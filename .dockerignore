@@ -1,0 +1,17 @@
+node_modules
+__pycache__
+*.pyc
+.env
+data/
+.git
+.gitignore
+.vscode
+*.db
+*.db-shm
+*.db-wal
+*.log
+*.md
+frontend/dist
+.mypy_cache
+.pytest_cache
+.ruff_cache

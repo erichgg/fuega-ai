@@ -1,0 +1,58 @@
+budget:
+  monthly_fixed_costs:
+    claude_max_subscription: 200.00
+    elevenlabs_creator: 22.00
+    domain_hosting: 5.00
+    total_fixed: 227.00
+
+  monthly_variable_estimate:
+    api_calls_low: 30.00
+    api_calls_high: 80.00
+    ad_spend_pass_through: 0.00  # Client pays directly
+
+  agent_budgets:
+    ceo: 15.00
+    content_writer: 20.00
+    editor: 12.00
+    seo_analyst: 8.00
+    social_media_manager: 1.00   # Runs locally via Ollama ($1 buffer for Claude fallback)
+    analytics_agent: 1.00        # Runs locally via Ollama ($1 buffer for Claude fallback)
+    ads_manager: 6.00
+    email_marketing_agent: 1.00  # Runs locally via Ollama ($1 buffer for Claude fallback)
+    sales_agent: 4.00
+    cfo_agent: 1.00              # Runs locally via Ollama ($1 buffer for Claude fallback)
+    fulfillment_agent: 1.00      # Runs locally via Ollama ($1 buffer for Claude fallback)
+    legal_bot: 3.00
+    prospector: 4.00
+    total_agent_budget: 73.00
+
+  alert_thresholds:
+    warning_percent: 80
+    critical_percent: 95
+    emergency_action: "pause_non_essential"
+
+  break_even:
+    fixed_costs: 227.00
+    variable_per_client: 15.00
+    avg_revenue_per_client: 349.00
+    break_even_clients: 1  # (227 + 15) / 349 ~ 0.7
+    target_clients_month_6: 10
+    target_monthly_revenue: 3490.00
+    target_monthly_profit: 3113.00  # 3490 - 227 - 150
+
+  model_pricing:
+    claude_sonnet_4_5:
+      input_per_million: 3.00
+      output_per_million: 15.00
+    claude_haiku_4_5:
+      input_per_million: 0.80
+      output_per_million: 4.00
+
+  cost_optimization:
+    - "Use Haiku for all execution tasks (writing, formatting, data collection)"
+    - "Reserve Sonnet for judgment tasks (CEO decisions, editorial review)"
+    - "Run simple agents locally via Ollama (social_media_manager, cfo_agent, fulfillment_agent, email_marketing_agent, analytics_agent) — $0.00 cost"
+    - "Cache common prompts to reduce token usage"
+    - "Batch similar operations to minimize API calls"
+    - "Set hard per-agent monthly limits with automatic pause"
+    - "CEO and Editor use max_tokens=2048 instead of 4096 to reduce output token costs"

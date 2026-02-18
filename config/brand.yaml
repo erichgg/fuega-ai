@@ -1,0 +1,61 @@
+company:
+  name: "Fuega AI"
+  legal_name: "Fuega AI LLC"
+  tagline:
+    en: "The Spark Your Business Needs"
+    es: "La Chispa Que Tu Negocio Necesita"
+    pt: "A Faisca Que Seu Negocio Precisa"
+  mission: "We use AI to deliver affordable, world-class digital marketing to small businesses across Latin America — so a family shop in CDMX gets the same growth tools as a Fortune 500."
+  value_proposition: "10x cheaper than a US agency, 10x more reliable than a freelancer, built by people who understand LATAM markets."
+  domain: "fuega.ai"
+  social_handles:
+    twitter: "@FuegaAI"
+    instagram: "@fuega.ai"
+    tiktok: "@fuegaai"
+    linkedin: "fuega-ai"
+
+visual_identity:
+  colors:
+    primary: "#FF6B2C"      # Warm orange - energy, spark
+    secondary: "#1A1A2E"    # Deep navy - professionalism
+    accent: "#00D4AA"       # Teal green - growth
+    surface: "#0F0F1A"      # Dark background
+    surface_alt: "#1C1C2E"  # Card background
+    text_primary: "#FFFFFF"
+    text_secondary: "#A0A0B8"
+    success: "#22C55E"
+    warning: "#EAB308"
+    error: "#EF4444"
+    chart_palette:
+      - "#FF6B2C"
+      - "#00D4AA"
+      - "#6366F1"
+      - "#EC4899"
+      - "#EAB308"
+      - "#06B6D4"
+  typography:
+    heading: "Inter"
+    body: "Inter"
+    mono: "JetBrains Mono"
+  logo_concept: "Stylized flame/spark with digital circuit traces, the 'y' in Fuega has a spark dot"
+
+brand_voice:
+  tone: "Professional but warm. Expert but accessible. We speak like a trusted advisor, not a robot or a salesperson."
+  language_style: "Clear, concise, jargon-free. When we must use technical terms, we explain them."
+  audience: "Non-technical small business owners in LATAM. Many are first-generation digital adopters."
+  guidelines:
+    - "Always explain the WHY behind recommendations"
+    - "Use concrete examples from LATAM businesses"
+    - "Respect that every peso spent is a real sacrifice for our clients"
+    - "Never talk down to clients or use condescending language"
+    - "Celebrate small wins - a 10% engagement increase matters"
+
+founder:
+  name: "Eric"
+  role: "Founder & Human-in-the-Loop"
+  approval_required:
+    - "All external communications (emails, DMs, posts mentioning real people)"
+    - "Budget changes over $50/month"
+    - "New client onboarding"
+    - "Ad campaign launches"
+    - "Any spending commitment"

@@ -1,0 +1,73 @@
+platforms:
+  twitter:
+    enabled: true
+    api: "tweepy"
+    max_posts_per_day: 5
+    character_limit: 280
+    thread_max: 10
+    best_times:
+      mx: ["09:00", "10:00", "11:00", "19:00", "20:00"]
+      co: ["10:00", "11:00", "12:00", "19:00", "20:00"]
+      br: ["09:00", "10:00", "11:00", "19:00", "20:00"]
+    content_types: [post, thread, poll]
+
+  instagram:
+    enabled: false
+    api: "buffer"
+    max_posts_per_day: 2
+    caption_limit: 2200
+    hashtag_limit: 30
+    best_times:
+      mx: ["12:00", "13:00", "14:00", "19:00", "20:00", "21:00"]
+      co: ["12:00", "13:00", "14:00", "19:00", "20:00", "21:00"]
+      br: ["11:00", "12:00", "13:00", "19:00", "20:00"]
+    content_types: [image, carousel, reel, story]
+
+  facebook:
+    enabled: false
+    api: "meta_graph"
+    max_posts_per_day: 2
+    best_times:
+      mx: ["13:00", "14:00", "15:00", "19:00", "20:00"]
+    content_types: [post, image, video, link]
+
+  linkedin:
+    enabled: false
+    api: "buffer"
+    max_posts_per_day: 1
+    character_limit: 3000
+    best_times:
+      mx: ["08:00", "09:00", "10:00", "12:00"]
+    content_types: [post, article, carousel]
+
+  blog:
+    enabled: false
+    api: "wordpress"
+    max_posts_per_day: 1
+    content_types: [post, tutorial, listicle, case_study]
+
+  newsletter:
+    enabled: false
+    api: "resend"
+    max_per_week: 2
+    content_types: [newsletter, announcement, digest]
+
+  youtube:
+    enabled: false
+    api: "youtube_data_v3"
+    max_posts_per_day: 1
+    best_times:
+      mx: ["12:00", "15:00", "19:00", "20:00"]
+      co: ["12:00", "15:00", "19:00", "20:00"]
+      br: ["12:00", "15:00", "19:00", "20:00"]
+    content_types: [short, video]
+
+  tiktok:
+    enabled: false
+    api: "buffer"
+    max_posts_per_day: 3
+    best_times:
+      mx: ["12:00", "13:00", "19:00", "20:00", "21:00"]
+      co: ["12:00", "13:00", "19:00", "20:00", "21:00"]
+      br: ["12:00", "13:00", "19:00", "20:00", "21:00"]
+    content_types: [video]

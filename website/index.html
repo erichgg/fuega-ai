@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fuega AI — Marketing Digital con Inteligencia Artificial</title>
+  <meta name="description" content="Marketing digital potenciado por IA para negocios locales en Latinoamerica. 10x mas barato que una agencia, 10x mas confiable que un freelancer.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --primary: #FF6B2C;
+      --primary-glow: rgba(255, 107, 44, 0.3);
+      --secondary: #1A1A2E;
+      --accent: #00D4AA;
+      --surface: #0F0F1A;
+      --surface-alt: #1C1C2E;
+      --text: #FFFFFF;
+      --text-dim: #A0A0B8;
+      --success: #22C55E;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: var(--surface);
+      color: var(--text);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* Nav */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      padding: 1rem 2rem;
+      background: rgba(15, 15, 26, 0.85);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .logo {
+      font-size: 1.5rem; font-weight: 800;
+      background: linear-gradient(135deg, var(--primary), #FF9A5C);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .nav-links { display: flex; gap: 2rem; align-items: center; }
+    .nav-links a {
+      color: var(--text-dim); text-decoration: none; font-size: 0.9rem;
+      font-weight: 500; transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--text); }
+
+    /* Buttons */
+    .btn {
+      display: inline-block; padding: 0.8rem 2rem; border-radius: 8px;
+      font-weight: 600; font-size: 1rem; text-decoration: none;
+      transition: all 0.3s; cursor: pointer; border: none;
+    }
+    .btn-primary {
+      background: var(--primary); color: white;
+      box-shadow: 0 4px 24px var(--primary-glow);
+    }
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 32px var(--primary-glow);
+    }
+    .btn-outline {
+      background: transparent; color: var(--text);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    .btn-outline:hover {
+      border-color: var(--primary); color: var(--primary);
+    }
+    .btn-accent {
+      background: var(--accent); color: var(--surface);
+    }
+    .btn-accent:hover { transform: translateY(-2px); }
+
+    /* Hero */
+    .hero {
+      min-height: 100vh; display: flex; align-items: center;
+      padding: 8rem 2rem 4rem;
+      position: relative; overflow: hidden;
+    }
+    .hero::before {
+      content: ''; position: absolute; top: -50%; right: -20%;
+      width: 800px; height: 800px; border-radius: 50%;
+      background: radial-gradient(circle, var(--primary-glow) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero-inner {
+      max-width: 1200px; margin: 0 auto; width: 100%;
+      display: grid; grid-template-columns: 1.2fr 1fr; gap: 4rem; align-items: center;
+    }
+    .hero h1 {
+      font-size: clamp(2.5rem, 5vw, 4rem); font-weight: 900;
+      line-height: 1.1; margin-bottom: 1.5rem;
+    }
+    .hero h1 .highlight {
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .hero p {
+      font-size: 1.2rem; color: var(--text-dim);
+      margin-bottom: 2rem; max-width: 520px;
+    }
+    .hero-buttons { display: flex; gap: 1rem; flex-wrap: wrap; }
+    .hero-visual {
+      display: flex; justify-content: center; align-items: center;
+    }
+    .agent-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;
+    }
+    .agent-card {
+      background: var(--surface-alt); border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 12px; padding: 1.2rem; text-align: center;
+      transition: all 0.3s;
+    }
+    .agent-card:hover {
+      border-color: var(--primary); transform: translateY(-4px);
+      box-shadow: 0 8px 32px rgba(255, 107, 44, 0.15);
+    }
+    .agent-icon { font-size: 2rem; margin-bottom: 0.5rem; }
+    .agent-name { font-weight: 600; font-size: 0.85rem; }
+    .agent-role { font-size: 0.75rem; color: var(--text-dim); }
+    .agent-status {
+      display: inline-block; margin-top: 0.4rem; font-size: 0.65rem;
+      color: var(--success); font-weight: 600;
+      background: rgba(34, 197, 94, 0.1); padding: 0.15rem 0.5rem;
+      border-radius: 20px;
+    }
+
+    /* Sections */
+    section { padding: 6rem 2rem; }
+    .container { max-width: 1200px; margin: 0 auto; }
+    .section-label {
+      font-size: 0.8rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.15em; color: var(--primary); margin-bottom: 0.5rem;
+    }
+    .section-title {
+      font-size: clamp(2rem, 3.5vw, 2.8rem); font-weight: 800;
+      margin-bottom: 1rem;
+    }
+    .section-subtitle {
+      font-size: 1.1rem; color: var(--text-dim); max-width: 600px;
+    }
+
+    /* Value Props */
+    .values-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 2rem; margin-top: 3rem;
+    }
+    .value-card {
+      background: var(--surface-alt); border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 16px; padding: 2rem;
+      transition: border-color 0.3s;
+    }
+    .value-card:hover { border-color: rgba(255, 107, 44, 0.3); }
+    .value-icon {
+      width: 48px; height: 48px; border-radius: 12px;
+      background: rgba(255, 107, 44, 0.1); display: flex;
+      align-items: center; justify-content: center;
+      font-size: 1.5rem; margin-bottom: 1rem;
+    }
+    .value-card h3 { font-size: 1.2rem; font-weight: 700; margin-bottom: 0.5rem; }
+    .value-card p { color: var(--text-dim); font-size: 0.95rem; }
+
+    /* How it works */
+    .steps {
+      display: grid; grid-template-columns: repeat(4, 1fr);
+      gap: 2rem; margin-top: 3rem; position: relative;
+    }
+    .step { text-align: center; position: relative; }
+    .step-number {
+      width: 56px; height: 56px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary), #FF9A5C);
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 800; font-size: 1.3rem; margin: 0 auto 1rem;
+    }
+    .step h3 { font-size: 1rem; font-weight: 700; margin-bottom: 0.4rem; }
+    .step p { color: var(--text-dim); font-size: 0.9rem; }
+
+    /* Pricing */
+    .pricing-grid {
+      display: grid; grid-template-columns: repeat(4, 1fr);
+      gap: 1.5rem; margin-top: 3rem;
+    }
+    .price-card {
+      background: var(--surface-alt); border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 16px; padding: 2rem;
+      display: flex; flex-direction: column;
+      transition: all 0.3s;
+    }
+    .price-card.featured {
+      border-color: var(--primary);
+      box-shadow: 0 0 40px var(--primary-glow);
+      position: relative;
+    }
+    .price-card.featured::before {
+      content: 'Mas Popular'; position: absolute; top: -12px; left: 50%;
+      transform: translateX(-50%); background: var(--primary); color: white;
+      font-size: 0.7rem; font-weight: 700; padding: 0.3rem 1rem;
+      border-radius: 20px; text-transform: uppercase; letter-spacing: 0.05em;
+    }
+    .price-card:hover { transform: translateY(-4px); }
+    .price-tier {
+      font-size: 0.8rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.1em; color: var(--primary); margin-bottom: 0.5rem;
+    }
+    .price-amount {
+      font-size: 2.5rem; font-weight: 900; margin-bottom: 0.2rem;
+    }
+    .price-amount span { font-size: 1rem; font-weight: 500; color: var(--text-dim); }
+    .price-mxn { font-size: 0.85rem; color: var(--text-dim); margin-bottom: 1.5rem; }
+    .price-features {
+      list-style: none; flex: 1; margin-bottom: 1.5rem;
+    }
+    .price-features li {
+      padding: 0.4rem 0; font-size: 0.9rem; color: var(--text-dim);
+      display: flex; align-items: baseline; gap: 0.5rem;
+    }
+    .price-features li::before {
+      content: '\2713'; color: var(--accent); font-weight: 700; flex-shrink: 0;
+    }
+
+    /* Stats */
+    .stats {
+      display: grid; grid-template-columns: repeat(4, 1fr);
+      gap: 2rem; margin-top: 3rem;
+    }
+    .stat { text-align: center; }
+    .stat-number {
+      font-size: 3rem; font-weight: 900;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .stat-label { color: var(--text-dim); font-size: 0.9rem; margin-top: 0.3rem; }
+
+    /* CTA */
+    .cta-section {
+      text-align: center; padding: 6rem 2rem;
+      background: linear-gradient(180deg, var(--surface) 0%, var(--secondary) 100%);
+    }
+    .cta-section h2 {
+      font-size: clamp(2rem, 4vw, 3rem); font-weight: 900; margin-bottom: 1rem;
+    }
+    .cta-section p {
+      color: var(--text-dim); font-size: 1.1rem;
+      max-width: 500px; margin: 0 auto 2rem;
+    }
+
+    /* Footer */
+    footer {
+      padding: 3rem 2rem; border-top: 1px solid rgba(255, 255, 255, 0.05);
+      text-align: center;
+    }
+    footer p { color: var(--text-dim); font-size: 0.85rem; }
+    footer a { color: var(--primary); text-decoration: none; }
+
+    /* Responsive */
+    @media (max-width: 900px) {
+      .hero-inner { grid-template-columns: 1fr; text-align: center; }
+      .hero p { margin-left: auto; margin-right: auto; }
+      .hero-buttons { justify-content: center; }
+      .hero-visual { display: none; }
+      .values-grid { grid-template-columns: 1fr; }
+      .steps { grid-template-columns: repeat(2, 1fr); }
+      .pricing-grid { grid-template-columns: 1fr; max-width: 400px; margin-left: auto; margin-right: auto; }
+      .stats { grid-template-columns: repeat(2, 1fr); }
+      .nav-links { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Nav -->
+  <nav>
+    <div class="logo">fuega.ai</div>
+    <div class="nav-links">
+      <a href="#servicios">Servicios</a>
+      <a href="#como">Como Funciona</a>
+      <a href="#precios">Precios</a>
+      <a href="#contacto" class="btn btn-primary" style="padding: 0.5rem 1.2rem; font-size: 0.85rem;">Empezar</a>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero-inner">
+      <div>
+        <h1>Marketing digital con <span class="highlight">inteligencia artificial</span> para tu negocio</h1>
+        <p>15 agentes de IA trabajan 24/7 para hacer crecer tu negocio. Contenido, SEO, redes sociales, publicidad y mas &mdash; todo por una fraccion del costo de una agencia tradicional.</p>
+        <div class="hero-buttons">
+          <a href="#precios" class="btn btn-primary">Ver Planes</a>
+          <a href="#como" class="btn btn-outline">Como Funciona</a>
+        </div>
+      </div>
+      <div class="hero-visual">
+        <div class="agent-grid">
+          <div class="agent-card">
+            <div class="agent-icon">&#x1F3AF;</div>
+            <div class="agent-name">Marco</div>
+            <div class="agent-role">Director Creativo</div>
+            <div class="agent-status">&#x25CF; Activo</div>
+          </div>
+          <div class="agent-card">
+            <div class="agent-icon">&#x270D;&#xFE0F;</div>
+            <div class="agent-name">Valentina</div>
+            <div class="agent-role">Escritora</div>
+            <div class="agent-status">&#x25CF; Activo</div>
+          </div>
+          <div class="agent-card">
+            <div class="agent-icon">&#x1F50D;</div>
+            <div class="agent-name">Carlos</div>
+            <div class="agent-role">SEO</div>
+            <div class="agent-status">&#x25CF; Activo</div>
+          </div>
+          <div class="agent-card">
+            <div class="agent-icon">&#x1F4CA;</div>
+            <div class="agent-name">Sofia</div>
+            <div class="agent-role">Analytics</div>
+            <div class="agent-status">&#x25CF; Activo</div>
+          </div>
+          <div class="agent-card">
+            <div class="agent-icon">&#x1F4F1;</div>
+            <div class="agent-name">Diego</div>
+            <div class="agent-role">Redes Sociales</div>
+            <div class="agent-status">&#x25CF; Activo</div>
+          </div>
+          <div class="agent-card">
+            <div class="agent-icon">&#x1F4E7;</div>
+            <div class="agent-name">Ana</div>
+            <div class="agent-role">Ventas</div>
+            <div class="agent-status">&#x25CF; Activo</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Stats -->
+  <section style="padding-top: 0;">
+    <div class="container">
+      <div class="stats">
+        <div class="stat">
+          <div class="stat-number">15</div>
+          <div class="stat-label">Agentes de IA</div>
+        </div>
+        <div class="stat">
+          <div class="stat-number">24/7</div>
+          <div class="stat-label">Siempre trabajando</div>
+        </div>
+        <div class="stat">
+          <div class="stat-number">10x</div>
+          <div class="stat-label">Mas barato que una agencia</div>
+        </div>
+        <div class="stat">
+          <div class="stat-number">100%</div>
+          <div class="stat-label">Automatizado</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- What we do -->
+  <section id="servicios">
+    <div class="container">
+      <div class="section-label">Servicios</div>
+      <h2 class="section-title">Todo lo que necesitas para crecer</h2>
+      <p class="section-subtitle">Nuestros agentes de IA cubren cada aspecto del marketing digital para tu negocio.</p>
+      <div class="values-grid">
+        <div class="value-card">
+          <div class="value-icon">&#x270D;&#xFE0F;</div>
+          <h3>Contenido</h3>
+          <p>Articulos de blog, posts para redes sociales, newsletters y guiones de video &mdash; todo escrito por IA y revisado por nuestro editor.</p>
+        </div>
+        <div class="value-card">
+          <div class="value-icon">&#x1F50D;</div>
+          <h3>SEO</h3>
+          <p>Optimizacion para Google, auditorias tecnicas, investigacion de palabras clave y Google Business Profile &mdash; para que te encuentren.</p>
+        </div>
+        <div class="value-card">
+          <div class="value-icon">&#x1F4F1;</div>
+          <h3>Redes Sociales</h3>
+          <p>Publicaciones diarias en Instagram, Facebook, TikTok y Twitter con imagenes, videos y copy que engancha a tu audiencia.</p>
+        </div>
+        <div class="value-card">
+          <div class="value-icon">&#x1F4E2;</div>
+          <h3>Publicidad</h3>
+          <p>Campanas en Google Ads y Meta Ads optimizadas por IA para maximizar tu retorno de inversion con el menor gasto posible.</p>
+        </div>
+        <div class="value-card">
+          <div class="value-icon">&#x1F4E7;</div>
+          <h3>Email Marketing</h3>
+          <p>Secuencias automatizadas, newsletters mensuales y campanas de re-engagement que mantienen a tus clientes conectados.</p>
+        </div>
+        <div class="value-card">
+          <div class="value-icon">&#x1F4CA;</div>
+          <h3>Analytics</h3>
+          <p>Reportes semanales con metricas claras: que esta funcionando, que no, y que hacer diferente &mdash; sin jerga tecnica.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- How it works -->
+  <section id="como" style="background: var(--secondary);">
+    <div class="container">
+      <div class="section-label">Como Funciona</div>
+      <h2 class="section-title">Simple. Rapido. Efectivo.</h2>
+      <p class="section-subtitle">En 4 pasos tu negocio tiene un equipo completo de marketing trabajando para ti.</p>
+      <div class="steps">
+        <div class="step">
+          <div class="step-number">1</div>
+          <h3>Nos cuentas tu negocio</h3>
+          <p>Respondemos algunas preguntas sobre tu negocio, tus clientes y tus metas.</p>
+        </div>
+        <div class="step">
+          <div class="step-number">2</div>
+          <h3>Creamos tu estrategia</h3>
+          <p>Nuestros agentes de IA analizan tu mercado y crean un plan personalizado.</p>
+        </div>
+        <div class="step">
+          <div class="step-number">3</div>
+          <h3>Los agentes trabajan</h3>
+          <p>15 agentes especializados ejecutan tu estrategia: contenido, SEO, ads, email y mas.</p>
+        </div>
+        <div class="step">
+          <div class="step-number">4</div>
+          <h3>Tu negocio crece</h3>
+          <p>Ves resultados en tu dashboard y ajustamos la estrategia cada semana.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Pricing -->
+  <section id="precios">
+    <div class="container">
+      <div class="section-label">Precios</div>
+      <h2 class="section-title">Planes para cada negocio</h2>
+      <p class="section-subtitle">Sin contratos. Sin sorpresas. Cancela cuando quieras.</p>
+      <div class="pricing-grid">
+
+        <div class="price-card">
+          <div class="price-tier">Starter</div>
+          <div class="price-amount">$149 <span>USD/mes</span></div>
+          <div class="price-mxn">~$2,990 MXN</div>
+          <ul class="price-features">
+            <li>8 posts en redes sociales</li>
+            <li>1 articulo de blog al mes</li>
+            <li>Auditoria SEO trimestral</li>
+            <li>Reporte mensual</li>
+          </ul>
+          <a href="#contacto" class="btn btn-outline" style="text-align: center;">Empezar</a>
+        </div>
+
+        <div class="price-card featured">
+          <div class="price-tier">Growth</div>
+          <div class="price-amount">$349 <span>USD/mes</span></div>
+          <div class="price-mxn">~$6,990 MXN</div>
+          <ul class="price-features">
+            <li>20 posts en redes sociales</li>
+            <li>4 articulos de blog al mes</li>
+            <li>1 newsletter mensual</li>
+            <li>SEO mensual</li>
+            <li>Google Business Profile</li>
+            <li>Reportes semanales</li>
+          </ul>
+          <a href="#contacto" class="btn btn-primary" style="text-align: center;">Empezar</a>
+        </div>
+
+        <div class="price-card">
+          <div class="price-tier">Pro</div>
+          <div class="price-amount">$699 <span>USD/mes</span></div>
+          <div class="price-mxn">~$13,990 MXN</div>
+          <ul class="price-features">
+            <li>40 posts en redes sociales</li>
+            <li>8 articulos de blog al mes</li>
+            <li>2 newsletters + 2 video scripts</li>
+            <li>SEO completo</li>
+            <li>Google Ads + Meta Ads</li>
+            <li>Email automation</li>
+            <li>Dashboard en tiempo real</li>
+            <li>Llamadas semanales</li>
+          </ul>
+          <a href="#contacto" class="btn btn-outline" style="text-align: center;">Empezar</a>
+        </div>
+
+        <div class="price-card">
+          <div class="price-tier">Enterprise</div>
+          <div class="price-amount">$1,299 <span>USD/mes</span></div>
+          <div class="price-mxn">~$25,990 MXN</div>
+          <ul class="price-features">
+            <li>Todo en Pro</li>
+            <li>Volumen personalizado</li>
+            <li>Multi-idioma</li>
+            <li>Account manager dedicado</li>
+            <li>Diseno de landing pages</li>
+            <li>Soporte prioritario</li>
+          </ul>
+          <a href="#contacto" class="btn btn-outline" style="text-align: center;">Contactar</a>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="cta-section" id="contacto">
+    <h2>Listo para crecer?</h2>
+    <p>Escríbenos y en 24 horas tendras tu equipo de marketing con IA trabajando para ti.</p>
+    <a href="mailto:hola@fuega.ai" class="btn btn-primary" style="font-size: 1.1rem; padding: 1rem 2.5rem;">
+      hola@fuega.ai
+    </a>
+    <p style="margin-top: 1rem; font-size: 0.85rem; color: var(--text-dim);">
+      O escribe a cualquiera de nuestros agentes directamente
+    </p>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div class="container">
+      <p style="margin-bottom: 0.5rem;">
+        <span class="logo" style="font-size: 1.2rem;">fuega.ai</span>
+      </p>
+      <p>&copy; 2026 Fuega AI LLC. Marketing digital potenciado por inteligencia artificial.</p>
+    </div>
+  </footer>
+
+</body>
+</html>

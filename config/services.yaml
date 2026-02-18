@@ -1,0 +1,133 @@
+service_catalog:
+  content:
+    name: "Content Creation"
+    description: "Social media posts, blog articles, newsletters, video scripts"
+    deliverables:
+      social_posts:
+        description: "Platform-optimized social media content"
+        platforms: [twitter, instagram, facebook, linkedin, tiktok]
+        languages: [es, en, pt]
+      blog_articles:
+        description: "SEO-optimized blog posts (800-1500 words)"
+        formats: [tutorial, listicle, case_study, opinion]
+      newsletters:
+        description: "Email newsletters with curated content"
+        frequency: [weekly, biweekly, monthly]
+      video_scripts:
+        description: "Short-form video scripts (30-90 seconds)"
+        platforms: [tiktok, instagram_reels, youtube_shorts]
+
+  seo:
+    name: "SEO Services"
+    description: "Keyword research, on-page optimization, technical audits, local SEO"
+    deliverables:
+      keyword_research:
+        description: "Monthly keyword opportunity reports"
+      on_page_optimization:
+        description: "Page-by-page SEO recommendations"
+      technical_audit:
+        description: "Site health check with fix priorities"
+      local_seo:
+        description: "Google Business Profile optimization"
+
+  paid_ads:
+    name: "Paid Advertising"
+    description: "Google Ads, Meta Ads campaign creation and optimization"
+    platforms: [google_ads, meta_ads]
+    deliverables:
+      campaign_creation:
+        description: "Full campaign setup with targeting and copy"
+      optimization:
+        description: "Weekly bid/budget/targeting adjustments"
+      reporting:
+        description: "Campaign performance reports"
+
+  email_marketing:
+    name: "Email Marketing"
+    description: "Campaign design, automation sequences, list management"
+    deliverables:
+      campaigns:
+        description: "Designed email campaigns"
+      automations:
+        description: "Welcome series, abandoned cart, re-engagement flows"
+      list_management:
+        description: "Segmentation, cleaning, growth strategies"
+
+  analytics:
+    name: "Analytics & Reporting"
+    description: "Monthly performance reports, dashboards, ROI tracking"
+    deliverables:
+      monthly_report:
+        description: "Comprehensive performance report with recommendations"
+      dashboard_access:
+        description: "Real-time dashboard with key metrics"
+      roi_tracking:
+        description: "Revenue attribution and ROI calculations"
+
+  web:
+    name: "Web Services"
+    description: "Landing pages, WordPress optimization"
+    deliverables:
+      landing_pages:
+        description: "Conversion-optimized landing pages"
+      wordpress_optimization:
+        description: "Speed, SEO, and UX improvements"
+
+pricing_tiers:
+  fuega_starter:
+    name: "Fuega Starter"
+    price_usd: 149
+    price_mxn: 2990
+    description: "Perfect for businesses just getting started online"
+    includes:
+      - "8 social media posts/month"
+      - "1 blog article/month"
+      - "Basic SEO audit (quarterly)"
+      - "Monthly performance report"
+    target: "Micro-businesses, solo entrepreneurs"
+
+  fuega_growth:
+    name: "Fuega Growth"
+    price_usd: 349
+    price_mxn: 6990
+    description: "For businesses ready to accelerate their digital presence"
+    includes:
+      - "20 social media posts/month"
+      - "4 blog articles/month"
+      - "1 newsletter/month"
+      - "Monthly SEO optimization"
+      - "Google Business management"
+      - "Weekly performance reports"
+    target: "Growing SMBs, family businesses with 5-20 employees"
+
+  fuega_pro:
+    name: "Fuega Pro"
+    price_usd: 699
+    price_mxn: 13990
+    description: "Full-service digital marketing for serious growth"
+    includes:
+      - "40 social media posts/month"
+      - "8 blog articles/month"
+      - "2 newsletters/month"
+      - "2 video scripts/month"
+      - "Full SEO management"
+      - "Google Ads management (ad spend separate)"
+      - "Meta Ads management (ad spend separate)"
+      - "Email automation setup"
+      - "Real-time dashboard"
+      - "Weekly strategy calls"
+    target: "Established SMBs, multi-location businesses"
+
+  fuega_enterprise:
+    name: "Fuega Enterprise"
+    price_usd: 1299
+    price_mxn: 25990
+    description: "Custom solution for larger operations"
+    includes:
+      - "Everything in Pro"
+      - "Custom content volume"
+      - "Multi-language campaigns"
+      - "Dedicated account manager"
+      - "Landing page design"
+      - "Priority support"
+    target: "Regional chains, franchise operations"

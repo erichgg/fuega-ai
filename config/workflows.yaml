@@ -1,0 +1,219 @@
+workflows:
+  content_pipeline:
+    name: "Content Pipeline"
+    description: "End-to-end content creation from ideation to publishing"
+    enabled: true
+    schedule: "0 8,14,20 * * *"  # 8am, 2pm, 8pm daily
+    timezone: "America/Mexico_City"
+    steps:
+      - id: "keyword_research"
+        agent: "seo_analyst"
+        action: "research_keywords"
+        next: "score_topics"
+      - id: "score_topics"
+        agent: "ceo"
+        action: "score_and_approve"
+        next: "create_content"
+        approval_threshold: 7
+      - id: "create_content"
+        agent: "content_writer"
+        action: "write_content"
+        next: "review_content"
+      - id: "review_content"
+        agent: "editor"
+        action: "review_and_score"
+        next: "format_and_schedule"
+        retry_on_low_score:
+          threshold: 7
+          max_revisions: 2
+          retry_step: "create_content"
+      - id: "format_and_schedule"
+        agent: "social_media_manager"
+        action: "format_and_publish"
+        next: "track_results"
+      - id: "track_results"
+        agent: "analytics_agent"
+        action: "collect_metrics"
+        next: null
+
+  seo_pipeline:
+    name: "SEO Pipeline"
+    description: "Client site audit and optimization"
+    enabled: true
+    schedule: "0 9 * * 1"  # Monday 9am
+    timezone: "America/Mexico_City"
+    steps:
+      - id: "audit_site"
+        agent: "seo_analyst"
+        action: "audit_client_site"
+        next: "keyword_opportunities"
+      - id: "keyword_opportunities"
+        agent: "seo_analyst"
+        action: "find_opportunities"
+        next: "create_seo_content"
+      - id: "create_seo_content"
+        agent: "content_writer"
+        action: "write_seo_content"
+        next: "review_seo_content"
+      - id: "review_seo_content"
+        agent: "editor"
+        action: "review_seo_quality"
+        next: "deliver_to_client"
+      - id: "deliver_to_client"
+        agent: "fulfillment_agent"
+        action: "deliver"
+        next: null
+
+  ads_pipeline:
+    name: "Ads Pipeline"
+    description: "Paid advertising campaign creation and management"
+    enabled: true
+    schedule: null  # On-demand
+    steps:
+      - id: "research_audience"
+        agent: "ads_manager"
+        action: "research_and_plan"
+        next: "approve_budget"
+      - id: "approve_budget"
+        agent: "ceo"
+        action: "approve_ad_budget"
+        next: "create_ads"
+        requires_human_approval: true
+      - id: "create_ads"
+        agent: "ads_manager"
+        action: "create_ad_copy"
+        next: "review_ads"
+      - id: "review_ads"
+        agent: "editor"
+        action: "review_ad_copy"
+        next: "human_approval"
+      - id: "human_approval"
+        agent: null
+        action: "await_human_approval"
+        next: "launch_campaign"
+        requires_human_approval: true
+      - id: "launch_campaign"
+        agent: "ads_manager"
+        action: "launch"
+        next: "track_performance"
+      - id: "track_performance"
+        agent: "analytics_agent"
+        action: "track_ad_metrics"
+        next: null
+
+  email_pipeline:
+    name: "Email Pipeline"
+    description: "Email campaign creation and sending"
+    enabled: true
+    schedule: null  # On-demand
+    steps:
+      - id: "design_campaign"
+        agent: "email_marketing_agent"
+        action: "design_campaign"
+        next: "review_email"
+      - id: "review_email"
+        agent: "editor"
+        action: "review_email"
+        next: "human_approval"
+      - id: "human_approval"
+        agent: null
+        action: "await_human_approval"
+        next: "send_campaign"
+        requires_human_approval: true
+      - id: "send_campaign"
+        agent: "email_marketing_agent"
+        action: "send"
+        next: "track_email_metrics"
+      - id: "track_email_metrics"
+        agent: "analytics_agent"
+        action: "track_email_metrics"
+        next: null
+
+  onboarding_pipeline:
+    name: "Client Onboarding"
+    description: "New client setup and resource allocation"
+    enabled: true
+    schedule: null  # On-demand
+    steps:
+      - id: "qualify_lead"
+        agent: "sales_agent"
+        action: "qualify_lead"
+        next: "human_approval"
+      - id: "human_approval"
+        agent: null
+        action: "await_human_approval"
+        next: "create_schedule"
+        requires_human_approval: true
+      - id: "create_schedule"
+        agent: "fulfillment_agent"
+        action: "create_deliverable_schedule"
+        next: "allocate_resources"
+      - id: "allocate_resources"
+        agent: "ceo"
+        action: "allocate_resources"
+        next: "approve_budget"
+      - id: "approve_budget"
+        agent: "cfo_agent"
+        action: "approve_client_budget"
+        next: null
+
+  outreach_pipeline:
+    name: "Local Outreach Pipeline"
+    description: "Scout local businesses, research opportunities, and draft personalized outreach"
+    enabled: true
+    schedule: "0 10 * * 1,3,5"  # Monday/Wednesday/Friday 10am
+    timezone: "America/Mexico_City"
+    steps:
+      - id: "scout_businesses"
+        agent: "local_outreach"
+        action: "scout_local_businesses"
+        next: "research_leads"
+      - id: "research_leads"
+        agent: "smb_researcher"
+        action: "research_businesses"
+        next: "score_leads"
+      - id: "score_leads"
+        agent: "prospector"
+        action: "score_and_qualify"
+        next: "draft_outreach"
+      - id: "draft_outreach"
+        agent: "local_outreach"
+        action: "draft_outreach"
+        next: "review_outreach"
+      - id: "review_outreach"
+        agent: "editor"
+        action: "review_outreach"
+        next: "compliance_check"
+      - id: "compliance_check"
+        agent: "legal_bot"
+        action: "compliance_review"
+        next: "human_approval"
+      - id: "human_approval"
+        agent: null
+        action: "await_human_approval"
+        next: null
+        requires_human_approval: true
+
+  reporting_pipeline:
+    name: "Reporting Pipeline"
+    description: "Regular client performance reports"
+    enabled: true
+    schedule: "0 8 * * 1"  # Monday 8am weekly
+    timezone: "America/Mexico_City"
+    steps:
+      - id: "collect_metrics"
+        agent: "analytics_agent"
+        action: "collect_all_metrics"
+        next: "generate_report"
+      - id: "generate_report"
+        agent: "analytics_agent"
+        action: "generate_report"
+        next: "add_recommendations"
+      - id: "add_recommendations"
+        agent: "ceo"
+        action: "add_strategic_recommendations"
+        next: "deliver_report"
+      - id: "deliver_report"
+        agent: "fulfillment_agent"
+        action: "deliver_report"
+        next: null

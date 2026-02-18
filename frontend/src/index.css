@@ -1,0 +1,162 @@
+@import "tailwindcss";
+
+@theme {
+  --color-chispa-orange: #FF6B2C;
+  --color-chispa-orange-light: #FF8F5C;
+  --color-chispa-navy: #1A1A2E;
+  --color-chispa-teal: #00D4AA;
+  --color-chispa-coral: #FF6B8A;
+  --color-chispa-purple: #A855F7;
+  --color-chispa-sunset: #FF9F43;
+  --color-chispa-surface: var(--surface);
+  --color-chispa-card: var(--card);
+  --color-chispa-card-hover: var(--card-hover);
+  --color-chispa-border: var(--border);
+  --color-chispa-text-primary: var(--text-primary);
+  --color-chispa-text-secondary: var(--text-secondary);
+  --color-chispa-text-muted: var(--text-muted);
+  --color-chispa-sidebar: var(--sidebar);
+  --color-chispa-input: var(--input);
+  --font-family-sans: 'Inter', system-ui, sans-serif;
+  --font-family-mono: 'JetBrains Mono', monospace;
+}
+
+/* Dark theme (default) — tropical deep ocean */
+:root {
+  --surface: #0B0F14;
+  --card: #111820;
+  --card-hover: #192028;
+  --border: #1C2530;
+  --text-primary: #F5F5F7;
+  --text-secondary: #A8B0C0;
+  --text-muted: #5E6878;
+  --sidebar: #0D1117;
+  --input: #0E1319;
+  --gradient-start: #FF6B2C;
+  --gradient-mid: #FF3CAC;
+  --gradient-end: #A855F7;
+  --card-shadow: 0 1px 3px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.03);
+  --glow-orange: 0 0 20px rgba(255,107,44,0.15);
+  --spacing-page: 12px;
+  --spacing-section: 8px;
+}
+
+/* Light theme — tropical warm cream */
+[data-theme="light"] {
+  --surface: #FFF8F0;
+  --card: #FFFFFF;
+  --card-hover: #FFF5EB;
+  --border: #F0E4D8;
+  --text-primary: #1A1A2E;
+  --text-secondary: #4A4A6A;
+  --text-muted: #8E8EA8;
+  --sidebar: #FFFCF8;
+  --input: #FFF6EE;
+  --gradient-start: #FF6B2C;
+  --gradient-mid: #FF3CAC;
+  --gradient-end: #A855F7;
+  --card-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 0 0 1px rgba(0,0,0,0.04);
+  --glow-orange: 0 0 20px rgba(255,107,44,0.1);
+  --spacing-page: 12px;
+  --spacing-section: 8px;
+}
+
+body {
+  background-color: var(--surface);
+  color: var(--text-primary);
+}
+
+/* Monospace numbers — use on financial/metric data */
+.num {
+  font-family: 'JetBrains Mono', monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Card glow on hover */
+.card-glow:hover {
+  box-shadow: var(--glow-orange);
+}
+
+/* Gradient text */
+.gradient-text {
+  background: linear-gradient(135deg, var(--gradient-start), var(--gradient-mid), var(--gradient-end));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Tropical gradient for accent elements */
+.gradient-tropical {
+  background: linear-gradient(135deg, #FF6B2C, #FF3CAC, #A855F7);
+}
+
+/* Gradient border */
+.gradient-border {
+  position: relative;
+}
+.gradient-border::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg, var(--gradient-start), var(--gradient-mid), var(--gradient-end));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+.gradient-border:hover::before {
+  opacity: 1;
+}
+
+/* Focus visible ring — orange accent */
+:focus-visible {
+  outline: 2px solid #FF6B2C;
+  outline-offset: 2px;
+}
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: none;
+  border-color: rgba(255, 107, 44, 0.5);
+  box-shadow: 0 0 0 3px rgba(255, 107, 44, 0.1);
+}
+
+/* Animation keyframes */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes pulseGlow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 107, 44, 0.4); }
+  50% { box-shadow: 0 0 0 6px rgba(255, 107, 44, 0); }
+}
+
+.animate-fadeIn { animation: fadeIn 150ms ease-out; }
+.animate-slideUp { animation: slideUp 200ms ease-out; }
+.animate-slideDown { animation: slideDown 200ms ease-out; }
+.animate-pulseGlow { animation: pulseGlow 2s ease-in-out infinite; }
+
+/* Scrollbar styling — Webkit */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #FF6B2C66; }
+::-webkit-scrollbar-corner { background: transparent; }
+
+/* Scrollbar styling — Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
