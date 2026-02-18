@@ -158,7 +158,7 @@ export default function Leads() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-24">
-        <div className="w-6 h-6 border-2 border-chispa-orange border-t-transparent rounded-full animate-spin" />
+        <div className="w-6 h-6 border-2 border-fuega-orange border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -173,7 +173,7 @@ export default function Leads() {
   });
 
   const scoreColor = (score: number) =>
-    score >= 70 ? 'text-green-400' : score >= 40 ? 'text-yellow-400' : 'text-chispa-text-muted';
+    score >= 70 ? 'text-green-400' : score >= 40 ? 'text-yellow-400' : 'text-fuega-text-muted';
 
   const columns: Column<{ stage: string; stageLabel: string; lead: any }>[] = [
     {
@@ -183,7 +183,7 @@ export default function Leads() {
       getValue: (row) => row.lead.business_name,
       render: (row) => (
         <button onClick={() => navigate(`/leads/${row.lead.id}`)} className="text-left">
-          <span className="text-[12px] text-chispa-text-primary font-medium hover:text-chispa-orange transition-colors">{row.lead.business_name}</span>
+          <span className="text-[12px] text-fuega-text-primary font-medium hover:text-fuega-orange transition-colors">{row.lead.business_name}</span>
         </button>
       ),
     },
@@ -214,21 +214,21 @@ export default function Leads() {
       label: 'Location',
       sortable: true,
       getValue: (row) => row.lead.location || '',
-      render: (row) => row.lead.location ? <span className="text-[10px] text-chispa-text-secondary">{row.lead.location}</span> : <span className="text-[10px] text-chispa-text-muted">--</span>,
+      render: (row) => row.lead.location ? <span className="text-[10px] text-fuega-text-secondary">{row.lead.location}</span> : <span className="text-[10px] text-fuega-text-muted">--</span>,
     },
     {
       key: 'industry',
       label: 'Industry',
       sortable: true,
       getValue: (row) => row.lead.industry || '',
-      render: (row) => row.lead.industry ? <span className="text-[10px] px-1.5 py-0.5 rounded bg-chispa-input text-chispa-text-secondary">{row.lead.industry}</span> : <span className="text-[10px] text-chispa-text-muted">--</span>,
+      render: (row) => row.lead.industry ? <span className="text-[10px] px-1.5 py-0.5 rounded bg-fuega-input text-fuega-text-secondary">{row.lead.industry}</span> : <span className="text-[10px] text-fuega-text-muted">--</span>,
     },
     {
       key: 'source',
       label: 'Source',
       sortable: true,
       getValue: (row) => row.lead.source || '',
-      render: (row) => row.lead.source ? <span className="text-[9px] text-chispa-text-muted">{row.lead.source}</span> : <span className="text-[10px] text-chispa-text-muted">--</span>,
+      render: (row) => row.lead.source ? <span className="text-[9px] text-fuega-text-muted">{row.lead.source}</span> : <span className="text-[10px] text-fuega-text-muted">--</span>,
     },
   ];
 
@@ -252,7 +252,7 @@ export default function Leads() {
             <button
               onClick={() => setShowPipelineForm(!showPipelineForm)}
               disabled={pipelineRunning}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gradient-to-r from-chispa-orange to-orange-500 text-white text-[12px] font-bold hover:from-chispa-orange/90 hover:to-orange-500/90 transition-all shadow-lg shadow-chispa-orange/20 disabled:opacity-50"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gradient-to-r from-fuega-orange to-orange-500 text-white text-[12px] font-bold hover:from-fuega-orange/90 hover:to-orange-500/90 transition-all shadow-lg shadow-fuega-orange/20 disabled:opacity-50"
             >
               {pipelineRunning ? (
                 <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -275,7 +275,7 @@ export default function Leads() {
             </button>
             <button
               onClick={() => setShowNewLead(true)}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-chispa-orange text-white text-[12px] font-medium hover:bg-chispa-orange/90 transition-colors"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-fuega-orange text-white text-[12px] font-medium hover:bg-fuega-orange/90 transition-colors"
             >
               <Plus className="w-3.5 h-3.5" />
               Add Lead
@@ -286,38 +286,38 @@ export default function Leads() {
 
       {/* Inline New Lead Form */}
       {showNewLead && (
-        <div className="mb-2 flex items-center gap-2 bg-chispa-card border border-chispa-border rounded-lg p-2">
+        <div className="mb-2 flex items-center gap-2 bg-fuega-card border border-fuega-border rounded-lg p-2">
           <input
             autoFocus
             value={newLead.business_name}
             onChange={e => setNewLead(prev => ({ ...prev, business_name: e.target.value }))}
             onKeyDown={e => e.key === 'Enter' && handleAddLead()}
             placeholder="Business name..."
-            className="flex-1 bg-chispa-input border border-chispa-border rounded px-2 py-1 text-sm text-chispa-text-primary placeholder:text-chispa-text-muted focus:outline-none focus:border-chispa-orange/50"
+            className="flex-1 bg-fuega-input border border-fuega-border rounded px-2 py-1 text-sm text-fuega-text-primary placeholder:text-fuega-text-muted focus:outline-none focus:border-fuega-orange/50"
           />
           <input
             value={newLead.industry}
             onChange={e => setNewLead(prev => ({ ...prev, industry: e.target.value }))}
             onKeyDown={e => e.key === 'Enter' && handleAddLead()}
             placeholder="Industry"
-            className="w-28 bg-chispa-input border border-chispa-border rounded px-2 py-1 text-sm text-chispa-text-primary placeholder:text-chispa-text-muted focus:outline-none focus:border-chispa-orange/50"
+            className="w-28 bg-fuega-input border border-fuega-border rounded px-2 py-1 text-sm text-fuega-text-primary placeholder:text-fuega-text-muted focus:outline-none focus:border-fuega-orange/50"
           />
           <input
             value={newLead.location}
             onChange={e => setNewLead(prev => ({ ...prev, location: e.target.value }))}
             onKeyDown={e => e.key === 'Enter' && handleAddLead()}
             placeholder="Location"
-            className="w-28 bg-chispa-input border border-chispa-border rounded px-2 py-1 text-sm text-chispa-text-primary placeholder:text-chispa-text-muted focus:outline-none focus:border-chispa-orange/50"
+            className="w-28 bg-fuega-input border border-fuega-border rounded px-2 py-1 text-sm text-fuega-text-primary placeholder:text-fuega-text-muted focus:outline-none focus:border-fuega-orange/50"
           />
           <input
             value={newLead.email}
             onChange={e => setNewLead(prev => ({ ...prev, email: e.target.value }))}
             onKeyDown={e => e.key === 'Enter' && handleAddLead()}
             placeholder="Email"
-            className="w-36 bg-chispa-input border border-chispa-border rounded px-2 py-1 text-sm text-chispa-text-primary placeholder:text-chispa-text-muted focus:outline-none focus:border-chispa-orange/50"
+            className="w-36 bg-fuega-input border border-fuega-border rounded px-2 py-1 text-sm text-fuega-text-primary placeholder:text-fuega-text-muted focus:outline-none focus:border-fuega-orange/50"
           />
-          <button onClick={handleAddLead} className="px-3 py-1 rounded bg-chispa-orange text-white text-xs font-medium hover:bg-chispa-orange/90 transition-colors">Add</button>
-          <button onClick={() => { setShowNewLead(false); setNewLead({ business_name: '', industry: '', location: '', email: '' }); }} className="p-1 rounded text-chispa-text-muted hover:text-chispa-text-primary transition-colors"><X className="w-4 h-4" /></button>
+          <button onClick={handleAddLead} className="px-3 py-1 rounded bg-fuega-orange text-white text-xs font-medium hover:bg-fuega-orange/90 transition-colors">Add</button>
+          <button onClick={() => { setShowNewLead(false); setNewLead({ business_name: '', industry: '', location: '', email: '' }); }} className="p-1 rounded text-fuega-text-muted hover:text-fuega-text-primary transition-colors"><X className="w-4 h-4" /></button>
         </div>
       )}
 
@@ -331,27 +331,27 @@ export default function Leads() {
             onChange={e => setScoutLocation(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && handleScout()}
             placeholder="Location (e.g. Mexico City, Condesa)"
-            className="flex-1 bg-chispa-input border border-chispa-border rounded px-2 py-1 text-sm text-chispa-text-primary placeholder:text-chispa-text-muted focus:outline-none focus:border-green-500/50"
+            className="flex-1 bg-fuega-input border border-fuega-border rounded px-2 py-1 text-sm text-fuega-text-primary placeholder:text-fuega-text-muted focus:outline-none focus:border-green-500/50"
           />
           <input
             value={scoutIndustry}
             onChange={e => setScoutIndustry(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && handleScout()}
             placeholder="Industry (optional)"
-            className="w-36 bg-chispa-input border border-chispa-border rounded px-2 py-1 text-sm text-chispa-text-primary placeholder:text-chispa-text-muted focus:outline-none focus:border-green-500/50"
+            className="w-36 bg-fuega-input border border-fuega-border rounded px-2 py-1 text-sm text-fuega-text-primary placeholder:text-fuega-text-muted focus:outline-none focus:border-green-500/50"
           />
           <button onClick={handleScout} className="px-3 py-1 rounded bg-green-500 text-white text-xs font-medium hover:bg-green-600 transition-colors">Scout</button>
-          <button onClick={() => setShowScoutForm(false)} className="p-1 rounded text-chispa-text-muted hover:text-chispa-text-primary transition-colors"><X className="w-4 h-4" /></button>
+          <button onClick={() => setShowScoutForm(false)} className="p-1 rounded text-fuega-text-muted hover:text-fuega-text-primary transition-colors"><X className="w-4 h-4" /></button>
         </div>
       )}
 
       {/* Pipeline Form */}
       {showPipelineForm && (
-        <div className="mb-2 bg-gradient-to-r from-chispa-orange/5 to-orange-500/5 border border-chispa-orange/20 rounded-lg p-3">
+        <div className="mb-2 bg-gradient-to-r from-fuega-orange/5 to-orange-500/5 border border-fuega-orange/20 rounded-lg p-3">
           <div className="flex items-center gap-2 mb-2">
-            <Play className="w-4 h-4 text-chispa-orange flex-shrink-0" />
-            <span className="text-xs font-semibold text-chispa-text-primary">Run Full Outreach Pipeline</span>
-            <span className="text-[10px] text-chispa-text-muted ml-1">Scout → Research → Score → Draft Outreach → Review → Compliance → Approval</span>
+            <Play className="w-4 h-4 text-fuega-orange flex-shrink-0" />
+            <span className="text-xs font-semibold text-fuega-text-primary">Run Full Outreach Pipeline</span>
+            <span className="text-[10px] text-fuega-text-muted ml-1">Scout → Research → Score → Draft Outreach → Review → Compliance → Approval</span>
           </div>
           <div className="flex items-center gap-2">
             <input
@@ -360,19 +360,19 @@ export default function Leads() {
               onChange={e => setPipelineLocation(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && handleRunPipeline()}
               placeholder="Target location (e.g. Monterrey, Mexico)"
-              className="flex-1 bg-chispa-input border border-chispa-border rounded px-2 py-1.5 text-sm text-chispa-text-primary placeholder:text-chispa-text-muted focus:outline-none focus:border-chispa-orange/50"
+              className="flex-1 bg-fuega-input border border-fuega-border rounded px-2 py-1.5 text-sm text-fuega-text-primary placeholder:text-fuega-text-muted focus:outline-none focus:border-fuega-orange/50"
             />
             <input
               value={pipelineIndustry}
               onChange={e => setPipelineIndustry(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && handleRunPipeline()}
               placeholder="Industry (optional)"
-              className="w-40 bg-chispa-input border border-chispa-border rounded px-2 py-1.5 text-sm text-chispa-text-primary placeholder:text-chispa-text-muted focus:outline-none focus:border-chispa-orange/50"
+              className="w-40 bg-fuega-input border border-fuega-border rounded px-2 py-1.5 text-sm text-fuega-text-primary placeholder:text-fuega-text-muted focus:outline-none focus:border-fuega-orange/50"
             />
-            <button onClick={handleRunPipeline} className="px-4 py-1.5 rounded bg-gradient-to-r from-chispa-orange to-orange-500 text-white text-xs font-bold hover:from-chispa-orange/90 hover:to-orange-500/90 transition-all shadow-lg shadow-chispa-orange/20">
+            <button onClick={handleRunPipeline} className="px-4 py-1.5 rounded bg-gradient-to-r from-fuega-orange to-orange-500 text-white text-xs font-bold hover:from-fuega-orange/90 hover:to-orange-500/90 transition-all shadow-lg shadow-fuega-orange/20">
               Launch
             </button>
-            <button onClick={() => setShowPipelineForm(false)} className="p-1 rounded text-chispa-text-muted hover:text-chispa-text-primary transition-colors"><X className="w-4 h-4" /></button>
+            <button onClick={() => setShowPipelineForm(false)} className="p-1 rounded text-fuega-text-muted hover:text-fuega-text-primary transition-colors"><X className="w-4 h-4" /></button>
           </div>
         </div>
       )}
@@ -383,17 +383,17 @@ export default function Leads() {
           pipelineStatus.status === 'completed' ? 'bg-green-500/5 border-green-500/20' :
           pipelineStatus.status === 'failed' ? 'bg-red-500/5 border-red-500/20' :
           pipelineStatus.status === 'approval' ? 'bg-yellow-500/5 border-yellow-500/20' :
-          'bg-chispa-orange/5 border-chispa-orange/20'
+          'bg-fuega-orange/5 border-fuega-orange/20'
         }`}>
           {pipelineStatus.status === 'completed' ? <CheckCircle2 className="w-4 h-4 text-green-400 flex-shrink-0" /> :
            pipelineStatus.status === 'failed' ? <AlertCircle className="w-4 h-4 text-red-400 flex-shrink-0" /> :
            pipelineStatus.status === 'approval' ? <AlertCircle className="w-4 h-4 text-yellow-400 flex-shrink-0" /> :
-           <Loader2 className="w-4 h-4 text-chispa-orange animate-spin flex-shrink-0" />}
+           <Loader2 className="w-4 h-4 text-fuega-orange animate-spin flex-shrink-0" />}
           <span className={`text-xs font-medium ${
             pipelineStatus.status === 'completed' ? 'text-green-400' :
             pipelineStatus.status === 'failed' ? 'text-red-400' :
             pipelineStatus.status === 'approval' ? 'text-yellow-400' :
-            'text-chispa-orange'
+            'text-fuega-orange'
           }`}>
             {pipelineStatus.step}
           </span>
@@ -415,12 +415,12 @@ export default function Leads() {
             {PIPELINE_STAGES.map(stage => {
               const items = stages[stage.key] || [];
               return (
-                <div key={stage.key} className="flex-1 min-w-[180px] bg-chispa-card border border-chispa-border rounded-lg flex flex-col">
+                <div key={stage.key} className="flex-1 min-w-[180px] bg-fuega-card border border-fuega-border rounded-lg flex flex-col">
                   {/* Column header */}
-                  <div className="p-2 border-b border-chispa-border">
+                  <div className="p-2 border-b border-fuega-border">
                     <div className="flex items-center gap-1.5">
                       <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: stage.color }} />
-                      <span className="text-xs font-semibold text-chispa-text-primary truncate">{stage.label}</span>
+                      <span className="text-xs font-semibold text-fuega-text-primary truncate">{stage.label}</span>
                       <span className="num text-[10px] px-1.5 py-0.5 rounded-full ml-auto flex-shrink-0" style={{ backgroundColor: stage.color + '20', color: stage.color }}>
                         {items.length}
                       </span>
@@ -430,27 +430,27 @@ export default function Leads() {
                   {/* Cards */}
                   <div className="p-1.5 flex-1 space-y-1.5 overflow-y-auto max-h-[calc(100vh-340px)]">
                     {items.length === 0 && (
-                      <div className="text-[10px] text-chispa-text-muted text-center py-4 opacity-50">No leads</div>
+                      <div className="text-[10px] text-fuega-text-muted text-center py-4 opacity-50">No leads</div>
                     )}
                     {items.map((lead: any) => (
                       <button
                         key={lead.id}
                         onClick={() => navigate(`/leads/${lead.id}`)}
-                        className="w-full text-left bg-chispa-bg border border-chispa-border rounded-md p-2 hover:border-chispa-orange/30 transition-all cursor-pointer group"
+                        className="w-full text-left bg-fuega-bg border border-fuega-border rounded-md p-2 hover:border-fuega-orange/30 transition-all cursor-pointer group"
                       >
-                        <p className="text-[11px] font-medium text-chispa-text-primary leading-tight mb-1 line-clamp-2">
+                        <p className="text-[11px] font-medium text-fuega-text-primary leading-tight mb-1 line-clamp-2">
                           {lead.business_name}
                         </p>
                         <div className="flex items-center gap-1.5 flex-wrap">
                           {lead.industry && (
-                            <span className="text-[9px] px-1.5 py-0.5 rounded bg-chispa-input text-chispa-text-secondary">{lead.industry}</span>
+                            <span className="text-[9px] px-1.5 py-0.5 rounded bg-fuega-input text-fuega-text-secondary">{lead.industry}</span>
                           )}
                           {lead.score > 0 && (
                             <span className={`num text-[10px] font-semibold ${scoreColor(lead.score)}`}>{lead.score}</span>
                           )}
                         </div>
                         {lead.location && (
-                          <div className="flex items-center gap-1 mt-1 text-[9px] text-chispa-text-muted">
+                          <div className="flex items-center gap-1 mt-1 text-[9px] text-fuega-text-muted">
                             <MapPin className="w-2.5 h-2.5" />
                             <span className="truncate">{lead.location}</span>
                           </div>

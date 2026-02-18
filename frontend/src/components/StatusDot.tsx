@@ -25,7 +25,7 @@ export function StatusDot({ status, pulse = false, size = 'md', label, className
   return (
     <span role="status" aria-label={label || status} className={clsx('inline-flex items-center gap-1.5', className)}>
       <span className={clsx('rounded-full flex-shrink-0', color, sizeMap[size], pulse && 'animate-pulse')} />
-      {label && <span className="text-[11px] text-chispa-text-muted">{label}</span>}
+      {label && <span className="text-[11px] text-fuega-text-muted">{label}</span>}
     </span>
   );
 }

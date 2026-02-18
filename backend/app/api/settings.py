@@ -1,8 +1,9 @@
 """Settings management routes."""
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 from backend.app.config import load_yaml_config, save_yaml_config
+from backend.app.auth import get_current_user
 
-router = APIRouter()
+router = APIRouter(dependencies=[Depends(get_current_user)])
 
 VALID_SECTIONS = {"brand", "services", "agents", "workflows", "budget", "platforms"}
 

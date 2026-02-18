@@ -1,1 +1,1 @@
-"""External API integration clients for Chyspa AI."""
+"""External API integration clients for Fuega AI."""

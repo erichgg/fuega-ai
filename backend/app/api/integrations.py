@@ -1,12 +1,13 @@
 """Integration API endpoints — real external service calls."""
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from backend.app.config import get_settings
+from backend.app.auth import get_current_user
 import structlog
 
 logger = structlog.get_logger()
 
-router = APIRouter()
+router = APIRouter(dependencies=[Depends(get_current_user)])
 
 
 # ── Request models ──────────────────────────────────────────────────────────
@@ -34,7 +35,7 @@ class ResendEmailRequest(BaseModel):
     to: str
     subject: str
     html_body: str
-    from_name: str = "Chyspa AI"
+    from_name: str = "Fuega AI"
     from_agent: str | None = None
 
 

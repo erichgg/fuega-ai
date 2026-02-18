@@ -20,7 +20,7 @@ function modelColor(model: string): string {
   if (model.includes('sonnet')) return 'bg-purple-500/15 text-purple-400';
   if (model.includes('haiku')) return 'bg-teal-500/15 text-teal-400';
   if (model.includes('opus')) return 'bg-orange-500/15 text-orange-400';
-  return 'bg-chispa-text-muted/10 text-chispa-text-muted';
+  return 'bg-fuega-text-muted/10 text-fuega-text-muted';
 }
 
 export default function Agents() {
@@ -99,7 +99,7 @@ export default function Agents() {
           onClick={(e) => { e.stopPropagation(); toggleStatus(row.slug, row.status); }}
           role="switch"
           aria-checked={row.status === 'active'}
-          className={`relative w-9 h-5 rounded-full transition-colors ${row.status === 'active' ? 'bg-green-500' : 'bg-chispa-border'}`}
+          className={`relative w-9 h-5 rounded-full transition-colors ${row.status === 'active' ? 'bg-green-500' : 'bg-fuega-border'}`}
           title={row.status === 'active' ? 'Click to pause' : 'Click to activate'}
         >
           <span className={`absolute top-0.5 w-4 h-4 rounded-full bg-white transition-transform ${row.status === 'active' ? 'left-[18px]' : 'left-0.5'}`} />
@@ -113,12 +113,12 @@ export default function Agents() {
       getValue: (row) => row.name,
       render: (row) => (
         <div className="flex items-center gap-2.5">
-          <div className="p-1 rounded-md bg-chispa-orange/10">
-            <Bot className="w-3.5 h-3.5 text-chispa-orange" />
+          <div className="p-1 rounded-md bg-fuega-orange/10">
+            <Bot className="w-3.5 h-3.5 text-fuega-orange" />
           </div>
           <div>
-            <p className="text-[12px] font-semibold text-chispa-text-primary">{row.name}</p>
-            <p className="text-[10px] text-chispa-text-muted">{row.role}</p>
+            <p className="text-[12px] font-semibold text-fuega-text-primary">{row.name}</p>
+            <p className="text-[10px] text-fuega-text-muted">{row.role}</p>
           </div>
         </div>
       ),
@@ -140,7 +140,7 @@ export default function Agents() {
       label: 'Calls',
       sortable: true,
       getValue: (row) => row.total_calls || 0,
-      render: (row) => <span className="text-[12px] text-chispa-text-secondary num">{(row.total_calls || 0).toLocaleString()}</span>,
+      render: (row) => <span className="text-[12px] text-fuega-text-secondary num">{(row.total_calls || 0).toLocaleString()}</span>,
     },
     {
       key: 'spend',
@@ -152,18 +152,18 @@ export default function Agents() {
         return (
           <div onClick={e => e.stopPropagation()}>
             <div className="flex items-center gap-1.5 text-[12px]">
-              <span className="text-chispa-text-primary num">${(row.month_spend_usd || 0).toFixed(2)}</span>
-              <span className="text-chispa-text-muted">/</span>
+              <span className="text-fuega-text-primary num">${(row.month_spend_usd || 0).toFixed(2)}</span>
+              <span className="text-fuega-text-muted">/</span>
               <InlineEdit
                 value={String(row.monthly_budget_usd || 0)}
                 onSave={(v) => saveBudget(row.slug, v)}
                 type="number"
-                displayClassName="text-chispa-text-secondary num text-[12px]"
+                displayClassName="text-fuega-text-secondary num text-[12px]"
                 className="w-16 text-[12px] num"
               />
-              <span className="text-[10px] text-chispa-text-muted">{pct.toFixed(0)}%</span>
+              <span className="text-[10px] text-fuega-text-muted">{pct.toFixed(0)}%</span>
             </div>
-            <div className="mt-1 w-full h-1 bg-chispa-surface rounded-full overflow-hidden">
+            <div className="mt-1 w-full h-1 bg-fuega-surface rounded-full overflow-hidden">
               <div className="h-full rounded-full" style={{ width: `${Math.min(pct, 100)}%`, backgroundColor: pct > 80 ? '#EF4444' : pct > 50 ? '#EAB308' : '#00D4AA' }} />
             </div>
           </div>
@@ -180,7 +180,7 @@ export default function Agents() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-24">
-        <div className="w-6 h-6 border-2 border-chispa-orange border-t-transparent rounded-full animate-spin" />
+        <div className="w-6 h-6 border-2 border-fuega-orange border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -198,21 +198,21 @@ export default function Agents() {
 
       {/* Filter bar */}
       <div className="flex items-center gap-2 mb-3 flex-wrap">
-        <div className="flex items-center gap-2 flex-1 min-w-[200px] bg-chispa-input border border-chispa-border rounded-lg px-2.5 py-1.5">
-          <Search className="w-3.5 h-3.5 text-chispa-text-muted" />
+        <div className="flex items-center gap-2 flex-1 min-w-[200px] bg-fuega-input border border-fuega-border rounded-lg px-2.5 py-1.5">
+          <Search className="w-3.5 h-3.5 text-fuega-text-muted" />
           <input
             type="text"
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
             placeholder="Search agents..."
-            className="flex-1 bg-transparent text-[12px] text-chispa-text-primary placeholder-chispa-text-muted focus:outline-none"
+            className="flex-1 bg-transparent text-[12px] text-fuega-text-primary placeholder-fuega-text-muted focus:outline-none"
           />
-          {searchQuery && <button onClick={() => setSearchQuery('')} className="text-chispa-text-muted hover:text-chispa-text-primary"><X className="w-3 h-3" /></button>}
+          {searchQuery && <button onClick={() => setSearchQuery('')} className="text-fuega-text-muted hover:text-fuega-text-primary"><X className="w-3 h-3" /></button>}
         </div>
         <select
           value={statusFilter}
           onChange={e => setStatusFilter(e.target.value)}
-          className="bg-chispa-input border border-chispa-border rounded-lg px-2.5 py-1.5 text-[12px] text-chispa-text-secondary focus:outline-none"
+          className="bg-fuega-input border border-fuega-border rounded-lg px-2.5 py-1.5 text-[12px] text-fuega-text-secondary focus:outline-none"
         >
           <option value="all">All Status</option>
           <option value="active">Active</option>
@@ -221,7 +221,7 @@ export default function Agents() {
         <select
           value={modelFilter}
           onChange={e => setModelFilter(e.target.value)}
-          className="bg-chispa-input border border-chispa-border rounded-lg px-2.5 py-1.5 text-[12px] text-chispa-text-secondary focus:outline-none"
+          className="bg-fuega-input border border-fuega-border rounded-lg px-2.5 py-1.5 text-[12px] text-fuega-text-secondary focus:outline-none"
         >
           <option value="all">All Models</option>
           {models.map(m => <option key={m} value={m}>{m}</option>)}
@@ -230,12 +230,12 @@ export default function Agents() {
 
       {/* Bulk action bar */}
       {selectedKeys.size > 0 && (
-        <div className="flex items-center gap-3 mb-3 bg-chispa-orange/5 border border-chispa-orange/20 rounded-lg px-3 py-2 animate-slideUp">
-          <span className="text-[12px] text-chispa-text-primary font-medium">{selectedKeys.size} selected</span>
+        <div className="flex items-center gap-3 mb-3 bg-fuega-orange/5 border border-fuega-orange/20 rounded-lg px-3 py-2 animate-slideUp">
+          <span className="text-[12px] text-fuega-text-primary font-medium">{selectedKeys.size} selected</span>
           <button onClick={bulkPause} className="flex items-center gap-1 text-[11px] text-yellow-400 bg-yellow-500/10 hover:bg-yellow-500/20 px-2 py-1 rounded transition-colors">
             <Pause className="w-3 h-3" /> Pause All
           </button>
-          <button onClick={() => setSelectedKeys(new Set())} className="text-[11px] text-chispa-text-muted hover:text-chispa-text-primary ml-auto">Clear</button>
+          <button onClick={() => setSelectedKeys(new Set())} className="text-[11px] text-fuega-text-muted hover:text-fuega-text-primary ml-auto">Clear</button>
         </div>
       )}
 

@@ -12,6 +12,12 @@ class Base(DeclarativeBase):
     pass
 
 
+class UserRole(str, enum.Enum):
+    ADMIN = "admin"
+    OPERATOR = "operator"
+    VIEWER = "viewer"
+
+
 class AgentStatus(str, enum.Enum):
     ACTIVE = "active"
     PAUSED = "paused"
@@ -66,6 +72,14 @@ class DeliverableStatus(str, enum.Enum):
     REVIEW = "review"
     DELIVERED = "delivered"
     OVERDUE = "overdue"
+
+
+class SubscriptionStatus(str, enum.Enum):
+    ACTIVE = "active"
+    PAST_DUE = "past_due"
+    CANCELED = "canceled"
+    TRIALING = "trialing"
+    INCOMPLETE = "incomplete"
 
 
 class Agent(Base):
@@ -177,6 +191,9 @@ class Lead(Base):
     outreach_draft = Column(Text)
     outreach_channel = Column(String(50))
     recommended_service_tier = Column(String(50))
+    # Follow-up tracking
+    followup_count = Column(Integer, default=0)
+    last_followup_at = Column(DateTime)
     # Research
     agent_research = Column(JSON)
     # Meta
@@ -376,6 +393,7 @@ class WorkflowStep(Base):
     duration_ms = Column(Integer, default=0)
     retry_count = Column(Integer, default=0)
     error_message = Column(Text)
+    approval_id = Column(Integer, ForeignKey("approval_queue.id"), nullable=True)
     started_at = Column(DateTime)
     completed_at = Column(DateTime)
 
@@ -418,4 +436,110 @@ class RevenueEvent(Base):
     amount_mxn = Column(Float)
     description = Column(String(300))
     event_type = Column(String(50))
+    created_at = Column(DateTime, default=lambda: datetime.utcnow())
+
+
+class User(Base):
+    __tablename__ = "users"
+    id = Column(Integer, primary_key=True)
+    email = Column(String, unique=True, nullable=False, index=True)
+    hashed_password = Column(String, nullable=False)
+    full_name = Column(String, default="")
+    role = Column(SAEnum(UserRole), default=UserRole.OPERATOR)
+    is_active = Column(Boolean, default=True)
+    created_at = Column(DateTime, default=lambda: datetime.utcnow())
+    last_login = Column(DateTime)
+
+    api_keys = relationship("APIKey", back_populates="user")
+
+
+class AuditLog(Base):
+    __tablename__ = "audit_log"
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+    action = Column(String, nullable=False)
+    resource = Column(String)
+    details = Column(JSON)
+    ip_address = Column(String)
+    created_at = Column(DateTime, default=lambda: datetime.utcnow())
+
+
+class APIKey(Base):
+    __tablename__ = "api_keys"
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey("users.id"))
+    name = Column(String, nullable=False)
+    key_hash = Column(String, nullable=False)
+    key_prefix = Column(String(8))
+    is_active = Column(Boolean, default=True)
+    created_at = Column(DateTime, default=lambda: datetime.utcnow())
+    last_used = Column(DateTime)
+
+    user = relationship("User", back_populates="api_keys")
+
+
+class Subscription(Base):
+    __tablename__ = "subscriptions"
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey("users.id"), index=True)
+    client_id = Column(Integer, ForeignKey("clients.id"), nullable=True, index=True)
+    stripe_customer_id = Column(String, unique=True, index=True)
+    stripe_subscription_id = Column(String, unique=True, index=True)
+    plan = Column(String, nullable=False)  # fuega_starter, fuega_growth, etc.
+    status = Column(SAEnum(SubscriptionStatus), default=SubscriptionStatus.INCOMPLETE)
+    current_period_start = Column(DateTime)
+    current_period_end = Column(DateTime)
+    cancel_at_period_end = Column(Boolean, default=False)
+    created_at = Column(DateTime, default=lambda: datetime.utcnow())
+    updated_at = Column(DateTime, default=lambda: datetime.utcnow(), onupdate=lambda: datetime.utcnow())
+
+
+class HITLMode(str, enum.Enum):
+    AUTO = "auto"
+    APPROVE = "approve"
+    MANUAL = "manual"
+
+
+class ApprovalStatus(str, enum.Enum):
+    PENDING = "pending"
+    APPROVED = "approved"
+    REJECTED = "rejected"
+    EXPIRED = "expired"
+
+
+class AgentActionConfig(Base):
+    __tablename__ = "agent_action_configs"
+    id = Column(Integer, primary_key=True)
+    agent_slug = Column(String, nullable=False, index=True)
+    action_name = Column(String, nullable=False)
+    mode = Column(SAEnum(HITLMode), default=HITLMode.APPROVE)
+    updated_by = Column(Integer, ForeignKey("users.id"), nullable=True)
+    updated_at = Column(DateTime, default=lambda: datetime.utcnow(), onupdate=lambda: datetime.utcnow())
+
+    __table_args__ = (Index('ix_agent_action', 'agent_slug', 'action_name', unique=True),)
+
+
+class ApprovalRequest(Base):
+    __tablename__ = "approval_queue"
+    id = Column(Integer, primary_key=True)
+    agent_slug = Column(String, nullable=False, index=True)
+    action_name = Column(String, nullable=False)
+    payload = Column(JSON, nullable=False)
+    context = Column(JSON)
+    status = Column(SAEnum(ApprovalStatus), default=ApprovalStatus.PENDING, index=True)
+    decided_by = Column(Integer, ForeignKey("users.id"), nullable=True)
+    decided_at = Column(DateTime)
+    rejection_reason = Column(Text)
+    modified_payload = Column(JSON)
+    created_at = Column(DateTime, default=lambda: datetime.utcnow())
+    expires_at = Column(DateTime)
+
+
+class BillingEvent(Base):
+    __tablename__ = "billing_events"
+    id = Column(Integer, primary_key=True)
+    stripe_event_id = Column(String, unique=True, index=True)
+    event_type = Column(String, nullable=False)
+    subscription_id = Column(Integer, ForeignKey("subscriptions.id"), nullable=True)
+    data = Column(JSON)
     created_at = Column(DateTime, default=lambda: datetime.utcnow())

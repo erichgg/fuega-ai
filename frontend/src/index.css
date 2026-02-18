@@ -1,22 +1,22 @@
 @import "tailwindcss";
 
 @theme {
-  --color-chispa-orange: #FF6B2C;
-  --color-chispa-orange-light: #FF8F5C;
-  --color-chispa-navy: #1A1A2E;
-  --color-chispa-teal: #00D4AA;
-  --color-chispa-coral: #FF6B8A;
-  --color-chispa-purple: #A855F7;
-  --color-chispa-sunset: #FF9F43;
-  --color-chispa-surface: var(--surface);
-  --color-chispa-card: var(--card);
-  --color-chispa-card-hover: var(--card-hover);
-  --color-chispa-border: var(--border);
-  --color-chispa-text-primary: var(--text-primary);
-  --color-chispa-text-secondary: var(--text-secondary);
-  --color-chispa-text-muted: var(--text-muted);
-  --color-chispa-sidebar: var(--sidebar);
-  --color-chispa-input: var(--input);
+  --color-fuega-orange: #FF6B2C;
+  --color-fuega-orange-light: #FF8F5C;
+  --color-fuega-navy: #1A1A2E;
+  --color-fuega-teal: #00D4AA;
+  --color-fuega-coral: #FF6B8A;
+  --color-fuega-purple: #A855F7;
+  --color-fuega-sunset: #FF9F43;
+  --color-fuega-surface: var(--surface);
+  --color-fuega-card: var(--card);
+  --color-fuega-card-hover: var(--card-hover);
+  --color-fuega-border: var(--border);
+  --color-fuega-text-primary: var(--text-primary);
+  --color-fuega-text-secondary: var(--text-secondary);
+  --color-fuega-text-muted: var(--text-muted);
+  --color-fuega-sidebar: var(--sidebar);
+  --color-fuega-input: var(--input);
   --font-family-sans: 'Inter', system-ui, sans-serif;
   --font-family-mono: 'JetBrains Mono', monospace;
 }

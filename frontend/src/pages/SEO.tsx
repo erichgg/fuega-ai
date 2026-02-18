@@ -57,7 +57,7 @@ export default function SEO() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-24">
-        <div className="w-6 h-6 border-2 border-chispa-orange border-t-transparent rounded-full animate-spin" />
+        <div className="w-6 h-6 border-2 border-fuega-orange border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -72,7 +72,7 @@ export default function SEO() {
             <button
               onClick={handleRunAudit}
               disabled={auditRunning}
-              className="flex items-center gap-1.5 bg-chispa-orange hover:bg-chispa-orange/80 text-white px-3 py-1.5 rounded-lg text-[12px] font-medium transition-colors disabled:opacity-50"
+              className="flex items-center gap-1.5 bg-fuega-orange hover:bg-fuega-orange/80 text-white px-3 py-1.5 rounded-lg text-[12px] font-medium transition-colors disabled:opacity-50"
             >
               <Play className="w-3.5 h-3.5" /> Run audit
             </button>
@@ -111,8 +111,8 @@ export default function SEO() {
       getValue: (row) => row.keyword,
       render: (row) => (
         <div>
-          <span className="text-[12px] text-chispa-text-primary">{row.keyword}</span>
-          <span className="ml-2 text-[10px] text-chispa-text-muted">{row.language}</span>
+          <span className="text-[12px] text-fuega-text-primary">{row.keyword}</span>
+          <span className="ml-2 text-[10px] text-fuega-text-muted">{row.language}</span>
         </div>
       ),
     },
@@ -121,7 +121,7 @@ export default function SEO() {
       label: 'Position',
       sortable: true,
       getValue: (row) => row.current_rank,
-      render: (row) => <span className="num text-[12px] font-bold text-chispa-text-primary">#{row.current_rank}</span>,
+      render: (row) => <span className="num text-[12px] font-bold text-fuega-text-primary">#{row.current_rank}</span>,
     },
     {
       key: 'trend',
@@ -142,8 +142,8 @@ export default function SEO() {
           <div className="flex items-center gap-1">
             {change > 0 && <ArrowUpRight className="w-3.5 h-3.5 text-green-400" />}
             {change < 0 && <ArrowDownRight className="w-3.5 h-3.5 text-red-400" />}
-            {change === 0 && <Minus className="w-3.5 h-3.5 text-chispa-text-muted" />}
-            <span className={`num text-[12px] font-medium ${change > 0 ? 'text-green-400' : change < 0 ? 'text-red-400' : 'text-chispa-text-muted'}`}>
+            {change === 0 && <Minus className="w-3.5 h-3.5 text-fuega-text-muted" />}
+            <span className={`num text-[12px] font-medium ${change > 0 ? 'text-green-400' : change < 0 ? 'text-red-400' : 'text-fuega-text-muted'}`}>
               {change > 0 ? `+${change}` : change === 0 ? '\u2014' : change}
             </span>
           </div>
@@ -155,7 +155,7 @@ export default function SEO() {
       label: 'Volume',
       sortable: true,
       getValue: (row) => row.search_volume || 0,
-      render: (row) => <span className="text-[12px] num text-chispa-text-secondary">{row.search_volume?.toLocaleString()}</span>,
+      render: (row) => <span className="text-[12px] num text-fuega-text-secondary">{row.search_volume?.toLocaleString()}</span>,
     },
     {
       key: 'difficulty',
@@ -164,13 +164,13 @@ export default function SEO() {
       getValue: (row) => row.difficulty || 0,
       render: (row) => (
         <div className="flex items-center gap-2">
-          <div className="w-14 h-1.5 bg-chispa-input rounded-full overflow-hidden">
+          <div className="w-14 h-1.5 bg-fuega-input rounded-full overflow-hidden">
             <div className="h-full rounded-full" style={{
               width: `${row.difficulty * 100}%`,
               backgroundColor: row.difficulty > 0.7 ? '#EF4444' : row.difficulty > 0.4 ? '#EAB308' : '#22C55E',
             }} />
           </div>
-          <span className="num text-[10px] text-chispa-text-muted">{(row.difficulty * 100).toFixed(0)}</span>
+          <span className="num text-[10px] text-fuega-text-muted">{(row.difficulty * 100).toFixed(0)}</span>
         </div>
       ),
     },
@@ -196,7 +196,7 @@ export default function SEO() {
           <button
             onClick={handleRunAudit}
             disabled={auditRunning}
-            className="flex items-center gap-1.5 bg-chispa-orange hover:bg-chispa-orange/80 text-white px-3 py-1.5 rounded-lg text-[12px] font-medium transition-colors disabled:opacity-50"
+            className="flex items-center gap-1.5 bg-fuega-orange hover:bg-fuega-orange/80 text-white px-3 py-1.5 rounded-lg text-[12px] font-medium transition-colors disabled:opacity-50"
           >
             {auditRunning ? (
               <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -231,7 +231,7 @@ export default function SEO() {
           <ChartCard title="Site Audits" subtitle={`${audits.length} audits`} className={keywords.length > 0 ? 'lg:col-span-2' : 'lg:col-span-3'}>
             <div className="space-y-2">
               {audits.map(audit => (
-                <div key={audit.id} className="flex items-center gap-3 py-2 px-3 rounded-lg bg-chispa-input border border-chispa-border/50">
+                <div key={audit.id} className="flex items-center gap-3 py-2 px-3 rounded-lg bg-fuega-input border border-fuega-border/50">
                   <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{
                     backgroundColor: audit.overall_score >= 70 ? '#22C55E20' : audit.overall_score >= 50 ? '#EAB30820' : '#EF444420',
                   }}>
@@ -241,15 +241,15 @@ export default function SEO() {
                   </div>
                   <div className="flex-1">
                     <div className="flex items-center gap-2">
-                      <Globe className="w-3.5 h-3.5 text-chispa-text-muted" />
-                      <span className="text-sm font-medium text-chispa-text-primary">{audit.url}</span>
+                      <Globe className="w-3.5 h-3.5 text-fuega-text-muted" />
+                      <span className="text-sm font-medium text-fuega-text-primary">{audit.url}</span>
                     </div>
                     <div className="flex gap-3 mt-0.5">
-                      <span className="text-xs text-chispa-text-muted">Technical: <span className="num">{audit.technical_score}</span></span>
-                      <span className="text-xs text-chispa-text-muted">Content: <span className="num">{audit.content_score}</span></span>
+                      <span className="text-xs text-fuega-text-muted">Technical: <span className="num">{audit.technical_score}</span></span>
+                      <span className="text-xs text-fuega-text-muted">Content: <span className="num">{audit.content_score}</span></span>
                     </div>
                   </div>
-                  <span className="text-xs text-chispa-text-muted">{audit.created_at}</span>
+                  <span className="text-xs text-fuega-text-muted">{audit.created_at}</span>
                 </div>
               ))}
             </div>
@@ -260,19 +260,19 @@ export default function SEO() {
       {keywords.length > 0 && (
         <>
           <div className="flex items-center gap-2 mb-3">
-            <div className="flex items-center gap-2 flex-1 min-w-[200px] max-w-sm bg-chispa-input border border-chispa-border rounded-lg px-2.5 py-1.5">
-              <Search className="w-3.5 h-3.5 text-chispa-text-muted" />
+            <div className="flex items-center gap-2 flex-1 min-w-[200px] max-w-sm bg-fuega-input border border-fuega-border rounded-lg px-2.5 py-1.5">
+              <Search className="w-3.5 h-3.5 text-fuega-text-muted" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
                 placeholder="Search keywords..."
-                className="flex-1 bg-transparent text-[12px] text-chispa-text-primary placeholder-chispa-text-muted focus:outline-none"
+                className="flex-1 bg-transparent text-[12px] text-fuega-text-primary placeholder-fuega-text-muted focus:outline-none"
               />
-              {searchQuery && <button onClick={() => setSearchQuery('')} className="text-chispa-text-muted hover:text-chispa-text-primary"><X className="w-3 h-3" /></button>}
+              {searchQuery && <button onClick={() => setSearchQuery('')} className="text-fuega-text-muted hover:text-fuega-text-primary"><X className="w-3 h-3" /></button>}
             </div>
             {searchQuery && (
-              <span className="text-[11px] text-chispa-text-muted">{filteredKeywords.length} result{filteredKeywords.length !== 1 ? 's' : ''}</span>
+              <span className="text-[11px] text-fuega-text-muted">{filteredKeywords.length} result{filteredKeywords.length !== 1 ? 's' : ''}</span>
             )}
           </div>
 

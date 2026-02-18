@@ -1,14 +1,25 @@
 """Agent management routes."""
+from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, Request, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from backend.app.database.engine import get_db
-from backend.app.database.models import Agent, AgentLog, AgentStatus
+from backend.app.database.models import (
+    Agent, AgentLog, AgentMemory, AgentStatus,
+    AgentActionConfig, HITLMode,
+)
 from backend.app.config import load_yaml_config
+from backend.app.auth import get_current_user
+from backend.app.database.models import User
 from pydantic import BaseModel, Field
 from typing import Optional
 
-router = APIRouter()
+router = APIRouter(dependencies=[Depends(get_current_user)])
+
+DEFAULT_ACTIONS = [
+    "send_email", "post_tweet", "search_web", "generate_content",
+    "make_api_call", "update_lead", "create_content", "run_analysis",
+]
 
 
 def _get_agent_yaml_config(slug: str) -> dict:
@@ -89,6 +100,88 @@ async def team_chat(body: TeamChatRequest, request: Request, db: AsyncSession = 
         })
 
     return responses
+
+
+class AgentImportBody(BaseModel):
+    slug: str = Field(..., min_length=1, max_length=50)
+    name: str = Field(..., min_length=1, max_length=100)
+    role: str = Field(..., min_length=1, max_length=100)
+    model: str = Field(default="claude-haiku-4-5-20251001")
+    description: Optional[str] = None
+    monthly_budget_usd: Optional[float] = None
+    action_configs: Optional[list[dict]] = None
+
+
+@router.post("/import")
+async def import_agent(
+    body: AgentImportBody,
+    db: AsyncSession = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    """Import agent config from JSON. Creates or updates agent record and action configs."""
+    result = await db.execute(select(Agent).where(Agent.slug == body.slug))
+    agent = result.scalar_one_or_none()
+
+    if agent:
+        agent.name = body.name
+        agent.role = body.role
+        agent.model = body.model
+        if body.description is not None:
+            agent.description = body.description
+        if body.monthly_budget_usd is not None:
+            agent.monthly_budget_usd = body.monthly_budget_usd
+    else:
+        agent = Agent(
+            slug=body.slug,
+            name=body.name,
+            role=body.role,
+            model=body.model,
+            description=body.description or "",
+            monthly_budget_usd=body.monthly_budget_usd or 0.0,
+        )
+        db.add(agent)
+
+    # Import action configs if provided
+    if body.action_configs:
+        for ac in body.action_configs:
+            action_name = ac.get("action_name")
+            mode_str = ac.get("mode", "approve")
+            if not action_name:
+                continue
+            try:
+                mode = HITLMode(mode_str)
+            except ValueError:
+                mode = HITLMode.APPROVE
+
+            existing = await db.execute(
+                select(AgentActionConfig).where(
+                    AgentActionConfig.agent_slug == body.slug,
+                    AgentActionConfig.action_name == action_name,
+                )
+            )
+            config = existing.scalar_one_or_none()
+            if config:
+                config.mode = mode
+                config.updated_by = user.id
+            else:
+                db.add(AgentActionConfig(
+                    agent_slug=body.slug,
+                    action_name=action_name,
+                    mode=mode,
+                    updated_by=user.id,
+                ))
+
+    await db.commit()
+    await db.refresh(agent)
+
+    return {
+        "id": agent.id,
+        "slug": agent.slug,
+        "name": agent.name,
+        "role": agent.role,
+        "model": agent.model,
+        "imported": True,
+    }
 
 
 class AgentUpdate(BaseModel):
@@ -204,4 +297,176 @@ async def chat_with_agent(slug: str, body: ChatMessage, request: Request, db: As
         "parsed": result.get("parsed"),
         "cost_usd": result.get("cost_usd", 0),
         "tokens": result.get("input_tokens", 0) + result.get("output_tokens", 0),
+    }
+
+
+# ── Agent Action Config (HITL) ─────────────────────────────────────────────
+
+
+@router.get("/{slug}/actions")
+async def list_agent_actions(slug: str, db: AsyncSession = Depends(get_db)):
+    """List all action configs for an agent. Returns defaults if none configured."""
+    result = await db.execute(
+        select(AgentActionConfig).where(AgentActionConfig.agent_slug == slug)
+        .order_by(AgentActionConfig.action_name)
+    )
+    configs = result.scalars().all()
+
+    if configs:
+        return [
+            {
+                "action_name": c.action_name,
+                "mode": c.mode.value if c.mode else "approve",
+                "updated_at": c.updated_at.isoformat() if c.updated_at else None,
+            }
+            for c in configs
+        ]
+
+    # No configs exist yet -- return defaults with APPROVE mode
+    return [
+        {"action_name": action, "mode": "approve", "updated_at": None}
+        for action in DEFAULT_ACTIONS
+    ]
+
+
+class ActionModeUpdate(BaseModel):
+    mode: str = Field(..., pattern=r'^(auto|approve|manual)$')
+
+
+@router.put("/{slug}/actions/{action_name}")
+async def update_action_mode(
+    slug: str,
+    action_name: str,
+    body: ActionModeUpdate,
+    db: AsyncSession = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    """Update the HITL mode for a single agent action."""
+    mode = HITLMode(body.mode)
+
+    result = await db.execute(
+        select(AgentActionConfig).where(
+            AgentActionConfig.agent_slug == slug,
+            AgentActionConfig.action_name == action_name,
+        )
+    )
+    config = result.scalar_one_or_none()
+
+    if config:
+        config.mode = mode
+        config.updated_by = user.id
+    else:
+        config = AgentActionConfig(
+            agent_slug=slug,
+            action_name=action_name,
+            mode=mode,
+            updated_by=user.id,
+        )
+        db.add(config)
+
+    await db.commit()
+    return {"action_name": action_name, "mode": mode.value, "updated": True}
+
+
+class BulkActionUpdate(BaseModel):
+    actions: list[dict] = Field(..., min_length=1)
+
+
+@router.put("/{slug}/actions")
+async def bulk_update_actions(
+    slug: str,
+    body: BulkActionUpdate,
+    db: AsyncSession = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    """Bulk update HITL modes for multiple agent actions."""
+    updated = []
+    for item in body.actions:
+        action_name = item.get("action_name")
+        mode_str = item.get("mode")
+        if not action_name or not mode_str:
+            continue
+        try:
+            mode = HITLMode(mode_str)
+        except ValueError:
+            continue
+
+        result = await db.execute(
+            select(AgentActionConfig).where(
+                AgentActionConfig.agent_slug == slug,
+                AgentActionConfig.action_name == action_name,
+            )
+        )
+        config = result.scalar_one_or_none()
+
+        if config:
+            config.mode = mode
+            config.updated_by = user.id
+        else:
+            config = AgentActionConfig(
+                agent_slug=slug,
+                action_name=action_name,
+                mode=mode,
+                updated_by=user.id,
+            )
+            db.add(config)
+        updated.append(action_name)
+
+    await db.commit()
+    return {"updated": updated, "count": len(updated)}
+
+
+# ── Agent Export ────────────────────────────────────────────────────────────
+
+
+@router.get("/{slug}/export")
+async def export_agent(slug: str, db: AsyncSession = Depends(get_db)):
+    """Export full agent config as JSON."""
+    result = await db.execute(select(Agent).where(Agent.slug == slug))
+    agent = result.scalar_one_or_none()
+    if not agent:
+        raise HTTPException(404, "Agent not found")
+
+    yaml_config = _get_agent_yaml_config(slug)
+
+    # Get action configs
+    actions_result = await db.execute(
+        select(AgentActionConfig).where(AgentActionConfig.agent_slug == slug)
+    )
+    action_configs = actions_result.scalars().all()
+
+    # Get memory entries
+    memories_result = await db.execute(
+        select(AgentMemory).where(AgentMemory.agent_id == agent.id)
+        .order_by(AgentMemory.confidence.desc()).limit(100)
+    )
+    memories = memories_result.scalars().all()
+
+    return {
+        "slug": agent.slug,
+        "name": agent.name,
+        "role": agent.role,
+        "description": agent.description or "",
+        "model": agent.model,
+        "monthly_budget_usd": agent.monthly_budget_usd,
+        "system_prompt": yaml_config.get("system_prompt", ""),
+        "inputs": yaml_config.get("inputs", []),
+        "outputs": yaml_config.get("outputs", []),
+        "tools": yaml_config.get("tools", []),
+        "action_configs": [
+            {
+                "action_name": c.action_name,
+                "mode": c.mode.value if c.mode else "approve",
+            }
+            for c in action_configs
+        ],
+        "memories": [
+            {
+                "category": m.category,
+                "key": m.key,
+                "value": m.value,
+                "confidence": m.confidence,
+            }
+            for m in memories
+        ],
     }

@@ -20,11 +20,11 @@ const TABS: { key: TabKey; label: string; icon: React.ReactNode }[] = [
 function InputField({ label, value, onChange, multiline = false }: { label: string; value: string; onChange: (v: string) => void; multiline?: boolean }) {
   return (
     <div>
-      <label className="block text-[11px] font-medium text-chispa-text-muted uppercase tracking-wider mb-1">{label}</label>
+      <label className="block text-[11px] font-medium text-fuega-text-muted uppercase tracking-wider mb-1">{label}</label>
       {multiline ? (
-        <textarea value={value || ''} onChange={e => onChange(e.target.value)} rows={3} className="w-full bg-chispa-input border border-chispa-border rounded-lg px-3 py-1.5 text-sm text-chispa-text-primary focus:outline-none focus:border-chispa-orange/50 resize-none" />
+        <textarea value={value || ''} onChange={e => onChange(e.target.value)} rows={3} className="w-full bg-fuega-input border border-fuega-border rounded-lg px-3 py-1.5 text-sm text-fuega-text-primary focus:outline-none focus:border-fuega-orange/50 resize-none" />
       ) : (
-        <input type="text" value={value || ''} onChange={e => onChange(e.target.value)} className="w-full bg-chispa-input border border-chispa-border rounded-lg px-3 py-1.5 text-sm text-chispa-text-primary focus:outline-none focus:border-chispa-orange/50" />
+        <input type="text" value={value || ''} onChange={e => onChange(e.target.value)} className="w-full bg-fuega-input border border-fuega-border rounded-lg px-3 py-1.5 text-sm text-fuega-text-primary focus:outline-none focus:border-fuega-orange/50" />
       )}
     </div>
   );
@@ -33,8 +33,8 @@ function InputField({ label, value, onChange, multiline = false }: { label: stri
 function NumberField({ label, value, onChange }: { label: string; value: number; onChange: (v: number) => void }) {
   return (
     <div>
-      <label className="block text-[11px] font-medium text-chispa-text-muted uppercase tracking-wider mb-1">{label}</label>
-      <input type="number" step="0.01" value={value ?? 0} onChange={e => onChange(parseFloat(e.target.value) || 0)} className="w-full bg-chispa-input border border-chispa-border rounded-lg px-3 py-1.5 text-sm text-chispa-text-primary num font-mono focus:outline-none focus:border-chispa-orange/50" />
+      <label className="block text-[11px] font-medium text-fuega-text-muted uppercase tracking-wider mb-1">{label}</label>
+      <input type="number" step="0.01" value={value ?? 0} onChange={e => onChange(parseFloat(e.target.value) || 0)} className="w-full bg-fuega-input border border-fuega-border rounded-lg px-3 py-1.5 text-sm text-fuega-text-primary num font-mono focus:outline-none focus:border-fuega-orange/50" />
     </div>
   );
 }
@@ -69,16 +69,16 @@ function ServicesForm({ config, setConfig }: { config: any; setConfig: (c: any) 
   return (
     <div className="space-y-2">
       {Object.entries(services).map(([key, svc]: [string, any]) => (
-        <div key={key} className="border border-chispa-border rounded-lg overflow-hidden">
+        <div key={key} className="border border-fuega-border rounded-lg overflow-hidden">
           <button
             onClick={() => setExpanded(expanded === key ? null : key)}
-            className="w-full flex items-center justify-between px-3 py-2.5 hover:bg-chispa-card-hover transition-colors"
+            className="w-full flex items-center justify-between px-3 py-2.5 hover:bg-fuega-card-hover transition-colors"
           >
-            <span className="text-sm font-medium text-chispa-text-primary">{svc?.name || key}</span>
-            {expanded === key ? <ChevronDown className="w-3.5 h-3.5 text-chispa-text-muted" /> : <ChevronRight className="w-3.5 h-3.5 text-chispa-text-muted" />}
+            <span className="text-sm font-medium text-fuega-text-primary">{svc?.name || key}</span>
+            {expanded === key ? <ChevronDown className="w-3.5 h-3.5 text-fuega-text-muted" /> : <ChevronRight className="w-3.5 h-3.5 text-fuega-text-muted" />}
           </button>
           {expanded === key && (
-            <div className="px-3 pb-3 border-t border-chispa-border/50 pt-2.5 space-y-2.5">
+            <div className="px-3 pb-3 border-t border-fuega-border/50 pt-2.5 space-y-2.5">
               {typeof svc === 'object' && svc !== null && Object.entries(svc).map(([field, val]) => (
                 <div key={field}>
                   {typeof val === 'number' ? (
@@ -93,8 +93,8 @@ function ServicesForm({ config, setConfig }: { config: any; setConfig: (c: any) 
                     }} />
                   ) : (
                     <div>
-                      <label className="block text-[11px] font-medium text-chispa-text-muted uppercase tracking-wider mb-1">{field.replace(/_/g, ' ')}</label>
-                      <pre className="text-xs text-chispa-text-secondary bg-chispa-input rounded p-2 overflow-auto max-h-32">{JSON.stringify(val, null, 2)}</pre>
+                      <label className="block text-[11px] font-medium text-fuega-text-muted uppercase tracking-wider mb-1">{field.replace(/_/g, ' ')}</label>
+                      <pre className="text-xs text-fuega-text-secondary bg-fuega-input rounded p-2 overflow-auto max-h-32">{JSON.stringify(val, null, 2)}</pre>
                     </div>
                   )}
                 </div>
@@ -115,7 +115,7 @@ function BudgetForm({ config, setConfig }: { config: any; setConfig: (c: any) =>
   return (
     <div className="space-y-4">
       <div>
-        <h3 className="text-xs font-semibold text-chispa-text-primary mb-2">Agent Budgets (USD/month)</h3>
+        <h3 className="text-xs font-semibold text-fuega-text-primary mb-2">Agent Budgets (USD/month)</h3>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-2.5">
           {Object.entries(agentBudgets).filter(([k]) => k !== 'total_agent_budget').map(([agent, amount]) => (
             <NumberField key={agent} label={agent.replace(/_/g, ' ')} value={amount as number} onChange={v => {
@@ -126,7 +126,7 @@ function BudgetForm({ config, setConfig }: { config: any; setConfig: (c: any) =>
         </div>
       </div>
       <div>
-        <h3 className="text-xs font-semibold text-chispa-text-primary mb-2">Fixed Costs (USD/month)</h3>
+        <h3 className="text-xs font-semibold text-fuega-text-primary mb-2">Fixed Costs (USD/month)</h3>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-2.5">
           {Object.entries(fixedCosts).filter(([k]) => k !== 'total_fixed').map(([item, amount]) => (
             <NumberField key={item} label={item.replace(/_/g, ' ')} value={amount as number} onChange={v => {
@@ -149,7 +149,7 @@ function PlatformsForm({ config, setConfig }: { config: any; setConfig: (c: any)
         if (typeof plat !== 'object' || plat === null) return null;
         const enabled = plat.enabled !== false;
         return (
-          <div key={key} className="flex items-center gap-3 bg-chispa-input border border-chispa-border rounded-lg px-3 py-2.5">
+          <div key={key} className="flex items-center gap-3 bg-fuega-input border border-fuega-border rounded-lg px-3 py-2.5">
             <button
               onClick={() => {
                 const updated = { ...platforms, [key]: { ...plat, enabled: !enabled } };
@@ -157,14 +157,14 @@ function PlatformsForm({ config, setConfig }: { config: any; setConfig: (c: any)
               }}
               role="switch"
               aria-checked={enabled}
-              className={`relative w-10 h-5 rounded-full transition-colors ${enabled ? 'bg-green-500' : 'bg-chispa-border'}`}
+              className={`relative w-10 h-5 rounded-full transition-colors ${enabled ? 'bg-green-500' : 'bg-fuega-border'}`}
             >
               <span className={`absolute top-0.5 w-4 h-4 rounded-full bg-white transition-transform ${enabled ? 'left-[22px]' : 'left-0.5'}`} />
             </button>
             <div className="flex-1">
-              <p className="text-sm font-medium text-chispa-text-primary">{plat.name || key}</p>
+              <p className="text-sm font-medium text-fuega-text-primary">{plat.name || key}</p>
               {plat.content_types && (
-                <p className="text-[11px] text-chispa-text-muted">{Array.isArray(plat.content_types) ? plat.content_types.join(', ') : plat.content_types}</p>
+                <p className="text-[11px] text-fuega-text-muted">{Array.isArray(plat.content_types) ? plat.content_types.join(', ') : plat.content_types}</p>
               )}
             </div>
             {plat.max_posts_per_day !== undefined && (
@@ -188,19 +188,19 @@ function WorkflowsView({ config }: { config: any }) {
   return (
     <div className="space-y-3">
       {Object.entries(workflows).map(([key, wf]: [string, any]) => (
-        <div key={key} className="border border-chispa-border rounded-lg overflow-hidden">
-          <div className="px-3 py-2.5 border-b border-chispa-border/50">
-            <p className="text-sm font-semibold text-chispa-text-primary">{wf.name || key}</p>
-            <p className="text-[11px] text-chispa-text-muted mt-0.5">{wf.description}</p>
-            {wf.schedule && <p className="text-[11px] text-chispa-text-muted mt-0.5 num font-mono">Schedule: {wf.schedule}</p>}
+        <div key={key} className="border border-fuega-border rounded-lg overflow-hidden">
+          <div className="px-3 py-2.5 border-b border-fuega-border/50">
+            <p className="text-sm font-semibold text-fuega-text-primary">{wf.name || key}</p>
+            <p className="text-[11px] text-fuega-text-muted mt-0.5">{wf.description}</p>
+            {wf.schedule && <p className="text-[11px] text-fuega-text-muted mt-0.5 num font-mono">Schedule: {wf.schedule}</p>}
           </div>
           {wf.steps && (
             <div className="px-3 py-2.5 space-y-1.5">
               {wf.steps.map((step: any, i: number) => (
                 <div key={step.id} className="flex items-center gap-2.5">
-                  <span className="text-[11px] text-chispa-text-muted num font-mono w-5">{i + 1}.</span>
-                  <span className="text-sm text-chispa-text-primary">{step.id.replace(/_/g, ' ')}</span>
-                  {step.agent && <span className="text-[11px] px-1.5 py-0.5 rounded bg-chispa-orange/10 text-chispa-orange">{step.agent.replace(/_/g, ' ')}</span>}
+                  <span className="text-[11px] text-fuega-text-muted num font-mono w-5">{i + 1}.</span>
+                  <span className="text-sm text-fuega-text-primary">{step.id.replace(/_/g, ' ')}</span>
+                  {step.agent && <span className="text-[11px] px-1.5 py-0.5 rounded bg-fuega-orange/10 text-fuega-orange">{step.agent.replace(/_/g, ' ')}</span>}
                   {step.requires_human_approval && <span className="text-[11px] px-1.5 py-0.5 rounded bg-yellow-500/10 text-yellow-400">needs approval</span>}
                 </div>
               ))}
@@ -298,8 +298,8 @@ export default function Settings() {
             <span className="flex items-center gap-1.5 text-[11px] ml-3">
               {saveStatus === 'saving' && (
                 <>
-                  <Loader2 className="w-3 h-3 animate-spin text-chispa-text-muted" />
-                  <span className="text-chispa-text-muted">Saving...</span>
+                  <Loader2 className="w-3 h-3 animate-spin text-fuega-text-muted" />
+                  <span className="text-fuega-text-muted">Saving...</span>
                 </>
               )}
               {saveStatus === 'saved' && (
@@ -321,10 +321,10 @@ export default function Settings() {
         }
       />
 
-      <div className="bg-chispa-card border border-chispa-border rounded-lg p-3">
+      <div className="bg-fuega-card border border-fuega-border rounded-lg p-3">
         {loading ? (
           <div className="flex items-center justify-center py-10">
-            <div className="w-5 h-5 border-2 border-chispa-orange border-t-transparent rounded-full animate-spin" />
+            <div className="w-5 h-5 border-2 border-fuega-orange border-t-transparent rounded-full animate-spin" />
           </div>
         ) : (
           <>
@@ -335,9 +335,9 @@ export default function Settings() {
             {tab === 'workflows' && <WorkflowsView config={config} />}
             {tab === 'agents' && (
               <div className="text-center py-6">
-                <Bot className="w-7 h-7 text-chispa-orange mx-auto mb-2" />
-                <p className="text-sm text-chispa-text-secondary mb-2">Agent configuration is managed on the Agents page.</p>
-                <Link to="/agents" className="text-sm text-chispa-orange hover:underline">Go to Agents</Link>
+                <Bot className="w-7 h-7 text-fuega-orange mx-auto mb-2" />
+                <p className="text-sm text-fuega-text-secondary mb-2">Agent configuration is managed on the Agents page.</p>
+                <Link to="/agents" className="text-sm text-fuega-orange hover:underline">Go to Agents</Link>
               </div>
             )}
           </>

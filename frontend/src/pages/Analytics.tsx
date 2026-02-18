@@ -37,7 +37,7 @@ export default function Analytics() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-24">
-        <div className="w-6 h-6 border-2 border-chispa-orange border-t-transparent rounded-full animate-spin" />
+        <div className="w-6 h-6 border-2 border-fuega-orange border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -117,15 +117,15 @@ export default function Analytics() {
         title="Analytics"
         subtitle="Financial performance and cost tracking"
         action={
-          <div className="flex gap-1 bg-chispa-card border border-chispa-border rounded-lg p-0.5">
+          <div className="flex gap-1 bg-fuega-card border border-fuega-border rounded-lg p-0.5">
             {rangeButtons.map(r => (
               <button
                 key={r.key}
                 onClick={() => setRange(r.key)}
                 className={`px-3 py-1 rounded-md text-[12px] font-medium transition-colors ${
                   range === r.key
-                    ? 'bg-chispa-orange text-white'
-                    : 'text-chispa-text-secondary hover:text-chispa-text-primary'
+                    ? 'bg-fuega-orange text-white'
+                    : 'text-fuega-text-secondary hover:text-fuega-text-primary'
                 }`}
               >
                 {r.label}
@@ -213,7 +213,7 @@ export default function Analytics() {
               <div key={item.label} className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }} />
-                  <span className="text-sm text-chispa-text-secondary">{item.label}</span>
+                  <span className="text-sm text-fuega-text-secondary">{item.label}</span>
                 </div>
                 <span className="num text-sm font-bold" style={{ color: item.color }}>{item.value}</span>
               </div>

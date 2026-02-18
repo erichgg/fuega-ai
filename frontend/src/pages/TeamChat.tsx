@@ -34,7 +34,7 @@ interface ChatSession {
   responses: ChatResponse[];
 }
 
-const SESSION_KEY = 'chispa_teamchat_sessions';
+const SESSION_KEY = 'fuega_teamchat_sessions';
 
 function loadSessions(): ChatSession[] {
   try {
@@ -114,7 +114,7 @@ export default function TeamChat() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-24">
-        <div className="w-6 h-6 border-2 border-chispa-orange border-t-transparent rounded-full animate-spin" />
+        <div className="w-6 h-6 border-2 border-fuega-orange border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -124,14 +124,14 @@ export default function TeamChat() {
       <PageHeader title="Team Chat" subtitle="Multi-agent group discussion" />
 
       {/* Agent selector */}
-      <div className="bg-chispa-card border border-chispa-border rounded-xl p-2 mb-2 card-glow">
+      <div className="bg-fuega-card border border-fuega-border rounded-xl p-2 mb-2 card-glow">
         <div className="flex items-center justify-between mb-2">
-          <h3 className="text-sm font-semibold text-chispa-text-primary">Select Agents for Meeting</h3>
+          <h3 className="text-sm font-semibold text-fuega-text-primary">Select Agents for Meeting</h3>
           <div className="flex gap-1 flex-wrap">
-            <button onClick={selectAll} className="text-[10px] px-2 py-1 rounded-lg bg-chispa-input border border-chispa-border text-chispa-text-secondary hover:text-chispa-text-primary transition-colors">Select All</button>
-            <button onClick={clearAll} className="text-[10px] px-2 py-1 rounded-lg bg-chispa-input border border-chispa-border text-chispa-text-secondary hover:text-chispa-text-primary transition-colors">Clear</button>
+            <button onClick={selectAll} className="text-[10px] px-2 py-1 rounded-lg bg-fuega-input border border-fuega-border text-fuega-text-secondary hover:text-fuega-text-primary transition-colors">Select All</button>
+            <button onClick={clearAll} className="text-[10px] px-2 py-1 rounded-lg bg-fuega-input border border-fuega-border text-fuega-text-secondary hover:text-fuega-text-primary transition-colors">Clear</button>
             {Object.entries(DIVISIONS).map(([name, slugs]) => (
-              <button key={name} onClick={() => selectDivision(slugs)} className="text-[10px] px-2 py-1 rounded-lg bg-chispa-input border border-chispa-border text-chispa-text-secondary hover:text-chispa-text-primary transition-colors">{name}</button>
+              <button key={name} onClick={() => selectDivision(slugs)} className="text-[10px] px-2 py-1 rounded-lg bg-fuega-input border border-fuega-border text-fuega-text-secondary hover:text-fuega-text-primary transition-colors">{name}</button>
             ))}
           </div>
         </div>
@@ -145,21 +145,21 @@ export default function TeamChat() {
                 onClick={() => toggleAgent(agent.slug)}
                 className={`flex items-center gap-2 p-2 rounded-lg border text-left text-sm transition-all ${
                   isSelected
-                    ? 'bg-chispa-orange/10 border-chispa-orange/40 text-chispa-text-primary'
-                    : 'bg-chispa-input border-chispa-border text-chispa-text-secondary hover:border-chispa-border/80'
+                    ? 'bg-fuega-orange/10 border-fuega-orange/40 text-fuega-text-primary'
+                    : 'bg-fuega-input border-fuega-border text-fuega-text-secondary hover:border-fuega-border/80'
                 } ${agent.status !== 'active' ? 'opacity-50' : ''}`}
               >
-                {isSelected ? <CheckSquare className="w-3.5 h-3.5 text-chispa-orange flex-shrink-0" /> : <Square className="w-3.5 h-3.5 text-chispa-text-muted flex-shrink-0" />}
+                {isSelected ? <CheckSquare className="w-3.5 h-3.5 text-fuega-orange flex-shrink-0" /> : <Square className="w-3.5 h-3.5 text-fuega-text-muted flex-shrink-0" />}
                 <div className="min-w-0 flex-1">
                   <p className="font-medium truncate text-[12px]">{agent.name}</p>
-                  <p className="text-[10px] text-chispa-text-muted truncate">{agent.role}</p>
+                  <p className="text-[10px] text-fuega-text-muted truncate">{agent.role}</p>
                 </div>
                 <StatusDot status={agent.status} size="sm" />
               </button>
             );
           })}
         </div>
-        <p className="text-[10px] text-chispa-text-muted mt-2">{selected.size} agent{selected.size !== 1 ? 's' : ''} selected</p>
+        <p className="text-[10px] text-fuega-text-muted mt-2">{selected.size} agent{selected.size !== 1 ? 's' : ''} selected</p>
       </div>
 
       {/* Message presets */}
@@ -171,7 +171,7 @@ export default function TeamChat() {
               setMessage(preset.text);
             }}
             disabled={sending}
-            className="text-[10px] px-2.5 py-1 rounded-lg bg-chispa-card border border-chispa-border text-chispa-text-secondary hover:text-chispa-text-primary hover:border-chispa-orange/40 transition-colors disabled:opacity-50"
+            className="text-[10px] px-2.5 py-1 rounded-lg bg-fuega-card border border-fuega-border text-fuega-text-secondary hover:text-fuega-text-primary hover:border-fuega-orange/40 transition-colors disabled:opacity-50"
           >
             {preset.label}
           </button>
@@ -179,21 +179,21 @@ export default function TeamChat() {
       </div>
 
       {/* Message input */}
-      <div className="bg-chispa-card border border-chispa-border rounded-xl p-2 mb-2 card-glow">
+      <div className="bg-fuega-card border border-fuega-border rounded-xl p-2 mb-2 card-glow">
         <textarea
           value={message}
           onChange={e => setMessage(e.target.value)}
           placeholder="Type your message to the team..."
           rows={3}
-          className="w-full bg-chispa-input border border-chispa-border rounded-lg p-2 text-sm text-chispa-text-primary placeholder-chispa-text-muted resize-none focus:outline-none focus:border-chispa-orange/50"
+          className="w-full bg-fuega-input border border-fuega-border rounded-lg p-2 text-sm text-fuega-text-primary placeholder-fuega-text-muted resize-none focus:outline-none focus:border-fuega-orange/50"
           onKeyDown={e => { if (e.key === 'Enter' && e.ctrlKey) handleSend(); }}
         />
         <div className="flex items-center justify-between mt-2">
-          <span className="text-[10px] text-chispa-text-muted">Ctrl+Enter to send</span>
+          <span className="text-[10px] text-fuega-text-muted">Ctrl+Enter to send</span>
           <button
             onClick={() => handleSend()}
             disabled={sending || !message.trim() || selected.size === 0}
-            className="flex items-center gap-1.5 bg-chispa-orange hover:bg-chispa-orange/80 text-white px-3 py-1.5 rounded-lg text-[12px] font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center gap-1.5 bg-fuega-orange hover:bg-fuega-orange/80 text-white px-3 py-1.5 rounded-lg text-[12px] font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {sending ? (
               <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -213,31 +213,31 @@ export default function TeamChat() {
             return (
               <div key={si}>
                 {/* User message */}
-                <div className="mb-2 bg-chispa-input border border-chispa-border rounded-xl p-2">
-                  <p className="text-[10px] text-chispa-text-muted mb-1">You &mdash; to {session.agents.length} agent{session.agents.length !== 1 ? 's' : ''}</p>
-                  <p className="text-sm text-chispa-text-primary whitespace-pre-wrap">{session.message}</p>
+                <div className="mb-2 bg-fuega-input border border-fuega-border rounded-xl p-2">
+                  <p className="text-[10px] text-fuega-text-muted mb-1">You &mdash; to {session.agents.length} agent{session.agents.length !== 1 ? 's' : ''}</p>
+                  <p className="text-sm text-fuega-text-primary whitespace-pre-wrap">{session.message}</p>
                 </div>
                 {/* Responses */}
                 <div className="flex items-center justify-between mb-1">
-                  <h3 className="text-[11px] font-semibold text-chispa-text-primary">Responses</h3>
+                  <h3 className="text-[11px] font-semibold text-fuega-text-primary">Responses</h3>
                   {totalCost > 0 && (
-                    <span className="num text-[10px] text-chispa-text-muted">Total cost: ${totalCost.toFixed(4)}</span>
+                    <span className="num text-[10px] text-fuega-text-muted">Total cost: ${totalCost.toFixed(4)}</span>
                   )}
                 </div>
                 <div className="space-y-2">
                   {session.responses.map((r, i) => (
-                    <div key={i} className={`bg-chispa-card border rounded-xl p-2 card-glow ${r.error ? 'border-red-500/30' : 'border-chispa-border'}`}>
+                    <div key={i} className={`bg-fuega-card border rounded-xl p-2 card-glow ${r.error ? 'border-red-500/30' : 'border-fuega-border'}`}>
                       <div className="flex items-center gap-2 mb-2">
-                        <div className="p-1 rounded-lg bg-chispa-orange/10">
-                          <Bot className="w-3.5 h-3.5 text-chispa-orange" />
+                        <div className="p-1 rounded-lg bg-fuega-orange/10">
+                          <Bot className="w-3.5 h-3.5 text-fuega-orange" />
                         </div>
-                        <span className="text-sm font-semibold text-chispa-text-primary">{r.name}</span>
+                        <span className="text-sm font-semibold text-fuega-text-primary">{r.name}</span>
                         <Badge variant={r.error ? 'error' : 'active'} label={r.error ? 'skipped' : 'responded'} />
                         {r.cost_usd !== undefined && r.cost_usd > 0 && (
-                          <span className="num text-[10px] text-chispa-text-muted ml-auto">${r.cost_usd.toFixed(4)}</span>
+                          <span className="num text-[10px] text-fuega-text-muted ml-auto">${r.cost_usd.toFixed(4)}</span>
                         )}
                       </div>
-                      <div className="text-sm text-chispa-text-secondary whitespace-pre-wrap leading-relaxed pl-8">
+                      <div className="text-sm text-fuega-text-secondary whitespace-pre-wrap leading-relaxed pl-8">
                         {r.response}
                       </div>
                     </div>

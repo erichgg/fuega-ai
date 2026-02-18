@@ -21,11 +21,11 @@ export function ToastContainer() {
       {toasts.map(toast => (
         <div
           key={toast.id}
-          className={`flex items-center gap-2.5 bg-chispa-card border ${borders[toast.type]} rounded-lg px-3 py-2.5 shadow-lg animate-slideUp`}
+          className={`flex items-center gap-2.5 bg-fuega-card border ${borders[toast.type]} rounded-lg px-3 py-2.5 shadow-lg animate-slideUp`}
         >
           {icons[toast.type]}
-          <span className="text-[12px] text-chispa-text-primary flex-1">{toast.message}</span>
-          <button onClick={() => dismiss(toast.id)} className="text-chispa-text-muted hover:text-chispa-text-primary">
+          <span className="text-[12px] text-fuega-text-primary flex-1">{toast.message}</span>
+          <button onClick={() => dismiss(toast.id)} className="text-fuega-text-muted hover:text-fuega-text-primary">
             <X className="w-3.5 h-3.5" />
           </button>
         </div>

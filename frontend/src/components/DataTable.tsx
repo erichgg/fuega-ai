@@ -87,11 +87,11 @@ export function DataTable<T>({
   const px = 'px-3';
 
   return (
-    <div className={clsx('bg-chispa-card border border-chispa-border rounded-lg overflow-hidden', className)}>
+    <div className={clsx('bg-fuega-card border border-fuega-border rounded-lg overflow-hidden', className)}>
       <div className="overflow-x-auto">
         <table className="w-full">
           <thead>
-            <tr className="border-b border-chispa-border">
+            <tr className="border-b border-fuega-border">
               {selectable && (
                 <th className={clsx(px, py, 'w-8')}>
                   <input
@@ -99,7 +99,7 @@ export function DataTable<T>({
                     checked={allSelected}
                     onChange={toggleAll}
                     aria-label="Select all rows"
-                    className="rounded border-chispa-border"
+                    className="rounded border-fuega-border"
                   />
                 </th>
               )}
@@ -107,9 +107,9 @@ export function DataTable<T>({
                 <th
                   key={col.key}
                   className={clsx(
-                    'text-left text-[10px] font-semibold text-chispa-text-muted uppercase tracking-wider',
+                    'text-left text-[10px] font-semibold text-fuega-text-muted uppercase tracking-wider',
                     px, py,
-                    col.sortable && 'cursor-pointer select-none hover:text-chispa-text-secondary'
+                    col.sortable && 'cursor-pointer select-none hover:text-fuega-text-secondary'
                   )}
                   style={col.width ? { width: col.width } : undefined}
                   onClick={col.sortable ? () => handleSort(col.key) : undefined}
@@ -127,7 +127,7 @@ export function DataTable<T>({
           <tbody>
             {sorted.length === 0 && (
               <tr>
-                <td colSpan={columns.length + (selectable ? 1 : 0)} className="text-center py-8 text-[11px] text-chispa-text-muted">
+                <td colSpan={columns.length + (selectable ? 1 : 0)} className="text-center py-8 text-[11px] text-fuega-text-muted">
                   {emptyMessage}
                 </td>
               </tr>
@@ -139,9 +139,9 @@ export function DataTable<T>({
                 <tr
                   key={key}
                   className={clsx(
-                    'border-b border-chispa-border/50 transition-colors',
+                    'border-b border-fuega-border/50 transition-colors',
                     onRowClick && 'cursor-pointer',
-                    isSelected ? 'bg-chispa-orange/5' : 'hover:bg-chispa-card-hover'
+                    isSelected ? 'bg-fuega-orange/5' : 'hover:bg-fuega-card-hover'
                   )}
                   onClick={() => onRowClick?.(row)}
                 >
@@ -152,7 +152,7 @@ export function DataTable<T>({
                         checked={isSelected || false}
                         onChange={() => toggleRow(key)}
                         aria-label="Select row"
-                        className="rounded border-chispa-border"
+                        className="rounded border-fuega-border"
                       />
                     </td>
                   )}

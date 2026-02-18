@@ -13,6 +13,7 @@ class WorkflowScheduler:
     def __init__(self):
         self.scheduler = AsyncIOScheduler()
         self._setup_workflows()
+        self._setup_followup_job()
 
     def _setup_workflows(self):
         config = load_yaml_config("workflows")
@@ -41,6 +42,31 @@ class WorkflowScheduler:
                     replace_existing=True,
                 )
                 logger.info("scheduler_registered", workflow=name, schedule=wf["schedule"])
+
+    def _setup_followup_job(self):
+        """Register the daily follow-up check job at 10am Mexico City time."""
+        trigger = CronTrigger(
+            hour=10,
+            minute=0,
+            timezone="America/Mexico_City",
+        )
+        self.scheduler.add_job(
+            self._run_daily_followups,
+            trigger=trigger,
+            id="daily_followups",
+            replace_existing=True,
+        )
+        logger.info("scheduler_registered", job="daily_followups", schedule="0 10 * * *")
+
+    async def _run_daily_followups(self):
+        """Execute the daily follow-up check."""
+        from backend.app.core.followup import run_daily_followups
+        async with AsyncSessionLocal() as db:
+            try:
+                result = await run_daily_followups(db)
+                logger.info("daily_followups_ran", sent=result["sent"], errors=result["errors"])
+            except Exception as e:
+                logger.error("daily_followups_failed", error=str(e))
 
     async def _run_workflow(self, workflow_name: str):
         async with AsyncSessionLocal() as db:

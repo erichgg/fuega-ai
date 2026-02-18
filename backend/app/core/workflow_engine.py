@@ -1,12 +1,13 @@
 """Workflow state machine with smart context threading, lead persistence, and agent collaboration."""
 import json
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from typing import Optional
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from backend.app.database.models import (
     WorkflowRun, WorkflowStep, WorkflowStatus, StepStatus,
     Lead, LeadStage,
+    AgentActionConfig, HITLMode, ApprovalRequest, ApprovalStatus,
 )
 from backend.app.config import load_yaml_config
 from backend.app.core.message_bus import message_bus
@@ -14,12 +15,83 @@ import structlog
 
 logger = structlog.get_logger()
 
+# Actions that require HITL check before execution
+HITL_CONTROLLED_ACTIONS = {
+    "send_email", "post_tweet", "make_api_call", "update_lead",
+    "draft_outreach", "format_and_publish", "send",
+}
+
+
+async def check_hitl(
+    agent_slug: str,
+    action_name: str,
+    payload: dict,
+    db: AsyncSession,
+    context: dict | None = None,
+) -> dict:
+    """Check if an action needs human approval before proceeding.
+
+    Returns:
+        {"proceed": True, "payload": payload} for AUTO mode
+        {"proceed": False, "reason": "manual_only"} for MANUAL mode
+        {"proceed": False, "approval_id": id, "reason": "awaiting_approval"} for APPROVE mode
+    """
+    # Look up the config for this agent+action
+    result = await db.execute(
+        select(AgentActionConfig).where(
+            AgentActionConfig.agent_slug == agent_slug,
+            AgentActionConfig.action_name == action_name,
+        )
+    )
+    config = result.scalar_one_or_none()
+
+    # Default to APPROVE if no config exists for controlled actions
+    mode = config.mode if config else HITLMode.APPROVE
+
+    if mode == HITLMode.AUTO:
+        return {"proceed": True, "payload": payload}
+
+    if mode == HITLMode.MANUAL:
+        return {"proceed": False, "reason": "manual_only"}
+
+    # APPROVE mode: create an approval request
+    approval = ApprovalRequest(
+        agent_slug=agent_slug,
+        action_name=action_name,
+        payload=payload,
+        context=context,
+        status=ApprovalStatus.PENDING,
+        expires_at=datetime.utcnow() + timedelta(hours=24),
+    )
+    db.add(approval)
+    await db.flush()
+
+    await message_bus.publish("approval.requested", {
+        "approval_id": approval.id,
+        "agent_slug": agent_slug,
+        "action_name": action_name,
+        "payload_summary": str(payload)[:200],
+    })
+
+    logger.info(
+        "hitl_approval_requested",
+        agent=agent_slug,
+        action=action_name,
+        approval_id=approval.id,
+    )
+
+    return {
+        "proceed": False,
+        "approval_id": approval.id,
+        "reason": "awaiting_approval",
+    }
+
 
 # ── Prompt templates that thread previous agent output into the next agent ──
 
 STEP_PROMPTS = {
     # ─── Outreach Pipeline ───
-    "scout_local_businesses": """You are Elena, Chyspa AI's Local Outreach Specialist. Scout REAL businesses in the target area.
+    "scout_local_businesses": """You are Elena, Fuega AI's Local Outreach Specialist. Scout REAL businesses in the target area.
 
 TARGET AREA: {location}
 {industry_line}
@@ -51,7 +123,7 @@ For EACH real business you find, provide ALL these fields:
 Return ONLY valid JSON:
 {{"businesses": [{{"business_name": "...", "industry": "...", "location": "...", "google_rating": 4.2, "review_count": 87, "has_website": false, "has_social": true, "digital_gap_score": 72, "score": 65, "email": "...", "phone": "...", "recommended_service_tier": "growth", "notes": "..."}}]}}""",
 
-    "research_businesses": """You are Tomás, Chyspa AI's SMB Researcher. Deep-dive on each business from the scout report.
+    "research_businesses": """You are Tomás, Fuega AI's SMB Researcher. Deep-dive on each business from the scout report.
 
 USE WEB SEARCH to research each business — look up their website, social media, Google listing, and competitors. Get real data.
 
@@ -91,24 +163,54 @@ Return as JSON:
   {{"business_name": "...", "score": 0-100, "qualified": true/false, "priority": 1, "recommended_tier": "...", "outreach_channel": "...", "key_talking_point": "...", "score_breakdown": {{...}}}}
 ]}}""",
 
-    "draft_outreach": """Draft personalized outreach messages for these qualified leads.
+    "draft_outreach": """Draft HIGHLY personalized outreach messages for these qualified leads.
 
 QUALIFIED LEADS WITH RESEARCH:
 {previous_output}
 
-For EACH qualified lead, write a warm, personalized outreach message that:
-1. Opens with something SPECIFIC about their business (rating, reviews, location)
-2. Identifies their specific digital gap with data
-3. Offers a concrete quick win with a timeline
-4. Keeps it casual and warm — these are small business owners, not corporate execs
-5. Write in Spanish for Mexico/Colombia, Portuguese for Brazil
-6. Include a clear but soft CTA
+CRITICAL INSTRUCTIONS:
+You MUST reference SPECIFIC details from the research step for each lead. Generic messages will be rejected.
 
-Also draft a follow-up message (shorter, for if they don't respond in 5 days).
+For EACH qualified lead, produce personalized outreach using these rules:
 
-Return as JSON:
+1. PERSONALIZATION (mandatory — use real data from research):
+   - Reference their exact Google rating and number of reviews (e.g., "Con tus 4.5 estrellas y 120 resenas...")
+   - Mention what their customers say (positive themes from reviews)
+   - Identify their specific digital gaps found during research (no website, no social media, poor SEO, etc.)
+   - Reference their location/neighborhood
+
+2. LANGUAGE:
+   - Write in Spanish (es) for Mexico/Colombia leads
+   - Write in Portuguese (pt) for Brazil leads
+   - Default to Spanish if language not specified
+
+3. VALUE PROPOSITION — tailor to their #1 gap:
+   - No website → "Te creamos una pagina web profesional en 2 semanas"
+   - No social media → "Manejamos tus redes sociales para atraer mas clientes"
+   - Low Google visibility → "Te ayudamos a aparecer en los primeros resultados de Google"
+   - No online ordering/booking → "Implementamos reservaciones/pedidos en linea"
+
+4. MESSAGE LENGTH:
+   - Email: 3-4 sentences MAX (subject line + short body)
+   - WhatsApp: 2-3 sentences MAX (casual, direct, no formality)
+   - Voice clip script: 2-3 sentences for a 15-20 second audio greeting
+
+5. GENERATE BOTH email AND WhatsApp versions for each lead
+
+6. TONE: Warm, casual, respectful — like a helpful neighbor, NOT a salesperson
+
+Return ONLY valid JSON with this EXACT structure:
 {{"outreach_messages": [
-  {{"business_name": "...", "channel": "email|whatsapp|dm", "subject": "...", "message": "...", "followup": "...", "language": "es|pt"}}
+  {{
+    "business_name": "...",
+    "email_subject": "...",
+    "email_body": "...",
+    "whatsapp_message": "...",
+    "voice_clip_script": "...",
+    "personalization_notes": "Key details used: rating, gap, value prop chosen",
+    "language": "es|pt",
+    "channel": "email+whatsapp"
+  }}
 ]}}""",
 
     "review_outreach": """Review these outreach messages drafted by the Local Outreach Specialist.
@@ -350,7 +452,7 @@ async def _persist_leads_from_step(action: str, output: dict, source: str, run_c
             logger.info("leads_updated_from_scoring", count=updated_count)
 
         elif action == "draft_outreach":
-            # Outreach drafting updates leads with message drafts
+            # Outreach drafting updates leads with message drafts (supports both old and new format)
             messages = output.get("outreach_messages", [])
             updated_count = 0
             for item in messages:
@@ -364,8 +466,11 @@ async def _persist_leads_from_step(action: str, output: dict, source: str, run_c
                 )
                 lead = result.scalar_one_or_none()
                 if lead:
-                    lead.outreach_draft = item.get("message", "")
-                    lead.outreach_channel = item.get("channel", lead.outreach_channel or "email")
+                    # Support new enhanced format (email_body + whatsapp_message)
+                    # as well as old format (message)
+                    draft = item.get("email_body") or item.get("message", "")
+                    lead.outreach_draft = draft
+                    lead.outreach_channel = item.get("channel", lead.outreach_channel or "email+whatsapp")
                     lead.stage = LeadStage.OUTREACH_DRAFTED
                     updated_count += 1
             if updated_count:
@@ -506,6 +611,39 @@ class WorkflowEngine:
                     source = f"{slug}:{action}"
                     await _persist_leads_from_step(action, step.output_data, source, run.context, db)
 
+                    # ── HITL check for controlled actions ──
+                    if action in HITL_CONTROLLED_ACTIONS:
+                        hitl_result = await check_hitl(
+                            agent_slug=slug,
+                            action_name=action,
+                            payload=step.output_data or {},
+                            db=db,
+                            context={"run_id": run.id, "step_id": current_step_id, "workflow": run.workflow_name},
+                        )
+                        if not hitl_result.get("proceed"):
+                            approval_id = hitl_result.get("approval_id")
+                            step.status = StepStatus.AWAITING_APPROVAL
+                            if approval_id:
+                                step.approval_id = approval_id
+                            run.status = WorkflowStatus.PAUSED_FOR_APPROVAL
+                            run.current_step_id = current_step_id
+                            await db.commit()
+                            await message_bus.publish("workflow.approval_needed", {
+                                "run_id": run.id,
+                                "step_id": current_step_id,
+                                "workflow": run.workflow_name,
+                                "approval_id": approval_id,
+                                "reason": hitl_result.get("reason"),
+                            })
+                            logger.info(
+                                "workflow_paused_for_hitl",
+                                run_id=run.id,
+                                step=current_step_id,
+                                action=action,
+                                approval_id=approval_id,
+                            )
+                            return  # Stop here, resume when approved
+
                     await message_bus.publish(f"agent.{slug}.completed", {
                         "run_id": run.id,
                         "step_id": current_step_id,
@@ -599,6 +737,67 @@ class WorkflowEngine:
             run.status = WorkflowStatus.CANCELLED
             run.completed_at = datetime.now(timezone.utc)
             await db.commit()
+
+    async def resume_from_approval(self, approval_id: int, db: AsyncSession, approved: bool = True):
+        """Resume a workflow that was paused by a HITL approval request.
+
+        Called when an approval decision is made via the approvals API.
+        Finds the workflow step linked to this approval_id and resumes or cancels.
+        """
+        step_result = await db.execute(
+            select(WorkflowStep).where(WorkflowStep.approval_id == approval_id)
+        )
+        step = step_result.scalar_one_or_none()
+        if not step:
+            return  # No linked workflow step
+
+        run_result = await db.execute(
+            select(WorkflowRun).where(WorkflowRun.id == step.run_id)
+        )
+        run = run_result.scalar_one_or_none()
+        if not run or run.status != WorkflowStatus.PAUSED_FOR_APPROVAL:
+            return
+
+        if approved:
+            # If the approval had a modified payload, update the step output
+            approval_result = await db.execute(
+                select(ApprovalRequest).where(ApprovalRequest.id == approval_id)
+            )
+            approval = approval_result.scalar_one_or_none()
+            if approval and approval.modified_payload:
+                step.output_data = approval.modified_payload
+                # Also update run context with modified payload
+                if run.context and step.step_id in run.context:
+                    run.context[step.step_id] = approval.modified_payload
+
+            step.status = StepStatus.COMPLETED
+            step.completed_at = datetime.now(timezone.utc)
+            run.status = WorkflowStatus.RUNNING
+            await db.commit()
+
+            workflows_config = load_yaml_config("workflows")
+            config = workflows_config.get("workflows", {}).get(run.workflow_name)
+            if config:
+                steps_config = {s["id"]: s for s in config["steps"]}
+                next_step = steps_config.get(step.step_id, {}).get("next")
+                if next_step:
+                    run.current_step_id = next_step
+                    await db.commit()
+                    await self._execute_workflow(run, config, db)
+                else:
+                    # This was the last step
+                    run.status = WorkflowStatus.COMPLETED
+                    run.completed_at = datetime.now(timezone.utc)
+                    await db.commit()
+
+            logger.info("workflow_resumed_from_approval", run_id=run.id, step=step.step_id)
+        else:
+            step.status = StepStatus.FAILED
+            step.completed_at = datetime.now(timezone.utc)
+            run.status = WorkflowStatus.CANCELLED
+            run.completed_at = datetime.now(timezone.utc)
+            await db.commit()
+            logger.info("workflow_cancelled_from_approval", run_id=run.id, step=step.step_id)
 
 
 workflow_engine = WorkflowEngine()

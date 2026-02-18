@@ -7,9 +7,10 @@ from backend.app.database.models import (
     Agent, AgentLog, AgentStatus, Client, ContentIdea, ContentDraft, ContentStatus,
     PublishedContent, WorkflowRun, WorkflowStatus, RevenueEvent,
 )
+from backend.app.auth import get_current_user
 from datetime import datetime, timedelta, timezone
 
-router = APIRouter()
+router = APIRouter(dependencies=[Depends(get_current_user)])
 
 
 @router.get("/kpis")

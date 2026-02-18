@@ -55,6 +55,7 @@ async def _ws_handler(message: dict):
 
 message_bus.subscribe("workflow.*", _ws_handler)
 message_bus.subscribe("agent.*", _ws_handler)
+message_bus.subscribe("approval.*", _ws_handler)
 
 
 @router.websocket("/ws")

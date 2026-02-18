@@ -4,7 +4,7 @@ export default {
   theme: {
     extend: {
       colors: {
-        chispa: {
+        fuega: {
           orange: '#FF6B2C',
           navy: '#1A1A2E',
           teal: '#00D4AA',

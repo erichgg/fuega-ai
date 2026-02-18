@@ -45,26 +45,26 @@ function OrgNode({ agent, agents, onChat }: { agent: Agent; agents: Agent[]; onC
       <div className="relative group">
         <Link
           to={`/agents/${agent.slug}`}
-          className="block bg-chispa-card border border-chispa-border rounded-xl p-2 w-48 hover:border-chispa-orange/50 transition-colors card-glow"
+          className="block bg-fuega-card border border-fuega-border rounded-xl p-2 w-48 hover:border-fuega-orange/50 transition-colors card-glow"
         >
           <div className="flex items-center justify-between mb-1.5">
             <StatusDot status={agent.status} pulse={agent.status === 'active'} label={agent.status} />
-            <span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-chispa-surface text-chispa-text-muted">
+            <span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-fuega-surface text-fuega-text-muted">
               {modelShort(agent.model)}
             </span>
           </div>
-          <p className="text-sm font-semibold text-chispa-text-primary group-hover:text-chispa-orange transition-colors truncate">
+          <p className="text-sm font-semibold text-fuega-text-primary group-hover:text-fuega-orange transition-colors truncate">
             {agent.name}
           </p>
-          <p className="text-[10px] text-chispa-text-muted mt-0.5 truncate">{agent.role}</p>
-          <div className="mt-2 flex items-center justify-between text-[10px] text-chispa-text-muted">
+          <p className="text-[10px] text-fuega-text-muted mt-0.5 truncate">{agent.role}</p>
+          <div className="mt-2 flex items-center justify-between text-[10px] text-fuega-text-muted">
             <span className="num">${(agent.month_spend_usd || 0).toFixed(2)} / ${agent.monthly_budget_usd}</span>
             <span className="num">{agent.budget_usage_pct}%</span>
           </div>
-          <div className="mt-1 h-1 rounded-full bg-chispa-surface overflow-hidden">
+          <div className="mt-1 h-1 rounded-full bg-fuega-surface overflow-hidden">
             <div
               className={`h-full rounded-full transition-all ${
-                agent.budget_usage_pct > 80 ? 'bg-red-500' : 'bg-chispa-orange'
+                agent.budget_usage_pct > 80 ? 'bg-red-500' : 'bg-fuega-orange'
               }`}
               style={{ width: `${Math.min(agent.budget_usage_pct, 100)}%` }}
             />
@@ -73,7 +73,7 @@ function OrgNode({ agent, agents, onChat }: { agent: Agent; agents: Agent[]; onC
         {/* Chat button overlay */}
         <button
           onClick={(e) => { e.stopPropagation(); onChat(agent.slug); }}
-          className="absolute -bottom-2 right-2 bg-chispa-orange text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity shadow-lg hover:bg-chispa-orange/80"
+          className="absolute -bottom-2 right-2 bg-fuega-orange text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity shadow-lg hover:bg-fuega-orange/80"
           title={`Chat with ${agent.name}`}
         >
           <MessageCircle className="w-3 h-3" />
@@ -84,14 +84,14 @@ function OrgNode({ agent, agents, onChat }: { agent: Agent; agents: Agent[]; onC
       {children.length > 0 && (
         <>
           {/* Vertical connector from parent */}
-          <div className="w-px h-6 bg-chispa-border" />
+          <div className="w-px h-6 bg-fuega-border" />
 
           {/* Horizontal line + children */}
           <div className="relative flex items-start">
             {/* Horizontal connector spanning children */}
             {children.length > 1 && (
               <div
-                className="absolute top-0 h-px bg-chispa-border"
+                className="absolute top-0 h-px bg-fuega-border"
                 style={{
                   left: `${100 / (children.length * 2)}%`,
                   right: `${100 / (children.length * 2)}%`,
@@ -103,7 +103,7 @@ function OrgNode({ agent, agents, onChat }: { agent: Agent; agents: Agent[]; onC
               {children.map(child => (
                 <div key={child.slug} className="flex flex-col items-center">
                   {/* Vertical connector from horizontal line to child */}
-                  <div className="w-px h-6 bg-chispa-border" />
+                  <div className="w-px h-6 bg-fuega-border" />
                   <OrgNode agent={child} agents={agents} onChat={onChat} />
                 </div>
               ))}
@@ -138,7 +138,7 @@ export default function Organization() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-24">
-        <div className="w-6 h-6 border-2 border-chispa-orange border-t-transparent rounded-full animate-spin" />
+        <div className="w-6 h-6 border-2 border-fuega-orange border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -167,7 +167,7 @@ export default function Organization() {
           {ceo ? (
             <OrgNode agent={ceo} agents={agents} onChat={handleChat} />
           ) : (
-            <p className="text-chispa-text-muted text-sm">No agents found.</p>
+            <p className="text-fuega-text-muted text-sm">No agents found.</p>
           )}
         </div>
       </div>
@@ -175,7 +175,7 @@ export default function Organization() {
       {/* Orphan agents (not in hierarchy) */}
       {orphans.length > 0 && (
         <div className="mt-4">
-          <h3 className="text-[10px] font-semibold uppercase tracking-widest text-chispa-text-muted mb-2">
+          <h3 className="text-[10px] font-semibold uppercase tracking-widest text-fuega-text-muted mb-2">
             Other Team Members
           </h3>
           <div className="flex flex-wrap gap-2">
@@ -183,22 +183,22 @@ export default function Organization() {
               <div key={agent.slug} className="relative group">
                 <Link
                   to={`/agents/${agent.slug}`}
-                  className="block bg-chispa-card border border-chispa-border rounded-xl p-2 w-48 hover:border-chispa-orange/50 transition-colors card-glow"
+                  className="block bg-fuega-card border border-fuega-border rounded-xl p-2 w-48 hover:border-fuega-orange/50 transition-colors card-glow"
                 >
                   <div className="flex items-center justify-between mb-1.5">
                     <StatusDot status={agent.status} pulse={agent.status === 'active'} label={agent.status} />
-                    <span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-chispa-surface text-chispa-text-muted">
+                    <span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-fuega-surface text-fuega-text-muted">
                       {modelShort(agent.model)}
                     </span>
                   </div>
-                  <p className="text-sm font-semibold text-chispa-text-primary group-hover:text-chispa-orange transition-colors truncate">
+                  <p className="text-sm font-semibold text-fuega-text-primary group-hover:text-fuega-orange transition-colors truncate">
                     {agent.name}
                   </p>
-                  <p className="text-[10px] text-chispa-text-muted mt-0.5 truncate">{agent.role}</p>
+                  <p className="text-[10px] text-fuega-text-muted mt-0.5 truncate">{agent.role}</p>
                 </Link>
                 <button
                   onClick={() => handleChat(agent.slug)}
-                  className="absolute -bottom-2 right-2 bg-chispa-orange text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity shadow-lg hover:bg-chispa-orange/80"
+                  className="absolute -bottom-2 right-2 bg-fuega-orange text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity shadow-lg hover:bg-fuega-orange/80"
                   title={`Chat with ${agent.name}`}
                 >
                   <MessageCircle className="w-3 h-3" />

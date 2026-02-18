@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml">
+
+  <!-- Spanish pages -->
+  <url>
+    <loc>https://fuega.ai/es/</loc>
+    <xhtml:link rel="alternate" hreflang="es" href="https://fuega.ai/es/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://fuega.ai/en/" />
+    <lastmod>2026-02-17</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>https://fuega.ai/es/servicios.html</loc>
+    <xhtml:link rel="alternate" hreflang="es" href="https://fuega.ai/es/servicios.html" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://fuega.ai/en/services.html" />
+    <lastmod>2026-02-17</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://fuega.ai/es/precios.html</loc>
+    <xhtml:link rel="alternate" hreflang="es" href="https://fuega.ai/es/precios.html" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://fuega.ai/en/pricing.html" />
+    <lastmod>2026-02-17</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://fuega.ai/es/nosotros.html</loc>
+    <xhtml:link rel="alternate" hreflang="es" href="https://fuega.ai/es/nosotros.html" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://fuega.ai/en/about.html" />
+    <lastmod>2026-02-17</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://fuega.ai/es/contacto.html</loc>
+    <xhtml:link rel="alternate" hreflang="es" href="https://fuega.ai/es/contacto.html" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://fuega.ai/en/contact.html" />
+    <lastmod>2026-02-17</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://fuega.ai/es/terminos.html</loc>
+    <xhtml:link rel="alternate" hreflang="es" href="https://fuega.ai/es/terminos.html" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://fuega.ai/en/terms.html" />
+    <lastmod>2026-02-17</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+  </url>
+  <url>
+    <loc>https://fuega.ai/es/privacidad.html</loc>
+    <xhtml:link rel="alternate" hreflang="es" href="https://fuega.ai/es/privacidad.html" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://fuega.ai/en/privacy.html" />
+    <lastmod>2026-02-17</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+  </url>
+
+  <!-- English pages -->
+  <url>
+    <loc>https://fuega.ai/en/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://fuega.ai/en/" />
+    <xhtml:link rel="alternate" hreflang="es" href="https://fuega.ai/es/" />
+    <lastmod>2026-02-17</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>https://fuega.ai/en/services.html</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://fuega.ai/en/services.html" />
+    <xhtml:link rel="alternate" hreflang="es" href="https://fuega.ai/es/servicios.html" />
+    <lastmod>2026-02-17</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://fuega.ai/en/pricing.html</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://fuega.ai/en/pricing.html" />
+    <xhtml:link rel="alternate" hreflang="es" href="https://fuega.ai/es/precios.html" />
+    <lastmod>2026-02-17</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://fuega.ai/en/about.html</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://fuega.ai/en/about.html" />
+    <xhtml:link rel="alternate" hreflang="es" href="https://fuega.ai/es/nosotros.html" />
+    <lastmod>2026-02-17</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://fuega.ai/en/contact.html</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://fuega.ai/en/contact.html" />
+    <xhtml:link rel="alternate" hreflang="es" href="https://fuega.ai/es/contacto.html" />
+    <lastmod>2026-02-17</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://fuega.ai/en/terms.html</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://fuega.ai/en/terms.html" />
+    <xhtml:link rel="alternate" hreflang="es" href="https://fuega.ai/es/terminos.html" />
+    <lastmod>2026-02-17</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+  </url>
+  <url>
+    <loc>https://fuega.ai/en/privacy.html</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://fuega.ai/en/privacy.html" />
+    <xhtml:link rel="alternate" hreflang="es" href="https://fuega.ai/es/privacidad.html" />
+    <lastmod>2026-02-17</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+  </url>
+
+</urlset>

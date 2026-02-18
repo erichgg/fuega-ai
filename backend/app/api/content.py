@@ -4,10 +4,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from backend.app.database.engine import get_db
 from backend.app.database.models import ContentIdea, ContentDraft, PublishedContent, ContentMetric, ContentStatus
+from backend.app.auth import get_current_user
 from typing import Optional
 from pydantic import BaseModel
 
-router = APIRouter()
+router = APIRouter(dependencies=[Depends(get_current_user)])
 
 
 class IdeaCreate(BaseModel):

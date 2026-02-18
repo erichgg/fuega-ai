@@ -110,10 +110,10 @@ const COLOR_MAP: Record<string, string> = {
   api: 'text-cyan-400',
   agent: 'text-blue-400',
   workflow: 'text-purple-400',
-  action: 'text-chispa-orange',
+  action: 'text-fuega-orange',
   success: 'text-green-400',
   error: 'text-red-400',
-  info: 'text-chispa-text-muted',
+  info: 'text-fuega-text-muted',
 };
 
 interface ConsolePanelProps {
@@ -170,26 +170,26 @@ export function ConsolePanel({ open, onClose }: ConsolePanelProps) {
   if (!open) return null;
 
   return (
-    <aside className="w-72 border-l border-chispa-border bg-chispa-sidebar flex flex-col flex-shrink-0 h-full">
+    <aside className="w-72 border-l border-fuega-border bg-fuega-sidebar flex flex-col flex-shrink-0 h-full">
       {/* Header */}
-      <div className="h-11 flex items-center justify-between px-3 border-b border-chispa-border flex-shrink-0">
+      <div className="h-11 flex items-center justify-between px-3 border-b border-fuega-border flex-shrink-0">
         <div className="flex items-center gap-2">
-          <Terminal className="w-4 h-4 text-chispa-orange" />
-          <span className="text-xs font-semibold text-chispa-text-primary">Console</span>
+          <Terminal className="w-4 h-4 text-fuega-orange" />
+          <span className="text-xs font-semibold text-fuega-text-primary">Console</span>
           <span className={clsx('w-1.5 h-1.5 rounded-full', connected ? 'bg-green-400 animate-pulse' : 'bg-red-400')} />
         </div>
         <div className="flex items-center gap-0.5">
-          <button onClick={handleClear} className="p-1 rounded text-chispa-text-muted hover:text-chispa-text-primary hover:bg-chispa-card-hover transition-colors" title="Clear">
+          <button onClick={handleClear} className="p-1 rounded text-fuega-text-muted hover:text-fuega-text-primary hover:bg-fuega-card-hover transition-colors" title="Clear">
             <Trash2 className="w-3.5 h-3.5" />
           </button>
           <button
             onClick={() => setAutoScroll(!autoScroll)}
-            className={clsx('p-1 rounded transition-colors', autoScroll ? 'text-chispa-orange' : 'text-chispa-text-muted hover:text-chispa-text-primary hover:bg-chispa-card-hover')}
+            className={clsx('p-1 rounded transition-colors', autoScroll ? 'text-fuega-orange' : 'text-fuega-text-muted hover:text-fuega-text-primary hover:bg-fuega-card-hover')}
             title={autoScroll ? 'Auto-scroll on' : 'Auto-scroll off'}
           >
             <ChevronDown className="w-3.5 h-3.5" />
           </button>
-          <button onClick={onClose} className="p-1 rounded text-chispa-text-muted hover:text-chispa-text-primary hover:bg-chispa-card-hover transition-colors" title="Close">
+          <button onClick={onClose} className="p-1 rounded text-fuega-text-muted hover:text-fuega-text-primary hover:bg-fuega-card-hover transition-colors" title="Close">
             <X className="w-3.5 h-3.5" />
           </button>
         </div>
@@ -198,7 +198,7 @@ export function ConsolePanel({ open, onClose }: ConsolePanelProps) {
       {/* Stream — newest at top */}
       <div ref={scrollRef} className="flex-1 overflow-y-auto p-1 font-mono text-[10px]">
         {entries.length === 0 && (
-          <div className="flex flex-col items-center justify-center py-12 text-chispa-text-muted">
+          <div className="flex flex-col items-center justify-center py-12 text-fuega-text-muted">
             <Terminal className="w-8 h-8 mb-2 opacity-20" />
             <p className="text-[11px]">Waiting for activity...</p>
             <p className="text-[9px] mt-1 opacity-60">All API calls, agent actions, and pipeline events show here</p>
@@ -207,19 +207,19 @@ export function ConsolePanel({ open, onClose }: ConsolePanelProps) {
         {entries.map(entry => {
           const Icon = ICON_MAP[entry.type] || Zap;
           return (
-            <div key={entry.id} className="flex items-start gap-1.5 px-1.5 py-[3px] rounded hover:bg-chispa-card-hover/50 transition-colors">
+            <div key={entry.id} className="flex items-start gap-1.5 px-1.5 py-[3px] rounded hover:bg-fuega-card-hover/50 transition-colors">
               <Icon className={clsx('w-3 h-3 flex-shrink-0 mt-[2px]', COLOR_MAP[entry.type])} />
               <div className="min-w-0 flex-1">
                 <div className="flex items-baseline gap-1">
                   <span className={clsx('font-medium leading-tight', COLOR_MAP[entry.type])} style={{ wordBreak: 'break-word' }}>
                     {entry.title}
                   </span>
-                  <span className="text-[8px] text-chispa-text-muted ml-auto flex-shrink-0 tabular-nums">
+                  <span className="text-[8px] text-fuega-text-muted ml-auto flex-shrink-0 tabular-nums">
                     {entry.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
                   </span>
                 </div>
                 {entry.detail && (
-                  <p className="text-[9px] text-chispa-text-muted leading-tight truncate">{entry.detail}</p>
+                  <p className="text-[9px] text-fuega-text-muted leading-tight truncate">{entry.detail}</p>
                 )}
               </div>
             </div>
@@ -228,7 +228,7 @@ export function ConsolePanel({ open, onClose }: ConsolePanelProps) {
       </div>
 
       {/* Footer */}
-      <div className="border-t border-chispa-border px-3 py-1.5 flex items-center justify-between text-[9px] text-chispa-text-muted flex-shrink-0">
+      <div className="border-t border-fuega-border px-3 py-1.5 flex items-center justify-between text-[9px] text-fuega-text-muted flex-shrink-0">
         <span>{entries.length} events</span>
         <div className="flex items-center gap-1">
           <Wifi className={clsx('w-3 h-3', connected ? 'text-green-400' : 'text-red-400')} />

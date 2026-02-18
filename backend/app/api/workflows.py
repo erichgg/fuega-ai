@@ -5,13 +5,14 @@ from sqlalchemy import select
 from backend.app.database.engine import get_db
 from backend.app.database.models import WorkflowRun, WorkflowStep, WorkflowStatus
 from backend.app.core.workflow_engine import workflow_engine
+from backend.app.auth import get_current_user
 from pydantic import BaseModel, Field
 from typing import Optional
 import logging
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter()
+router = APIRouter(dependencies=[Depends(get_current_user)])
 
 
 @router.get("/")

@@ -1,10 +1,11 @@
 // @refresh reset
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { Line } from 'react-chartjs-2';
 import {
   DollarSign, Users, Bot, TrendingUp, Activity, Clock,
   AlertTriangle, ThumbsUp, ThumbsDown, Joystick, Target,
+  Zap, CheckCircle, XCircle, GitBranch, Filter,
 } from 'lucide-react';
 import { api } from '../lib/api';
 import { defaultChartOptions } from '../lib/chartConfig';
@@ -16,6 +17,21 @@ import { useWebSocket } from '../lib/useWebSocket';
 import { useToast } from '../lib/ToastContext';
 import { EmptyState } from '../components/EmptyState';
 
+interface FeedItem {
+  id: string;
+  type: 'agent_action' | 'workflow_complete' | 'approval_request' | 'error' | 'activity';
+  agent?: string;
+  description: string;
+  timestamp: string;
+}
+
+const FEED_COLORS: Record<string, { dot: 'active' | 'error' | 'paused'; icon: React.ReactNode; bg: string }> = {
+  agent_action: { dot: 'active', icon: <Zap className="w-3 h-3 text-blue-400" />, bg: 'bg-blue-500/10' },
+  workflow_complete: { dot: 'active', icon: <CheckCircle className="w-3 h-3 text-green-400" />, bg: 'bg-green-500/10' },
+  approval_request: { dot: 'paused', icon: <AlertTriangle className="w-3 h-3 text-yellow-400" />, bg: 'bg-yellow-500/10' },
+  error: { dot: 'error', icon: <XCircle className="w-3 h-3 text-red-400" />, bg: 'bg-red-500/10' },
+  activity: { dot: 'active', icon: <Activity className="w-3 h-3 text-fuega-text-muted" />, bg: 'bg-fuega-card-hover' },
+};
 
 export default function Dashboard() {
   const toast = useToast();
@@ -27,7 +43,23 @@ export default function Dashboard() {
   const [costChart, setCostChart] = useState<any>(null);
   const [leadsCount, setLeadsCount] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [liveFeed, setLiveFeed] = useState<FeedItem[]>([]);
+  const [feedFilter, setFeedFilter] = useState<string>('all');
   const { events } = useWebSocket();
+
+  const filteredFeed = useMemo(() => {
+    if (feedFilter === 'all') return liveFeed;
+    return liveFeed.filter(item => item.type === feedFilter || item.agent === feedFilter);
+  }, [liveFeed, feedFilter]);
+
+  const feedAgents = useMemo(() => {
+    const set = new Set(liveFeed.map(f => f.agent).filter(Boolean));
+    return Array.from(set) as string[];
+  }, [liveFeed]);
+
+  const addFeedItem = useCallback((item: FeedItem) => {
+    setLiveFeed(prev => [item, ...prev].slice(0, 100));
+  }, []);
 
   const activeAgents = useMemo(() => agents.filter(a => a.status === 'active'), [agents]);
   const pausedAgents = useMemo(() => agents.filter(a => a.status === 'paused'), [agents]);
@@ -55,15 +87,30 @@ export default function Dashboard() {
     }).finally(() => setLoading(false));
   }, []);
 
-  // Wire WebSocket events into activity feed
+  // Wire WebSocket events into activity feed + live feed
   useEffect(() => {
     if (events.length > 0) {
       const latest = events[0];
       if (latest.event === 'activity' || latest.event === 'agent_action') {
         setActivity(prev => [{ ...(latest.data || latest) } as any, ...prev].slice(0, 30));
       }
+      // Populate live activity feed from WebSocket events
+      const data = (latest.data || latest) as any;
+      const feedType =
+        latest.event === 'agent_action' ? 'agent_action' :
+        latest.event === 'workflow_complete' || latest.event === 'workflow_completed' ? 'workflow_complete' :
+        latest.event === 'approval_request' || latest.event === 'new_approval' ? 'approval_request' :
+        latest.event === 'error' ? 'error' :
+        'activity';
+      addFeedItem({
+        id: `${Date.now()}-${Math.random()}`,
+        type: feedType as FeedItem['type'],
+        agent: data.agent_slug || data.agent_name || data.agent || undefined,
+        description: data.action || data.description || data.output_summary || data.message || latest.event,
+        timestamp: data.created_at || new Date().toISOString(),
+      });
     }
-  }, [events]);
+  }, [events, addFeedItem]);
 
   const handleApproval = async (runId: number, stepId: string, approved: boolean) => {
     try {
@@ -75,7 +122,7 @@ export default function Dashboard() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-24">
-        <div className="w-6 h-6 border-2 border-chispa-orange border-t-transparent rounded-full animate-spin" />
+        <div className="w-6 h-6 border-2 border-fuega-orange border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -84,7 +131,7 @@ export default function Dashboard() {
     return (
       <div>
         <PageHeader title="Command Center" subtitle="Start the backend to populate data" />
-        <div className="text-center py-12 text-chispa-text-muted text-sm animate-fadeIn">No data available. Start the backend API.</div>
+        <div className="text-center py-12 text-fuega-text-muted text-sm animate-fadeIn">No data available. Start the backend API.</div>
       </div>
     );
   }
@@ -109,12 +156,12 @@ export default function Dashboard() {
           <div className="flex items-center gap-3">
             <Link
               to="/control-panel"
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-chispa-orange text-white text-[12px] font-medium hover:bg-chispa-orange/90 transition-colors"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-fuega-orange text-white text-[12px] font-medium hover:bg-fuega-orange/90 transition-colors"
             >
               <Joystick className="w-3.5 h-3.5" />
               Control Panel
             </Link>
-            <span className="text-[11px] text-chispa-text-muted">
+            <span className="text-[11px] text-fuega-text-muted">
               <StatusDot status="active" pulse label={`${activeAgents.length}/${agents.length} active`} size="sm" />
             </span>
           </div>
@@ -123,14 +170,14 @@ export default function Dashboard() {
 
       {/* Pending Approvals Banner */}
       {pendingApprovals.length > 0 && (
-        <div className="mb-3 bg-chispa-orange/5 border-l-2 border-chispa-orange rounded-r-lg px-3 py-2 animate-slideUp">
+        <div className="mb-3 bg-fuega-orange/5 border-l-2 border-fuega-orange rounded-r-lg px-3 py-2 animate-slideUp">
           <div className="flex items-center gap-2 mb-1.5">
-            <AlertTriangle className="w-3.5 h-3.5 text-chispa-orange" />
-            <span className="text-[12px] font-semibold text-chispa-orange">{pendingApprovals.length} Pending Approval{pendingApprovals.length > 1 ? 's' : ''}</span>
+            <AlertTriangle className="w-3.5 h-3.5 text-fuega-orange" />
+            <span className="text-[12px] font-semibold text-fuega-orange">{pendingApprovals.length} Pending Approval{pendingApprovals.length > 1 ? 's' : ''}</span>
           </div>
           {pendingApprovals.map(pa => (
             <div key={pa.id} className="flex items-center gap-2 py-1">
-              <span className="text-[12px] text-chispa-text-primary flex-1">{pa.workflow_name?.replace(/_/g, ' ')} #{pa.id} — {pa.current_step_id?.replace(/_/g, ' ')}</span>
+              <span className="text-[12px] text-fuega-text-primary flex-1">{pa.workflow_name?.replace(/_/g, ' ')} #{pa.id} — {pa.current_step_id?.replace(/_/g, ' ')}</span>
               <button onClick={() => handleApproval(pa.id, pa.current_step_id, true)} className="flex items-center gap-1 bg-green-500/20 hover:bg-green-500/30 text-green-400 px-2 py-1 rounded text-[11px] font-medium transition-colors"><ThumbsUp className="w-3 h-3" /> Approve</button>
               <button onClick={() => handleApproval(pa.id, pa.current_step_id, false)} className="flex items-center gap-1 bg-red-500/20 hover:bg-red-500/30 text-red-400 px-2 py-1 rounded text-[11px] font-medium transition-colors"><ThumbsDown className="w-3 h-3" /> Reject</button>
             </div>
@@ -149,14 +196,14 @@ export default function Dashboard() {
       </div>
 
       {/* Fleet health summary — compact */}
-      <div className="bg-chispa-card border border-chispa-border rounded-lg mb-3 overflow-hidden">
-        <div className="flex items-center justify-between px-3 py-2 border-b border-chispa-border">
-          <h3 className="text-[11px] uppercase tracking-wider font-mono font-semibold text-chispa-text-primary">Agent Fleet</h3>
+      <div className="bg-fuega-card border border-fuega-border rounded-lg mb-3 overflow-hidden">
+        <div className="flex items-center justify-between px-3 py-2 border-b border-fuega-border">
+          <h3 className="text-[11px] uppercase tracking-wider font-mono font-semibold text-fuega-text-primary">Agent Fleet</h3>
           <div className="flex items-center gap-4 text-[11px]">
             <StatusDot status="active" label={`${activeAgents.length} active`} size="sm" />
             <StatusDot status="paused" label={`${pausedAgents.length} paused`} size="sm" />
             {overBudget.length > 0 && <StatusDot status="error" label={`${overBudget.length} over-budget`} size="sm" />}
-            <Link to="/agents" className="text-[10px] text-chispa-orange hover:underline">Manage</Link>
+            <Link to="/agents" className="text-[10px] text-fuega-orange hover:underline">Manage</Link>
           </div>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-8">
@@ -166,16 +213,16 @@ export default function Dashboard() {
               <Link
                 key={agent.slug}
                 to={`/agents/${agent.slug}`}
-                className="flex items-center gap-2 px-2.5 py-2 border-r border-b border-chispa-border/50 hover:bg-chispa-card-hover transition-colors"
+                className="flex items-center gap-2 px-2.5 py-2 border-r border-b border-fuega-border/50 hover:bg-fuega-card-hover transition-colors"
               >
                 <StatusDot status={agent.status === 'active' ? 'active' : 'paused'} size="sm" />
                 <div className="min-w-0 flex-1">
-                  <p className="text-[11px] font-medium text-chispa-text-primary truncate">{agent.name}</p>
+                  <p className="text-[11px] font-medium text-fuega-text-primary truncate">{agent.name}</p>
                   <div className="flex items-center gap-1">
-                    <div className="flex-1 h-[3px] bg-chispa-surface rounded-full overflow-hidden">
+                    <div className="flex-1 h-[3px] bg-fuega-surface rounded-full overflow-hidden">
                       <div className="h-full rounded-full" style={{ width: `${Math.min(pct, 100)}%`, backgroundColor: pct > 80 ? '#EF4444' : pct > 50 ? '#EAB308' : '#00D4AA' }} />
                     </div>
-                    <span className="text-[9px] text-chispa-text-muted num">${(agent.month_spend_usd || 0).toFixed(2)}</span>
+                    <span className="text-[9px] text-fuega-text-muted num">${(agent.month_spend_usd || 0).toFixed(2)}</span>
                   </div>
                 </div>
               </Link>
@@ -191,7 +238,7 @@ export default function Dashboard() {
             {revenueChartData ? (
               <Line data={revenueChartData} options={{ ...defaultChartOptions, plugins: { ...defaultChartOptions.plugins, legend: { display: false } } } as any} />
             ) : (
-              <div className="flex items-center justify-center h-full text-[11px] text-chispa-text-muted">No data</div>
+              <div className="flex items-center justify-center h-full text-[11px] text-fuega-text-muted">No data</div>
             )}
           </div>
         </ChartCard>
@@ -201,7 +248,7 @@ export default function Dashboard() {
             {costChartData ? (
               <Line data={costChartData} options={{ ...defaultChartOptions, plugins: { ...defaultChartOptions.plugins, legend: { display: false } } } as any} />
             ) : (
-              <div className="flex items-center justify-center h-full text-[11px] text-chispa-text-muted">No data</div>
+              <div className="flex items-center justify-center h-full text-[11px] text-fuega-text-muted">No data</div>
             )}
           </div>
         </ChartCard>
@@ -211,15 +258,15 @@ export default function Dashboard() {
             <div className="grid grid-cols-3 gap-4 w-full text-center">
               <div>
                 <p className="text-2xl font-bold text-green-400 num">{activeAgents.length}</p>
-                <p className="text-[10px] text-chispa-text-muted">Active</p>
+                <p className="text-[10px] text-fuega-text-muted">Active</p>
               </div>
               <div>
                 <p className="text-2xl font-bold text-yellow-400 num">{pausedAgents.length}</p>
-                <p className="text-[10px] text-chispa-text-muted">Paused</p>
+                <p className="text-[10px] text-fuega-text-muted">Paused</p>
               </div>
               <div>
                 <p className="text-2xl font-bold text-red-400 num">{overBudget.length}</p>
-                <p className="text-[10px] text-chispa-text-muted">Over Budget</p>
+                <p className="text-[10px] text-fuega-text-muted">Over Budget</p>
               </div>
             </div>
           </div>
@@ -227,16 +274,16 @@ export default function Dashboard() {
       </div>
 
       {/* Activity Feed + Budget Table */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 mb-3">
         <ChartCard title="Live Feed" subtitle={`${activity.length} recent`}>
           <div className="space-y-0.5 max-h-56 overflow-y-auto">
             {activity.length === 0 && <EmptyState title="No activity yet" />}
             {activity.map((item, i) => (
-              <div key={item.id ?? i} className="flex items-center gap-2 py-1.5 px-1 rounded hover:bg-chispa-card-hover transition-colors">
+              <div key={item.id ?? i} className="flex items-center gap-2 py-1.5 px-1 rounded hover:bg-fuega-card-hover transition-colors">
                 <StatusDot status="active" size="sm" />
-                <span className="text-[11px] text-chispa-text-primary flex-1 truncate">{item.action || item.output_summary || 'Agent action'}</span>
-                {item.cost_usd > 0 && <span className="text-[10px] text-chispa-text-muted num">${item.cost_usd.toFixed(4)}</span>}
-                <span className="text-[10px] text-chispa-text-muted">{item.created_at ? new Date(item.created_at).toLocaleTimeString('en', { hour: '2-digit', minute: '2-digit' }) : ''}</span>
+                <span className="text-[11px] text-fuega-text-primary flex-1 truncate">{item.action || item.output_summary || 'Agent action'}</span>
+                {item.cost_usd > 0 && <span className="text-[10px] text-fuega-text-muted num">${item.cost_usd.toFixed(4)}</span>}
+                <span className="text-[10px] text-fuega-text-muted">{item.created_at ? new Date(item.created_at).toLocaleTimeString('en', { hour: '2-digit', minute: '2-digit' }) : ''}</span>
               </div>
             ))}
           </div>
@@ -248,17 +295,67 @@ export default function Dashboard() {
               const pct = agent.monthly_budget_usd ? ((agent.month_spend_usd || 0) / agent.monthly_budget_usd) * 100 : 0;
               return (
                 <div key={agent.slug} className="flex items-center gap-2 py-1 px-1">
-                  <span className="text-[11px] text-chispa-text-secondary w-28 truncate">{agent.name}</span>
-                  <div className="flex-1 h-[5px] bg-chispa-surface rounded-full overflow-hidden">
+                  <span className="text-[11px] text-fuega-text-secondary w-28 truncate">{agent.name}</span>
+                  <div className="flex-1 h-[5px] bg-fuega-surface rounded-full overflow-hidden">
                     <div className="h-full rounded-full" style={{ width: `${Math.min(pct, 100)}%`, backgroundColor: pct > 80 ? '#EF4444' : pct > 50 ? '#EAB308' : '#00D4AA' }} />
                   </div>
-                  <span className="text-[10px] text-chispa-text-muted num w-20 text-right">${(agent.month_spend_usd || 0).toFixed(2)} / ${agent.monthly_budget_usd || 0}</span>
+                  <span className="text-[10px] text-fuega-text-muted num w-20 text-right">${(agent.month_spend_usd || 0).toFixed(2)} / ${agent.monthly_budget_usd || 0}</span>
                 </div>
               );
             })}
           </div>
         </ChartCard>
       </div>
+
+      {/* Real-time Activity Feed (WebSocket powered) */}
+      <ChartCard
+        title="Real-time Activity"
+        subtitle={`${filteredFeed.length} events`}
+        action={
+          <div className="flex items-center gap-1.5">
+            <Filter className="w-3 h-3 text-fuega-text-muted" />
+            <select
+              value={feedFilter}
+              onChange={e => setFeedFilter(e.target.value)}
+              className="bg-fuega-input border border-fuega-border rounded px-1.5 py-0.5 text-[10px] text-fuega-text-secondary focus:outline-none focus:border-fuega-orange/50"
+            >
+              <option value="all">All events</option>
+              <option value="agent_action">Agent Actions</option>
+              <option value="workflow_complete">Workflows</option>
+              <option value="approval_request">Approvals</option>
+              <option value="error">Errors</option>
+              {feedAgents.map(agent => (
+                <option key={agent} value={agent}>{agent.replace(/_/g, ' ')}</option>
+              ))}
+            </select>
+          </div>
+        }
+      >
+        <div className="space-y-0.5 max-h-64 overflow-y-auto">
+          {filteredFeed.length === 0 && (
+            <EmptyState title="No real-time events yet" description="Events from agents and workflows will stream here via WebSocket." />
+          )}
+          {filteredFeed.map((item) => {
+            const style = FEED_COLORS[item.type] || FEED_COLORS.activity;
+            return (
+              <div key={item.id} className="flex items-center gap-2 py-1.5 px-1 rounded hover:bg-fuega-card-hover transition-colors animate-slideUp">
+                <div className={`p-0.5 rounded ${style.bg}`}>
+                  {style.icon}
+                </div>
+                {item.agent && (
+                  <span className="text-[10px] font-medium text-fuega-orange bg-fuega-orange/10 px-1.5 py-0.5 rounded truncate max-w-[80px]">
+                    {item.agent.replace(/_/g, ' ')}
+                  </span>
+                )}
+                <span className="text-[11px] text-fuega-text-primary flex-1 truncate">{item.description}</span>
+                <span className="text-[10px] text-fuega-text-muted flex-shrink-0">
+                  {new Date(item.timestamp).toLocaleTimeString('en', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+      </ChartCard>
     </div>
   );
 }

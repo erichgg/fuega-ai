@@ -5,6 +5,7 @@ from sqlalchemy import select, func
 from backend.app.database.engine import get_db
 from backend.app.database.models import Lead, LeadStage, Client
 from backend.app.core.workflow_engine import workflow_engine
+from backend.app.auth import get_current_user
 from pydantic import BaseModel, Field, EmailStr
 from typing import Optional
 from datetime import datetime, timezone
@@ -12,7 +13,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter()
+router = APIRouter(dependencies=[Depends(get_current_user)])
 
 LEAD_STAGES = [s.value for s in LeadStage]
 
@@ -41,6 +42,8 @@ def _lead_to_dict(lead: Lead) -> dict:
         "outreach_channel": lead.outreach_channel,
         "recommended_service_tier": lead.recommended_service_tier,
         "agent_research": lead.agent_research,
+        "followup_count": lead.followup_count or 0,
+        "last_followup_at": lead.last_followup_at.isoformat() if lead.last_followup_at else None,
         "notes": lead.notes,
         "assigned_agent": lead.assigned_agent,
         "client_id": lead.client_id,

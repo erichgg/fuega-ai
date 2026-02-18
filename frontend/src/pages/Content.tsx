@@ -105,7 +105,7 @@ export default function Content() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-24">
-        <div className="w-6 h-6 border-2 border-chispa-orange border-t-transparent rounded-full animate-spin" />
+        <div className="w-6 h-6 border-2 border-fuega-orange border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -142,7 +142,7 @@ export default function Content() {
       label: 'Title',
       sortable: true,
       getValue: (row) => row.item.title || 'Untitled',
-      render: (row) => <span className="text-[12px] text-chispa-text-primary font-medium">{row.item.title || 'Untitled'}</span>,
+      render: (row) => <span className="text-[12px] text-fuega-text-primary font-medium">{row.item.title || 'Untitled'}</span>,
     },
     {
       key: 'stage',
@@ -171,11 +171,11 @@ export default function Content() {
       sortable: true,
       getValue: (row) => row.item.platform || '',
       render: (row) => row.item.platform ? (
-        <span className="text-[10px] px-1.5 py-0.5 rounded bg-chispa-input text-chispa-text-secondary">
+        <span className="text-[10px] px-1.5 py-0.5 rounded bg-fuega-input text-fuega-text-secondary">
           {row.item.platform}
         </span>
       ) : (
-        <span className="text-[10px] text-chispa-text-muted">--</span>
+        <span className="text-[10px] text-fuega-text-muted">--</span>
       ),
     },
     {
@@ -188,7 +188,7 @@ export default function Content() {
           {row.item.score}/10
         </span>
       ) : (
-        <span className="text-[10px] text-chispa-text-muted">--</span>
+        <span className="text-[10px] text-fuega-text-muted">--</span>
       ),
     },
   ];
@@ -212,7 +212,7 @@ export default function Content() {
             <Tabs tabs={viewTabs} active={view} onChange={(k) => setView(k as 'kanban' | 'table')} />
             <button
               onClick={() => setShowNewIdea(true)}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-chispa-orange text-white text-[12px] font-medium hover:bg-chispa-orange/90 transition-colors"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-fuega-orange text-white text-[12px] font-medium hover:bg-fuega-orange/90 transition-colors"
             >
               <Plus className="w-3.5 h-3.5" />
               New Idea
@@ -223,31 +223,31 @@ export default function Content() {
 
       {/* Inline New Idea Form */}
       {showNewIdea && (
-        <div className="mb-2 flex items-center gap-2 bg-chispa-card border border-chispa-border rounded-lg p-2">
+        <div className="mb-2 flex items-center gap-2 bg-fuega-card border border-fuega-border rounded-lg p-2">
           <input
             autoFocus
             value={newIdeaTitle}
             onChange={e => setNewIdeaTitle(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && handleAddIdea()}
             placeholder="Idea title..."
-            className="flex-1 bg-chispa-input border border-chispa-border rounded px-2 py-1 text-sm text-chispa-text-primary placeholder:text-chispa-text-muted focus:outline-none focus:border-chispa-orange/50"
+            className="flex-1 bg-fuega-input border border-fuega-border rounded px-2 py-1 text-sm text-fuega-text-primary placeholder:text-fuega-text-muted focus:outline-none focus:border-fuega-orange/50"
           />
           <input
             value={newIdeaPlatform}
             onChange={e => setNewIdeaPlatform(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && handleAddIdea()}
             placeholder="Platform"
-            className="w-28 bg-chispa-input border border-chispa-border rounded px-2 py-1 text-sm text-chispa-text-primary placeholder:text-chispa-text-muted focus:outline-none focus:border-chispa-orange/50"
+            className="w-28 bg-fuega-input border border-fuega-border rounded px-2 py-1 text-sm text-fuega-text-primary placeholder:text-fuega-text-muted focus:outline-none focus:border-fuega-orange/50"
           />
           <button
             onClick={handleAddIdea}
-            className="px-3 py-1 rounded bg-chispa-orange text-white text-xs font-medium hover:bg-chispa-orange/90 transition-colors"
+            className="px-3 py-1 rounded bg-fuega-orange text-white text-xs font-medium hover:bg-fuega-orange/90 transition-colors"
           >
             Add
           </button>
           <button
             onClick={() => { setShowNewIdea(false); setNewIdeaTitle(''); setNewIdeaPlatform(''); }}
-            className="p-1 rounded text-chispa-text-muted hover:text-chispa-text-primary transition-colors"
+            className="p-1 rounded text-fuega-text-muted hover:text-fuega-text-primary transition-colors"
           >
             <X className="w-4 h-4" />
           </button>
@@ -284,13 +284,13 @@ export default function Content() {
               return (
                 <div
                   key={stage.key}
-                  className="flex-1 min-w-[200px] bg-chispa-card border border-chispa-border rounded-lg flex flex-col"
+                  className="flex-1 min-w-[200px] bg-fuega-card border border-fuega-border rounded-lg flex flex-col"
                 >
                   {/* Column header */}
-                  <div className="p-2 border-b border-chispa-border">
+                  <div className="p-2 border-b border-fuega-border">
                     <div className="flex items-center gap-1.5 mb-0.5">
                       <Icon className="w-3.5 h-3.5 flex-shrink-0" style={{ color: stage.color }} />
-                      <span className="text-xs font-semibold text-chispa-text-primary truncate">{stage.label}</span>
+                      <span className="text-xs font-semibold text-fuega-text-primary truncate">{stage.label}</span>
                       <span
                         className="num text-[10px] px-1.5 py-0.5 rounded-full ml-auto flex-shrink-0"
                         style={{ backgroundColor: stage.color + '20', color: stage.color }}
@@ -298,7 +298,7 @@ export default function Content() {
                         {items.length}
                       </span>
                     </div>
-                    <div className="flex items-center gap-1 text-[10px] text-chispa-text-muted">
+                    <div className="flex items-center gap-1 text-[10px] text-fuega-text-muted">
                       <Bot className="w-3 h-3" />
                       <span className="truncate">{stage.agent}</span>
                     </div>
@@ -307,21 +307,21 @@ export default function Content() {
                   {/* Cards */}
                   <div className="p-1.5 flex-1 space-y-1.5 overflow-y-auto max-h-[calc(100vh-380px)]">
                     {items.length === 0 && (
-                      <div className="text-[10px] text-chispa-text-muted text-center py-4 opacity-50">
+                      <div className="text-[10px] text-fuega-text-muted text-center py-4 opacity-50">
                         No items
                       </div>
                     )}
                     {items.map((item: any) => (
                       <div
                         key={`${stage.key}-${item.id}`}
-                        className="bg-chispa-bg border border-chispa-border rounded-md p-2 hover:border-chispa-orange/30 transition-all cursor-default group"
+                        className="bg-fuega-bg border border-fuega-border rounded-md p-2 hover:border-fuega-orange/30 transition-all cursor-default group"
                       >
-                        <p className="text-[11px] font-medium text-chispa-text-primary leading-tight mb-1.5 line-clamp-2">
+                        <p className="text-[11px] font-medium text-fuega-text-primary leading-tight mb-1.5 line-clamp-2">
                           {item.title || 'Untitled'}
                         </p>
                         <div className="flex items-center gap-1.5 flex-wrap">
                           {item.platform && (
-                            <span className="text-[9px] px-1.5 py-0.5 rounded bg-chispa-input text-chispa-text-secondary">
+                            <span className="text-[9px] px-1.5 py-0.5 rounded bg-fuega-input text-fuega-text-secondary">
                               {item.platform}
                             </span>
                           )}
@@ -331,7 +331,7 @@ export default function Content() {
                             </span>
                           )}
                           {item.revision !== undefined && item.revision > 0 && (
-                            <span className="text-[9px] text-chispa-text-muted">
+                            <span className="text-[9px] text-fuega-text-muted">
                               Rev <span className="num">{item.revision}</span>
                             </span>
                           )}
@@ -339,11 +339,11 @@ export default function Content() {
 
                         {/* Integration buttons — only for items with content (writing+) */}
                         {['writing', 'review', 'revision', 'ready', 'published'].includes(stage.key) && item.title && (
-                          <div className="flex items-center gap-1 mt-1.5 pt-1.5 border-t border-chispa-border/50 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <div className="flex items-center gap-1 mt-1.5 pt-1.5 border-t border-fuega-border/50 opacity-0 group-hover:opacity-100 transition-opacity">
                             <button
                               onClick={(e) => { e.stopPropagation(); handleVoiceover(`${stage.key}-${item.id}`, item.title); }}
                               disabled={!!mediaLoading}
-                              className="flex items-center gap-0.5 text-[8px] px-1.5 py-0.5 rounded bg-chispa-surface border border-chispa-border text-chispa-text-muted hover:text-purple-400 hover:border-purple-400/30 transition-colors disabled:opacity-40"
+                              className="flex items-center gap-0.5 text-[8px] px-1.5 py-0.5 rounded bg-fuega-surface border border-fuega-border text-fuega-text-muted hover:text-purple-400 hover:border-purple-400/30 transition-colors disabled:opacity-40"
                               title="Generate Voiceover"
                             >
                               {mediaLoading === `voiceover-${stage.key}-${item.id}` ? (
@@ -356,7 +356,7 @@ export default function Content() {
                             <button
                               onClick={(e) => { e.stopPropagation(); handleStockPhotos(`${stage.key}-${item.id}`, item.title); }}
                               disabled={!!mediaLoading}
-                              className="flex items-center gap-0.5 text-[8px] px-1.5 py-0.5 rounded bg-chispa-surface border border-chispa-border text-chispa-text-muted hover:text-teal-400 hover:border-teal-400/30 transition-colors disabled:opacity-40"
+                              className="flex items-center gap-0.5 text-[8px] px-1.5 py-0.5 rounded bg-fuega-surface border border-fuega-border text-fuega-text-muted hover:text-teal-400 hover:border-teal-400/30 transition-colors disabled:opacity-40"
                               title="Find Stock Photos"
                             >
                               {mediaLoading === `photos-${stage.key}-${item.id}` ? (
@@ -369,7 +369,7 @@ export default function Content() {
                             <button
                               onClick={(e) => { e.stopPropagation(); handleGenerateImage(`${stage.key}-${item.id}`, item.title); }}
                               disabled={!!mediaLoading}
-                              className="flex items-center gap-0.5 text-[8px] px-1.5 py-0.5 rounded bg-chispa-surface border border-chispa-border text-chispa-text-muted hover:text-pink-400 hover:border-pink-400/30 transition-colors disabled:opacity-40"
+                              className="flex items-center gap-0.5 text-[8px] px-1.5 py-0.5 rounded bg-fuega-surface border border-fuega-border text-fuega-text-muted hover:text-pink-400 hover:border-pink-400/30 transition-colors disabled:opacity-40"
                               title="Generate Image"
                             >
                               {mediaLoading === `image-${stage.key}-${item.id}` ? (
@@ -384,14 +384,14 @@ export default function Content() {
 
                         {/* Inline voiceover result */}
                         {voiceoverResult?.itemId === `${stage.key}-${item.id}` && (
-                          <div className="mt-1.5 pt-1.5 border-t border-chispa-border/50">
+                          <div className="mt-1.5 pt-1.5 border-t border-fuega-border/50">
                             <audio controls src={voiceoverResult.audio_url} className="w-full h-6" style={{ minWidth: 0 }} />
                           </div>
                         )}
 
                         {/* Inline stock photos */}
                         {stockPhotos?.itemId === `${stage.key}-${item.id}` && stockPhotos.photos.length > 0 && (
-                          <div className="mt-1.5 pt-1.5 border-t border-chispa-border/50">
+                          <div className="mt-1.5 pt-1.5 border-t border-fuega-border/50">
                             <div className="grid grid-cols-3 gap-1">
                               {stockPhotos.photos.slice(0, 6).map((photo: any, idx: number) => (
                                 <img
@@ -407,7 +407,7 @@ export default function Content() {
 
                         {/* Inline generated image */}
                         {generatedImage?.itemId === `${stage.key}-${item.id}` && (
-                          <div className="mt-1.5 pt-1.5 border-t border-chispa-border/50">
+                          <div className="mt-1.5 pt-1.5 border-t border-fuega-border/50">
                             <img
                               src={generatedImage.image_url}
                               alt="AI generated"

@@ -123,7 +123,7 @@ export default function LeadDetail() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-24">
-        <div className="w-6 h-6 border-2 border-chispa-orange border-t-transparent rounded-full animate-spin" />
+        <div className="w-6 h-6 border-2 border-fuega-orange border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -138,7 +138,7 @@ export default function LeadDetail() {
   }
 
   const stageInfo = STAGES.find(s => s.key === lead.stage) || STAGES[0];
-  const scoreColor = (lead.score || 0) >= 70 ? 'text-green-400' : (lead.score || 0) >= 40 ? 'text-yellow-400' : 'text-chispa-text-muted';
+  const scoreColor = (lead.score || 0) >= 70 ? 'text-green-400' : (lead.score || 0) >= 40 ? 'text-yellow-400' : 'text-fuega-text-muted';
 
   const agentActions = [
     { label: 'Deep Research', agent: 'smb_researcher', action: 'research_businesses', icon: <Search className="w-3 h-3" />, color: '#8B5CF6' },
@@ -168,13 +168,13 @@ export default function LeadDetail() {
               <ChevronDown className="w-3 h-3" />
             </button>
             {stageOpen && (
-              <div className="absolute top-full mt-1 right-0 z-10 bg-chispa-card border border-chispa-border rounded-lg shadow-lg py-1 min-w-[160px]">
+              <div className="absolute top-full mt-1 right-0 z-10 bg-fuega-card border border-fuega-border rounded-lg shadow-lg py-1 min-w-[160px]">
                 {STAGES.map(s => (
                   <button
                     key={s.key}
                     onClick={() => handleStageChange(s.key)}
                     className={`w-full flex items-center gap-2 px-3 py-1.5 text-[11px] text-left transition-colors ${
-                      s.key === lead.stage ? 'bg-chispa-orange/10 text-chispa-orange' : 'text-chispa-text-secondary hover:bg-chispa-card-hover'
+                      s.key === lead.stage ? 'bg-fuega-orange/10 text-fuega-orange' : 'text-fuega-text-secondary hover:bg-fuega-card-hover'
                     }`}
                   >
                     <span className="w-2 h-2 rounded-full" style={{ backgroundColor: s.color }} />
@@ -188,9 +188,9 @@ export default function LeadDetail() {
       />
 
       {/* Lead info bar */}
-      <div className="flex items-center gap-4 mb-3 text-[11px] text-chispa-text-secondary flex-wrap">
-        <div className="w-10 h-10 rounded-xl bg-chispa-orange/10 flex items-center justify-center flex-shrink-0">
-          <span className="text-lg font-bold text-chispa-orange">{lead.business_name?.charAt(0)}</span>
+      <div className="flex items-center gap-4 mb-3 text-[11px] text-fuega-text-secondary flex-wrap">
+        <div className="w-10 h-10 rounded-xl bg-fuega-orange/10 flex items-center justify-center flex-shrink-0">
+          <span className="text-lg font-bold text-fuega-orange">{lead.business_name?.charAt(0)}</span>
         </div>
         {lead.score > 0 && <span className={`num text-sm font-bold ${scoreColor}`}>Score: {lead.score}</span>}
         {lead.location && <span className="flex items-center gap-1"><MapPin className="w-3 h-3" />{lead.location}</span>}
@@ -198,11 +198,11 @@ export default function LeadDetail() {
         {lead.email && <span className="flex items-center gap-1"><Mail className="w-3 h-3" />{lead.email}</span>}
         {lead.phone && <span className="flex items-center gap-1"><Phone className="w-3 h-3" />{lead.phone}</span>}
         {lead.website_url && (
-          <a href={lead.website_url} target="_blank" rel="noreferrer" className="flex items-center gap-1 text-chispa-orange hover:underline">
+          <a href={lead.website_url} target="_blank" rel="noreferrer" className="flex items-center gap-1 text-fuega-orange hover:underline">
             <Globe className="w-3 h-3" />{lead.website_url}
           </a>
         )}
-        {lead.source && <span className="text-[10px] px-1.5 py-0.5 rounded bg-chispa-input text-chispa-text-muted">Source: {lead.source}</span>}
+        {lead.source && <span className="text-[10px] px-1.5 py-0.5 rounded bg-fuega-input text-fuega-text-muted">Source: {lead.source}</span>}
       </div>
 
       {/* Agent Actions Bar */}
@@ -215,7 +215,7 @@ export default function LeadDetail() {
               key={key}
               onClick={() => handleRunAgent(a.agent, a.action, a.label)}
               disabled={!!runningAgent}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-[11px] font-medium transition-all disabled:opacity-50 hover:bg-chispa-card-hover"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-[11px] font-medium transition-all disabled:opacity-50 hover:bg-fuega-card-hover"
               style={{ borderColor: a.color + '40', color: a.color }}
             >
               {isRunning ? (
@@ -240,47 +240,47 @@ export default function LeadDetail() {
         {/* Digital Presence Audit */}
         <ChartCard title="Digital Presence" subtitle="Scout data">
           <div className="grid grid-cols-2 gap-2">
-            <div className="flex items-center gap-2 p-2 rounded-lg bg-chispa-input border border-chispa-border">
+            <div className="flex items-center gap-2 p-2 rounded-lg bg-fuega-input border border-fuega-border">
               <Star className="w-4 h-4 text-yellow-400" />
               <div>
-                <p className="text-[10px] text-chispa-text-muted">Google Rating</p>
-                <p className="text-sm font-semibold text-chispa-text-primary num">{lead.google_rating ?? '--'}</p>
+                <p className="text-[10px] text-fuega-text-muted">Google Rating</p>
+                <p className="text-sm font-semibold text-fuega-text-primary num">{lead.google_rating ?? '--'}</p>
               </div>
             </div>
-            <div className="flex items-center gap-2 p-2 rounded-lg bg-chispa-input border border-chispa-border">
+            <div className="flex items-center gap-2 p-2 rounded-lg bg-fuega-input border border-fuega-border">
               <MessageSquare className="w-4 h-4 text-blue-400" />
               <div>
-                <p className="text-[10px] text-chispa-text-muted">Reviews</p>
-                <p className="text-sm font-semibold text-chispa-text-primary num">{lead.review_count ?? '--'}</p>
+                <p className="text-[10px] text-fuega-text-muted">Reviews</p>
+                <p className="text-sm font-semibold text-fuega-text-primary num">{lead.review_count ?? '--'}</p>
               </div>
             </div>
-            <div className="flex items-center gap-2 p-2 rounded-lg bg-chispa-input border border-chispa-border">
+            <div className="flex items-center gap-2 p-2 rounded-lg bg-fuega-input border border-fuega-border">
               {lead.has_website ? <CheckCircle className="w-4 h-4 text-green-400" /> : <XCircle className="w-4 h-4 text-red-400" />}
               <div>
-                <p className="text-[10px] text-chispa-text-muted">Website</p>
-                <p className="text-sm font-semibold text-chispa-text-primary">{lead.has_website ? 'Yes' : lead.has_website === false ? 'No' : '--'}</p>
+                <p className="text-[10px] text-fuega-text-muted">Website</p>
+                <p className="text-sm font-semibold text-fuega-text-primary">{lead.has_website ? 'Yes' : lead.has_website === false ? 'No' : '--'}</p>
               </div>
             </div>
-            <div className="flex items-center gap-2 p-2 rounded-lg bg-chispa-input border border-chispa-border">
+            <div className="flex items-center gap-2 p-2 rounded-lg bg-fuega-input border border-fuega-border">
               {lead.has_social ? <CheckCircle className="w-4 h-4 text-green-400" /> : <XCircle className="w-4 h-4 text-red-400" />}
               <div>
-                <p className="text-[10px] text-chispa-text-muted">Social Media</p>
-                <p className="text-sm font-semibold text-chispa-text-primary">{lead.has_social ? 'Yes' : lead.has_social === false ? 'No' : '--'}</p>
+                <p className="text-[10px] text-fuega-text-muted">Social Media</p>
+                <p className="text-sm font-semibold text-fuega-text-primary">{lead.has_social ? 'Yes' : lead.has_social === false ? 'No' : '--'}</p>
               </div>
             </div>
           </div>
           {lead.digital_gap_score != null && (
             <div className="mt-2 flex items-center gap-2">
-              <span className="text-[10px] text-chispa-text-muted">Digital Gap Score:</span>
-              <div className="flex-1 h-2 bg-chispa-surface rounded-full overflow-hidden">
-                <div className="h-full rounded-full bg-chispa-orange" style={{ width: `${lead.digital_gap_score}%` }} />
+              <span className="text-[10px] text-fuega-text-muted">Digital Gap Score:</span>
+              <div className="flex-1 h-2 bg-fuega-surface rounded-full overflow-hidden">
+                <div className="h-full rounded-full bg-fuega-orange" style={{ width: `${lead.digital_gap_score}%` }} />
               </div>
-              <span className="num text-[11px] text-chispa-orange">{lead.digital_gap_score}%</span>
+              <span className="num text-[11px] text-fuega-orange">{lead.digital_gap_score}%</span>
             </div>
           )}
           {lead.recommended_service_tier && (
-            <div className="mt-2 text-[10px] text-chispa-text-muted">
-              Recommended tier: <span className="text-chispa-text-primary font-medium">{lead.recommended_service_tier}</span>
+            <div className="mt-2 text-[10px] text-fuega-text-muted">
+              Recommended tier: <span className="text-fuega-text-primary font-medium">{lead.recommended_service_tier}</span>
             </div>
           )}
         </ChartCard>
@@ -289,13 +289,13 @@ export default function LeadDetail() {
         <ChartCard title="Outreach" subtitle={lead.outreach_channel || 'Draft your pitch'}>
           <div className="space-y-2">
             <div className="flex items-center gap-2 mb-2">
-              <span className="text-[10px] text-chispa-text-muted">Channel:</span>
+              <span className="text-[10px] text-fuega-text-muted">Channel:</span>
               {CHANNELS.map(ch => (
                 <button
                   key={ch}
                   onClick={() => setChannel(ch)}
                   className={`text-[10px] px-2 py-0.5 rounded border transition-colors ${
-                    channel === ch ? 'bg-chispa-orange/10 border-chispa-orange/40 text-chispa-orange' : 'border-chispa-border text-chispa-text-muted hover:text-chispa-text-primary'
+                    channel === ch ? 'bg-fuega-orange/10 border-fuega-orange/40 text-fuega-orange' : 'border-fuega-border text-fuega-text-muted hover:text-fuega-text-primary'
                   }`}
                 >
                   {ch}
@@ -307,13 +307,13 @@ export default function LeadDetail() {
               onChange={e => setOutreach(e.target.value)}
               placeholder="Outreach message draft... Use 'Draft Outreach' agent action to auto-generate."
               rows={6}
-              className="w-full bg-chispa-input border border-chispa-border rounded-lg px-2.5 py-1.5 text-[12px] text-chispa-text-primary placeholder-chispa-text-muted resize-none focus:outline-none focus:border-chispa-orange/50"
+              className="w-full bg-fuega-input border border-fuega-border rounded-lg px-2.5 py-1.5 text-[12px] text-fuega-text-primary placeholder-fuega-text-muted resize-none focus:outline-none focus:border-fuega-orange/50"
             />
             <div className="flex items-center gap-2">
               <button
                 onClick={handleSaveOutreach}
                 disabled={saving}
-                className="flex items-center gap-1.5 px-3 py-1 rounded bg-chispa-orange text-white text-[11px] font-medium hover:bg-chispa-orange/90 transition-colors disabled:opacity-50"
+                className="flex items-center gap-1.5 px-3 py-1 rounded bg-fuega-orange text-white text-[11px] font-medium hover:bg-fuega-orange/90 transition-colors disabled:opacity-50"
               >
                 <Save className="w-3 h-3" />
                 Save Outreach
@@ -343,14 +343,14 @@ export default function LeadDetail() {
               {typeof lead.agent_research === 'object' ? (
                 Object.entries(lead.agent_research).map(([key, val]) => (
                   <div key={key} className="text-[11px]">
-                    <span className="font-semibold text-chispa-text-primary capitalize">{key.replace(/_/g, ' ')}:</span>{' '}
-                    <span className="text-chispa-text-secondary">
+                    <span className="font-semibold text-fuega-text-primary capitalize">{key.replace(/_/g, ' ')}:</span>{' '}
+                    <span className="text-fuega-text-secondary">
                       {typeof val === 'string' ? val : JSON.stringify(val, null, 2)}
                     </span>
                   </div>
                 ))
               ) : (
-                <pre className="text-[10px] text-chispa-text-secondary whitespace-pre-wrap">{String(lead.agent_research)}</pre>
+                <pre className="text-[10px] text-fuega-text-secondary whitespace-pre-wrap">{String(lead.agent_research)}</pre>
               )}
             </div>
           ) : (
@@ -366,12 +366,12 @@ export default function LeadDetail() {
               onChange={e => setNotes(e.target.value)}
               placeholder="Add notes about this lead..."
               rows={5}
-              className="w-full bg-chispa-input border border-chispa-border rounded-lg px-2.5 py-1.5 text-[12px] text-chispa-text-primary placeholder-chispa-text-muted resize-none focus:outline-none focus:border-chispa-orange/50"
+              className="w-full bg-fuega-input border border-fuega-border rounded-lg px-2.5 py-1.5 text-[12px] text-fuega-text-primary placeholder-fuega-text-muted resize-none focus:outline-none focus:border-fuega-orange/50"
             />
             <button
               onClick={handleSaveNotes}
               disabled={saving}
-              className="flex items-center gap-1.5 px-3 py-1 rounded bg-chispa-orange text-white text-[11px] font-medium hover:bg-chispa-orange/90 transition-colors disabled:opacity-50"
+              className="flex items-center gap-1.5 px-3 py-1 rounded bg-fuega-orange text-white text-[11px] font-medium hover:bg-fuega-orange/90 transition-colors disabled:opacity-50"
             >
               <Save className="w-3 h-3" />
               Save Notes

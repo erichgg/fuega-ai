@@ -310,7 +310,7 @@ export default function ControlPanel() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-24">
-        <div className="w-6 h-6 border-2 border-chispa-orange border-t-transparent rounded-full animate-spin" />
+        <div className="w-6 h-6 border-2 border-fuega-orange border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -333,7 +333,7 @@ export default function ControlPanel() {
         action={
           <div className="flex items-center gap-2 text-[10px]">
             <StatusDot status={connected ? 'active' : 'error'} pulse={connected} label={connected ? 'Live' : 'Offline'} size="sm" />
-            {totalSessionCost > 0 && <span className="text-chispa-text-muted num">Session: ${totalSessionCost.toFixed(4)}</span>}
+            {totalSessionCost > 0 && <span className="text-fuega-text-muted num">Session: ${totalSessionCost.toFixed(4)}</span>}
           </div>
         }
       />
@@ -347,11 +347,11 @@ export default function ControlPanel() {
       {tab === 'actions' && (
         <div className="space-y-3">
           {ACTION_CATEGORIES.map(cat => (
-            <div key={cat.label} className="bg-chispa-card border border-chispa-border rounded-lg overflow-hidden">
-              <div className="flex items-center gap-2 px-3 py-2 border-b border-chispa-border">
+            <div key={cat.label} className="bg-fuega-card border border-fuega-border rounded-lg overflow-hidden">
+              <div className="flex items-center gap-2 px-3 py-2 border-b border-fuega-border">
                 <span style={{ color: cat.color }}>{cat.icon}</span>
-                <h3 className="text-[11px] uppercase tracking-wider font-mono font-semibold text-chispa-text-primary">{cat.label}</h3>
-                <span className="text-[10px] text-chispa-text-muted">{cat.actions.length} actions</span>
+                <h3 className="text-[11px] uppercase tracking-wider font-mono font-semibold text-fuega-text-primary">{cat.label}</h3>
+                <span className="text-[10px] text-fuega-text-muted">{cat.actions.length} actions</span>
               </div>
               <div className="p-2 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-1.5">
                 {cat.actions.map(action => {
@@ -362,9 +362,9 @@ export default function ControlPanel() {
                       key={key}
                       onClick={() => handleRunAction(action)}
                       disabled={!!runningAction}
-                      className="flex items-start gap-2 p-2 rounded-lg bg-chispa-input border border-chispa-border hover:border-chispa-orange/30 text-left transition-all disabled:opacity-50 group"
+                      className="flex items-start gap-2 p-2 rounded-lg bg-fuega-input border border-fuega-border hover:border-fuega-orange/30 text-left transition-all disabled:opacity-50 group"
                     >
-                      <div className="p-1 rounded bg-chispa-surface group-hover:bg-chispa-orange/10 transition-colors mt-0.5" style={{ color: cat.color }}>
+                      <div className="p-1 rounded bg-fuega-surface group-hover:bg-fuega-orange/10 transition-colors mt-0.5" style={{ color: cat.color }}>
                         {isRunning ? (
                           <div className="w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin" />
                         ) : (
@@ -372,11 +372,11 @@ export default function ControlPanel() {
                         )}
                       </div>
                       <div className="min-w-0 flex-1">
-                        <p className="text-[11px] font-semibold text-chispa-text-primary truncate">{action.label}</p>
-                        <p className="text-[9px] text-chispa-text-muted leading-tight">{action.description}</p>
+                        <p className="text-[11px] font-semibold text-fuega-text-primary truncate">{action.label}</p>
+                        <p className="text-[9px] text-fuega-text-muted leading-tight">{action.description}</p>
                         <div className="flex items-center gap-2 mt-1">
-                          <span className="text-[9px] text-chispa-text-muted num">{action.cost}</span>
-                          <span className="text-[9px] text-chispa-text-muted">via {action.agent.replace(/_/g, ' ')}</span>
+                          <span className="text-[9px] text-fuega-text-muted num">{action.cost}</span>
+                          <span className="text-[9px] text-fuega-text-muted">via {action.agent.replace(/_/g, ' ')}</span>
                         </div>
                       </div>
                     </button>
@@ -409,7 +409,7 @@ export default function ControlPanel() {
             </button>
             <Link
               to="/agents"
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-chispa-input border border-chispa-border text-chispa-text-secondary text-[11px] font-medium hover:text-chispa-text-primary transition-colors"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-fuega-input border border-fuega-border text-fuega-text-secondary text-[11px] font-medium hover:text-fuega-text-primary transition-colors"
             >
               <Bot className="w-3.5 h-3.5" /> Manage Agents
             </Link>
@@ -427,30 +427,30 @@ export default function ControlPanel() {
               return (
                 <div
                   key={agent.slug}
-                  className={`bg-chispa-card border rounded-lg p-2.5 transition-all ${
-                    isActive ? 'border-green-500/30' : 'border-chispa-border opacity-60'
+                  className={`bg-fuega-card border rounded-lg p-2.5 transition-all ${
+                    isActive ? 'border-green-500/30' : 'border-fuega-border opacity-60'
                   }`}
                 >
                   <div className="flex items-center justify-between mb-1.5">
                     <div className="flex items-center gap-1.5 min-w-0 flex-1">
-                      <Bot className="w-3.5 h-3.5 text-chispa-orange flex-shrink-0" />
-                      <p className="text-[11px] font-semibold text-chispa-text-primary truncate">{agent.name}</p>
+                      <Bot className="w-3.5 h-3.5 text-fuega-orange flex-shrink-0" />
+                      <p className="text-[11px] font-semibold text-fuega-text-primary truncate">{agent.name}</p>
                     </div>
                     <button
                       onClick={() => toggleAgentStatus(agent.slug, agent.status)}
                       role="switch"
                       aria-checked={isActive}
-                      className={`relative w-8 h-[18px] rounded-full transition-colors flex-shrink-0 ${isActive ? 'bg-green-500' : 'bg-chispa-border'}`}
+                      className={`relative w-8 h-[18px] rounded-full transition-colors flex-shrink-0 ${isActive ? 'bg-green-500' : 'bg-fuega-border'}`}
                     >
                       <span className={`absolute top-[2px] w-[14px] h-[14px] rounded-full bg-white transition-transform ${isActive ? 'left-[16px]' : 'left-[2px]'}`} />
                     </button>
                   </div>
-                  <p className="text-[9px] text-chispa-text-muted mb-1.5 truncate">{agent.role}</p>
-                  <div className="flex items-center justify-between text-[9px] text-chispa-text-muted mb-1">
+                  <p className="text-[9px] text-fuega-text-muted mb-1.5 truncate">{agent.role}</p>
+                  <div className="flex items-center justify-between text-[9px] text-fuega-text-muted mb-1">
                     <span className="num">${(agent.month_spend_usd || 0).toFixed(2)} / ${agent.monthly_budget_usd || 0}</span>
                     <span className="num">{pct.toFixed(0)}%</span>
                   </div>
-                  <div className="h-[3px] bg-chispa-surface rounded-full overflow-hidden">
+                  <div className="h-[3px] bg-fuega-surface rounded-full overflow-hidden">
                     <div className="h-full rounded-full" style={{ width: `${Math.min(pct, 100)}%`, backgroundColor: pct > 80 ? '#EF4444' : pct > 50 ? '#EAB308' : '#00D4AA' }} />
                   </div>
                 </div>
@@ -463,31 +463,31 @@ export default function ControlPanel() {
       {/* === PIPELINES TAB === */}
       {tab === 'pipelines' && (
         <div>
-          <div className="flex items-start gap-2 mb-3 bg-chispa-purple/5 border border-chispa-purple/20 rounded-lg p-2.5">
-            <AlertTriangle className="w-3.5 h-3.5 text-chispa-purple flex-shrink-0 mt-0.5" />
-            <p className="text-[11px] text-chispa-text-secondary">
+          <div className="flex items-start gap-2 mb-3 bg-fuega-purple/5 border border-fuega-purple/20 rounded-lg p-2.5">
+            <AlertTriangle className="w-3.5 h-3.5 text-fuega-purple flex-shrink-0 mt-0.5" />
+            <p className="text-[11px] text-fuega-text-secondary">
               Pipelines run multiple agents in sequence. Each pipeline triggers the full workflow end-to-end.
-              <Link to="/workflows" className="text-chispa-orange hover:underline ml-1">View detailed workflow management →</Link>
+              <Link to="/workflows" className="text-fuega-orange hover:underline ml-1">View detailed workflow management →</Link>
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
             {defEntries.map(([key, wf]: [string, any], i: number) => (
-              <div key={key} className="bg-chispa-card border border-chispa-border rounded-lg p-3 hover:border-chispa-orange/20 transition-colors">
+              <div key={key} className="bg-fuega-card border border-fuega-border rounded-lg p-3 hover:border-fuega-orange/20 transition-colors">
                 <div className="flex items-center justify-between mb-2">
-                  <h3 className="text-[12px] font-semibold text-chispa-text-primary">{wf.name}</h3>
+                  <h3 className="text-[12px] font-semibold text-fuega-text-primary">{wf.name}</h3>
                   <Kbd>{i + 1}</Kbd>
                 </div>
-                <p className="text-[10px] text-chispa-text-muted mb-2 leading-relaxed">{wf.description}</p>
+                <p className="text-[10px] text-fuega-text-muted mb-2 leading-relaxed">{wf.description}</p>
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-[9px] text-chispa-text-muted">
+                  <div className="flex items-center gap-2 text-[9px] text-fuega-text-muted">
                     <span>{wf.steps?.length || 0} steps</span>
                     {wf.schedule && <span className="num">{wf.schedule}</span>}
                   </div>
                   <button
                     onClick={() => handleQuickRun(key)}
                     disabled={!!quickRunning}
-                    className="flex items-center gap-1 bg-chispa-orange hover:bg-chispa-orange/80 text-white px-2.5 py-1 rounded text-[11px] font-medium transition-colors disabled:opacity-50"
+                    className="flex items-center gap-1 bg-fuega-orange hover:bg-fuega-orange/80 text-white px-2.5 py-1 rounded text-[11px] font-medium transition-colors disabled:opacity-50"
                   >
                     {quickRunning === key ? (
                       <RefreshCw className="w-3 h-3 animate-spin" />
@@ -506,7 +506,7 @@ export default function ControlPanel() {
       {/* === DIRECT PROMPT TAB === */}
       {tab === 'prompt' && (
         <div>
-          <p className="text-[11px] text-chispa-text-muted mb-3">Select an agent and send them a direct message. Use this for ad-hoc queries or custom instructions.</p>
+          <p className="text-[11px] text-fuega-text-muted mb-3">Select an agent and send them a direct message. Use this for ad-hoc queries or custom instructions.</p>
 
           {/* Agent selector grid */}
           <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-7 gap-1.5 mb-3">
@@ -516,13 +516,13 @@ export default function ControlPanel() {
                 onClick={() => { setPromptAgent(agent.slug); setPromptResponse(null); }}
                 className={`flex items-center gap-1.5 p-2 rounded-lg border text-left transition-all ${
                   promptAgent === agent.slug
-                    ? 'bg-chispa-orange/10 border-chispa-orange/40'
-                    : 'bg-chispa-input border-chispa-border hover:border-chispa-orange/20'
+                    ? 'bg-fuega-orange/10 border-fuega-orange/40'
+                    : 'bg-fuega-input border-fuega-border hover:border-fuega-orange/20'
                 } ${agent.status !== 'active' ? 'opacity-50' : ''}`}
               >
                 <StatusDot status={agent.status === 'active' ? 'active' : 'paused'} size="sm" />
                 <div className="min-w-0 flex-1">
-                  <p className="text-[10px] font-semibold text-chispa-text-primary truncate">{agent.name}</p>
+                  <p className="text-[10px] font-semibold text-fuega-text-primary truncate">{agent.name}</p>
                 </div>
               </button>
             ))}
@@ -530,17 +530,17 @@ export default function ControlPanel() {
 
           {/* Prompt area */}
           {promptAgent && (
-            <div className="bg-chispa-card border border-chispa-border rounded-lg p-3 animate-slideUp">
+            <div className="bg-fuega-card border border-fuega-border rounded-lg p-3 animate-slideUp">
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2">
-                  <Bot className="w-3.5 h-3.5 text-chispa-orange" />
-                  <span className="text-[12px] font-semibold text-chispa-text-primary">
+                  <Bot className="w-3.5 h-3.5 text-fuega-orange" />
+                  <span className="text-[12px] font-semibold text-fuega-text-primary">
                     {agents.find(a => a.slug === promptAgent)?.name || promptAgent}
                   </span>
                 </div>
                 <button
                   onClick={() => { setPromptAgent(null); setPromptResponse(null); }}
-                  className="text-[10px] text-chispa-text-muted hover:text-chispa-text-primary"
+                  className="text-[10px] text-fuega-text-muted hover:text-fuega-text-primary"
                 >
                   Close
                 </button>
@@ -553,12 +553,12 @@ export default function ControlPanel() {
                   onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSendPrompt(); } }}
                   placeholder="Ask anything... (Enter to send)"
                   rows={3}
-                  className="flex-1 bg-chispa-input border border-chispa-border rounded-lg px-2.5 py-1.5 text-[12px] text-chispa-text-primary placeholder-chispa-text-muted resize-none focus:outline-none focus:border-chispa-orange/50"
+                  className="flex-1 bg-fuega-input border border-fuega-border rounded-lg px-2.5 py-1.5 text-[12px] text-fuega-text-primary placeholder-fuega-text-muted resize-none focus:outline-none focus:border-fuega-orange/50"
                 />
                 <button
                   onClick={handleSendPrompt}
                   disabled={promptSending || !promptText.trim()}
-                  className="px-3 py-1.5 bg-chispa-orange text-white rounded-lg hover:bg-chispa-orange/90 disabled:opacity-50 transition-colors self-end"
+                  className="px-3 py-1.5 bg-fuega-orange text-white rounded-lg hover:bg-fuega-orange/90 disabled:opacity-50 transition-colors self-end"
                 >
                   {promptSending ? (
                     <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -572,7 +572,7 @@ export default function ControlPanel() {
                   <button
                     key={preset}
                     onClick={() => setPromptText(preset)}
-                    className="text-[9px] px-2 py-0.5 rounded bg-chispa-input border border-chispa-border text-chispa-text-muted hover:text-chispa-orange hover:border-chispa-orange/30 transition-colors"
+                    className="text-[9px] px-2 py-0.5 rounded bg-fuega-input border border-fuega-border text-fuega-text-muted hover:text-fuega-orange hover:border-fuega-orange/30 transition-colors"
                   >
                     {preset}
                   </button>
@@ -580,17 +580,17 @@ export default function ControlPanel() {
               </div>
 
               {promptResponse && (
-                <div className="mt-2 bg-chispa-input border border-chispa-border rounded-lg p-2 animate-slideUp">
+                <div className="mt-2 bg-fuega-input border border-fuega-border rounded-lg p-2 animate-slideUp">
                   <div className="flex items-center justify-between mb-1">
-                    <span className="text-[11px] font-semibold text-chispa-text-primary flex items-center gap-1">
-                      <Bot className="w-3 h-3 text-chispa-orange" />
+                    <span className="text-[11px] font-semibold text-fuega-text-primary flex items-center gap-1">
+                      <Bot className="w-3 h-3 text-fuega-orange" />
                       {agents.find(a => a.slug === promptResponse.agent)?.name}
                     </span>
                     {promptResponse.cost != null && promptResponse.cost > 0 && (
-                      <span className="text-[9px] text-chispa-text-muted num">${promptResponse.cost.toFixed(4)}</span>
+                      <span className="text-[9px] text-fuega-text-muted num">${promptResponse.cost.toFixed(4)}</span>
                     )}
                   </div>
-                  <p className="text-[11px] text-chispa-text-secondary whitespace-pre-wrap leading-relaxed">
+                  <p className="text-[11px] text-fuega-text-secondary whitespace-pre-wrap leading-relaxed">
                     {promptResponse.response}
                   </p>
                 </div>
@@ -599,7 +599,7 @@ export default function ControlPanel() {
           )}
 
           {!promptAgent && (
-            <div className="text-center py-8 text-chispa-text-muted text-[12px]">
+            <div className="text-center py-8 text-fuega-text-muted text-[12px]">
               Select an agent above to send them a direct message
             </div>
           )}
@@ -609,18 +609,18 @@ export default function ControlPanel() {
 
         {/* Live Feed Panel — always visible */}
         <div className="w-72 xl:w-80 flex-shrink-0 hidden lg:block">
-          <div className="bg-chispa-card border border-chispa-border rounded-lg sticky top-3 max-h-[calc(100vh-100px)] flex flex-col">
-            <div className="flex items-center justify-between px-3 py-2 border-b border-chispa-border">
+          <div className="bg-fuega-card border border-fuega-border rounded-lg sticky top-3 max-h-[calc(100vh-100px)] flex flex-col">
+            <div className="flex items-center justify-between px-3 py-2 border-b border-fuega-border">
               <div className="flex items-center gap-2">
-                <Radio className="w-3.5 h-3.5 text-chispa-orange" />
-                <h3 className="text-[11px] uppercase tracking-wider font-mono font-semibold text-chispa-text-primary">Live Feed</h3>
+                <Radio className="w-3.5 h-3.5 text-fuega-orange" />
+                <h3 className="text-[11px] uppercase tracking-wider font-mono font-semibold text-fuega-text-primary">Live Feed</h3>
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-[9px] text-chispa-text-muted num">{actionResults.length} events</span>
+                <span className="text-[9px] text-fuega-text-muted num">{actionResults.length} events</span>
                 {actionResults.length > 0 && (
                   <button
                     onClick={() => setActionResults([])}
-                    className="text-chispa-text-muted hover:text-chispa-text-primary transition-colors"
+                    className="text-fuega-text-muted hover:text-fuega-text-primary transition-colors"
                     title="Clear feed"
                   >
                     <Trash2 className="w-3 h-3" />
@@ -631,7 +631,7 @@ export default function ControlPanel() {
 
             <div className="flex-1 overflow-y-auto p-2 space-y-1.5">
               {actionResults.length === 0 && (
-                <div className="text-center py-8 text-[10px] text-chispa-text-muted">
+                <div className="text-center py-8 text-[10px] text-fuega-text-muted">
                   <Radio className="w-5 h-5 mx-auto mb-2 opacity-30" />
                   <p>No activity yet</p>
                   <p className="mt-1">Run an action to see progress here</p>
@@ -642,10 +642,10 @@ export default function ControlPanel() {
                   key={log.id}
                   className={`rounded-lg border p-2 text-[10px] transition-all ${
                     log.status === 'running'
-                      ? 'border-chispa-orange/30 bg-chispa-orange/5 animate-pulse'
+                      ? 'border-fuega-orange/30 bg-fuega-orange/5 animate-pulse'
                       : log.status === 'error'
                       ? 'border-red-500/20 bg-red-500/5'
-                      : 'border-chispa-border bg-chispa-input'
+                      : 'border-fuega-border bg-fuega-input'
                   }`}
                 >
                   <div className="flex items-center gap-1.5 mb-1">
@@ -654,22 +654,22 @@ export default function ControlPanel() {
                       pulse={log.status === 'running'}
                       size="sm"
                     />
-                    <span className="font-semibold text-chispa-text-primary truncate flex-1">{log.label}</span>
+                    <span className="font-semibold text-fuega-text-primary truncate flex-1">{log.label}</span>
                   </div>
-                  <div className="flex items-center gap-2 text-chispa-text-muted">
+                  <div className="flex items-center gap-2 text-fuega-text-muted">
                     <span>{log.timestamp.toLocaleTimeString('en', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}</span>
                     {log.type !== 'ws_event' && (
-                      <span className="px-1 py-px rounded bg-chispa-surface text-[8px] uppercase">{log.type}</span>
+                      <span className="px-1 py-px rounded bg-fuega-surface text-[8px] uppercase">{log.type}</span>
                     )}
-                    {log.cost != null && log.cost > 0 && <span className="num text-chispa-orange">${log.cost.toFixed(4)}</span>}
+                    {log.cost != null && log.cost > 0 && <span className="num text-fuega-orange">${log.cost.toFixed(4)}</span>}
                     {log.duration != null && <span className="num">{log.duration}ms</span>}
                   </div>
                   {log.result && (
                     <details className="mt-1">
-                      <summary className="text-[9px] text-chispa-text-muted cursor-pointer hover:text-chispa-text-secondary">
+                      <summary className="text-[9px] text-fuega-text-muted cursor-pointer hover:text-fuega-text-secondary">
                         View result
                       </summary>
-                      <pre className="mt-1 text-[9px] text-chispa-text-secondary whitespace-pre-wrap font-mono bg-chispa-surface rounded p-1.5 max-h-32 overflow-y-auto border border-chispa-border/50">
+                      <pre className="mt-1 text-[9px] text-fuega-text-secondary whitespace-pre-wrap font-mono bg-fuega-surface rounded p-1.5 max-h-32 overflow-y-auto border border-fuega-border/50">
                         {log.result}
                       </pre>
                     </details>
@@ -681,7 +681,7 @@ export default function ControlPanel() {
 
             {/* Feed footer with session totals */}
             {actionResults.length > 0 && (
-              <div className="px-3 py-1.5 border-t border-chispa-border text-[9px] text-chispa-text-muted flex items-center justify-between">
+              <div className="px-3 py-1.5 border-t border-fuega-border text-[9px] text-fuega-text-muted flex items-center justify-between">
                 <span>
                   {actionResults.filter(l => l.status === 'success').length} ok /
                   {actionResults.filter(l => l.status === 'error').length} err /

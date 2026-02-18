@@ -32,6 +32,15 @@ class Settings(BaseSettings):
     cors_origins: list[str] = ["http://localhost:5173", "https://fuega.ai", "https://app.fuega.ai"]
     environment: str = "development"
     log_level: str = "INFO"
+    jwt_secret: str = "change-me-in-production"
+    jwt_algorithm: str = "HS256"
+    stripe_secret_key: str = ""
+    stripe_publishable_key: str = ""
+    stripe_webhook_secret: str = ""
+    stripe_starter_price_id: str = ""
+    stripe_growth_price_id: str = ""
+    stripe_pro_price_id: str = ""
+    stripe_enterprise_price_id: str = ""
 
     model_config = {"env_file": ".env", "env_file_encoding": "utf-8", "extra": "ignore"}
 

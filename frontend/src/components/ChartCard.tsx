@@ -16,17 +16,17 @@ export function ChartCard({ title, subtitle, children, action, className = '', c
   const [collapsed, setCollapsed] = useState(defaultCollapsed);
 
   return (
-    <div className={`bg-chispa-card border border-chispa-border rounded-lg overflow-hidden ${className}`}>
-      <div className="flex items-center justify-between px-3 py-2 border-b border-chispa-border">
+    <div className={`bg-fuega-card border border-fuega-border rounded-lg overflow-hidden ${className}`}>
+      <div className="flex items-center justify-between px-3 py-2 border-b border-fuega-border">
         <div className="flex items-center gap-2">
           {collapsible && (
-            <button onClick={() => setCollapsed(!collapsed)} className="text-chispa-text-muted hover:text-chispa-text-primary transition-colors">
+            <button onClick={() => setCollapsed(!collapsed)} className="text-fuega-text-muted hover:text-fuega-text-primary transition-colors">
               {collapsed ? <ChevronRight className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
             </button>
           )}
           <div className="flex items-baseline gap-2">
-            <h3 className={clsx("text-[11px] uppercase tracking-wider font-mono font-semibold text-chispa-text-primary")}>{title}</h3>
-            {subtitle && <p className="text-[10px] text-chispa-text-muted">{subtitle}</p>}
+            <h3 className={clsx("text-[11px] uppercase tracking-wider font-mono font-semibold text-fuega-text-primary")}>{title}</h3>
+            {subtitle && <p className="text-[10px] text-fuega-text-muted">{subtitle}</p>}
           </div>
         </div>
         {action}

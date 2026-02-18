@@ -9,13 +9,13 @@ const ThemeContext = createContext<{
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setTheme] = useState<Theme>(() => {
-    const saved = localStorage.getItem('chispa-theme');
+    const saved = localStorage.getItem('fuega-theme');
     return (saved === 'light' || saved === 'dark') ? saved : 'dark';
   });
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
-    localStorage.setItem('chispa-theme', theme);
+    localStorage.setItem('fuega-theme', theme);
   }, [theme]);
 
   const toggle = () => setTheme(t => t === 'dark' ? 'light' : 'dark');

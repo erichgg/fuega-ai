@@ -37,12 +37,12 @@ export function InlineEdit({ value, onSave, type = 'text', className, displayCla
       <button
         onClick={() => { setDraft(value); setEditing(true); }}
         className={clsx(
-          'hover:text-chispa-orange transition-colors cursor-pointer text-left',
+          'hover:text-fuega-orange transition-colors cursor-pointer text-left',
           displayClassName
         )}
         title="Click to edit"
       >
-        {value || <span className="text-chispa-text-muted italic">{placeholder || 'Click to edit'}</span>}
+        {value || <span className="text-fuega-text-muted italic">{placeholder || 'Click to edit'}</span>}
       </button>
     );
   }
@@ -60,7 +60,7 @@ export function InlineEdit({ value, onSave, type = 'text', className, displayCla
       }}
       aria-label="Edit value"
       className={clsx(
-        'bg-chispa-input border border-chispa-orange/50 rounded px-2 py-0.5 text-chispa-text-primary focus:outline-none',
+        'bg-fuega-input border border-fuega-orange/50 rounded px-2 py-0.5 text-fuega-text-primary focus:outline-none',
         className
       )}
     />

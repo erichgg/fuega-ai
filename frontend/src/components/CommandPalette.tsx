@@ -103,31 +103,31 @@ export function CommandPalette({ open, onClose }: Props) {
         role="dialog"
         aria-modal="true"
         aria-label="Command palette"
-        className="relative w-full max-w-lg bg-chispa-card border border-chispa-border rounded-xl shadow-2xl overflow-hidden animate-slideDown"
+        className="relative w-full max-w-lg bg-fuega-card border border-fuega-border rounded-xl shadow-2xl overflow-hidden animate-slideDown"
         onClick={e => e.stopPropagation()}
       >
         {/* Search input */}
-        <div className="flex items-center gap-3 px-4 py-3 border-b border-chispa-border">
-          <Command className="w-4 h-4 text-chispa-text-muted" />
+        <div className="flex items-center gap-3 px-4 py-3 border-b border-fuega-border">
+          <Command className="w-4 h-4 text-fuega-text-muted" />
           <input
             ref={inputRef}
             type="text"
             value={query}
             onChange={e => setQuery(e.target.value)}
             placeholder="Type a command or search..."
-            className="flex-1 bg-transparent text-sm text-chispa-text-primary placeholder-chispa-text-muted focus:outline-none"
+            className="flex-1 bg-transparent text-sm text-fuega-text-primary placeholder-fuega-text-muted focus:outline-none"
           />
-          <kbd className="text-[10px] px-1.5 py-0.5 rounded bg-chispa-input border border-chispa-border text-chispa-text-muted font-mono">ESC</kbd>
+          <kbd className="text-[10px] px-1.5 py-0.5 rounded bg-fuega-input border border-fuega-border text-fuega-text-muted font-mono">ESC</kbd>
         </div>
 
         {/* Results */}
         <div role="listbox" className="max-h-80 overflow-y-auto py-2">
           {filtered.length === 0 && (
-            <div className="px-4 py-8 text-center text-sm text-chispa-text-muted">No results found</div>
+            <div className="px-4 py-8 text-center text-sm text-fuega-text-muted">No results found</div>
           )}
           {Object.entries(sections).map(([section, items]) => (
             <div key={section}>
-              <div className="px-4 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-chispa-text-muted">{section}</div>
+              <div className="px-4 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-fuega-text-muted">{section}</div>
               {items.map(item => {
                 globalIdx++;
                 const isSelected = globalIdx === selectedIndex;
@@ -139,12 +139,12 @@ export function CommandPalette({ open, onClose }: Props) {
                     onClick={() => { item.action(); onClose(); }}
                     onMouseEnter={() => setSelectedIndex(idx)}
                     className={`w-full flex items-center gap-3 px-4 py-2 text-left text-sm transition-colors ${
-                      isSelected ? 'bg-chispa-orange/10 text-chispa-orange' : 'text-chispa-text-secondary hover:bg-chispa-card-hover'
+                      isSelected ? 'bg-fuega-orange/10 text-fuega-orange' : 'text-fuega-text-secondary hover:bg-fuega-card-hover'
                     }`}
                   >
-                    <span className={isSelected ? 'text-chispa-orange' : 'text-chispa-text-muted'}>{item.icon}</span>
+                    <span className={isSelected ? 'text-fuega-orange' : 'text-fuega-text-muted'}>{item.icon}</span>
                     <span className="flex-1">{item.label}</span>
-                    {isSelected && <span className="text-[10px] text-chispa-text-muted">Enter</span>}
+                    {isSelected && <span className="text-[10px] text-fuega-text-muted">Enter</span>}
                   </button>
                 );
               })}
@@ -153,10 +153,10 @@ export function CommandPalette({ open, onClose }: Props) {
         </div>
 
         {/* Footer */}
-        <div className="px-4 py-2 border-t border-chispa-border flex items-center gap-4 text-[10px] text-chispa-text-muted">
-          <span><kbd className="font-mono px-1 py-0.5 rounded bg-chispa-input border border-chispa-border">↑↓</kbd> Navigate</span>
-          <span><kbd className="font-mono px-1 py-0.5 rounded bg-chispa-input border border-chispa-border">↵</kbd> Open</span>
-          <span><kbd className="font-mono px-1 py-0.5 rounded bg-chispa-input border border-chispa-border">esc</kbd> Close</span>
+        <div className="px-4 py-2 border-t border-fuega-border flex items-center gap-4 text-[10px] text-fuega-text-muted">
+          <span><kbd className="font-mono px-1 py-0.5 rounded bg-fuega-input border border-fuega-border">↑↓</kbd> Navigate</span>
+          <span><kbd className="font-mono px-1 py-0.5 rounded bg-fuega-input border border-fuega-border">↵</kbd> Open</span>
+          <span><kbd className="font-mono px-1 py-0.5 rounded bg-fuega-input border border-fuega-border">esc</kbd> Close</span>
         </div>
       </div>
     </div>

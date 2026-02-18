@@ -4,11 +4,12 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from backend.app.database.engine import get_db
 from backend.app.database.models import Client, ClientDeliverable, Invoice
+from backend.app.auth import get_current_user
 from pydantic import BaseModel, Field, EmailStr
 from typing import Optional
 from datetime import datetime, timezone
 
-router = APIRouter()
+router = APIRouter(dependencies=[Depends(get_current_user)])
 
 
 class ClientCreate(BaseModel):

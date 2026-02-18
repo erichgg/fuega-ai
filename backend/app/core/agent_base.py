@@ -31,7 +31,7 @@ REDUCED_TOKEN_AGENTS = {"ceo", "editor"}
 
 
 class BaseAgent:
-    """Base class for all Chyspa AI agents.
+    """Base class for all Fuega AI agents.
 
     Agents are objective, fact-based tools defined by:
     - Role: What decisions this agent makes
@@ -272,7 +272,7 @@ class BaseAgent:
         except (json.JSONDecodeError, TypeError):
             pass
         # Try extracting from code block
-        match = re.search(r'``' + '`(?:json)?\s*([\s\S]*?)\s*``' + '`', text)
+        match = re.search(r'``' + r'`(?:json)?\s*([\s\S]*?)\s*``' + '`', text)
         if match:
             try:
                 return json.loads(match.group(1))

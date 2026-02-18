@@ -1,4 +1,4 @@
-# Chyspa AI — AI Agent Audit Report
+# Fuega AI — AI Agent Audit Report
 
 **Date:** 2026-02-16
 **Auditor:** Claude Opus 4.6 (Consultant Mode)
