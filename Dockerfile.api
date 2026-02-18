@@ -15,12 +15,12 @@ RUN pip install --no-cache-dir .
 COPY backend/ backend/
 COPY config/ config/
 
-# Create data dir
-RUN mkdir -p data
+# Create data dir with proper ownership
+RUN adduser --disabled-password --gecos '' appuser
+RUN mkdir -p data && chown -R appuser:appuser data
 
 EXPOSE 8000
 
-RUN adduser --disabled-password --gecos '' appuser
 USER appuser
 
 CMD ["uvicorn", "backend.app.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "2"]

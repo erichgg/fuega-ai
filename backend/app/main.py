@@ -41,9 +41,9 @@ async def lifespan(app: FastAPI):
     scheduler.start()
     app.state.scheduler = scheduler
 
-    # Create media directories
+    # Create media directories (use /app/data which is writable in Docker)
     from pathlib import Path
-    media_root = Path(__file__).parent.parent / "media"
+    media_root = Path("/app/data/media") if get_settings().environment == "production" else Path(__file__).parent.parent / "media"
     (media_root / "audio").mkdir(parents=True, exist_ok=True)
     (media_root / "images").mkdir(parents=True, exist_ok=True)
 
