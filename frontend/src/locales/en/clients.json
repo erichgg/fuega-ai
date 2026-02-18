@@ -1,0 +1,40 @@
+{
+  "title": "Clients",
+  "subtitle": "{{count}} client · ${{revenue}}/mo revenue",
+  "subtitlePlural": "{{count}} clients · ${{revenue}}/mo revenue",
+  "singleClient": "client",
+  "newClient": "New Client",
+  "form": {
+    "title": "New Client",
+    "contactName": "Contact name *",
+    "businessName": "Business name",
+    "country": "Country (MX)",
+    "createClient": "Create Client",
+    "creating": "Creating..."
+  },
+  "tiers": {
+    "starter": "Starter",
+    "growth": "Growth",
+    "pro": "Pro",
+    "enterprise": "Enterprise"
+  },
+  "stats": {
+    "totalClients": "Total Clients",
+    "monthlyRevenue": "Monthly Revenue",
+    "avgRevenue": "Avg Revenue/Client",
+    "planDistribution": "Plan Distribution"
+  },
+  "searchPlaceholder": "Search clients...",
+  "columns": {
+    "client": "Client",
+    "business": "Business",
+    "plan": "Plan",
+    "revenue": "Revenue",
+    "status": "Status"
+  },
+  "empty": {
+    "noClients": "No clients yet",
+    "noClientsDesc": "Clients will appear here once onboarded through the sales pipeline.",
+    "noMatch": "No clients match your search"
+  }
+}

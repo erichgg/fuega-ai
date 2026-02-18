@@ -1,0 +1,38 @@
+{
+  "title": "SEO",
+  "subtitle": "Search engine optimization tracking",
+  "runAudit": "Run audit",
+  "stats": {
+    "trackedKeywords": "Tracked Keywords",
+    "avgPosition": "Avg Position",
+    "improved": "Improved",
+    "declined": "Declined"
+  },
+  "charts": {
+    "rankDistribution": "Rank Distribution",
+    "currentPositions": "Current keyword positions",
+    "siteAudits": "Site Audits",
+    "auditsCount": "{{count}} audits"
+  },
+  "rankLabels": { "top3": "Top 3", "top10": "Top 10", "top20": "Top 20", "over20": "20+" },
+  "auditScores": { "technical": "Technical", "content": "Content" },
+  "columns": {
+    "keyword": "Keyword",
+    "position": "Position",
+    "trend": "Trend",
+    "change": "Change",
+    "volume": "Volume",
+    "difficulty": "Difficulty",
+    "opportunity": "Opportunity"
+  },
+  "searchPlaceholder": "Search keywords...",
+  "errors": {
+    "auditFailed": "SEO audit failed. Check that the backend is running."
+  },
+  "datasetLabel": "Keywords",
+  "empty": {
+    "noData": "No SEO data yet",
+    "noDataDesc": "Run the SEO pipeline to generate keyword research and site audits.",
+    "noMatch": "No keywords match your search"
+  }
+}

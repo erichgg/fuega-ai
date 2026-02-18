@@ -1,0 +1,55 @@
+{
+  "title": "Pipeline de Conteúdo",
+  "subtitle": "{{count}} itens em todas as etapas",
+  "stages": {
+    "ideas": "Ideias",
+    "approved": "Aprovadas",
+    "writing": "Redação",
+    "review": "Revisão",
+    "revision": "Correção",
+    "ready": "Prontas para Publicar",
+    "published": "Publicadas"
+  },
+  "views": {
+    "kanban": "Kanban",
+    "table": "Tabela"
+  },
+  "newIdea": "Nova Ideia",
+  "form": {
+    "ideaTitle": "Título da ideia...",
+    "platform": "Plataforma"
+  },
+  "stats": {
+    "ideas": "Ideias",
+    "inProduction": "Em Produção",
+    "readyToPublish": "Prontas para Publicar",
+    "published": "Publicadas"
+  },
+  "columns": {
+    "title": "Título",
+    "stage": "Etapa",
+    "platform": "Plataforma",
+    "score": "Pontuação"
+  },
+  "untitled": "Sem título",
+  "noItems": "Sem itens",
+  "emptyTable": "Nenhum item de conteúdo encontrado",
+  "contentByPlatform": "Conteúdo por Plataforma",
+  "distributionSubtitle": "Distribuição entre canais",
+  "media": {
+    "voice": "Voz",
+    "photos": "Fotos",
+    "aiImg": "Img IA",
+    "generateVoiceover": "Gerar Locução",
+    "findStockPhotos": "Buscar Fotos de Stock",
+    "generateImage": "Gerar Imagem"
+  },
+  "agents": {
+    "seoAnalyst": "Analista SEO",
+    "ceo": "CEO",
+    "contentWriter": "Redator de Conteúdo",
+    "editor": "Editor",
+    "socialMediaManager": "Gestor de Redes Sociais",
+    "analyticsAgent": "Agente de Analítica"
+  }
+}

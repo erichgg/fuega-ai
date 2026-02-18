@@ -1,7 +1,7 @@
 """Seed the database with initial agent data from config."""
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
-from backend.app.database.models import Agent, BudgetTracking
+from backend.app.database.models import Agent, AgentStatus, BudgetTracking
 from backend.app.config import load_yaml_config
 from datetime import datetime, timezone
 import logging
@@ -27,6 +27,7 @@ async def seed_agents(db: AsyncSession):
             description=agent_cfg.get("description", ""),
             model=agent_cfg["model"],
             monthly_budget_usd=agent_cfg.get("monthly_budget_usd", 0),
+            status=AgentStatus.PAUSED,
         )
         db.add(agent)
 

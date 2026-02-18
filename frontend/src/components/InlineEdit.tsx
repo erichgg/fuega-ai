@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import clsx from 'clsx';
 
 interface InlineEditProps {
@@ -11,6 +12,7 @@ interface InlineEditProps {
 }
 
 export function InlineEdit({ value, onSave, type = 'text', className, displayClassName, placeholder }: InlineEditProps) {
+  const { t } = useTranslation('common');
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(value);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -40,9 +42,9 @@ export function InlineEdit({ value, onSave, type = 'text', className, displayCla
           'hover:text-fuega-orange transition-colors cursor-pointer text-left',
           displayClassName
         )}
-        title="Click to edit"
+        title={t('common:clickToEdit')}
       >
-        {value || <span className="text-fuega-text-muted italic">{placeholder || 'Click to edit'}</span>}
+        {value || <span className="text-fuega-text-muted italic">{placeholder || t('common:clickToEdit')}</span>}
       </button>
     );
   }

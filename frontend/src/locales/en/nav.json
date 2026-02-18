@@ -1,0 +1,36 @@
+{
+  "sections": {
+    "overview": "Overview",
+    "operations": "Operations",
+    "team": "Team",
+    "business": "Business"
+  },
+  "items": {
+    "dashboard": "Dashboard",
+    "controlPanel": "Control Panel",
+    "analytics": "Analytics",
+    "leads": "Leads",
+    "content": "Content",
+    "campaigns": "Campaigns",
+    "seo": "SEO",
+    "workflows": "Workflows",
+    "organization": "Organization",
+    "agents": "Agents",
+    "teamChat": "Team Chat",
+    "clients": "Clients",
+    "approvals": "Approvals",
+    "billing": "Billing",
+    "settings": "Settings"
+  },
+  "search": "Search...",
+  "signOut": "Sign out",
+  "lightMode": "Light mode",
+  "darkMode": "Dark mode",
+  "hideConsole": "Hide Console",
+  "console": "Console",
+  "collapse": "Collapse",
+  "pages": "Pages",
+  "searchPlaceholder": "Type a command or search...",
+  "navigate": "Navigate",
+  "open": "Open"
+}

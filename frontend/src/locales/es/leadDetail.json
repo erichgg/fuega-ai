@@ -1,0 +1,49 @@
+{
+  "title": "Lead",
+  "notFound": "Lead no encontrado",
+  "notFoundDesc": "Este lead no existe o el backend no está disponible.",
+  "labels": {
+    "score": "Puntuación",
+    "source": "Fuente",
+    "stage": "etapa"
+  },
+  "convertedSuccess": "Lead convertido a Cliente #{{id}}!",
+  "errors": {
+    "convertFailed": "Error al convertir el lead"
+  },
+  "agentActions": {
+    "deepResearch": "Investigación Profunda",
+    "scoreLead": "Calificar Lead",
+    "draftOutreach": "Redactar Contacto",
+    "convertToClient": "Convertir a Cliente"
+  },
+  "digitalPresence": {
+    "title": "Presencia Digital",
+    "subtitle": "Datos de exploración",
+    "googleRating": "Calificación en Google",
+    "reviews": "Reseñas",
+    "website": "Sitio Web",
+    "socialMedia": "Redes Sociales",
+    "digitalGapScore": "Puntuación de Brecha Digital",
+    "recommendedTier": "Plan recomendado"
+  },
+  "outreach": {
+    "title": "Contacto",
+    "channel": "Canal",
+    "placeholder": "Borrador del mensaje de contacto... Usa la acción 'Redactar Contacto' para generar automáticamente.",
+    "saveOutreach": "Guardar Contacto",
+    "sendEmail": "Enviar Correo"
+  },
+  "research": {
+    "title": "Investigación del Agente",
+    "subtitle": "Informe detallado",
+    "noResearch": "Sin investigación aún",
+    "noResearchDesc": "Haz clic en \"Investigación Profunda\" para generar un informe."
+  },
+  "notes": {
+    "title": "Notas",
+    "subtitle": "Notas internas",
+    "placeholder": "Agregar notas sobre este lead...",
+    "saveNotes": "Guardar Notas"
+  }
+}

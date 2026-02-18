@@ -1,0 +1,67 @@
+{
+  "tabs": {
+    "chat": "Chat",
+    "actions": "Actions",
+    "hitlControls": "HITL Controls",
+    "logs": "Logs"
+  },
+  "notFound": "Agent not found",
+  "notFoundDesc": "This agent doesn't exist or the backend is unavailable.",
+  "back": "Back",
+  "export": "Export",
+  "import": "Import",
+  "labels": {
+    "spend": "Spend",
+    "budget": "Budget",
+    "calls": "Calls",
+    "usage": "Usage",
+    "modelTools": "Model & Tools",
+    "inputs": "Inputs",
+    "outputs": "Outputs",
+    "performance": "Performance",
+    "success": "Success",
+    "noneSpecified": "None specified"
+  },
+  "systemPrompt": "System Prompt",
+  "chat": {
+    "title": "Direct Chat",
+    "session": "Session",
+    "clear": "Clear",
+    "sendMessage": "Send a message to chat with {{name}}",
+    "placeholder": "Ask {{name}}...",
+    "requestFailed": "Request failed. Check the backend."
+  },
+  "actions": {
+    "title": "Available Actions for {{name}}",
+    "description": "Run individual workflow steps. Each fires a single API call to this agent.",
+    "noActions": "No workflow actions mapped",
+    "running": "Running...",
+    "result": "Result"
+  },
+  "hitl": {
+    "title": "Human-in-the-Loop Controls",
+    "description": "Configure which actions require human approval before execution.",
+    "auto": "Auto",
+    "approve": "Approve",
+    "manual": "Manual",
+    "noActions": "No actions configured",
+    "noActionsDesc": "Agent actions will appear here once the backend provides them."
+  },
+  "logs": {
+    "title": "Activity Log",
+    "noActivity": "No activity yet",
+    "action": "Action"
+  },
+  "errors": {
+    "updateActionMode": "Failed to update action mode",
+    "exportFailed": "Failed to export config",
+    "importFailed": "Failed to import config",
+    "actionFailed": "Action failed",
+    "statusFailed": "Failed to update status"
+  },
+  "modeSetTo": "{{action}} set to {{mode}}",
+  "configExported": "Config exported",
+  "configImported": "Config imported successfully",
+  "pauseAgent": "Pause agent",
+  "activateAgent": "Activate agent"
+}

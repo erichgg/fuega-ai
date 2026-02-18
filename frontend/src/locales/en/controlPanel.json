@@ -1,0 +1,123 @@
+{
+  "title": "Control Panel",
+  "subtitle": "{{active}}/{{total}} agents active — Fire commands, run operations, control the fleet",
+  "tabs": {
+    "actions": "Actions",
+    "fleet": "Agent Fleet",
+    "pipelines": "Pipelines",
+    "prompt": "Direct Prompt"
+  },
+  "actions": {
+    "actionsCount": "{{count}} actions",
+    "via": "via {{agent}}"
+  },
+  "fleet": {
+    "activateAll": "Activate All",
+    "pauseAll": "Pause All",
+    "manageAgents": "Manage Agents",
+    "activeCount": "{{count}} active",
+    "pausedCount": "{{count}} paused"
+  },
+  "pipelines": {
+    "info": "Pipelines run multiple agents in sequence. Each pipeline triggers the full workflow end-to-end.",
+    "viewWorkflows": "View detailed workflow management →",
+    "steps": "{{count}} steps",
+    "runAll": "Run"
+  },
+  "prompt": {
+    "description": "Select an agent and send them a direct message. Use this for ad-hoc queries or custom instructions.",
+    "selectAgent": "Select an agent above to send them a direct message",
+    "placeholder": "Ask anything... (Enter to send)",
+    "close": "Close",
+    "presets": {
+      "statusReport": "Status report",
+      "workingOn": "What are you working on?",
+      "budgetCheck": "Budget check",
+      "anyBlockers": "Any blockers?",
+      "weeklySummary": "Weekly summary",
+      "topPriorities": "Top priorities"
+    }
+  },
+  "liveFeed": {
+    "title": "Live Feed",
+    "events": "{{count}} events",
+    "clearFeed": "Clear feed",
+    "noActivity": "No activity yet",
+    "runAction": "Run an action to see progress here",
+    "ok": "ok",
+    "err": "err",
+    "running": "running",
+    "total": "Total"
+  },
+  "categories": {
+    "contentOperations": "Content Operations",
+    "seoAnalytics": "SEO & Analytics",
+    "salesOutreach": "Sales & Outreach",
+    "advertising": "Advertising",
+    "emailCampaigns": "Email & Campaigns",
+    "financeCompliance": "Finance & Compliance",
+    "strategic": "Strategic"
+  },
+  "actionLabels": {
+    "researchKeywords": "Research Keywords",
+    "writeContent": "Write Content",
+    "reviewContent": "Review Content",
+    "schedulePosts": "Schedule Posts",
+    "postToTwitter": "Post to Twitter",
+    "siteAudit": "Site Audit",
+    "findOpportunities": "Find Opportunities",
+    "collectMetrics": "Collect Metrics",
+    "generateReport": "Generate Report",
+    "findNewProspects": "Find New Prospects",
+    "deepDiveResearch": "Deep-Dive Research",
+    "scoreQualifyLeads": "Score & Qualify Leads",
+    "draftOutreachMessages": "Draft Outreach Messages",
+    "researchAudience": "Research Audience",
+    "createAdCopy": "Create Ad Copy",
+    "trackAdMetrics": "Track Ad Metrics",
+    "designCampaign": "Design Campaign",
+    "reviewEmail": "Review Email",
+    "trackEmailMetrics": "Track Email Metrics",
+    "budgetStatus": "Budget Status",
+    "clientProfitability": "Client Profitability",
+    "complianceCheck": "Compliance Check",
+    "deliveryStatus": "Delivery Status",
+    "ceoAssessment": "CEO Assessment",
+    "scoreIdeas": "Score Ideas",
+    "resourceAllocation": "Resource Allocation"
+  },
+  "errors": {
+    "updateFailed": "Failed to update {{agent}}",
+    "actionFailed": "{{action}} FAILED — {{agent}} could not complete the action",
+    "triggerFailed": "Failed to trigger \"{{pipeline}}\" — Is the backend running?",
+    "promptFailed": "Failed to reach {{agent}} — Is the agent active and backend running?"
+  },
+  "actionDescriptions": {
+    "researchKeywords": "Find keyword opportunities for clients",
+    "writeContent": "Generate a content piece from approved topic",
+    "reviewContent": "QA review and scoring (1-10)",
+    "schedulePosts": "Format and schedule approved content",
+    "postToTwitter": "Publish a post to Twitter/X via API",
+    "siteAudit": "Technical SEO audit for a client site",
+    "findOpportunities": "Keyword gap and opportunity analysis",
+    "collectMetrics": "Pull all platform metrics",
+    "generateReport": "Build performance report",
+    "findNewProspects": "Scout local mom & pop shops, restaurants, salons — businesses needing digital help",
+    "deepDiveResearch": "Analyze a prospect's online presence, competitors, and service gaps",
+    "scoreQualifyLeads": "Rank all current leads by fit, budget potential, and urgency",
+    "draftOutreachMessages": "Write personalized ES/EN pitch emails for top-scored leads",
+    "researchAudience": "Audience research and targeting plan",
+    "createAdCopy": "Generate ad variations",
+    "trackAdMetrics": "Campaign performance tracking",
+    "designCampaign": "Build email campaign from scratch",
+    "reviewEmail": "QA review on email content",
+    "trackEmailMetrics": "Open/click/unsubscribe tracking",
+    "budgetStatus": "Current budget usage and forecast",
+    "clientProfitability": "Revenue vs cost per client",
+    "complianceCheck": "Review content for legal compliance",
+    "deliveryStatus": "Check all deliverable deadlines",
+    "ceoAssessment": "Portfolio health and strategic priorities",
+    "scoreIdeas": "Score and prioritize content ideas",
+    "resourceAllocation": "Optimize team workload allocation"
+  }
+}

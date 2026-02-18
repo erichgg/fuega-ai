@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Palette, Package, Bot, GitBranch, DollarSign, Monitor, Check, ChevronDown, ChevronRight, Loader2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { api } from '../lib/api';
@@ -7,15 +8,6 @@ import { PageHeader } from '../components/PageHeader';
 import { Tabs } from '../components/Tabs';
 
 type TabKey = 'brand' | 'services' | 'agents' | 'workflows' | 'budget' | 'platforms';
-
-const TABS: { key: TabKey; label: string; icon: React.ReactNode }[] = [
-  { key: 'brand', label: 'Brand', icon: <Palette className="w-3.5 h-3.5" /> },
-  { key: 'services', label: 'Services', icon: <Package className="w-3.5 h-3.5" /> },
-  { key: 'agents', label: 'Agents', icon: <Bot className="w-3.5 h-3.5" /> },
-  { key: 'workflows', label: 'Workflows', icon: <GitBranch className="w-3.5 h-3.5" /> },
-  { key: 'budget', label: 'Budget', icon: <DollarSign className="w-3.5 h-3.5" /> },
-  { key: 'platforms', label: 'Platforms', icon: <Monitor className="w-3.5 h-3.5" /> },
-];
 
 function InputField({ label, value, onChange, multiline = false }: { label: string; value: string; onChange: (v: string) => void; multiline?: boolean }) {
   return (
@@ -39,7 +31,7 @@ function NumberField({ label, value, onChange }: { label: string; value: number;
   );
 }
 
-function BrandForm({ config, setConfig }: { config: any; setConfig: (c: any) => void }) {
+function BrandForm({ config, setConfig, t }: { config: any; setConfig: (c: any) => void; t: (key: string) => string }) {
   const brand = config?.brand || config || {};
   const update = (key: string, val: any) => setConfig({ ...config, brand: { ...brand, [key]: val } });
   const social = brand.social_media || {};
@@ -48,16 +40,16 @@ function BrandForm({ config, setConfig }: { config: any; setConfig: (c: any) => 
   return (
     <div className="space-y-3">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-        <InputField label="Agency Name" value={brand.name || ''} onChange={v => update('name', v)} />
-        <InputField label="Tagline (EN)" value={brand.tagline?.en || brand.tagline || ''} onChange={v => update('tagline', { ...(brand.tagline || {}), en: v })} />
+        <InputField label={t('settings:brand.agencyName')} value={brand.name || ''} onChange={v => update('name', v)} />
+        <InputField label={t('settings:brand.taglineEn')} value={brand.tagline?.en || brand.tagline || ''} onChange={v => update('tagline', { ...(brand.tagline || {}), en: v })} />
       </div>
-      <InputField label="Mission" value={brand.mission || ''} onChange={v => update('mission', v)} multiline />
+      <InputField label={t('settings:brand.mission')} value={brand.mission || ''} onChange={v => update('mission', v)} multiline />
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
         {Object.entries(social).map(([platform, handle]) => (
           <InputField key={platform} label={platform} value={handle as string} onChange={v => update('social_media', { ...social, [platform]: v })} />
         ))}
       </div>
-      <InputField label="Brand Voice Guidelines" value={typeof voice === 'string' ? voice : JSON.stringify(voice, null, 2)} onChange={v => update('brand_voice', v)} multiline />
+      <InputField label={t('settings:brand.brandVoice')} value={typeof voice === 'string' ? voice : JSON.stringify(voice, null, 2)} onChange={v => update('brand_voice', v)} multiline />
     </div>
   );
 }
@@ -107,7 +99,7 @@ function ServicesForm({ config, setConfig }: { config: any; setConfig: (c: any) 
   );
 }
 
-function BudgetForm({ config, setConfig }: { config: any; setConfig: (c: any) => void }) {
+function BudgetForm({ config, setConfig, t }: { config: any; setConfig: (c: any) => void; t: (key: string) => string }) {
   const budget = config?.budget || config || {};
   const agentBudgets = budget.agent_budgets || {};
   const fixedCosts = budget.monthly_fixed_costs || {};
@@ -115,7 +107,7 @@ function BudgetForm({ config, setConfig }: { config: any; setConfig: (c: any) =>
   return (
     <div className="space-y-4">
       <div>
-        <h3 className="text-xs font-semibold text-fuega-text-primary mb-2">Agent Budgets (USD/month)</h3>
+        <h3 className="text-xs font-semibold text-fuega-text-primary mb-2">{t('settings:budget.agentBudgets')}</h3>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-2.5">
           {Object.entries(agentBudgets).filter(([k]) => k !== 'total_agent_budget').map(([agent, amount]) => (
             <NumberField key={agent} label={agent.replace(/_/g, ' ')} value={amount as number} onChange={v => {
@@ -126,7 +118,7 @@ function BudgetForm({ config, setConfig }: { config: any; setConfig: (c: any) =>
         </div>
       </div>
       <div>
-        <h3 className="text-xs font-semibold text-fuega-text-primary mb-2">Fixed Costs (USD/month)</h3>
+        <h3 className="text-xs font-semibold text-fuega-text-primary mb-2">{t('settings:budget.fixedCosts')}</h3>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-2.5">
           {Object.entries(fixedCosts).filter(([k]) => k !== 'total_fixed').map(([item, amount]) => (
             <NumberField key={item} label={item.replace(/_/g, ' ')} value={amount as number} onChange={v => {
@@ -140,7 +132,7 @@ function BudgetForm({ config, setConfig }: { config: any; setConfig: (c: any) =>
   );
 }
 
-function PlatformsForm({ config, setConfig }: { config: any; setConfig: (c: any) => void }) {
+function PlatformsForm({ config, setConfig, t }: { config: any; setConfig: (c: any) => void; t: (key: string) => string }) {
   const platforms = config?.platforms || config || {};
 
   return (
@@ -169,7 +161,7 @@ function PlatformsForm({ config, setConfig }: { config: any; setConfig: (c: any)
             </div>
             {plat.max_posts_per_day !== undefined && (
               <div className="w-24">
-                <NumberField label="Posts/day" value={plat.max_posts_per_day} onChange={v => {
+                <NumberField label={t('settings:platforms.postsPerDay')} value={plat.max_posts_per_day} onChange={v => {
                   const updated = { ...platforms, [key]: { ...plat, max_posts_per_day: v } };
                   setConfig({ ...config, platforms: updated });
                 }} />
@@ -182,7 +174,7 @@ function PlatformsForm({ config, setConfig }: { config: any; setConfig: (c: any)
   );
 }
 
-function WorkflowsView({ config }: { config: any }) {
+function WorkflowsView({ config, t }: { config: any; t: (key: string) => string }) {
   const workflows = config?.workflows || {};
 
   return (
@@ -192,7 +184,7 @@ function WorkflowsView({ config }: { config: any }) {
           <div className="px-3 py-2.5 border-b border-fuega-border/50">
             <p className="text-sm font-semibold text-fuega-text-primary">{wf.name || key}</p>
             <p className="text-[11px] text-fuega-text-muted mt-0.5">{wf.description}</p>
-            {wf.schedule && <p className="text-[11px] text-fuega-text-muted mt-0.5 num font-mono">Schedule: {wf.schedule}</p>}
+            {wf.schedule && <p className="text-[11px] text-fuega-text-muted mt-0.5 num font-mono">{t('settings:workflows.schedule')}: {wf.schedule}</p>}
           </div>
           {wf.steps && (
             <div className="px-3 py-2.5 space-y-1.5">
@@ -201,7 +193,7 @@ function WorkflowsView({ config }: { config: any }) {
                   <span className="text-[11px] text-fuega-text-muted num font-mono w-5">{i + 1}.</span>
                   <span className="text-sm text-fuega-text-primary">{step.id.replace(/_/g, ' ')}</span>
                   {step.agent && <span className="text-[11px] px-1.5 py-0.5 rounded bg-fuega-orange/10 text-fuega-orange">{step.agent.replace(/_/g, ' ')}</span>}
-                  {step.requires_human_approval && <span className="text-[11px] px-1.5 py-0.5 rounded bg-yellow-500/10 text-yellow-400">needs approval</span>}
+                  {step.requires_human_approval && <span className="text-[11px] px-1.5 py-0.5 rounded bg-yellow-500/10 text-yellow-400">{t('settings:workflows.needsApproval')}</span>}
                 </div>
               ))}
             </div>
@@ -220,6 +212,7 @@ export default function Settings() {
   const [loading, setLoading] = useState(false);
   const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle');
   const toast = useToast();
+  const { t } = useTranslation(['settings', 'common']);
 
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const configRef = useRef<any>(null);
@@ -241,7 +234,7 @@ export default function Settings() {
       setTimeout(() => setSaveStatus(prev => (prev === 'saved' ? 'idle' : prev)), 2000);
     } catch {
       setSaveStatus('idle');
-      toast.error('Failed to save settings. Check the backend.');
+      toast.error(t('common:errors.failedToUpdate', { resource: t('settings:title').toLowerCase() }) + ' ' + t('common:errors.backendCheck'));
     }
   }, [toast]);
 
@@ -282,30 +275,39 @@ export default function Settings() {
     };
     fetchers[tab]()
       .then(setConfig)
-      .catch(() => toast.error('Failed to load settings. Check that the backend is running.'))
+      .catch(() => toast.error(t('common:errors.failedToLoad', { resource: t('settings:title').toLowerCase() }) + ' ' + t('common:errors.backendCheck')))
       .finally(() => setLoading(false));
   }, [tab, toast]);
 
   const isEditable = tab !== 'agents' && tab !== 'workflows';
 
+  const TABS: { key: TabKey; label: string; icon: React.ReactNode }[] = [
+    { key: 'brand', label: t('settings:tabs.brand'), icon: <Palette className="w-3.5 h-3.5" /> },
+    { key: 'services', label: t('settings:tabs.services'), icon: <Package className="w-3.5 h-3.5" /> },
+    { key: 'agents', label: t('settings:tabs.agents'), icon: <Bot className="w-3.5 h-3.5" /> },
+    { key: 'workflows', label: t('settings:tabs.workflows'), icon: <GitBranch className="w-3.5 h-3.5" /> },
+    { key: 'budget', label: t('settings:tabs.budget'), icon: <DollarSign className="w-3.5 h-3.5" /> },
+    { key: 'platforms', label: t('settings:tabs.platforms'), icon: <Monitor className="w-3.5 h-3.5" /> },
+  ];
+
   return (
     <div className="animate-fadeIn">
       <PageHeader
-        title="Settings"
-        subtitle="Configuration management"
+        title={t('settings:title')}
+        subtitle={t('settings:subtitle')}
         status={
           isEditable && saveStatus !== 'idle' ? (
             <span className="flex items-center gap-1.5 text-[11px] ml-3">
               {saveStatus === 'saving' && (
                 <>
                   <Loader2 className="w-3 h-3 animate-spin text-fuega-text-muted" />
-                  <span className="text-fuega-text-muted">Saving...</span>
+                  <span className="text-fuega-text-muted">{t('common:status.saving')}</span>
                 </>
               )}
               {saveStatus === 'saved' && (
                 <>
                   <Check className="w-3 h-3 text-green-400" />
-                  <span className="text-green-400">Saved</span>
+                  <span className="text-green-400">{t('common:status.saved')}</span>
                 </>
               )}
             </span>
@@ -328,16 +330,16 @@ export default function Settings() {
           </div>
         ) : (
           <>
-            {tab === 'brand' && <BrandForm config={config} setConfig={handleSetConfig} />}
+            {tab === 'brand' && <BrandForm config={config} setConfig={handleSetConfig} t={t} />}
             {tab === 'services' && <ServicesForm config={config} setConfig={handleSetConfig} />}
-            {tab === 'budget' && <BudgetForm config={config} setConfig={handleSetConfig} />}
-            {tab === 'platforms' && <PlatformsForm config={config} setConfig={handleSetConfig} />}
-            {tab === 'workflows' && <WorkflowsView config={config} />}
+            {tab === 'budget' && <BudgetForm config={config} setConfig={handleSetConfig} t={t} />}
+            {tab === 'platforms' && <PlatformsForm config={config} setConfig={handleSetConfig} t={t} />}
+            {tab === 'workflows' && <WorkflowsView config={config} t={t} />}
             {tab === 'agents' && (
               <div className="text-center py-6">
                 <Bot className="w-7 h-7 text-fuega-orange mx-auto mb-2" />
-                <p className="text-sm text-fuega-text-secondary mb-2">Agent configuration is managed on the Agents page.</p>
-                <Link to="/agents" className="text-sm text-fuega-orange hover:underline">Go to Agents</Link>
+                <p className="text-sm text-fuega-text-secondary mb-2">{t('settings:agents.message')}</p>
+                <Link to="/agents" className="text-sm text-fuega-orange hover:underline">{t('settings:agents.goToAgents')}</Link>
               </div>
             )}
           </>

@@ -1,5 +1,6 @@
 import { useEffect, useState, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Bot, Cpu, Search, Pause, X } from 'lucide-react';
 import { api } from '../lib/api';
 import { PageHeader } from '../components/PageHeader';
@@ -24,6 +25,7 @@ function modelColor(model: string): string {
 }
 
 export default function Agents() {
+  const { t } = useTranslation(['agents', 'common']);
   const [agents, setAgents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -36,7 +38,7 @@ export default function Agents() {
   useEffect(() => {
     api.agents.list()
       .then(setAgents)
-      .catch(() => toast.error('Failed to load agents. Check that the backend is running.'))
+      .catch(() => toast.error(t('common:errors.failedToLoad', { resource: t('agents:title').toLowerCase() }) + ' ' + t('common:errors.backendCheck')))
       .finally(() => setLoading(false));
   }, []);
 
@@ -55,7 +57,7 @@ export default function Agents() {
       const updated = await api.agents.update(slug, { status: newStatus });
       setAgents(prev => prev.map(a => a.slug === slug ? { ...a, ...updated } : a));
     } catch {
-      toast.error(`Failed to update ${slug}`);
+      toast.error(t('common:errors.failedToUpdate', { resource: slug }));
     }
   };
 
@@ -66,7 +68,7 @@ export default function Agents() {
       const updated = await api.agents.update(slug, { monthly_budget_usd: val });
       setAgents(prev => prev.map(a => a.slug === slug ? { ...a, ...updated } : a));
     } catch {
-      toast.error('Failed to update budget');
+      toast.error(t('common:errors.failedToUpdate', { resource: t('common:labels.budget').toLowerCase() }));
     }
   };
 
@@ -92,7 +94,7 @@ export default function Agents() {
   const columns: Column<any>[] = [
     {
       key: 'status',
-      label: 'Status',
+      label: t('agents:columns.status'),
       width: '60px',
       render: (row) => (
         <button
@@ -100,7 +102,7 @@ export default function Agents() {
           role="switch"
           aria-checked={row.status === 'active'}
           className={`relative w-9 h-5 rounded-full transition-colors ${row.status === 'active' ? 'bg-green-500' : 'bg-fuega-border'}`}
-          title={row.status === 'active' ? 'Click to pause' : 'Click to activate'}
+          title={row.status === 'active' ? t('agents:togglePause') : t('agents:toggleActivate')}
         >
           <span className={`absolute top-0.5 w-4 h-4 rounded-full bg-white transition-transform ${row.status === 'active' ? 'left-[18px]' : 'left-0.5'}`} />
         </button>
@@ -108,7 +110,7 @@ export default function Agents() {
     },
     {
       key: 'name',
-      label: 'Agent',
+      label: t('agents:columns.agent'),
       sortable: true,
       getValue: (row) => row.name,
       render: (row) => (
@@ -125,7 +127,7 @@ export default function Agents() {
     },
     {
       key: 'model',
-      label: 'Model',
+      label: t('agents:columns.model'),
       sortable: true,
       getValue: (row) => row.model,
       render: (row) => (
@@ -137,14 +139,14 @@ export default function Agents() {
     },
     {
       key: 'calls',
-      label: 'Calls',
+      label: t('agents:columns.calls'),
       sortable: true,
       getValue: (row) => row.total_calls || 0,
       render: (row) => <span className="text-[12px] text-fuega-text-secondary num">{(row.total_calls || 0).toLocaleString()}</span>,
     },
     {
       key: 'spend',
-      label: 'Spend / Budget',
+      label: t('agents:columns.spendBudget'),
       sortable: true,
       getValue: (row) => row.month_spend_usd || 0,
       render: (row) => {
@@ -172,7 +174,7 @@ export default function Agents() {
     },
     {
       key: 'trend',
-      label: '7d Trend',
+      label: t('agents:columns.trend'),
       render: (row) => <Sparkline data={getSparkline(row)} color={row.budget_usage_pct > 80 ? '#EF4444' : '#00D4AA'} />,
     },
   ];
@@ -194,7 +196,7 @@ export default function Agents() {
 
   return (
     <div className="animate-fadeIn">
-      <PageHeader title="AI Agents" subtitle={`${agents.length} agents — Your real team, real budget, real results`} />
+      <PageHeader title={t('agents:title')} subtitle={t('agents:subtitle', { count: agents.length })} />
 
       {/* Filter bar */}
       <div className="flex items-center gap-2 mb-3 flex-wrap">
@@ -204,7 +206,7 @@ export default function Agents() {
             type="text"
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
-            placeholder="Search agents..."
+            placeholder={t('agents:searchPlaceholder')}
             className="flex-1 bg-transparent text-[12px] text-fuega-text-primary placeholder-fuega-text-muted focus:outline-none"
           />
           {searchQuery && <button onClick={() => setSearchQuery('')} className="text-fuega-text-muted hover:text-fuega-text-primary"><X className="w-3 h-3" /></button>}
@@ -214,16 +216,16 @@ export default function Agents() {
           onChange={e => setStatusFilter(e.target.value)}
           className="bg-fuega-input border border-fuega-border rounded-lg px-2.5 py-1.5 text-[12px] text-fuega-text-secondary focus:outline-none"
         >
-          <option value="all">All Status</option>
-          <option value="active">Active</option>
-          <option value="paused">Paused</option>
+          <option value="all">{t('agents:filters.allStatus')}</option>
+          <option value="active">{t('agents:filters.active')}</option>
+          <option value="paused">{t('agents:filters.paused')}</option>
         </select>
         <select
           value={modelFilter}
           onChange={e => setModelFilter(e.target.value)}
           className="bg-fuega-input border border-fuega-border rounded-lg px-2.5 py-1.5 text-[12px] text-fuega-text-secondary focus:outline-none"
         >
-          <option value="all">All Models</option>
+          <option value="all">{t('agents:filters.allModels')}</option>
           {models.map(m => <option key={m} value={m}>{m}</option>)}
         </select>
       </div>
@@ -231,18 +233,18 @@ export default function Agents() {
       {/* Bulk action bar */}
       {selectedKeys.size > 0 && (
         <div className="flex items-center gap-3 mb-3 bg-fuega-orange/5 border border-fuega-orange/20 rounded-lg px-3 py-2 animate-slideUp">
-          <span className="text-[12px] text-fuega-text-primary font-medium">{selectedKeys.size} selected</span>
+          <span className="text-[12px] text-fuega-text-primary font-medium">{t('agents:bulk.selected', { count: selectedKeys.size })}</span>
           <button onClick={bulkPause} className="flex items-center gap-1 text-[11px] text-yellow-400 bg-yellow-500/10 hover:bg-yellow-500/20 px-2 py-1 rounded transition-colors">
-            <Pause className="w-3 h-3" /> Pause All
+            <Pause className="w-3 h-3" /> {t('agents:bulk.pauseAll')}
           </button>
-          <button onClick={() => setSelectedKeys(new Set())} className="text-[11px] text-fuega-text-muted hover:text-fuega-text-primary ml-auto">Clear</button>
+          <button onClick={() => setSelectedKeys(new Set())} className="text-[11px] text-fuega-text-muted hover:text-fuega-text-primary ml-auto">{t('common:actions.clear')}</button>
         </div>
       )}
 
       {filtered.length === 0 && agents.length > 0 ? (
-        <EmptyState title="No matching agents" description="Try adjusting your search or filters." />
+        <EmptyState title={t('agents:empty.noMatching')} description={t('agents:empty.noMatchingDesc')} />
       ) : filtered.length === 0 ? (
-        <EmptyState title="No agents" description="Agents will appear once the backend seeds them from config." />
+        <EmptyState title={t('agents:empty.noAgents')} description={t('agents:empty.noAgentsDesc')} />
       ) : (
         <DataTable
           columns={columns}

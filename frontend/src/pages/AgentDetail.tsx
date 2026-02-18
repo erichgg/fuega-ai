@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Send, Bot, User, ChevronDown, ChevronUp, Cpu, Wrench, ArrowDownToLine, ArrowUpFromLine, Zap, Play, DollarSign, Activity, Download, Upload, Shield, ShieldCheck, ShieldAlert } from 'lucide-react';
 import { api } from '../lib/api';
 import { Badge } from '../components/Badge';
@@ -17,10 +18,11 @@ interface AgentAction {
 }
 
 function ActionModeToggle({ action, onModeChange }: { action: AgentAction; onModeChange: (name: string, mode: ActionMode) => void }) {
+  const { t } = useTranslation('agentDetail');
   const modes: { value: ActionMode; label: string; color: string; icon: React.ReactNode }[] = [
-    { value: 'auto', label: 'Auto', color: 'bg-green-500', icon: <ShieldCheck className="w-3 h-3" /> },
-    { value: 'approve', label: 'Approve', color: 'bg-yellow-500', icon: <Shield className="w-3 h-3" /> },
-    { value: 'manual', label: 'Manual', color: 'bg-red-500', icon: <ShieldAlert className="w-3 h-3" /> },
+    { value: 'auto', label: t('agentDetail:hitl.auto'), color: 'bg-green-500', icon: <ShieldCheck className="w-3 h-3" /> },
+    { value: 'approve', label: t('agentDetail:hitl.approve'), color: 'bg-yellow-500', icon: <Shield className="w-3 h-3" /> },
+    { value: 'manual', label: t('agentDetail:hitl.manual'), color: 'bg-red-500', icon: <ShieldAlert className="w-3 h-3" /> },
   ];
 
   return (
@@ -48,6 +50,7 @@ function ActionModeToggle({ action, onModeChange }: { action: AgentAction; onMod
 }
 
 export default function AgentDetail() {
+  const { t } = useTranslation(['agentDetail', 'common']);
   const { slug } = useParams<{ slug: string }>();
   const [agent, setAgent] = useState<any>(null);
   const [logs, setLogs] = useState<any[]>([]);
@@ -90,9 +93,9 @@ export default function AgentDetail() {
     try {
       await api.agents.updateAction(slug, actionName, mode);
       setHitlActions(prev => prev.map(a => a.name === actionName ? { ...a, mode } : a));
-      toast.success(`${actionName.replace(/_/g, ' ')} set to ${mode}`);
+      toast.success(t('agentDetail:modeSetTo', { action: actionName.replace(/_/g, ' '), mode }));
     } catch {
-      toast.error('Failed to update action mode');
+      toast.error(t('agentDetail:errors.updateActionMode'));
     }
   }, [slug, toast]);
 
@@ -107,9 +110,9 @@ export default function AgentDetail() {
       a.download = `${slug}-config.json`;
       a.click();
       URL.revokeObjectURL(url);
-      toast.success('Config exported');
+      toast.success(t('agentDetail:configExported'));
     } catch {
-      toast.error('Failed to export config');
+      toast.error(t('agentDetail:errors.exportFailed'));
     }
   }, [slug, toast]);
 
@@ -121,14 +124,14 @@ export default function AgentDetail() {
       const text = await file.text();
       const data = JSON.parse(text);
       await api.agents.importConfig(data);
-      toast.success('Config imported successfully');
+      toast.success(t('agentDetail:configImported'));
       // Refresh agent data
       if (slug) {
         const updated = await api.agents.get(slug);
         setAgent(updated);
       }
     } catch {
-      toast.error('Failed to import config');
+      toast.error(t('agentDetail:errors.importFailed'));
     }
     setImportLoading(false);
     // Reset file input
@@ -166,7 +169,7 @@ export default function AgentDetail() {
       setChatMessages(prev => [...prev, { id: assistantId, role: 'assistant', content: res.response || 'Done.', cost: res.cost_usd }]);
     } catch {
       const errorId = nextIdRef.current++;
-      setChatMessages(prev => [...prev, { id: errorId, role: 'assistant', content: 'Request failed. Check the backend.' }]);
+      setChatMessages(prev => [...prev, { id: errorId, role: 'assistant', content: t('agentDetail:chat.requestFailed') }]);
     } finally {
       setSending(false);
     }
@@ -180,8 +183,8 @@ export default function AgentDetail() {
       const result = await api.workflows.runStep(slug, action);
       setActionResult(result);
     } catch {
-      setActionResult({ error: 'Action failed. Check the backend.' });
-      toast.error('Action failed');
+      setActionResult({ error: t('agentDetail:errors.actionFailed') });
+      toast.error(t('agentDetail:errors.actionFailed'));
     }
     setActionRunning(null);
   };
@@ -192,7 +195,7 @@ export default function AgentDetail() {
     try {
       const updated = await api.agents.update(slug, { status: newStatus });
       setAgent((prev: any) => ({ ...prev, ...updated }));
-    } catch { toast.error('Failed to update status'); }
+    } catch { toast.error(t('agentDetail:errors.statusFailed')); }
   };
 
   if (loading) {
@@ -207,9 +210,9 @@ export default function AgentDetail() {
     return (
       <div className="animate-fadeIn">
         <Link to="/agents" className="inline-flex items-center gap-1.5 text-[12px] text-fuega-text-secondary hover:text-fuega-text-primary transition-colors mb-3">
-          Back
+          {t('agentDetail:back')}
         </Link>
-        <EmptyState title="Agent not found" description="This agent doesn't exist or the backend is unavailable." />
+        <EmptyState title={t('agentDetail:notFound')} description={t('agentDetail:notFoundDesc')} />
       </div>
     );
   }
@@ -232,17 +235,17 @@ export default function AgentDetail() {
   const totalLogCost = logs.reduce((s, l) => s + (l.cost_usd || 0), 0);
 
   const tabItems = [
-    { key: 'chat', label: 'Chat', icon: <Send className="w-3 h-3" /> },
-    { key: 'actions', label: 'Actions', icon: <Zap className="w-3 h-3" />, count: agentActions.length },
-    { key: 'hitl', label: 'HITL Controls', icon: <Shield className="w-3 h-3" />, count: hitlActions.length },
-    { key: 'logs', label: 'Logs', icon: <Activity className="w-3 h-3" />, count: logs.length },
+    { key: 'chat', label: t('agentDetail:tabs.chat'), icon: <Send className="w-3 h-3" /> },
+    { key: 'actions', label: t('agentDetail:tabs.actions'), icon: <Zap className="w-3 h-3" />, count: agentActions.length },
+    { key: 'hitl', label: t('agentDetail:tabs.hitlControls'), icon: <Shield className="w-3 h-3" />, count: hitlActions.length },
+    { key: 'logs', label: t('agentDetail:tabs.logs'), icon: <Activity className="w-3 h-3" />, count: logs.length },
   ];
 
   return (
     <div className="animate-fadeIn">
       <PageHeader
         title={agent.name}
-        breadcrumbs={[{ label: 'Agents', href: '/agents' }, { label: agent.name }]}
+        breadcrumbs={[{ label: t('common:breadcrumbs.agents'), href: '/agents' }, { label: agent.name }]}
         status={
           <div className="flex items-center gap-2">
             <Badge variant={agent.status} />
@@ -251,7 +254,7 @@ export default function AgentDetail() {
               role="switch"
               aria-checked={isActive}
               className={`relative w-8 h-4 rounded-full transition-colors ${isActive ? 'bg-green-500' : 'bg-fuega-border'}`}
-              title={isActive ? 'Pause agent' : 'Activate agent'}
+              title={isActive ? t('agentDetail:pauseAgent') : t('agentDetail:activateAgent')}
             >
               <span className={`absolute top-0.5 w-3 h-3 rounded-full bg-white transition-transform ${isActive ? 'left-[16px]' : 'left-0.5'}`} />
             </button>
@@ -263,36 +266,36 @@ export default function AgentDetail() {
             <button
               onClick={handleExportConfig}
               className="flex items-center gap-1 px-2 py-1 rounded text-[11px] font-medium bg-fuega-input border border-fuega-border text-fuega-text-secondary hover:border-fuega-orange/50 hover:text-fuega-orange transition-colors"
-              title="Export agent config as JSON"
+              title={t('agentDetail:export')}
             >
               <Download className="w-3 h-3" />
-              Export
+              {t('agentDetail:export')}
             </button>
             <button
               onClick={() => fileInputRef.current?.click()}
               disabled={importLoading}
               className="flex items-center gap-1 px-2 py-1 rounded text-[11px] font-medium bg-fuega-input border border-fuega-border text-fuega-text-secondary hover:border-fuega-orange/50 hover:text-fuega-orange transition-colors disabled:opacity-50"
-              title="Import agent config from JSON"
+              title={t('agentDetail:import')}
             >
               <Upload className="w-3 h-3" />
-              Import
+              {t('agentDetail:import')}
             </button>
             <input ref={fileInputRef} type="file" accept=".json" className="hidden" onChange={handleImportConfig} />
             <div className="text-right">
-              <p className="text-[10px] text-fuega-text-muted uppercase">Spend</p>
+              <p className="text-[10px] text-fuega-text-muted uppercase">{t('agentDetail:labels.spend')}</p>
               <p className="text-[13px] num font-bold text-fuega-text-primary">${(agent.month_spend_usd || 0).toFixed(3)}</p>
             </div>
             <div className="text-right">
-              <p className="text-[10px] text-fuega-text-muted uppercase">Budget</p>
+              <p className="text-[10px] text-fuega-text-muted uppercase">{t('agentDetail:labels.budget')}</p>
               <p className="text-[13px] num text-fuega-text-primary">${agent.monthly_budget_usd || 0}/mo</p>
             </div>
             <div className="text-right">
-              <p className="text-[10px] text-fuega-text-muted uppercase">Calls</p>
+              <p className="text-[10px] text-fuega-text-muted uppercase">{t('agentDetail:labels.calls')}</p>
               <p className="text-[13px] num text-fuega-text-primary">{agent.total_calls || 0}</p>
             </div>
             <div className="w-20">
               <div className="flex items-center justify-between text-[10px] text-fuega-text-muted mb-0.5">
-                <span>Usage</span><span>{budgetPct}%</span>
+                <span>{t('agentDetail:labels.usage')}</span><span>{budgetPct}%</span>
               </div>
               <div className="h-1.5 rounded-full bg-fuega-surface overflow-hidden">
                 <div className={`h-full rounded-full ${budgetPct > 80 ? 'bg-red-500' : 'bg-fuega-orange'}`} style={{ width: `${Math.min(budgetPct, 100)}%` }} />
@@ -306,7 +309,7 @@ export default function AgentDetail() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-3">
         <div className="bg-fuega-card border border-fuega-border rounded-lg p-2.5">
           <h4 className="text-[10px] font-semibold uppercase tracking-wider text-fuega-text-muted mb-1.5 flex items-center gap-1">
-            <Cpu className="w-3 h-3" /> Model & Tools
+            <Cpu className="w-3 h-3" /> {t('agentDetail:labels.modelTools')}
           </h4>
           <p className="text-[11px] text-fuega-text-primary num mb-1">{agent.model}</p>
           {agent.tools?.length > 0 && (
@@ -321,7 +324,7 @@ export default function AgentDetail() {
         </div>
         <div className="bg-fuega-card border border-fuega-border rounded-lg p-2.5">
           <h4 className="text-[10px] font-semibold uppercase tracking-wider text-fuega-text-muted mb-1.5 flex items-center gap-1">
-            <ArrowDownToLine className="w-3 h-3" /> Inputs
+            <ArrowDownToLine className="w-3 h-3" /> {t('agentDetail:labels.inputs')}
           </h4>
           {agent.inputs?.length > 0 ? (
             <ul className="space-y-0.5">
@@ -329,11 +332,11 @@ export default function AgentDetail() {
                 <li key={i} className="text-[10px] text-fuega-text-secondary leading-tight">- {item}</li>
               ))}
             </ul>
-          ) : <p className="text-[10px] text-fuega-text-muted">None specified</p>}
+          ) : <p className="text-[10px] text-fuega-text-muted">{t('agentDetail:labels.noneSpecified')}</p>}
         </div>
         <div className="bg-fuega-card border border-fuega-border rounded-lg p-2.5">
           <h4 className="text-[10px] font-semibold uppercase tracking-wider text-fuega-text-muted mb-1.5 flex items-center gap-1">
-            <ArrowUpFromLine className="w-3 h-3" /> Outputs
+            <ArrowUpFromLine className="w-3 h-3" /> {t('agentDetail:labels.outputs')}
           </h4>
           {agent.outputs?.length > 0 ? (
             <ul className="space-y-0.5">
@@ -341,17 +344,17 @@ export default function AgentDetail() {
                 <li key={i} className="text-[10px] text-fuega-text-secondary leading-tight">- {item}</li>
               ))}
             </ul>
-          ) : <p className="text-[10px] text-fuega-text-muted">None specified</p>}
+          ) : <p className="text-[10px] text-fuega-text-muted">{t('agentDetail:labels.noneSpecified')}</p>}
         </div>
         <div className="bg-fuega-card border border-fuega-border rounded-lg p-2.5">
           <h4 className="text-[10px] font-semibold uppercase tracking-wider text-fuega-text-muted mb-1.5 flex items-center gap-1">
-            <Activity className="w-3 h-3" /> Performance
+            <Activity className="w-3 h-3" /> {t('agentDetail:labels.performance')}
           </h4>
           <div className="space-y-1">
-            <div className="flex justify-between text-[10px]"><span className="text-fuega-text-muted">Success</span><span className="text-fuega-text-primary">{agent.success_rate != null ? `${agent.success_rate}%` : 'N/A'}</span></div>
-            <div className="flex justify-between text-[10px]"><span className="text-fuega-text-muted">Calls</span><span className="text-fuega-text-primary num">{agent.total_calls || 0}</span></div>
-            <div className="flex justify-between text-[10px]"><span className="text-fuega-text-muted">Spend</span><span className="text-fuega-text-primary num">${(agent.month_spend_usd || 0).toFixed(4)}</span></div>
-            <div className="flex justify-between text-[10px]"><span className="text-fuega-text-muted">Budget</span><span className="text-fuega-text-primary num">${agent.monthly_budget_usd || 0}/mo</span></div>
+            <div className="flex justify-between text-[10px]"><span className="text-fuega-text-muted">{t('agentDetail:labels.success')}</span><span className="text-fuega-text-primary">{agent.success_rate != null ? `${agent.success_rate}%` : 'N/A'}</span></div>
+            <div className="flex justify-between text-[10px]"><span className="text-fuega-text-muted">{t('agentDetail:labels.calls')}</span><span className="text-fuega-text-primary num">{agent.total_calls || 0}</span></div>
+            <div className="flex justify-between text-[10px]"><span className="text-fuega-text-muted">{t('agentDetail:labels.spend')}</span><span className="text-fuega-text-primary num">${(agent.month_spend_usd || 0).toFixed(4)}</span></div>
+            <div className="flex justify-between text-[10px]"><span className="text-fuega-text-muted">{t('agentDetail:labels.budget')}</span><span className="text-fuega-text-primary num">${agent.monthly_budget_usd || 0}/mo</span></div>
           </div>
         </div>
       </div>
@@ -363,7 +366,7 @@ export default function AgentDetail() {
             onClick={() => setPromptExpanded(!promptExpanded)}
             className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-fuega-text-muted hover:text-fuega-text-primary transition-colors"
           >
-            System Prompt
+            {t('agentDetail:systemPrompt')}
             {promptExpanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
           </button>
           {promptExpanded && (
@@ -383,18 +386,18 @@ export default function AgentDetail() {
       {activeTab === 'chat' && (
         <div className="bg-fuega-card border border-fuega-border rounded-lg flex flex-col" style={{ height: 'calc(100vh - 380px)', minHeight: '300px' }}>
           <div className="px-3 py-2 border-b border-fuega-border flex items-center justify-between">
-            <h3 className="text-[11px] uppercase tracking-wider font-mono font-semibold text-fuega-text-primary">Direct Chat</h3>
+            <h3 className="text-[11px] uppercase tracking-wider font-mono font-semibold text-fuega-text-primary">{t('agentDetail:chat.title')}</h3>
             <div className="flex items-center gap-3">
-              {totalChatCost > 0 && <span className="text-[10px] text-fuega-text-muted num">Session: ${totalChatCost.toFixed(4)}</span>}
+              {totalChatCost > 0 && <span className="text-[10px] text-fuega-text-muted num">{t('agentDetail:chat.session')}: ${totalChatCost.toFixed(4)}</span>}
               {chatMessages.length > 0 && (
-                <button onClick={() => setChatMessages([])} className="text-[10px] text-fuega-text-muted hover:text-fuega-text-primary">Clear</button>
+                <button onClick={() => setChatMessages([])} className="text-[10px] text-fuega-text-muted hover:text-fuega-text-primary">{t('agentDetail:chat.clear')}</button>
               )}
             </div>
           </div>
           <div className="flex-1 overflow-y-auto p-3 space-y-2">
             {chatMessages.length === 0 && (
               <div className="flex items-center justify-center h-full text-fuega-text-muted text-[11px]">
-                Send a message to chat with {agent.name}
+                {t('agentDetail:chat.sendMessage', { name: agent.name })}
               </div>
             )}
             {chatMessages.map((msg) => (
@@ -434,7 +437,7 @@ export default function AgentDetail() {
                 value={input}
                 onChange={e => setInput(e.target.value)}
                 onKeyDown={e => e.key === 'Enter' && handleSend()}
-                placeholder={`Ask ${agent.name}...`}
+                placeholder={t('agentDetail:chat.placeholder', { name: agent.name })}
                 className="flex-1 bg-fuega-input border border-fuega-border rounded-lg px-2.5 py-1.5 text-[12px] text-fuega-text-primary placeholder-fuega-text-muted focus:outline-none focus:border-fuega-orange/50"
               />
               <button onClick={handleSend} disabled={sending || !input.trim()} aria-label="Send" className="px-2.5 py-1.5 bg-fuega-orange text-white rounded-lg hover:bg-fuega-orange/90 disabled:opacity-50 transition-colors">
@@ -449,11 +452,11 @@ export default function AgentDetail() {
       {activeTab === 'actions' && (
         <div className="bg-fuega-card border border-fuega-border rounded-lg overflow-hidden">
           <div className="px-3 py-2 border-b border-fuega-border">
-            <h3 className="text-[11px] uppercase tracking-wider font-mono font-semibold text-fuega-text-primary">Available Actions for {agent.name}</h3>
-            <p className="text-[10px] text-fuega-text-muted mt-0.5">Run individual workflow steps. Each fires a single API call to this agent.</p>
+            <h3 className="text-[11px] uppercase tracking-wider font-mono font-semibold text-fuega-text-primary">{t('agentDetail:actions.title', { name: agent.name })}</h3>
+            <p className="text-[10px] text-fuega-text-muted mt-0.5">{t('agentDetail:actions.description')}</p>
           </div>
           {agentActions.length === 0 ? (
-            <EmptyState title="No workflow actions mapped" />
+            <EmptyState title={t('agentDetail:actions.noActions')} />
           ) : (
             <div className="p-2 space-y-1.5">
               {agentActions.map(act => {
@@ -473,7 +476,7 @@ export default function AgentDetail() {
                       className="flex items-center gap-1 bg-fuega-input border border-fuega-border hover:border-fuega-orange/50 text-fuega-text-secondary hover:text-fuega-orange px-2 py-1 rounded text-[11px] font-medium transition-all disabled:opacity-50 flex-shrink-0"
                     >
                       {isRunning ? <div className="w-3 h-3 border-2 border-fuega-orange border-t-transparent rounded-full animate-spin" /> : <Play className="w-3 h-3" />}
-                      {isRunning ? 'Running...' : 'Run'}
+                      {isRunning ? t('agentDetail:actions.running') : t('common:actions.run')}
                     </button>
                   </div>
                 );
@@ -484,7 +487,7 @@ export default function AgentDetail() {
           {actionResult && (
             <div className="mx-2 mb-2 bg-fuega-input border border-fuega-border rounded-lg p-2.5 animate-slideUp">
               <div className="flex items-center justify-between mb-1.5">
-                <span className="text-[11px] font-semibold text-fuega-text-primary">Result</span>
+                <span className="text-[11px] font-semibold text-fuega-text-primary">{t('agentDetail:actions.result')}</span>
                 <div className="flex items-center gap-2 text-[10px] text-fuega-text-muted num">
                   {actionResult.cost_usd != null && <span><DollarSign className="w-2.5 h-2.5 inline" />${actionResult.cost_usd?.toFixed(4)}</span>}
                   {actionResult.duration_ms != null && <span>{actionResult.duration_ms}ms</span>}
@@ -502,12 +505,12 @@ export default function AgentDetail() {
       {activeTab === 'hitl' && (
         <div className="bg-fuega-card border border-fuega-border rounded-lg overflow-hidden">
           <div className="px-3 py-2 border-b border-fuega-border">
-            <h3 className="text-[11px] uppercase tracking-wider font-mono font-semibold text-fuega-text-primary">Human-in-the-Loop Controls</h3>
+            <h3 className="text-[11px] uppercase tracking-wider font-mono font-semibold text-fuega-text-primary">{t('agentDetail:hitl.title')}</h3>
             <p className="text-[10px] text-fuega-text-muted mt-0.5">
-              Configure which actions require human approval before execution.
-              <span className="ml-2 inline-flex items-center gap-1"><span className="inline-block w-2 h-2 rounded-sm bg-green-500" /> Auto</span>
-              <span className="ml-2 inline-flex items-center gap-1"><span className="inline-block w-2 h-2 rounded-sm bg-yellow-500" /> Approve</span>
-              <span className="ml-2 inline-flex items-center gap-1"><span className="inline-block w-2 h-2 rounded-sm bg-red-500" /> Manual</span>
+              {t('agentDetail:hitl.description')}
+              <span className="ml-2 inline-flex items-center gap-1"><span className="inline-block w-2 h-2 rounded-sm bg-green-500" /> {t('agentDetail:hitl.auto')}</span>
+              <span className="ml-2 inline-flex items-center gap-1"><span className="inline-block w-2 h-2 rounded-sm bg-yellow-500" /> {t('agentDetail:hitl.approve')}</span>
+              <span className="ml-2 inline-flex items-center gap-1"><span className="inline-block w-2 h-2 rounded-sm bg-red-500" /> {t('agentDetail:hitl.manual')}</span>
             </p>
           </div>
           {hitlLoading ? (
@@ -515,7 +518,7 @@ export default function AgentDetail() {
               <div className="w-5 h-5 border-2 border-fuega-orange border-t-transparent rounded-full animate-spin" />
             </div>
           ) : hitlActions.length === 0 ? (
-            <EmptyState title="No actions configured" description="Agent actions will appear here once the backend provides them." />
+            <EmptyState title={t('agentDetail:hitl.noActions')} description={t('agentDetail:hitl.noActionsDesc')} />
           ) : (
             <div className="p-2 space-y-1.5">
               {hitlActions.map(action => (
@@ -534,17 +537,17 @@ export default function AgentDetail() {
       {activeTab === 'logs' && (
         <div className="bg-fuega-card border border-fuega-border rounded-lg overflow-hidden">
           <div className="px-3 py-2 border-b border-fuega-border flex items-center justify-between">
-            <h3 className="text-[11px] uppercase tracking-wider font-mono font-semibold text-fuega-text-primary">Activity Log ({logs.length})</h3>
-            {totalLogCost > 0 && <span className="text-[10px] text-fuega-text-muted num">Total: ${totalLogCost.toFixed(4)}</span>}
+            <h3 className="text-[11px] uppercase tracking-wider font-mono font-semibold text-fuega-text-primary">{t('agentDetail:logs.title')} ({logs.length})</h3>
+            {totalLogCost > 0 && <span className="text-[10px] text-fuega-text-muted num">{t('common:labels.total')}: ${totalLogCost.toFixed(4)}</span>}
           </div>
           {logs.length === 0 ? (
-            <EmptyState title="No activity yet" />
+            <EmptyState title={t('agentDetail:logs.noActivity')} />
           ) : (
             <div className="max-h-[420px] overflow-y-auto">
               {logs.map(log => (
                 <div key={log.id} className="flex items-center gap-3 px-3 py-2 border-b border-fuega-border/30 hover:bg-fuega-card-hover transition-colors">
                   <StatusDot status="active" size="sm" />
-                  <span className="text-[11px] text-fuega-text-primary flex-1 truncate">{log.action || log.output_summary || 'Action'}</span>
+                  <span className="text-[11px] text-fuega-text-primary flex-1 truncate">{log.action || log.output_summary || t('agentDetail:logs.action')}</span>
                   <span className="text-[10px] text-fuega-text-muted num">{log.duration_ms != null ? `${log.duration_ms}ms` : ''}</span>
                   <span className="text-[10px] text-fuega-text-muted num">${log.cost_usd?.toFixed(4) ?? '0.0000'}</span>
                   <span className="text-[10px] text-fuega-text-muted">{log.created_at ? new Date(log.created_at).toLocaleTimeString() : ''}</span>

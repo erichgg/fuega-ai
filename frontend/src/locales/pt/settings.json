@@ -1,0 +1,33 @@
+{
+  "title": "Configurações",
+  "subtitle": "Gerenciamento de configuração",
+  "tabs": {
+    "brand": "Marca",
+    "services": "Serviços",
+    "agents": "Agentes",
+    "workflows": "Fluxos de Trabalho",
+    "budget": "Orçamento",
+    "platforms": "Plataformas"
+  },
+  "brand": {
+    "agencyName": "Nome da Agência",
+    "taglineEn": "Slogan (EN)",
+    "mission": "Missão",
+    "brandVoice": "Diretrizes de Voz da Marca"
+  },
+  "budget": {
+    "agentBudgets": "Orçamentos de Agentes (USD/mês)",
+    "fixedCosts": "Custos Fixos (USD/mês)"
+  },
+  "platforms": {
+    "postsPerDay": "Publicações/dia"
+  },
+  "workflows": {
+    "schedule": "Agenda",
+    "needsApproval": "requer aprovação"
+  },
+  "agents": {
+    "message": "A configuração de agentes é gerenciada na página de Agentes.",
+    "goToAgents": "Ir para Agentes"
+  }
+}

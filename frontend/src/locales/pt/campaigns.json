@@ -1,0 +1,44 @@
+{
+  "title": "Campanhas",
+  "subtitle": "Anúncios pagos e email marketing",
+  "tabs": {
+    "paidAds": "Anúncios Pagos",
+    "email": "E-mail"
+  },
+  "stats": {
+    "totalAdSpend": "Gasto Total em Anúncios",
+    "totalClicks": "Cliques Totais",
+    "avgRoas": "ROAS Médio",
+    "emailCampaigns": "Campanhas de E-mail"
+  },
+  "searchPlaceholder": "Buscar campanhas...",
+  "adColumns": {
+    "campaign": "Campanha",
+    "platform": "Plataforma",
+    "status": "Status",
+    "spend": "Gasto",
+    "clicks": "Cliques",
+    "ctr": "CTR",
+    "cpc": "CPC",
+    "roas": "ROAS"
+  },
+  "emailColumns": {
+    "campaign": "Campanha",
+    "subject": "Assunto",
+    "status": "Status",
+    "sent": "Enviados",
+    "openRate": "Taxa de Abertura",
+    "clickRate": "Taxa de Cliques"
+  },
+  "adPerformance": "Desempenho de Anúncios",
+  "adPerformanceSubtitle": "Cliques e impressões por campanha",
+  "impressionsLabel": "Impressões (÷100)",
+  "empty": {
+    "noAds": "Sem campanhas de anúncios",
+    "noAdsDesc": "As campanhas de anúncios aparecerão após executar o pipeline de anúncios.",
+    "noEmails": "Sem campanhas de e-mail",
+    "noEmailsDesc": "As campanhas de e-mail aparecerão após executar o pipeline de e-mail.",
+    "noAdsMatch": "Nenhuma campanha de anúncios corresponde à sua busca",
+    "noEmailsMatch": "Nenhuma campanha de e-mail corresponde à sua busca"
+  }
+}

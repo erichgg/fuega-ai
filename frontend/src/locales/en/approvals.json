@@ -1,0 +1,26 @@
+{
+  "title": "Approvals",
+  "subtitle": "{{count}} pending",
+  "approveAll": "Approve All ({{count}})",
+  "approve": "Approve",
+  "reject": "Reject",
+  "approved": "Approved",
+  "rejected": "Rejected",
+  "togglePayload": "Toggle payload",
+  "editPayload": "Edit payload before approving:",
+  "approveWithChanges": "Approve with Changes",
+  "rejectReason": "Rejection reason:",
+  "rejectPlaceholder": "Why is this being rejected?",
+  "confirmReject": "Confirm Reject",
+  "empty": {
+    "noRequests": "No approval requests",
+    "noRequestsDesc": "When agents need human approval for actions, they will appear here."
+  },
+  "errors": {
+    "provideReason": "Please provide a reason",
+    "invalidJson": "Invalid JSON payload",
+    "bulkApproveFailed": "Bulk approve failed"
+  },
+  "bulkApprovedSuccess": "Approved {{count}} items",
+  "approval": "approval"
+}

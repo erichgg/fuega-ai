@@ -1,0 +1,38 @@
+{
+  "title": "SEO",
+  "subtitle": "Acompanhamento de otimização para mecanismos de busca",
+  "runAudit": "Executar auditoria",
+  "stats": {
+    "trackedKeywords": "Palavras-chave Rastreadas",
+    "avgPosition": "Posição Média",
+    "improved": "Melhoradas",
+    "declined": "Pioradas"
+  },
+  "charts": {
+    "rankDistribution": "Distribuição de Ranking",
+    "currentPositions": "Posições atuais de palavras-chave",
+    "siteAudits": "Auditorias do Site",
+    "auditsCount": "{{count}} auditorias"
+  },
+  "rankLabels": { "top3": "Top 3", "top10": "Top 10", "top20": "Top 20", "over20": "20+" },
+  "auditScores": { "technical": "Técnico", "content": "Conteúdo" },
+  "columns": {
+    "keyword": "Palavra-chave",
+    "position": "Posição",
+    "trend": "Tendência",
+    "change": "Variação",
+    "volume": "Volume",
+    "difficulty": "Dificuldade",
+    "opportunity": "Oportunidade"
+  },
+  "searchPlaceholder": "Buscar palavras-chave...",
+  "errors": {
+    "auditFailed": "A auditoria SEO falhou. Verifique se o backend esta em execucao."
+  },
+  "datasetLabel": "Palavras-chave",
+  "empty": {
+    "noData": "Sem dados de SEO ainda",
+    "noDataDesc": "Execute o pipeline de SEO para gerar pesquisa de palavras-chave e auditorias do site.",
+    "noMatch": "Nenhuma palavra-chave corresponde à sua busca"
+  }
+}

@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import {
   Target, MapPin, Globe, Mail, Phone, Star, Search,
   PenTool, UserCheck, ChevronDown, Save, Send,
@@ -13,20 +14,21 @@ import { ChartCard } from '../components/ChartCard';
 import { EmptyState } from '../components/EmptyState';
 import { StatusDot } from '../components/StatusDot';
 
-const STAGES = [
-  { key: 'prospect', label: 'Prospect', color: '#6366F1' },
-  { key: 'researched', label: 'Researched', color: '#8B5CF6' },
-  { key: 'qualified', label: 'Qualified', color: '#EAB308' },
-  { key: 'outreach_drafted', label: 'Outreach Drafted', color: '#F97316' },
-  { key: 'outreach_sent', label: 'Outreach Sent', color: '#FF6B2C' },
-  { key: 'responded', label: 'Responded', color: '#00D4AA' },
-  { key: 'won', label: 'Won', color: '#22C55E' },
-  { key: 'lost', label: 'Lost', color: '#EF4444' },
+const STAGE_KEYS = [
+  { key: 'prospect', labelKey: 'stages.prospect', color: '#6366F1' },
+  { key: 'researched', labelKey: 'stages.researched', color: '#8B5CF6' },
+  { key: 'qualified', labelKey: 'stages.qualified', color: '#EAB308' },
+  { key: 'outreach_drafted', labelKey: 'stages.outreach_drafted', color: '#F97316' },
+  { key: 'outreach_sent', labelKey: 'stages.outreach_sent', color: '#FF6B2C' },
+  { key: 'responded', labelKey: 'stages.responded', color: '#00D4AA' },
+  { key: 'won', labelKey: 'stages.won', color: '#22C55E' },
+  { key: 'lost', labelKey: 'stages.lost', color: '#EF4444' },
 ];
 
 const CHANNELS = ['email', 'dm', 'phone', 'whatsapp'];
 
 export default function LeadDetail() {
+  const { t } = useTranslation(['leadDetail', 'leads', 'common']);
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const toast = useToast();
@@ -49,7 +51,7 @@ export default function LeadDetail() {
         setOutreach(data.outreach_draft || '');
         setChannel(data.outreach_channel || 'email');
       })
-      .catch(() => toast.error('Failed to load lead details.'))
+      .catch(() => toast.error(t('common:errors.failedToLoad', { resource: t('leadDetail:title').toLowerCase() })))
       .finally(() => setLoading(false));
   }, [id]);
 
@@ -60,7 +62,7 @@ export default function LeadDetail() {
     try {
       const updated = await api.leads.update(Number(id), { stage });
       setLead(updated);
-    } catch { toast.error('Failed to update stage'); }
+    } catch { toast.error(t('common:errors.failedToUpdate', { resource: t('leadDetail:labels.stage') })); }
   };
 
   const handleSaveNotes = async () => {
@@ -68,7 +70,7 @@ export default function LeadDetail() {
     try {
       const updated = await api.leads.update(Number(id), { notes });
       setLead(updated);
-    } catch { toast.error('Failed to save notes'); }
+    } catch { toast.error(t('common:errors.failedAction', { action: t('leadDetail:notes.saveNotes') })); }
     setSaving(false);
   };
 
@@ -77,7 +79,7 @@ export default function LeadDetail() {
     try {
       const updated = await api.leads.update(Number(id), { outreach_draft: outreach, outreach_channel: channel });
       setLead(updated);
-    } catch { toast.error('Failed to save outreach'); }
+    } catch { toast.error(t('common:errors.failedAction', { action: t('leadDetail:outreach.saveOutreach') })); }
     setSaving(false);
   };
 
@@ -90,7 +92,7 @@ export default function LeadDetail() {
       const updated = await api.leads.update(Number(id), { stage: 'outreach_sent' });
       setLead(updated);
     } catch {
-      toast.error('Failed to send email');
+      toast.error(t('common:errors.failedToSend', { resource: t('leadDetail:outreach.sendEmail') }));
     }
     setSendingEmail(false);
   };
@@ -107,7 +109,7 @@ export default function LeadDetail() {
       setChannel(result.lead.outreach_channel || channel);
       activityBus.push('success', `${label} done`, `$${result.cost_usd?.toFixed(4) || '0'}`);
     } catch {
-      toast.error(`${label} failed`);
+      toast.error(t('common:errors.failedAction', { action: label }));
     }
     setRunningAgent(null);
   };
@@ -115,9 +117,9 @@ export default function LeadDetail() {
   const handleConvert = async () => {
     try {
       const result = await api.leads.convert(Number(id));
-      toast.success(`Lead converted to Client #${result.client_id}!`);
+      toast.success(t('leadDetail:convertedSuccess', { id: result.client_id }));
       navigate(`/clients/${result.client_id}`);
-    } catch { toast.error('Failed to convert lead'); }
+    } catch { toast.error(t('leadDetail:errors.convertFailed')); }
   };
 
   if (loading) {
@@ -128,11 +130,13 @@ export default function LeadDetail() {
     );
   }
 
+  const STAGES = STAGE_KEYS.map(s => ({ ...s, label: t(`leads:${s.labelKey}`) }));
+
   if (!lead) {
     return (
       <div className="animate-fadeIn">
-        <PageHeader title="Lead" breadcrumbs={[{ label: 'Leads', href: '/leads' }, { label: 'Not found' }]} />
-        <EmptyState title="Lead not found" description="This lead doesn't exist or the backend is unavailable." />
+        <PageHeader title={t('leadDetail:title')} breadcrumbs={[{ label: t('leads:title'), href: '/leads' }, { label: t('leadDetail:notFound') }]} />
+        <EmptyState title={t('leadDetail:notFound')} description={t('leadDetail:notFoundDesc')} />
       </div>
     );
   }
@@ -141,19 +145,19 @@ export default function LeadDetail() {
   const scoreColor = (lead.score || 0) >= 70 ? 'text-green-400' : (lead.score || 0) >= 40 ? 'text-yellow-400' : 'text-fuega-text-muted';
 
   const agentActions = [
-    { label: 'Deep Research', agent: 'smb_researcher', action: 'research_businesses', icon: <Search className="w-3 h-3" />, color: '#8B5CF6' },
-    { label: 'Score Lead', agent: 'prospector', action: 'score_and_qualify', icon: <Target className="w-3 h-3" />, color: '#EAB308' },
-    { label: 'Draft Outreach', agent: 'local_outreach', action: 'draft_outreach', icon: <PenTool className="w-3 h-3" />, color: '#FF6B2C' },
+    { label: t('leadDetail:agentActions.deepResearch'), agent: 'smb_researcher', action: 'research_businesses', icon: <Search className="w-3 h-3" />, color: '#8B5CF6' },
+    { label: t('leadDetail:agentActions.scoreLead'), agent: 'prospector', action: 'score_and_qualify', icon: <Target className="w-3 h-3" />, color: '#EAB308' },
+    { label: t('leadDetail:agentActions.draftOutreach'), agent: 'local_outreach', action: 'draft_outreach', icon: <PenTool className="w-3 h-3" />, color: '#FF6B2C' },
   ];
 
   return (
     <div className="animate-fadeIn">
       <PageHeader
         title={lead.business_name}
-        subtitle={lead.contact_name || lead.industry || 'Lead'}
+        subtitle={lead.contact_name || lead.industry || t('leadDetail:title')}
         breadcrumbs={[
-          { label: 'Dashboard', href: '/' },
-          { label: 'Leads', href: '/leads' },
+          { label: t('common:breadcrumbs.dashboard'), href: '/' },
+          { label: t('leads:title'), href: '/leads' },
           { label: lead.business_name },
         ]}
         status={
@@ -192,7 +196,7 @@ export default function LeadDetail() {
         <div className="w-10 h-10 rounded-xl bg-fuega-orange/10 flex items-center justify-center flex-shrink-0">
           <span className="text-lg font-bold text-fuega-orange">{lead.business_name?.charAt(0)}</span>
         </div>
-        {lead.score > 0 && <span className={`num text-sm font-bold ${scoreColor}`}>Score: {lead.score}</span>}
+        {lead.score > 0 && <span className={`num text-sm font-bold ${scoreColor}`}>{t('leadDetail:labels.score')}: {lead.score}</span>}
         {lead.location && <span className="flex items-center gap-1"><MapPin className="w-3 h-3" />{lead.location}</span>}
         {lead.country && <span className="flex items-center gap-1">{lead.country}</span>}
         {lead.email && <span className="flex items-center gap-1"><Mail className="w-3 h-3" />{lead.email}</span>}
@@ -202,7 +206,7 @@ export default function LeadDetail() {
             <Globe className="w-3 h-3" />{lead.website_url}
           </a>
         )}
-        {lead.source && <span className="text-[10px] px-1.5 py-0.5 rounded bg-fuega-input text-fuega-text-muted">Source: {lead.source}</span>}
+        {lead.source && <span className="text-[10px] px-1.5 py-0.5 rounded bg-fuega-input text-fuega-text-muted">{t('leadDetail:labels.source')}: {lead.source}</span>}
       </div>
 
       {/* Agent Actions Bar */}
@@ -232,46 +236,46 @@ export default function LeadDetail() {
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-green-500/10 border border-green-500/30 text-green-400 text-[11px] font-medium hover:bg-green-500/20 transition-colors ml-auto"
         >
           <UserCheck className="w-3.5 h-3.5" />
-          Convert to Client
+          {t('leadDetail:agentActions.convertToClient')}
         </button>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
         {/* Digital Presence Audit */}
-        <ChartCard title="Digital Presence" subtitle="Scout data">
+        <ChartCard title={t('leadDetail:digitalPresence.title')} subtitle={t('leadDetail:digitalPresence.subtitle')}>
           <div className="grid grid-cols-2 gap-2">
             <div className="flex items-center gap-2 p-2 rounded-lg bg-fuega-input border border-fuega-border">
               <Star className="w-4 h-4 text-yellow-400" />
               <div>
-                <p className="text-[10px] text-fuega-text-muted">Google Rating</p>
+                <p className="text-[10px] text-fuega-text-muted">{t('leadDetail:digitalPresence.googleRating')}</p>
                 <p className="text-sm font-semibold text-fuega-text-primary num">{lead.google_rating ?? '--'}</p>
               </div>
             </div>
             <div className="flex items-center gap-2 p-2 rounded-lg bg-fuega-input border border-fuega-border">
               <MessageSquare className="w-4 h-4 text-blue-400" />
               <div>
-                <p className="text-[10px] text-fuega-text-muted">Reviews</p>
+                <p className="text-[10px] text-fuega-text-muted">{t('leadDetail:digitalPresence.reviews')}</p>
                 <p className="text-sm font-semibold text-fuega-text-primary num">{lead.review_count ?? '--'}</p>
               </div>
             </div>
             <div className="flex items-center gap-2 p-2 rounded-lg bg-fuega-input border border-fuega-border">
               {lead.has_website ? <CheckCircle className="w-4 h-4 text-green-400" /> : <XCircle className="w-4 h-4 text-red-400" />}
               <div>
-                <p className="text-[10px] text-fuega-text-muted">Website</p>
-                <p className="text-sm font-semibold text-fuega-text-primary">{lead.has_website ? 'Yes' : lead.has_website === false ? 'No' : '--'}</p>
+                <p className="text-[10px] text-fuega-text-muted">{t('leadDetail:digitalPresence.website')}</p>
+                <p className="text-sm font-semibold text-fuega-text-primary">{lead.has_website ? t('common:labels.yes') : lead.has_website === false ? t('common:labels.no') : '--'}</p>
               </div>
             </div>
             <div className="flex items-center gap-2 p-2 rounded-lg bg-fuega-input border border-fuega-border">
               {lead.has_social ? <CheckCircle className="w-4 h-4 text-green-400" /> : <XCircle className="w-4 h-4 text-red-400" />}
               <div>
-                <p className="text-[10px] text-fuega-text-muted">Social Media</p>
-                <p className="text-sm font-semibold text-fuega-text-primary">{lead.has_social ? 'Yes' : lead.has_social === false ? 'No' : '--'}</p>
+                <p className="text-[10px] text-fuega-text-muted">{t('leadDetail:digitalPresence.socialMedia')}</p>
+                <p className="text-sm font-semibold text-fuega-text-primary">{lead.has_social ? t('common:labels.yes') : lead.has_social === false ? t('common:labels.no') : '--'}</p>
               </div>
             </div>
           </div>
           {lead.digital_gap_score != null && (
             <div className="mt-2 flex items-center gap-2">
-              <span className="text-[10px] text-fuega-text-muted">Digital Gap Score:</span>
+              <span className="text-[10px] text-fuega-text-muted">{t('leadDetail:digitalPresence.digitalGapScore')}:</span>
               <div className="flex-1 h-2 bg-fuega-surface rounded-full overflow-hidden">
                 <div className="h-full rounded-full bg-fuega-orange" style={{ width: `${lead.digital_gap_score}%` }} />
               </div>
@@ -280,16 +284,16 @@ export default function LeadDetail() {
           )}
           {lead.recommended_service_tier && (
             <div className="mt-2 text-[10px] text-fuega-text-muted">
-              Recommended tier: <span className="text-fuega-text-primary font-medium">{lead.recommended_service_tier}</span>
+              {t('leadDetail:digitalPresence.recommendedTier')}: <span className="text-fuega-text-primary font-medium">{lead.recommended_service_tier}</span>
             </div>
           )}
         </ChartCard>
 
         {/* Outreach Section */}
-        <ChartCard title="Outreach" subtitle={lead.outreach_channel || 'Draft your pitch'}>
+        <ChartCard title={t('leadDetail:outreach.title')} subtitle={lead.outreach_channel || t('leadDetail:outreach.title')}>
           <div className="space-y-2">
             <div className="flex items-center gap-2 mb-2">
-              <span className="text-[10px] text-fuega-text-muted">Channel:</span>
+              <span className="text-[10px] text-fuega-text-muted">{t('leadDetail:outreach.channel')}:</span>
               {CHANNELS.map(ch => (
                 <button
                   key={ch}
@@ -305,7 +309,7 @@ export default function LeadDetail() {
             <textarea
               value={outreach}
               onChange={e => setOutreach(e.target.value)}
-              placeholder="Outreach message draft... Use 'Draft Outreach' agent action to auto-generate."
+              placeholder={t('leadDetail:outreach.placeholder')}
               rows={6}
               className="w-full bg-fuega-input border border-fuega-border rounded-lg px-2.5 py-1.5 text-[12px] text-fuega-text-primary placeholder-fuega-text-muted resize-none focus:outline-none focus:border-fuega-orange/50"
             />
@@ -316,7 +320,7 @@ export default function LeadDetail() {
                 className="flex items-center gap-1.5 px-3 py-1 rounded bg-fuega-orange text-white text-[11px] font-medium hover:bg-fuega-orange/90 transition-colors disabled:opacity-50"
               >
                 <Save className="w-3 h-3" />
-                Save Outreach
+                {t('leadDetail:outreach.saveOutreach')}
               </button>
               {lead.email && outreach.trim() && (
                 <button
@@ -329,7 +333,7 @@ export default function LeadDetail() {
                   ) : (
                     <Send className="w-3 h-3" />
                   )}
-                  Send Email
+                  {t('leadDetail:outreach.sendEmail')}
                 </button>
               )}
             </div>
@@ -337,7 +341,7 @@ export default function LeadDetail() {
         </ChartCard>
 
         {/* Research Panel */}
-        <ChartCard title="Agent Research" subtitle="Deep-dive brief" collapsible>
+        <ChartCard title={t('leadDetail:research.title')} subtitle={t('leadDetail:research.subtitle')} collapsible>
           {lead.agent_research ? (
             <div className="space-y-2">
               {typeof lead.agent_research === 'object' ? (
@@ -354,17 +358,17 @@ export default function LeadDetail() {
               )}
             </div>
           ) : (
-            <EmptyState title="No research yet" description='Click "Deep Research" to generate a research brief.' />
+            <EmptyState title={t('leadDetail:research.noResearch')} description={t('leadDetail:research.noResearchDesc')} />
           )}
         </ChartCard>
 
         {/* Notes */}
-        <ChartCard title="Notes" subtitle="Internal notes">
+        <ChartCard title={t('leadDetail:notes.title')} subtitle={t('leadDetail:notes.subtitle')}>
           <div className="space-y-2">
             <textarea
               value={notes}
               onChange={e => setNotes(e.target.value)}
-              placeholder="Add notes about this lead..."
+              placeholder={t('leadDetail:notes.placeholder')}
               rows={5}
               className="w-full bg-fuega-input border border-fuega-border rounded-lg px-2.5 py-1.5 text-[12px] text-fuega-text-primary placeholder-fuega-text-muted resize-none focus:outline-none focus:border-fuega-orange/50"
             />
@@ -374,7 +378,7 @@ export default function LeadDetail() {
               className="flex items-center gap-1.5 px-3 py-1 rounded bg-fuega-orange text-white text-[11px] font-medium hover:bg-fuega-orange/90 transition-colors disabled:opacity-50"
             >
               <Save className="w-3 h-3" />
-              Save Notes
+              {t('leadDetail:notes.saveNotes')}
             </button>
           </div>
         </ChartCard>

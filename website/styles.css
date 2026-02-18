@@ -54,12 +54,21 @@ nav {
   transition: all 0.3s;
 }
 .nav-cta:hover { transform: translateY(-2px); box-shadow: 0 8px 32px var(--primary-glow); }
+.lang-switcher {
+  display: flex; gap: 0; align-items: center;
+}
 .lang-toggle {
   font-size: 0.8rem !important; font-weight: 600 !important;
   color: var(--accent) !important; border: 1px solid var(--accent);
-  padding: 0.25rem 0.6rem; border-radius: 4px;
+  padding: 0.25rem 0.6rem; border-radius: 0;
 }
+.lang-switcher .lang-toggle:first-child { border-radius: 4px 0 0 4px; }
+.lang-switcher .lang-toggle:last-child { border-radius: 0 4px 4px 0; }
+.lang-switcher .lang-toggle + .lang-toggle { border-left: none; }
 .lang-toggle:hover { background: rgba(0, 212, 170, 0.1); }
+.lang-toggle.active {
+  background: var(--accent); color: var(--surface) !important;
+}
 
 /* Mobile menu toggle */
 .nav-toggle {

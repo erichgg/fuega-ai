@@ -1,0 +1,17 @@
+{
+  "title": "Cliente",
+  "notFound": "Cliente não encontrado",
+  "notFoundDesc": "Este cliente não existe ou o backend está indisponível.",
+  "deliverables": {
+    "title": "Entregáveis",
+    "items": "{{count}} itens",
+    "none": "Sem entregáveis",
+    "due": "Vence em {{date}}"
+  },
+  "invoices": {
+    "title": "Faturas",
+    "records": "{{count}} registros",
+    "none": "Sem faturas",
+    "period": "Período"
+  }
+}

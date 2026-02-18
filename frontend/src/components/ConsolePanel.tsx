@@ -1,5 +1,6 @@
 // @refresh reset
 import { useState, useRef, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Terminal, X, ChevronDown, Trash2, Bot, GitBranch, Zap,
   AlertCircle, CheckCircle2, Globe, ArrowRight, Clock, Wifi,
@@ -122,6 +123,7 @@ interface ConsolePanelProps {
 }
 
 export function ConsolePanel({ open, onClose }: ConsolePanelProps) {
+  const { t } = useTranslation(['nav', 'common']);
   const { events: wsEvents, connected } = useWebSocket();
   const [entries, setEntries] = useState<ConsoleEntry[]>([]);
   const [autoScroll, setAutoScroll] = useState(true);
@@ -175,11 +177,11 @@ export function ConsolePanel({ open, onClose }: ConsolePanelProps) {
       <div className="h-11 flex items-center justify-between px-3 border-b border-fuega-border flex-shrink-0">
         <div className="flex items-center gap-2">
           <Terminal className="w-4 h-4 text-fuega-orange" />
-          <span className="text-xs font-semibold text-fuega-text-primary">Console</span>
+          <span className="text-xs font-semibold text-fuega-text-primary">{t('nav:console')}</span>
           <span className={clsx('w-1.5 h-1.5 rounded-full', connected ? 'bg-green-400 animate-pulse' : 'bg-red-400')} />
         </div>
         <div className="flex items-center gap-0.5">
-          <button onClick={handleClear} className="p-1 rounded text-fuega-text-muted hover:text-fuega-text-primary hover:bg-fuega-card-hover transition-colors" title="Clear">
+          <button onClick={handleClear} className="p-1 rounded text-fuega-text-muted hover:text-fuega-text-primary hover:bg-fuega-card-hover transition-colors" title={t('common:actions.clear')}>
             <Trash2 className="w-3.5 h-3.5" />
           </button>
           <button
@@ -189,7 +191,7 @@ export function ConsolePanel({ open, onClose }: ConsolePanelProps) {
           >
             <ChevronDown className="w-3.5 h-3.5" />
           </button>
-          <button onClick={onClose} className="p-1 rounded text-fuega-text-muted hover:text-fuega-text-primary hover:bg-fuega-card-hover transition-colors" title="Close">
+          <button onClick={onClose} className="p-1 rounded text-fuega-text-muted hover:text-fuega-text-primary hover:bg-fuega-card-hover transition-colors" title={t('common:actions.close')}>
             <X className="w-3.5 h-3.5" />
           </button>
         </div>
@@ -200,8 +202,8 @@ export function ConsolePanel({ open, onClose }: ConsolePanelProps) {
         {entries.length === 0 && (
           <div className="flex flex-col items-center justify-center py-12 text-fuega-text-muted">
             <Terminal className="w-8 h-8 mb-2 opacity-20" />
-            <p className="text-[11px]">Waiting for activity...</p>
-            <p className="text-[9px] mt-1 opacity-60">All API calls, agent actions, and pipeline events show here</p>
+            <p className="text-[11px]">{t('common:status.loading')}</p>
+            <p className="text-[9px] mt-1 opacity-60">{t('common:empty.description')}</p>
           </div>
         )}
         {entries.map(entry => {
@@ -229,10 +231,10 @@ export function ConsolePanel({ open, onClose }: ConsolePanelProps) {
 
       {/* Footer */}
       <div className="border-t border-fuega-border px-3 py-1.5 flex items-center justify-between text-[9px] text-fuega-text-muted flex-shrink-0">
-        <span>{entries.length} events</span>
+        <span>{entries.length} {t('common:labels.calls')}</span>
         <div className="flex items-center gap-1">
           <Wifi className={clsx('w-3 h-3', connected ? 'text-green-400' : 'text-red-400')} />
-          <span>{connected ? 'Live' : 'Offline'}</span>
+          <span>{connected ? t('common:status.live') : t('common:status.offline')}</span>
         </div>
       </div>
     </aside>

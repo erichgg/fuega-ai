@@ -1,0 +1,67 @@
+{
+  "tabs": {
+    "chat": "Chat",
+    "actions": "Acoes",
+    "hitlControls": "Controles HITL",
+    "logs": "Registros"
+  },
+  "notFound": "Agente nao encontrado",
+  "notFoundDesc": "Este agente nao existe ou o backend esta indisponivel.",
+  "back": "Voltar",
+  "export": "Exportar",
+  "import": "Importar",
+  "labels": {
+    "spend": "Gasto",
+    "budget": "Orcamento",
+    "calls": "Chamadas",
+    "usage": "Uso",
+    "modelTools": "Modelo e Ferramentas",
+    "inputs": "Entradas",
+    "outputs": "Saidas",
+    "performance": "Desempenho",
+    "success": "Sucesso",
+    "noneSpecified": "Nao especificado"
+  },
+  "systemPrompt": "Prompt do Sistema",
+  "chat": {
+    "title": "Chat Direto",
+    "session": "Sessao",
+    "clear": "Limpar",
+    "sendMessage": "Envie uma mensagem para conversar com {{name}}",
+    "placeholder": "Pergunte ao {{name}}...",
+    "requestFailed": "A solicitacao falhou. Verifique o backend."
+  },
+  "actions": {
+    "title": "Acoes Disponiveis para {{name}}",
+    "description": "Execute etapas individuais do fluxo de trabalho. Cada uma dispara uma unica chamada API para este agente.",
+    "noActions": "Nenhuma acao de fluxo de trabalho mapeada",
+    "running": "Executando...",
+    "result": "Resultado"
+  },
+  "hitl": {
+    "title": "Controles Humano-no-Ciclo",
+    "description": "Configure quais acoes requerem aprovacao humana antes da execucao.",
+    "auto": "Auto",
+    "approve": "Aprovar",
+    "manual": "Manual",
+    "noActions": "Nenhuma acao configurada",
+    "noActionsDesc": "As acoes do agente aparecerao aqui assim que o backend fornecer."
+  },
+  "logs": {
+    "title": "Registro de Atividade",
+    "noActivity": "Sem atividade ainda",
+    "action": "Acao"
+  },
+  "errors": {
+    "updateActionMode": "Falha ao atualizar modo de acao",
+    "exportFailed": "Falha ao exportar configuracao",
+    "importFailed": "Falha ao importar configuracao",
+    "actionFailed": "A acao falhou",
+    "statusFailed": "Falha ao atualizar status"
+  },
+  "modeSetTo": "{{action}} configurado para {{mode}}",
+  "configExported": "Configuracao exportada",
+  "configImported": "Configuracao importada com sucesso",
+  "pauseAgent": "Pausar agente",
+  "activateAgent": "Ativar agente"
+}

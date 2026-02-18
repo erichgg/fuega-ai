@@ -1,0 +1,65 @@
+{
+  "title": "Workflows",
+  "subtitle": "Pipeline execution and manual controls",
+  "tabs": {
+    "fullPipelines": "Full Pipelines",
+    "individualSteps": "Individual Steps",
+    "runHistory": "Run History"
+  },
+  "stats": {
+    "completed": "Completed",
+    "running": "Running",
+    "needsApproval": "Needs Approval",
+    "totalCost": "Total Cost"
+  },
+  "pendingApprovals": "Pending Approvals ({{count}})",
+  "approveAndContinue": "Approve & Continue",
+  "reject": "Reject",
+  "agentsProduced": "What the agents produced:",
+  "latestStepOutput": "Latest step output:",
+  "pipelines": {
+    "noDefs": "No pipeline definitions",
+    "noDefsDesc": "Start the backend to load workflow definitions from config.",
+    "steps": "{{count}} steps",
+    "runAll": "Run All"
+  },
+  "steps": {
+    "noSteps": "No steps available",
+    "noStepsDesc": "Pipeline definitions must be loaded from the backend to show individual steps.",
+    "saveTokens": "Save tokens by running individual steps.",
+    "costInfo": "Each button fires a single agent action. Haiku steps cost ~$0.001-0.003, Sonnet ~$0.005-0.015.",
+    "columns": { "step": "Step", "agent": "Agent", "model": "Model" },
+    "stepResult": "Step Result"
+  },
+  "errors": {
+    "loadFailed": "Failed to load workflows.",
+    "triggerFailed": "Failed to trigger \"{{pipeline}}\" — Is the backend running? Check agent registration.",
+    "stepFailed": "Step FAILED: {{action}} via {{agent}} — {{duration}}ms elapsed. Check backend logs.",
+    "approvalFailed": "Failed to {{action}} step on run #{{runId}}. Backend may be down.",
+    "loadStepsFailed": "Could not load step details for run #{{runId}}"
+  },
+  "approvalSummary": {
+    "lead": "Lead",
+    "outreach": "outreach",
+    "subject": "Subject",
+    "review": "Review",
+    "score": "Score",
+    "compliance": "Compliance",
+    "issues": "Issues",
+    "noIssues": "No issues found",
+    "leadsScored": "{{count}} leads scored",
+    "content": "Content"
+  },
+  "history": {
+    "title": "Run History",
+    "filterAll": "All Statuses",
+    "filterCompleted": "Completed",
+    "filterRunning": "Running",
+    "filterFailed": "Failed",
+    "filterApproval": "Paused for Approval",
+    "noRuns": "No workflow runs yet",
+    "noRunsDesc": "Trigger a workflow above or wait for the scheduler to run one.",
+    "noFilteredRuns": "No {{status}} runs",
+    "noFilteredRunsDesc": "Try selecting a different status filter."
+  }
+}

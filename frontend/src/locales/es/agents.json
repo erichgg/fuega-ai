@@ -1,0 +1,31 @@
+{
+  "title": "Agentes IA",
+  "subtitle": "{{count}} agentes — Tu equipo real, presupuesto real, resultados reales",
+  "searchPlaceholder": "Buscar agentes...",
+  "columns": {
+    "status": "Estado",
+    "agent": "Agente",
+    "model": "Modelo",
+    "calls": "Llamadas",
+    "spendBudget": "Gasto / Presupuesto",
+    "trend": "Tendencia 7d"
+  },
+  "filters": {
+    "allStatus": "Todos los Estados",
+    "active": "Activo",
+    "paused": "Pausado",
+    "allModels": "Todos los Modelos"
+  },
+  "bulk": {
+    "selected": "{{count}} seleccionados",
+    "pauseAll": "Pausar Todos"
+  },
+  "togglePause": "Clic para pausar",
+  "toggleActivate": "Clic para activar",
+  "empty": {
+    "noMatching": "No se encontraron agentes",
+    "noMatchingDesc": "Intenta ajustar tu busqueda o filtros.",
+    "noAgents": "Sin agentes",
+    "noAgentsDesc": "Los agentes apareceran una vez que el backend los cargue desde la configuracion."
+  }
+}

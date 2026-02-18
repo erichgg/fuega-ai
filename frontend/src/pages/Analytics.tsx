@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { DollarSign, TrendingUp, Zap, Bot, PhoneCall } from 'lucide-react';
 import { Line, Bar } from 'react-chartjs-2';
 import { api } from '../lib/api';
@@ -18,6 +19,7 @@ export default function Analytics() {
   const [loading, setLoading] = useState(true);
   const [range, setRange] = useState<Range>('30d');
   const toast = useToast();
+  const { t } = useTranslation(['analytics', 'common']);
 
   useEffect(() => {
     setLoading(true);
@@ -30,7 +32,7 @@ export default function Analytics() {
       setCosts(c);
       setCostChart(cc);
       setKpis(k);
-    }).catch(() => toast.error('Failed to load analytics. Check that the backend is running.'))
+    }).catch(() => toast.error(t('common:errors.failedToLoad', { resource: t('analytics:title').toLowerCase() }) + ' ' + t('common:errors.backendCheck')))
     .finally(() => setLoading(false));
   }, [range]);
 
@@ -45,8 +47,8 @@ export default function Analytics() {
   if (!costs && !kpis) {
     return (
       <div className="animate-fadeIn">
-        <PageHeader title="Analytics" subtitle="Financial performance and cost tracking" />
-        <EmptyState title="No analytics data" description="Run some workflows so agents generate cost and revenue data." />
+        <PageHeader title={t('analytics:title')} subtitle={t('analytics:subtitle')} />
+        <EmptyState title={t('analytics:empty.noData')} description={t('analytics:empty.noDataDesc')} />
       </div>
     );
   }
@@ -72,13 +74,13 @@ export default function Analytics() {
   const fmtDelta = (val: number | null) => {
     if (val === null) return undefined;
     const sign = val >= 0 ? '+' : '';
-    return `${sign}${val.toFixed(1)}% vs last period`;
+    return `${sign}${val.toFixed(1)}% ${t('analytics:vsLastPeriod')}`;
   };
 
   const costBreakdownData = agents.length > 0 ? {
     labels: agents.map((a: any) => a.name),
     datasets: [{
-      label: 'Spend (USD)',
+      label: t('common:labels.spend') + ' (USD)',
       data: agents.map((a: any) => a.month_spend_usd || 0),
       backgroundColor: CHART_COLORS.concat(CHART_COLORS).map(c => c + 'BB'),
       borderColor: CHART_COLORS.concat(CHART_COLORS),
@@ -92,7 +94,7 @@ export default function Analytics() {
     labels: costChart.labels,
     datasets: [
       {
-        label: 'API Costs',
+        label: t('analytics:pl.apiCosts'),
         data: costChart.costs,
         borderColor: '#FF6B2C',
         backgroundColor: 'rgba(255,107,44,0.1)',
@@ -106,16 +108,16 @@ export default function Analytics() {
   } : null;
 
   const rangeButtons: { key: Range; label: string }[] = [
-    { key: '7d', label: '7d' },
-    { key: '30d', label: '30d' },
-    { key: '90d', label: '90d' },
+    { key: '7d', label: t('analytics:ranges.7d') },
+    { key: '30d', label: t('analytics:ranges.30d') },
+    { key: '90d', label: t('analytics:ranges.90d') },
   ];
 
   return (
     <div className="animate-fadeIn">
       <PageHeader
-        title="Analytics"
-        subtitle="Financial performance and cost tracking"
+        title={t('analytics:title')}
+        subtitle={t('analytics:subtitle')}
         action={
           <div className="flex gap-1 bg-fuega-card border border-fuega-border rounded-lg p-0.5">
             {rangeButtons.map(r => (
@@ -137,7 +139,7 @@ export default function Analytics() {
 
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-2 mb-3">
         <StatCard
-          label="Monthly Revenue"
+          label={t('analytics:stats.monthlyRevenue')}
           value={<span className="num">${revenue.toLocaleString()}</span>}
           subValue={fmtDelta(delta(revenue, prevRevenue))}
           icon={<DollarSign className="w-5 h-5" />}
@@ -146,36 +148,36 @@ export default function Analytics() {
           trendValue={fmtDelta(delta(revenue, prevRevenue))}
         />
         <StatCard
-          label="Total API Costs"
+          label={t('analytics:stats.totalApiCosts')}
           value={<span className="num">${totalSpent.toFixed(2)}</span>}
-          subValue={`${usagePct}% of $${totalBudget} budget`}
+          subValue={t('common:budgetOf', { pct: usagePct, budget: totalBudget })}
           icon={<Zap className="w-5 h-5" />}
           color="orange"
           trend={delta(totalSpent, prevSpent) !== null ? (delta(totalSpent, prevSpent)! >= 0 ? 'up' : 'down') : undefined}
           trendValue={fmtDelta(delta(totalSpent, prevSpent))}
         />
         <StatCard
-          label="Net Profit"
+          label={t('analytics:stats.netProfit')}
           value={<span className="num">${profit.toFixed(2)}</span>}
-          subValue={revenue > 0 ? `${((profit / revenue) * 100).toFixed(0)}% margin` : undefined}
+          subValue={revenue > 0 ? `${((profit / revenue) * 100).toFixed(0)}% ${t('common:margin')}` : undefined}
           trend={profit >= 0 ? 'up' : 'down'}
-          trendValue={fmtDelta(delta(profit, prevProfit)) || (profit >= 0 ? 'Profitable' : 'Loss')}
+          trendValue={fmtDelta(delta(profit, prevProfit)) || (profit >= 0 ? t('analytics:stats.profitable') : t('analytics:stats.loss'))}
           icon={<TrendingUp className="w-5 h-5" />}
           color="teal"
         />
         <StatCard
-          label="Cost per Call"
+          label={t('analytics:stats.costPerCall')}
           value={<span className="num">${costPerCall.toFixed(4)}</span>}
-          subValue={totalCalls > 0 ? `${totalCalls} calls total` : 'No calls yet'}
+          subValue={totalCalls > 0 ? t('common:callsTotal', { count: totalCalls }) : t('common:noCallsYet')}
           icon={<PhoneCall className="w-5 h-5" />}
           color="pink"
         />
-        <StatCard label="Active Agents" value={agents.length} icon={<Bot className="w-5 h-5" />} color="indigo" />
+        <StatCard label={t('analytics:stats.activeAgents')} value={agents.length} icon={<Bot className="w-5 h-5" />} color="indigo" />
       </div>
 
       {/* Cost trend */}
       {costTrendData ? (
-        <ChartCard title="Cost Trend" subtitle={`Daily API costs (${range})`} className="mb-4">
+        <ChartCard title={t('analytics:charts.costTrend')} subtitle={t('analytics:charts.dailyCosts', { range })} className="mb-4">
           <div className="h-72">
             <Line data={costTrendData} options={{
               ...defaultChartOptions,
@@ -188,7 +190,7 @@ export default function Analytics() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-2 mb-3">
         {/* Cost per agent */}
         {costBreakdownData ? (
-          <ChartCard title="Cost per Agent" subtitle="API spend breakdown" className="lg:col-span-2">
+          <ChartCard title={t('analytics:charts.costPerAgent')} subtitle={t('analytics:charts.apiSpend')} className="lg:col-span-2">
             <div className="h-64">
               <Bar data={costBreakdownData} options={{
                 ...defaultChartOptions,
@@ -197,18 +199,18 @@ export default function Analytics() {
             </div>
           </ChartCard>
         ) : (
-          <ChartCard title="Cost per Agent" subtitle="API spend breakdown" className="lg:col-span-2">
-            <EmptyState title="No agent costs yet" />
+          <ChartCard title={t('analytics:charts.costPerAgent')} subtitle={t('analytics:charts.apiSpend')} className="lg:col-span-2">
+            <EmptyState title={t('analytics:empty.noAgentCosts')} />
           </ChartCard>
         )}
 
         {/* P&L */}
-        <ChartCard title="P&L Breakdown" subtitle="This month">
+        <ChartCard title={t('analytics:charts.plBreakdown')} subtitle={t('analytics:charts.thisMonth')}>
           <div className="space-y-3 py-2">
             {[
-              { label: 'Revenue', value: `$${revenue.toFixed(2)}`, color: '#00D4AA' },
-              { label: 'API Costs', value: `-$${totalSpent.toFixed(2)}`, color: '#FF6B2C' },
-              { label: 'Net Profit', value: `$${profit.toFixed(2)}`, color: profit >= 0 ? '#22C55E' : '#EF4444' },
+              { label: t('analytics:pl.revenue'), value: `$${revenue.toFixed(2)}`, color: '#00D4AA' },
+              { label: t('analytics:pl.apiCosts'), value: `-$${totalSpent.toFixed(2)}`, color: '#FF6B2C' },
+              { label: t('analytics:pl.netProfit'), value: `$${profit.toFixed(2)}`, color: profit >= 0 ? '#22C55E' : '#EF4444' },
             ].map(item => (
               <div key={item.label} className="flex items-center justify-between">
                 <div className="flex items-center gap-2">

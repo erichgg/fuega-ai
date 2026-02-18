@@ -1,0 +1,33 @@
+{
+  "title": "Team Chat",
+  "subtitle": "Multi-agent group discussion",
+  "selectAgents": "Select Agents for Meeting",
+  "selectAll": "Select All",
+  "clear": "Clear",
+  "divisions": {
+    "content": "Content",
+    "growth": "Growth",
+    "finance": "Finance",
+    "outreach": "Outreach",
+    "operations": "Operations"
+  },
+  "agentsSelected": "{{count}} agent selected",
+  "agentsSelectedPlural": "{{count}} agents selected",
+  "presets": {
+    "statusReport": "Status report",
+    "weeklySummary": "Weekly summary",
+    "budgetCheck": "Budget check"
+  },
+  "messagePlaceholder": "Type your message to the team...",
+  "ctrlEnterToSend": "Ctrl+Enter to send",
+  "sendToTeam": "Send to Team",
+  "agentsThinking": "Agents thinking...",
+  "responses": "Responses",
+  "totalCost": "Total cost",
+  "you": "You",
+  "toAgents": "to {{count}} agent",
+  "toAgentsPlural": "to {{count}} agents",
+  "responded": "responded",
+  "skipped": "skipped",
+  "message": "message"
+}

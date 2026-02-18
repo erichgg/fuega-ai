@@ -1,0 +1,95 @@
+{
+  "actions": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "search": "Search",
+    "close": "Close",
+    "clear": "Clear",
+    "add": "Add",
+    "run": "Run",
+    "approve": "Approve",
+    "reject": "Reject",
+    "export": "Export",
+    "import": "Import",
+    "create": "Create",
+    "update": "Update",
+    "send": "Send",
+    "back": "Back",
+    "viewResult": "View result",
+    "dismiss": "dismiss",
+    "launch": "Launch"
+  },
+  "status": {
+    "active": "Active",
+    "paused": "Paused",
+    "running": "Running",
+    "completed": "Completed",
+    "failed": "Failed",
+    "pending": "Pending",
+    "error": "Error",
+    "live": "Live",
+    "offline": "Offline",
+    "loading": "Loading...",
+    "saving": "Saving...",
+    "saved": "Saved",
+    "creating": "Creating..."
+  },
+  "time": {
+    "justNow": "just now",
+    "minAgo": "{{count}} min ago",
+    "hAgo": "{{count}}h ago",
+    "dAgo": "{{count}}d ago"
+  },
+  "empty": {
+    "title": "No data yet",
+    "description": "Data will appear here once the system starts generating it.",
+    "noResults": "No results found"
+  },
+  "pagination": {
+    "result": "{{count}} result",
+    "results": "{{count}} results"
+  },
+  "labels": {
+    "yes": "Yes",
+    "no": "No",
+    "none": "None",
+    "total": "Total",
+    "session": "Session",
+    "cost": "Cost",
+    "budget": "Budget",
+    "revenue": "Revenue",
+    "profit": "Profit",
+    "spend": "Spend",
+    "calls": "Calls",
+    "usage": "Usage"
+  },
+  "errors": {
+    "backendCheck": "Check that the backend is running.",
+    "failedToLoad": "Failed to load {{resource}}.",
+    "failedToUpdate": "Failed to update {{resource}}.",
+    "failedToCreate": "Failed to create {{resource}}.",
+    "failedToSend": "Failed to send {{resource}}.",
+    "failedAction": "{{action}} failed.",
+    "nameRequired": "Name is required.",
+    "actionFailed": "Action failed"
+  },
+  "breadcrumbs": {
+    "dashboard": "Dashboard",
+    "agents": "Agents"
+  },
+  "alt": {
+    "stockPhoto": "Stock photo",
+    "aiGenerated": "AI generated"
+  },
+  "changeLanguage": "Change language",
+  "clickToEdit": "Click to edit",
+  "margin": "margin",
+  "noCallsYet": "No calls yet",
+  "callsTotal": "{{count}} calls total",
+  "budgetOf": "{{pct}}% of ${{budget}} budget",
+  "retries": "{{count}} retries",
+  "stepsCompleted": "{{count}} steps completed",
+  "runsOf": "{{filtered}} of {{total}} runs"
+}

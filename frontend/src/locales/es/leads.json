@@ -1,0 +1,72 @@
+{
+  "title": "Pipeline de Leads",
+  "subtitle": "{{count}} leads en todas las etapas",
+  "stages": {
+    "prospect": "Prospectos",
+    "researched": "Investigados",
+    "qualified": "Calificados",
+    "outreach_drafted": "Contacto Redactado",
+    "outreach_sent": "Contacto Enviado",
+    "responded": "Respondieron",
+    "won": "Ganados",
+    "lost": "Perdidos"
+  },
+  "views": {
+    "pipeline": "Pipeline",
+    "table": "Tabla"
+  },
+  "actions": {
+    "runFullPipeline": "Ejecutar Pipeline Completo",
+    "running": "Ejecutando...",
+    "scoutOnly": "Solo Explorar",
+    "scouting": "Explorando...",
+    "addLead": "Agregar Lead"
+  },
+  "form": {
+    "businessName": "Nombre del negocio...",
+    "industry": "Industria",
+    "location": "Ubicación",
+    "email": "Correo electrónico"
+  },
+  "scout": {
+    "locationPlaceholder": "Ubicación (ej. Ciudad de México, Condesa)",
+    "industryPlaceholder": "Industria (opcional)",
+    "scout": "Explorar"
+  },
+  "pipeline": {
+    "title": "Ejecutar Pipeline de Contacto Completo",
+    "steps": "Explorar → Investigar → Calificar → Redactar Contacto → Revisar → Cumplimiento → Aprobación",
+    "targetLocation": "Ubicación objetivo (ej. Monterrey, México)",
+    "industryOptional": "Industria (opcional)"
+  },
+  "stats": {
+    "prospects": "Prospectos",
+    "qualified": "Calificados",
+    "outreach": "Contacto",
+    "won": "Ganados"
+  },
+  "columns": {
+    "business": "Negocio",
+    "stage": "Etapa",
+    "score": "Puntuación",
+    "location": "Ubicación",
+    "industry": "Industria",
+    "source": "Fuente"
+  },
+  "empty": {
+    "noLeads": "Sin leads",
+    "emptyTable": "No se encontraron leads. Explora prospectos o agrega un lead manualmente."
+  },
+  "pipelineStatus": {
+    "starting": "Iniciando pipeline...",
+    "completed": "¡Los {{count}} pasos completados!",
+    "waitingApproval": "Esperando tu aprobación"
+  },
+  "errors": {
+    "businessRequired": "El nombre del negocio es obligatorio",
+    "enterLocation": "Ingresa una ubicación para explorar",
+    "enterTargetLocation": "Ingresa una ubicación objetivo",
+    "scoutFailed": "La exploracion fallo",
+    "pipelineFailed": "Error al lanzar el pipeline"
+  }
+}

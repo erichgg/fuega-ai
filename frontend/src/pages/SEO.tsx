@@ -1,4 +1,5 @@
 import { useEffect, useState, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Search, TrendingUp, TrendingDown, Minus, Globe, BarChart3, ArrowUpRight, ArrowDownRight, Play, X } from 'lucide-react';
 import { Bar } from 'react-chartjs-2';
 import { api } from '../lib/api';
@@ -18,6 +19,7 @@ export default function SEO() {
   const [auditRunning, setAuditRunning] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const toast = useToast();
+  const { t } = useTranslation(['seo', 'common']);
 
   useEffect(() => {
     Promise.all([
@@ -48,7 +50,7 @@ export default function SEO() {
       setKeywords(k);
       setAudits(a);
     } catch {
-      toast.error('SEO audit failed — is the backend running?');
+      toast.error(t('seo:errors.auditFailed'));
     } finally {
       setAuditRunning(false);
     }
@@ -66,19 +68,19 @@ export default function SEO() {
     return (
       <div className="animate-fadeIn">
         <PageHeader
-          title="SEO"
-          subtitle="Search engine optimization tracking"
+          title={t('seo:title')}
+          subtitle={t('seo:subtitle')}
           action={
             <button
               onClick={handleRunAudit}
               disabled={auditRunning}
               className="flex items-center gap-1.5 bg-fuega-orange hover:bg-fuega-orange/80 text-white px-3 py-1.5 rounded-lg text-[12px] font-medium transition-colors disabled:opacity-50"
             >
-              <Play className="w-3.5 h-3.5" /> Run audit
+              <Play className="w-3.5 h-3.5" /> {t('seo:runAudit')}
             </button>
           }
         />
-        <EmptyState title="No SEO data yet" description="Run the SEO pipeline to generate keyword research and site audits." />
+        <EmptyState title={t('seo:empty.noData')} description={t('seo:empty.noDataDesc')} />
       </div>
     );
   }
@@ -88,9 +90,9 @@ export default function SEO() {
   const declined = keywords.filter(k => k.current_rank > k.previous_rank).length;
 
   const rankDistribution = {
-    labels: ['Top 3', 'Top 10', 'Top 20', '20+'],
+    labels: [t('seo:rankLabels.top3'), t('seo:rankLabels.top10'), t('seo:rankLabels.top20'), t('seo:rankLabels.over20')],
     datasets: [{
-      label: 'Keywords',
+      label: t('seo:datasetLabel'),
       data: [
         keywords.filter(k => k.current_rank <= 3).length,
         keywords.filter(k => k.current_rank > 3 && k.current_rank <= 10).length,
@@ -106,7 +108,7 @@ export default function SEO() {
   const keywordColumns: Column<any>[] = [
     {
       key: 'keyword',
-      label: 'Keyword',
+      label: t('seo:columns.keyword'),
       sortable: true,
       getValue: (row) => row.keyword,
       render: (row) => (
@@ -118,14 +120,14 @@ export default function SEO() {
     },
     {
       key: 'position',
-      label: 'Position',
+      label: t('seo:columns.position'),
       sortable: true,
       getValue: (row) => row.current_rank,
       render: (row) => <span className="num text-[12px] font-bold text-fuega-text-primary">#{row.current_rank}</span>,
     },
     {
       key: 'trend',
-      label: 'Trend',
+      label: t('seo:columns.trend'),
       render: (row) => {
         const history: number[] = row.rank_history || (row.previous_rank ? [row.previous_rank, row.current_rank] : []);
         return <Sparkline data={history} color={history.length >= 2 && history[history.length - 1] <= history[0] ? '#22C55E' : '#EF4444'} />;
@@ -133,7 +135,7 @@ export default function SEO() {
     },
     {
       key: 'change',
-      label: 'Change',
+      label: t('seo:columns.change'),
       sortable: true,
       getValue: (row) => row.previous_rank - row.current_rank,
       render: (row) => {
@@ -152,14 +154,14 @@ export default function SEO() {
     },
     {
       key: 'volume',
-      label: 'Volume',
+      label: t('seo:columns.volume'),
       sortable: true,
       getValue: (row) => row.search_volume || 0,
       render: (row) => <span className="text-[12px] num text-fuega-text-secondary">{row.search_volume?.toLocaleString()}</span>,
     },
     {
       key: 'difficulty',
-      label: 'Difficulty',
+      label: t('seo:columns.difficulty'),
       sortable: true,
       getValue: (row) => row.difficulty || 0,
       render: (row) => (
@@ -176,7 +178,7 @@ export default function SEO() {
     },
     {
       key: 'opportunity',
-      label: 'Opportunity',
+      label: t('seo:columns.opportunity'),
       sortable: true,
       getValue: (row) => row.opportunity_score || 0,
       render: (row) => (
@@ -190,8 +192,8 @@ export default function SEO() {
   return (
     <div className="animate-fadeIn">
       <PageHeader
-        title="SEO"
-        subtitle="Search engine optimization tracking"
+        title={t('seo:title')}
+        subtitle={t('seo:subtitle')}
         action={
           <button
             onClick={handleRunAudit}
@@ -203,21 +205,21 @@ export default function SEO() {
             ) : (
               <Play className="w-3.5 h-3.5" />
             )}
-            Run audit
+            {t('seo:runAudit')}
           </button>
         }
       />
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 mb-3">
-        <StatCard label="Tracked Keywords" value={keywords.length} icon={<Search className="w-5 h-5" />} color="orange" />
-        <StatCard label="Avg Position" value={<span className="num">{avgRank}</span>} icon={<BarChart3 className="w-5 h-5" />} color="teal" />
-        <StatCard label="Improved" value={improved} trend="up" trendValue={`${improved} keywords`} icon={<TrendingUp className="w-5 h-5" />} color="teal" />
-        <StatCard label="Declined" value={declined} trend={declined > 0 ? 'down' : 'neutral'} trendValue={`${declined} keywords`} icon={<TrendingDown className="w-5 h-5" />} color="pink" />
+        <StatCard label={t('seo:stats.trackedKeywords')} value={keywords.length} icon={<Search className="w-5 h-5" />} color="orange" />
+        <StatCard label={t('seo:stats.avgPosition')} value={<span className="num">{avgRank}</span>} icon={<BarChart3 className="w-5 h-5" />} color="teal" />
+        <StatCard label={t('seo:stats.improved')} value={improved} trend="up" trendValue={`${improved} keywords`} icon={<TrendingUp className="w-5 h-5" />} color="teal" />
+        <StatCard label={t('seo:stats.declined')} value={declined} trend={declined > 0 ? 'down' : 'neutral'} trendValue={`${declined} keywords`} icon={<TrendingDown className="w-5 h-5" />} color="pink" />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-2 mb-3">
         {keywords.length > 0 && (
-          <ChartCard title="Rank Distribution" subtitle="Current keyword positions" className="lg:col-span-1">
+          <ChartCard title={t('seo:charts.rankDistribution')} subtitle={t('seo:charts.currentPositions')} className="lg:col-span-1">
             <div className="h-52">
               <Bar data={rankDistribution} options={{
                 ...defaultChartOptions,
@@ -228,7 +230,7 @@ export default function SEO() {
         )}
 
         {audits.length > 0 && (
-          <ChartCard title="Site Audits" subtitle={`${audits.length} audits`} className={keywords.length > 0 ? 'lg:col-span-2' : 'lg:col-span-3'}>
+          <ChartCard title={t('seo:charts.siteAudits')} subtitle={t('seo:charts.auditsCount', { count: audits.length })} className={keywords.length > 0 ? 'lg:col-span-2' : 'lg:col-span-3'}>
             <div className="space-y-2">
               {audits.map(audit => (
                 <div key={audit.id} className="flex items-center gap-3 py-2 px-3 rounded-lg bg-fuega-input border border-fuega-border/50">
@@ -245,8 +247,8 @@ export default function SEO() {
                       <span className="text-sm font-medium text-fuega-text-primary">{audit.url}</span>
                     </div>
                     <div className="flex gap-3 mt-0.5">
-                      <span className="text-xs text-fuega-text-muted">Technical: <span className="num">{audit.technical_score}</span></span>
-                      <span className="text-xs text-fuega-text-muted">Content: <span className="num">{audit.content_score}</span></span>
+                      <span className="text-xs text-fuega-text-muted">{t('seo:auditScores.technical')}: <span className="num">{audit.technical_score}</span></span>
+                      <span className="text-xs text-fuega-text-muted">{t('seo:auditScores.content')}: <span className="num">{audit.content_score}</span></span>
                     </div>
                   </div>
                   <span className="text-xs text-fuega-text-muted">{audit.created_at}</span>
@@ -266,13 +268,13 @@ export default function SEO() {
                 type="text"
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
-                placeholder="Search keywords..."
+                placeholder={t('seo:searchPlaceholder')}
                 className="flex-1 bg-transparent text-[12px] text-fuega-text-primary placeholder-fuega-text-muted focus:outline-none"
               />
               {searchQuery && <button onClick={() => setSearchQuery('')} className="text-fuega-text-muted hover:text-fuega-text-primary"><X className="w-3 h-3" /></button>}
             </div>
             {searchQuery && (
-              <span className="text-[11px] text-fuega-text-muted">{filteredKeywords.length} result{filteredKeywords.length !== 1 ? 's' : ''}</span>
+              <span className="text-[11px] text-fuega-text-muted">{filteredKeywords.length !== 1 ? t('common:pagination.results', { count: filteredKeywords.length }) : t('common:pagination.result', { count: filteredKeywords.length })}</span>
             )}
           </div>
 
@@ -281,7 +283,7 @@ export default function SEO() {
             data={filteredKeywords}
             getRowKey={(row) => row.id}
             compact
-            emptyMessage="No keywords match your search"
+            emptyMessage={t('seo:empty.noMatch')}
           />
         </>
       )}

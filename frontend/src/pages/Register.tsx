@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../lib/auth';
 import { ChispaLogo } from '../components/ChispaLogo';
@@ -12,17 +13,18 @@ export default function Register() {
   const [submitting, setSubmitting] = useState(false);
   const { register } = useAuth();
   const navigate = useNavigate();
+  const { t } = useTranslation(['auth', 'common']);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
 
     if (password !== confirmPassword) {
-      setError('Passwords do not match');
+      setError(t('auth:errors.passwordsMismatch'));
       return;
     }
     if (password.length < 8) {
-      setError('Password must be at least 8 characters');
+      setError(t('auth:errors.passwordTooShort'));
       return;
     }
 
@@ -31,7 +33,7 @@ export default function Register() {
       await register(email, password, fullName);
       navigate('/', { replace: true });
     } catch (err: any) {
-      setError(err.message || 'Registration failed');
+      setError(err.message || t('auth:errors.registrationFailed'));
     } finally {
       setSubmitting(false);
     }
@@ -47,7 +49,7 @@ export default function Register() {
             <span className="gradient-text">Fuega</span>{' '}
             <span className="text-fuega-text-secondary font-normal">AI</span>
           </h1>
-          <p className="text-[12px] text-fuega-text-muted mt-1">Create your operator account</p>
+          <p className="text-[12px] text-fuega-text-muted mt-1">{t('auth:register.subtitle')}</p>
         </div>
 
         {/* Form */}
@@ -60,7 +62,7 @@ export default function Register() {
 
           <div>
             <label htmlFor="fullName" className="block text-[11px] font-medium text-fuega-text-muted uppercase tracking-wider mb-1">
-              Full Name
+              {t('auth:register.fullName')}
             </label>
             <input
               id="fullName"
@@ -71,13 +73,13 @@ export default function Register() {
               autoFocus
               autoComplete="name"
               className="w-full bg-fuega-input border border-fuega-border rounded-lg px-3 py-2 text-sm text-fuega-text-primary placeholder-fuega-text-muted focus:outline-none focus:border-fuega-orange/50 transition-colors"
-              placeholder="Your name"
+              placeholder={t('auth:register.namePlaceholder')}
             />
           </div>
 
           <div>
             <label htmlFor="email" className="block text-[11px] font-medium text-fuega-text-muted uppercase tracking-wider mb-1">
-              Email
+              {t('auth:register.email')}
             </label>
             <input
               id="email"
@@ -87,13 +89,13 @@ export default function Register() {
               required
               autoComplete="email"
               className="w-full bg-fuega-input border border-fuega-border rounded-lg px-3 py-2 text-sm text-fuega-text-primary placeholder-fuega-text-muted focus:outline-none focus:border-fuega-orange/50 transition-colors"
-              placeholder="you@example.com"
+              placeholder={t('auth:register.emailPlaceholder')}
             />
           </div>
 
           <div>
             <label htmlFor="password" className="block text-[11px] font-medium text-fuega-text-muted uppercase tracking-wider mb-1">
-              Password
+              {t('auth:register.password')}
             </label>
             <input
               id="password"
@@ -103,13 +105,13 @@ export default function Register() {
               required
               autoComplete="new-password"
               className="w-full bg-fuega-input border border-fuega-border rounded-lg px-3 py-2 text-sm text-fuega-text-primary placeholder-fuega-text-muted focus:outline-none focus:border-fuega-orange/50 transition-colors"
-              placeholder="At least 8 characters"
+              placeholder={t('auth:register.passwordPlaceholder')}
             />
           </div>
 
           <div>
             <label htmlFor="confirmPassword" className="block text-[11px] font-medium text-fuega-text-muted uppercase tracking-wider mb-1">
-              Confirm Password
+              {t('auth:register.confirmPassword')}
             </label>
             <input
               id="confirmPassword"
@@ -119,7 +121,7 @@ export default function Register() {
               required
               autoComplete="new-password"
               className="w-full bg-fuega-input border border-fuega-border rounded-lg px-3 py-2 text-sm text-fuega-text-primary placeholder-fuega-text-muted focus:outline-none focus:border-fuega-orange/50 transition-colors"
-              placeholder="Confirm your password"
+              placeholder={t('auth:register.confirmPlaceholder')}
             />
           </div>
 
@@ -131,19 +133,19 @@ export default function Register() {
             {submitting ? (
               <span className="flex items-center justify-center gap-2">
                 <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                Creating account...
+                {t('auth:register.creatingAccount')}
               </span>
             ) : (
-              'Create Account'
+              t('auth:register.createAccount')
             )}
           </button>
         </form>
 
         {/* Login link */}
         <p className="text-center text-[12px] text-fuega-text-muted mt-4">
-          Already have an account?{' '}
+          {t('auth:register.alreadyHaveAccount')}{' '}
           <Link to="/login" className="text-fuega-orange hover:underline">
-            Sign in
+            {t('auth:register.signIn')}
           </Link>
         </p>
       </div>

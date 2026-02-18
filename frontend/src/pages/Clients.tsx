@@ -1,5 +1,6 @@
 import { useEffect, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Users, Building2, MapPin, DollarSign, TrendingUp, Search, Plus } from 'lucide-react';
 import { Doughnut } from 'react-chartjs-2';
 import { api } from '../lib/api';
@@ -11,12 +12,7 @@ import { EmptyState } from '../components/EmptyState';
 import { DataTable, type Column } from '../components/DataTable';
 import { defaultChartOptions } from '../lib/chartConfig';
 
-const tierLabels: Record<string, string> = {
-  fuega_starter: 'Starter',
-  fuega_growth: 'Growth',
-  fuega_pro: 'Pro',
-  fuega_enterprise: 'Enterprise',
-};
+// tierLabels is defined inside the component to use t()
 
 const tierColors: Record<string, string> = {
   fuega_starter: '#6366F1',
@@ -26,6 +22,13 @@ const tierColors: Record<string, string> = {
 };
 
 export default function Clients() {
+  const { t } = useTranslation(['clients', 'common']);
+  const tierLabels: Record<string, string> = {
+    fuega_starter: t('clients:tiers.starter'),
+    fuega_growth: t('clients:tiers.growth'),
+    fuega_pro: t('clients:tiers.pro'),
+    fuega_enterprise: t('clients:tiers.enterprise'),
+  };
   const [clients, setClients] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState('');
@@ -38,7 +41,7 @@ export default function Clients() {
   useEffect(() => {
     api.clients.list()
       .then(setClients)
-      .catch(() => toast.error('Failed to load clients. Check that the backend is running.'))
+      .catch(() => toast.error(t('common:errors.failedToLoad', { resource: t('clients:title').toLowerCase() }) + ' ' + t('common:errors.backendCheck')))
       .finally(() => setLoading(false));
   }, []);
 
@@ -81,7 +84,7 @@ export default function Clients() {
   const clientColumns: Column<any>[] = [
     {
       key: 'client',
-      label: 'Client',
+      label: t('clients:columns.client'),
       sortable: true,
       getValue: (row) => row.name,
       render: (row) => (
@@ -100,7 +103,7 @@ export default function Clients() {
     },
     {
       key: 'business',
-      label: 'Business',
+      label: t('clients:columns.business'),
       sortable: true,
       getValue: (row) => row.business_name,
       render: (row) => (
@@ -115,7 +118,7 @@ export default function Clients() {
     },
     {
       key: 'plan',
-      label: 'Plan',
+      label: t('clients:columns.plan'),
       sortable: true,
       getValue: (row) => row.plan_tier,
       render: (row) => (
@@ -129,7 +132,7 @@ export default function Clients() {
     },
     {
       key: 'revenue',
-      label: 'Revenue',
+      label: t('clients:columns.revenue'),
       sortable: true,
       getValue: (row) => row.monthly_rate_usd || 0,
       render: (row) => (
@@ -138,7 +141,7 @@ export default function Clients() {
     },
     {
       key: 'status',
-      label: 'Status',
+      label: t('clients:columns.status'),
       sortable: true,
       getValue: (row) => row.status,
       render: (row) => <Badge variant={row.status} />,
@@ -148,65 +151,65 @@ export default function Clients() {
   return (
     <div className="animate-fadeIn">
       <PageHeader
-        title="Clients"
-        subtitle={`${clients.length} client${clients.length !== 1 ? 's' : ''} \u00b7 $${totalRevenue}/mo revenue`}
+        title={t('clients:title')}
+        subtitle={clients.length !== 1 ? t('clients:subtitlePlural', { count: clients.length, revenue: totalRevenue }) : t('clients:subtitle', { count: clients.length, revenue: totalRevenue })}
         action={
           <button
             onClick={() => setShowNewClient(true)}
             className="flex items-center gap-1.5 bg-fuega-orange hover:bg-fuega-orange/80 text-white px-3 py-1.5 rounded-lg text-[12px] font-medium transition-colors"
           >
-            <Plus className="w-3.5 h-3.5" /> New Client
+            <Plus className="w-3.5 h-3.5" /> {t('clients:newClient')}
           </button>
         }
       />
 
       {showNewClient && (
         <div className="mb-3 bg-fuega-card border border-fuega-border rounded-lg p-3 animate-slideUp">
-          <h3 className="text-[12px] font-semibold text-fuega-text-primary mb-2">New Client</h3>
+          <h3 className="text-[12px] font-semibold text-fuega-text-primary mb-2">{t('clients:form.title')}</h3>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
-            <input value={newClient.name} onChange={e => setNewClient(p => ({ ...p, name: e.target.value }))} placeholder="Contact name *" className="bg-fuega-input border border-fuega-border rounded px-2 py-1.5 text-sm text-fuega-text-primary placeholder:text-fuega-text-muted focus:outline-none focus:border-fuega-orange/50" />
-            <input value={newClient.business_name} onChange={e => setNewClient(p => ({ ...p, business_name: e.target.value }))} placeholder="Business name" className="bg-fuega-input border border-fuega-border rounded px-2 py-1.5 text-sm text-fuega-text-primary placeholder:text-fuega-text-muted focus:outline-none focus:border-fuega-orange/50" />
+            <input value={newClient.name} onChange={e => setNewClient(p => ({ ...p, name: e.target.value }))} placeholder={t('clients:form.contactName')} className="bg-fuega-input border border-fuega-border rounded px-2 py-1.5 text-sm text-fuega-text-primary placeholder:text-fuega-text-muted focus:outline-none focus:border-fuega-orange/50" />
+            <input value={newClient.business_name} onChange={e => setNewClient(p => ({ ...p, business_name: e.target.value }))} placeholder={t('clients:form.businessName')} className="bg-fuega-input border border-fuega-border rounded px-2 py-1.5 text-sm text-fuega-text-primary placeholder:text-fuega-text-muted focus:outline-none focus:border-fuega-orange/50" />
             <select value={newClient.plan_tier} onChange={e => setNewClient(p => ({ ...p, plan_tier: e.target.value, monthly_rate_usd: { fuega_starter: 149, fuega_growth: 349, fuega_pro: 699, fuega_enterprise: 1299 }[e.target.value] || 149 }))} className="bg-fuega-input border border-fuega-border rounded px-2 py-1.5 text-sm text-fuega-text-primary focus:outline-none focus:border-fuega-orange/50">
-              <option value="fuega_starter">Starter ($149)</option>
-              <option value="fuega_growth">Growth ($349)</option>
-              <option value="fuega_pro">Pro ($699)</option>
-              <option value="fuega_enterprise">Enterprise ($1299)</option>
+              <option value="fuega_starter">{t('clients:tiers.starter')} ($149)</option>
+              <option value="fuega_growth">{t('clients:tiers.growth')} ($349)</option>
+              <option value="fuega_pro">{t('clients:tiers.pro')} ($699)</option>
+              <option value="fuega_enterprise">{t('clients:tiers.enterprise')} ($1299)</option>
             </select>
-            <input value={newClient.country} onChange={e => setNewClient(p => ({ ...p, country: e.target.value }))} placeholder="Country (MX)" className="bg-fuega-input border border-fuega-border rounded px-2 py-1.5 text-sm text-fuega-text-primary placeholder:text-fuega-text-muted focus:outline-none focus:border-fuega-orange/50" />
+            <input value={newClient.country} onChange={e => setNewClient(p => ({ ...p, country: e.target.value }))} placeholder={t('clients:form.country')} className="bg-fuega-input border border-fuega-border rounded px-2 py-1.5 text-sm text-fuega-text-primary placeholder:text-fuega-text-muted focus:outline-none focus:border-fuega-orange/50" />
           </div>
           <div className="flex items-center gap-2 mt-2">
             <button
               onClick={async () => {
-                if (!newClient.name.trim()) { toast.error('Name is required'); return; }
+                if (!newClient.name.trim()) { toast.error(t('common:errors.nameRequired')); return; }
                 setCreating(true);
                 try {
                   const result = await api.clients.create(newClient);
                   setClients(prev => [{ ...newClient, id: result.id, status: 'active' }, ...prev]);
                   setShowNewClient(false);
                   setNewClient({ name: '', business_name: '', country: 'MX', plan_tier: 'fuega_starter', monthly_rate_usd: 149 });
-                } catch { toast.error('Failed to create client'); }
+                } catch { toast.error(t('common:errors.failedToCreate', { resource: t('clients:singleClient') })); }
                 setCreating(false);
               }}
               disabled={creating}
               className="px-3 py-1.5 rounded bg-fuega-orange text-white text-[11px] font-medium hover:bg-fuega-orange/90 transition-colors disabled:opacity-50"
             >
-              {creating ? 'Creating...' : 'Create Client'}
+              {creating ? t('clients:form.creating') : t('clients:form.createClient')}
             </button>
-            <button onClick={() => setShowNewClient(false)} className="px-3 py-1.5 rounded text-[11px] text-fuega-text-muted hover:text-fuega-text-primary transition-colors">Cancel</button>
+            <button onClick={() => setShowNewClient(false)} className="px-3 py-1.5 rounded text-[11px] text-fuega-text-muted hover:text-fuega-text-primary transition-colors">{t('common:actions.cancel')}</button>
           </div>
         </div>
       )}
 
       {clients.length === 0 ? (
-        <EmptyState title="No clients yet" description="Clients will appear here once onboarded through the sales pipeline." />
+        <EmptyState title={t('clients:empty.noClients')} description={t('clients:empty.noClientsDesc')} />
       ) : (
         <>
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-2 mb-3">
-            <StatCard label="Total Clients" value={clients.length} icon={<Users className="w-5 h-5" />} color="orange" />
-            <StatCard label="Monthly Revenue" value={<span className="num">${totalRevenue}</span>} subValue={`\u2248 MXN ${(totalRevenue * 17.5).toLocaleString(undefined, {maximumFractionDigits: 0})}`} icon={<DollarSign className="w-5 h-5" />} color="teal" />
-            <StatCard label="Avg Revenue/Client" value={<span className="num">${clients.length ? (totalRevenue / clients.length).toFixed(0) : 0}</span>} icon={<TrendingUp className="w-5 h-5" />} color="indigo" />
+            <StatCard label={t('clients:stats.totalClients')} value={clients.length} icon={<Users className="w-5 h-5" />} color="orange" />
+            <StatCard label={t('clients:stats.monthlyRevenue')} value={<span className="num">${totalRevenue}</span>} subValue={`\u2248 MXN ${(totalRevenue * 17.5).toLocaleString(undefined, {maximumFractionDigits: 0})}`} icon={<DollarSign className="w-5 h-5" />} color="teal" />
+            <StatCard label={t('clients:stats.avgRevenue')} value={<span className="num">${clients.length ? (totalRevenue / clients.length).toFixed(0) : 0}</span>} icon={<TrendingUp className="w-5 h-5" />} color="indigo" />
             <div className="bg-fuega-card border border-fuega-border rounded-lg p-2">
-              <p className="text-[10px] font-medium text-fuega-text-muted uppercase tracking-wider mb-2">Plan Distribution</p>
+              <p className="text-[10px] font-medium text-fuega-text-muted uppercase tracking-wider mb-2">{t('clients:stats.planDistribution')}</p>
               <div className="h-24">
                 <Doughnut data={tierChartData} options={{
                   responsive: true, maintainAspectRatio: false, cutout: '60%',
@@ -224,12 +227,12 @@ export default function Clients() {
                 type="text"
                 value={query}
                 onChange={e => setQuery(e.target.value)}
-                placeholder="Search clients..."
+                placeholder={t('clients:searchPlaceholder')}
                 className="w-full bg-fuega-input border border-fuega-border rounded-lg pl-8 pr-3 py-1.5 text-sm text-fuega-text-primary placeholder-fuega-text-muted focus:outline-none focus:border-fuega-orange/50"
               />
             </div>
             {query && (
-              <span className="text-[11px] text-fuega-text-muted">{filtered.length} result{filtered.length !== 1 ? 's' : ''}</span>
+              <span className="text-[11px] text-fuega-text-muted">{filtered.length !== 1 ? t('common:pagination.results', { count: filtered.length }) : t('common:pagination.result', { count: filtered.length })}</span>
             )}
           </div>
 
@@ -239,7 +242,7 @@ export default function Clients() {
             getRowKey={(row) => row.id}
             onRowClick={(row) => navigate(`/clients/${row.id}`)}
             compact
-            emptyMessage="No clients match your search"
+            emptyMessage={t('clients:empty.noMatch')}
           />
         </>
       )}

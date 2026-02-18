@@ -1,0 +1,31 @@
+{
+  "title": "AI Agents",
+  "subtitle": "{{count}} agents — Your real team, real budget, real results",
+  "searchPlaceholder": "Search agents...",
+  "columns": {
+    "status": "Status",
+    "agent": "Agent",
+    "model": "Model",
+    "calls": "Calls",
+    "spendBudget": "Spend / Budget",
+    "trend": "7d Trend"
+  },
+  "filters": {
+    "allStatus": "All Status",
+    "active": "Active",
+    "paused": "Paused",
+    "allModels": "All Models"
+  },
+  "bulk": {
+    "selected": "{{count}} selected",
+    "pauseAll": "Pause All"
+  },
+  "togglePause": "Click to pause",
+  "toggleActivate": "Click to activate",
+  "empty": {
+    "noMatching": "No matching agents",
+    "noMatchingDesc": "Try adjusting your search or filters.",
+    "noAgents": "No agents",
+    "noAgentsDesc": "Agents will appear once the backend seeds them from config."
+  }
+}

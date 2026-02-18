@@ -1,0 +1,63 @@
+{
+  "title": "Pipeline de Contenido",
+  "subtitle": "{{count}} elementos en todas las etapas",
+  "stages": {
+    "ideas": "Ideas",
+    "approved": "Aprobadas",
+    "writing": "Redacción",
+    "review": "Revisión",
+    "revision": "Corrección",
+    "ready": "Listas para Publicar",
+    "published": "Publicadas"
+  },
+  "views": {
+    "kanban": "Kanban",
+    "table": "Tabla"
+  },
+  "newIdea": "Nueva Idea",
+  "form": {
+    "ideaTitle": "Título de la idea...",
+    "platform": "Plataforma"
+  },
+  "stats": {
+    "ideas": "Ideas",
+    "inProduction": "En Producción",
+    "readyToPublish": "Listas para Publicar",
+    "published": "Publicadas"
+  },
+  "columns": {
+    "title": "Título",
+    "stage": "Etapa",
+    "platform": "Plataforma",
+    "score": "Puntuación"
+  },
+  "untitled": "Sin título",
+  "noItems": "Sin elementos",
+  "emptyTable": "No se encontraron elementos de contenido",
+  "contentByPlatform": "Contenido por Plataforma",
+  "distributionSubtitle": "Distribución entre canales",
+  "media": {
+    "voice": "Voz",
+    "photos": "Fotos",
+    "aiImg": "Img IA",
+    "generateVoiceover": "Generar Locución",
+    "findStockPhotos": "Buscar Fotos de Stock",
+    "generateImage": "Generar Imagen"
+  },
+  "agents": {
+    "seoAnalyst": "Analista SEO",
+    "ceo": "CEO",
+    "contentWriter": "Redactor de Contenido",
+    "editor": "Editor",
+    "socialMediaManager": "Community Manager",
+    "analyticsAgent": "Agente de Analítica"
+  },
+  "chartLabel": "Piezas de contenido",
+  "errors": {
+    "enterTitle": "Ingresa un titulo",
+    "failedToSaveIdea": "Error al guardar la idea",
+    "voiceoverFailed": "Error en la generacion de locucion",
+    "stockPhotoFailed": "Error en la busqueda de fotos de stock",
+    "imageGenerationFailed": "Error en la generacion de imagen"
+  }
+}

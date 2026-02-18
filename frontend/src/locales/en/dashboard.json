@@ -1,0 +1,52 @@
+{
+  "title": "Command Center",
+  "subtitle": "Start the backend to populate data",
+  "noData": "No data available. Start the backend API.",
+  "controlPanel": "Control Panel",
+  "agentFleet": "Agent Fleet",
+  "manage": "Manage",
+  "activeCount": "{{active}}/{{total}} active",
+  "stats": {
+    "revenue": "Revenue",
+    "clients": "Clients",
+    "agents": "Agents",
+    "apiCosts": "API Costs",
+    "profit": "Profit",
+    "leads": "Leads"
+  },
+  "charts": {
+    "revenue": "Revenue",
+    "monthly": "Monthly",
+    "apiCosts": "API Costs",
+    "daily": "Daily",
+    "fleet": "Fleet",
+    "status": "Status",
+    "noData": "No data",
+    "revenueDataset": "Revenue",
+    "costsDataset": "Costs"
+  },
+  "fleet": {
+    "active": "Active",
+    "paused": "Paused",
+    "overBudget": "Over Budget"
+  },
+  "liveFeed": "Live Feed",
+  "recent": "{{count}} recent",
+  "noActivityYet": "No activity yet",
+  "agentAction": "Agent action",
+  "budgetOverview": "Budget Overview",
+  "usedLabel": "${{spent}} / ${{total}} used",
+  "pendingApprovals": "{{count}} Pending Approval",
+  "pendingApprovalsPlural": "{{count}} Pending Approvals",
+  "realTimeActivity": "Real-time Activity",
+  "events": "{{count}} events",
+  "noRealTimeEvents": "No real-time events yet",
+  "realTimeDescription": "Events from agents and workflows will stream here via WebSocket.",
+  "filters": {
+    "allEvents": "All events",
+    "agentActions": "Agent Actions",
+    "workflows": "Workflows",
+    "approvals": "Approvals",
+    "errors": "Errors"
+  }
+}

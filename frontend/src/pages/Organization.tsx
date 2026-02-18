@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router-dom';
 import { MessageCircle } from 'lucide-react';
 import { api } from '../lib/api';
@@ -34,7 +35,7 @@ function modelShort(model: string): string {
   return model;
 }
 
-function OrgNode({ agent, agents, onChat }: { agent: Agent; agents: Agent[]; onChat: (slug: string) => void }) {
+function OrgNode({ agent, agents, onChat, chatTitle }: { agent: Agent; agents: Agent[]; onChat: (slug: string) => void; chatTitle: (name: string) => string }) {
   const children = (hierarchy[agent.slug] || [])
     .map(slug => agents.find(a => a.slug === slug))
     .filter(Boolean) as Agent[];
@@ -74,7 +75,7 @@ function OrgNode({ agent, agents, onChat }: { agent: Agent; agents: Agent[]; onC
         <button
           onClick={(e) => { e.stopPropagation(); onChat(agent.slug); }}
           className="absolute -bottom-2 right-2 bg-fuega-orange text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity shadow-lg hover:bg-fuega-orange/80"
-          title={`Chat with ${agent.name}`}
+          title={chatTitle(agent.name)}
         >
           <MessageCircle className="w-3 h-3" />
         </button>
@@ -104,7 +105,7 @@ function OrgNode({ agent, agents, onChat }: { agent: Agent; agents: Agent[]; onC
                 <div key={child.slug} className="flex flex-col items-center">
                   {/* Vertical connector from horizontal line to child */}
                   <div className="w-px h-6 bg-fuega-border" />
-                  <OrgNode agent={child} agents={agents} onChat={onChat} />
+                  <OrgNode agent={child} agents={agents} onChat={onChat} chatTitle={chatTitle} />
                 </div>
               ))}
             </div>
@@ -120,12 +121,13 @@ export default function Organization() {
   const [loading, setLoading] = useState(true);
   const toast = useToast();
   const navigate = useNavigate();
+  const { t } = useTranslation(['organization', 'common']);
 
   useEffect(() => {
     api.agents.list()
       .then(setAgents)
       .catch(() => {
-        toast.error('Failed to load organization data.');
+        toast.error(t('common:errors.failedToLoad', { resource: t('organization:title').toLowerCase() }) + ' ' + t('common:errors.backendCheck'));
         setAgents([]);
       })
       .finally(() => setLoading(false));
@@ -134,6 +136,8 @@ export default function Organization() {
   const handleChat = (_slug: string) => {
     navigate('/team-chat');
   };
+
+  const chatTitle = (name: string) => t('organization:chatWith', { name });
 
   if (loading) {
     return (
@@ -157,17 +161,17 @@ export default function Organization() {
   return (
     <div className="animate-fadeIn">
       <PageHeader
-        title="Organization"
-        subtitle="Company hierarchy and team structure"
+        title={t('organization:title')}
+        subtitle={t('organization:subtitle')}
       />
 
       {/* Org Chart */}
       <div className="mt-2 overflow-x-auto pb-4">
         <div className="inline-flex justify-center min-w-full">
           {ceo ? (
-            <OrgNode agent={ceo} agents={agents} onChat={handleChat} />
+            <OrgNode agent={ceo} agents={agents} onChat={handleChat} chatTitle={chatTitle} />
           ) : (
-            <p className="text-fuega-text-muted text-sm">No agents found.</p>
+            <p className="text-fuega-text-muted text-sm">{t('organization:noAgentsFound')}</p>
           )}
         </div>
       </div>
@@ -176,7 +180,7 @@ export default function Organization() {
       {orphans.length > 0 && (
         <div className="mt-4">
           <h3 className="text-[10px] font-semibold uppercase tracking-widest text-fuega-text-muted mb-2">
-            Other Team Members
+            {t('organization:otherTeamMembers')}
           </h3>
           <div className="flex flex-wrap gap-2">
             {orphans.map(agent => (
@@ -199,7 +203,7 @@ export default function Organization() {
                 <button
                   onClick={() => handleChat(agent.slug)}
                   className="absolute -bottom-2 right-2 bg-fuega-orange text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity shadow-lg hover:bg-fuega-orange/80"
-                  title={`Chat with ${agent.name}`}
+                  title={chatTitle(agent.name)}
                 >
                   <MessageCircle className="w-3 h-3" />
                 </button>

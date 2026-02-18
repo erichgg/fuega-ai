@@ -1,0 +1,65 @@
+{
+  "title": "Flujos de Trabajo",
+  "subtitle": "Ejecución de pipelines y controles manuales",
+  "tabs": {
+    "fullPipelines": "Pipelines Completos",
+    "individualSteps": "Pasos Individuales",
+    "runHistory": "Historial de Ejecución"
+  },
+  "stats": {
+    "completed": "Completados",
+    "running": "En Ejecución",
+    "needsApproval": "Requiere Aprobación",
+    "totalCost": "Costo Total"
+  },
+  "pendingApprovals": "Aprobaciones Pendientes ({{count}})",
+  "approveAndContinue": "Aprobar y Continuar",
+  "reject": "Rechazar",
+  "agentsProduced": "Lo que los agentes produjeron:",
+  "latestStepOutput": "Resultado del último paso:",
+  "pipelines": {
+    "noDefs": "Sin definiciones de pipeline",
+    "noDefsDesc": "Inicia el backend para cargar las definiciones de flujos de trabajo desde la configuración.",
+    "steps": "{{count}} pasos",
+    "runAll": "Ejecutar Todo"
+  },
+  "steps": {
+    "noSteps": "Sin pasos disponibles",
+    "noStepsDesc": "Las definiciones de pipeline deben cargarse desde el backend para mostrar los pasos individuales.",
+    "saveTokens": "Ahorra tokens ejecutando pasos individuales.",
+    "costInfo": "Cada botón ejecuta una acción de agente. Pasos Haiku cuestan ~$0.001-0.003, Sonnet ~$0.005-0.015.",
+    "columns": { "step": "Paso", "agent": "Agente", "model": "Modelo" },
+    "stepResult": "Resultado del Paso"
+  },
+  "errors": {
+    "loadFailed": "Error al cargar flujos de trabajo.",
+    "triggerFailed": "Error al ejecutar \"{{pipeline}}\" — Esta el backend corriendo? Verifica el registro de agentes.",
+    "stepFailed": "Paso FALLIDO: {{action}} via {{agent}} — {{duration}}ms transcurridos. Revisa logs del backend.",
+    "approvalFailed": "Error al {{action}} paso en ejecucion #{{runId}}. El backend puede estar caido.",
+    "loadStepsFailed": "No se pudieron cargar los detalles del paso para ejecucion #{{runId}}"
+  },
+  "approvalSummary": {
+    "lead": "Prospecto",
+    "outreach": "prospeccion",
+    "subject": "Asunto",
+    "review": "Revision",
+    "score": "Puntaje",
+    "compliance": "Cumplimiento",
+    "issues": "Problemas",
+    "noIssues": "Sin problemas encontrados",
+    "leadsScored": "{{count}} prospectos calificados",
+    "content": "Contenido"
+  },
+  "history": {
+    "title": "Historial de Ejecución",
+    "filterAll": "Todos los Estados",
+    "filterCompleted": "Completados",
+    "filterRunning": "En Ejecución",
+    "filterFailed": "Fallidos",
+    "filterApproval": "Pausados para Aprobación",
+    "noRuns": "Sin ejecuciones de flujos aún",
+    "noRunsDesc": "Ejecuta un flujo de trabajo arriba o espera a que el programador ejecute uno.",
+    "noFilteredRuns": "Sin ejecuciones {{status}}",
+    "noFilteredRunsDesc": "Intenta seleccionar un filtro de estado diferente."
+  }
+}

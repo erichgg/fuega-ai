@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import {
   LayoutDashboard, Bot, FileText, Users, Search, Megaphone,
   BarChart3, GitBranch, Settings, Network, MessagesSquare, Command, Joystick, Target
@@ -20,26 +21,27 @@ interface Props {
 }
 
 export function CommandPalette({ open, onClose }: Props) {
+  const { t } = useTranslation(['nav', 'common']);
   const [query, setQuery] = useState('');
   const [selectedIndex, setSelectedIndex] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
 
   const commands = useMemo<CommandItem[]>(() => [
-    { id: 'dashboard', label: 'Dashboard', section: 'Pages', icon: <LayoutDashboard className="w-4 h-4" />, action: () => navigate('/'), keywords: 'home command center' },
-    { id: 'control-panel', label: 'Control Panel', section: 'Pages', icon: <Joystick className="w-4 h-4" />, action: () => navigate('/control-panel'), keywords: 'actions run fire execute pipeline fleet' },
-    { id: 'agents', label: 'Agents', section: 'Pages', icon: <Bot className="w-4 h-4" />, action: () => navigate('/agents'), keywords: 'ai bots' },
-    { id: 'workflows', label: 'Workflows', section: 'Pages', icon: <GitBranch className="w-4 h-4" />, action: () => navigate('/workflows'), keywords: 'pipelines automation' },
-    { id: 'leads', label: 'Leads', section: 'Pages', icon: <Target className="w-4 h-4" />, action: () => navigate('/leads'), keywords: 'prospects pipeline outreach sales' },
-    { id: 'content', label: 'Content', section: 'Pages', icon: <FileText className="w-4 h-4" />, action: () => navigate('/content'), keywords: 'kanban writing' },
-    { id: 'analytics', label: 'Analytics', section: 'Pages', icon: <BarChart3 className="w-4 h-4" />, action: () => navigate('/analytics'), keywords: 'costs revenue' },
-    { id: 'seo', label: 'SEO', section: 'Pages', icon: <Search className="w-4 h-4" />, action: () => navigate('/seo'), keywords: 'keywords rankings' },
-    { id: 'campaigns', label: 'Campaigns', section: 'Pages', icon: <Megaphone className="w-4 h-4" />, action: () => navigate('/campaigns'), keywords: 'ads email' },
-    { id: 'clients', label: 'Clients', section: 'Pages', icon: <Users className="w-4 h-4" />, action: () => navigate('/clients'), keywords: 'customers' },
-    { id: 'organization', label: 'Organization', section: 'Pages', icon: <Network className="w-4 h-4" />, action: () => navigate('/organization'), keywords: 'org chart team' },
-    { id: 'team-chat', label: 'Team Chat', section: 'Pages', icon: <MessagesSquare className="w-4 h-4" />, action: () => navigate('/team-chat'), keywords: 'group discussion' },
-    { id: 'settings', label: 'Settings', section: 'Pages', icon: <Settings className="w-4 h-4" />, action: () => navigate('/settings'), keywords: 'config preferences' },
-  ], [navigate]);
+    { id: 'dashboard', label: t('nav:items.dashboard'), section: t('nav:pages'), icon: <LayoutDashboard className="w-4 h-4" />, action: () => navigate('/'), keywords: 'home command center' },
+    { id: 'control-panel', label: t('nav:items.controlPanel'), section: t('nav:pages'), icon: <Joystick className="w-4 h-4" />, action: () => navigate('/control-panel'), keywords: 'actions run fire execute pipeline fleet' },
+    { id: 'agents', label: t('nav:items.agents'), section: t('nav:pages'), icon: <Bot className="w-4 h-4" />, action: () => navigate('/agents'), keywords: 'ai bots' },
+    { id: 'workflows', label: t('nav:items.workflows'), section: t('nav:pages'), icon: <GitBranch className="w-4 h-4" />, action: () => navigate('/workflows'), keywords: 'pipelines automation' },
+    { id: 'leads', label: t('nav:items.leads'), section: t('nav:pages'), icon: <Target className="w-4 h-4" />, action: () => navigate('/leads'), keywords: 'prospects pipeline outreach sales' },
+    { id: 'content', label: t('nav:items.content'), section: t('nav:pages'), icon: <FileText className="w-4 h-4" />, action: () => navigate('/content'), keywords: 'kanban writing' },
+    { id: 'analytics', label: t('nav:items.analytics'), section: t('nav:pages'), icon: <BarChart3 className="w-4 h-4" />, action: () => navigate('/analytics'), keywords: 'costs revenue' },
+    { id: 'seo', label: t('nav:items.seo'), section: t('nav:pages'), icon: <Search className="w-4 h-4" />, action: () => navigate('/seo'), keywords: 'keywords rankings' },
+    { id: 'campaigns', label: t('nav:items.campaigns'), section: t('nav:pages'), icon: <Megaphone className="w-4 h-4" />, action: () => navigate('/campaigns'), keywords: 'ads email' },
+    { id: 'clients', label: t('nav:items.clients'), section: t('nav:pages'), icon: <Users className="w-4 h-4" />, action: () => navigate('/clients'), keywords: 'customers' },
+    { id: 'organization', label: t('nav:items.organization'), section: t('nav:pages'), icon: <Network className="w-4 h-4" />, action: () => navigate('/organization'), keywords: 'org chart team' },
+    { id: 'team-chat', label: t('nav:items.teamChat'), section: t('nav:pages'), icon: <MessagesSquare className="w-4 h-4" />, action: () => navigate('/team-chat'), keywords: 'group discussion' },
+    { id: 'settings', label: t('nav:items.settings'), section: t('nav:pages'), icon: <Settings className="w-4 h-4" />, action: () => navigate('/settings'), keywords: 'config preferences' },
+  ], [navigate, t]);
 
   const filtered = useMemo(() => {
     if (!query.trim()) return commands;
@@ -114,7 +116,7 @@ export function CommandPalette({ open, onClose }: Props) {
             type="text"
             value={query}
             onChange={e => setQuery(e.target.value)}
-            placeholder="Type a command or search..."
+            placeholder={t('nav:searchPlaceholder')}
             className="flex-1 bg-transparent text-sm text-fuega-text-primary placeholder-fuega-text-muted focus:outline-none"
           />
           <kbd className="text-[10px] px-1.5 py-0.5 rounded bg-fuega-input border border-fuega-border text-fuega-text-muted font-mono">ESC</kbd>
@@ -123,7 +125,7 @@ export function CommandPalette({ open, onClose }: Props) {
         {/* Results */}
         <div role="listbox" className="max-h-80 overflow-y-auto py-2">
           {filtered.length === 0 && (
-            <div className="px-4 py-8 text-center text-sm text-fuega-text-muted">No results found</div>
+            <div className="px-4 py-8 text-center text-sm text-fuega-text-muted">{t('common:empty.noResults')}</div>
           )}
           {Object.entries(sections).map(([section, items]) => (
             <div key={section}>
@@ -154,9 +156,9 @@ export function CommandPalette({ open, onClose }: Props) {
 
         {/* Footer */}
         <div className="px-4 py-2 border-t border-fuega-border flex items-center gap-4 text-[10px] text-fuega-text-muted">
-          <span><kbd className="font-mono px-1 py-0.5 rounded bg-fuega-input border border-fuega-border">↑↓</kbd> Navigate</span>
-          <span><kbd className="font-mono px-1 py-0.5 rounded bg-fuega-input border border-fuega-border">↵</kbd> Open</span>
-          <span><kbd className="font-mono px-1 py-0.5 rounded bg-fuega-input border border-fuega-border">esc</kbd> Close</span>
+          <span><kbd className="font-mono px-1 py-0.5 rounded bg-fuega-input border border-fuega-border">↑↓</kbd> {t('nav:navigate')}</span>
+          <span><kbd className="font-mono px-1 py-0.5 rounded bg-fuega-input border border-fuega-border">↵</kbd> {t('nav:open')}</span>
+          <span><kbd className="font-mono px-1 py-0.5 rounded bg-fuega-input border border-fuega-border">esc</kbd> {t('common:actions.close')}</span>
         </div>
       </div>
     </div>

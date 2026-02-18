@@ -1,5 +1,6 @@
 // @refresh reset
 import { useEffect, useState, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { GitBranch, Play, CheckCircle, XCircle, Clock, AlertTriangle, ChevronDown, ChevronRight, ThumbsUp, ThumbsDown, Zap, Bot, Info } from 'lucide-react';
 import { api } from '../lib/api';
 import { PageHeader } from '../components/PageHeader';
@@ -49,6 +50,7 @@ export default function Workflows() {
   const [historyStatusFilter, setHistoryStatusFilter] = useState<string>('all');
   const toast = useToast();
   const { events } = useWebSocket();
+  const { t } = useTranslation(['workflows', 'common', 'approvals']);
 
   useEffect(() => {
     Promise.all([
@@ -58,7 +60,7 @@ export default function Workflows() {
       setWorkflows(wf);
       setDefinitions(defs);
     })
-    .catch(() => toast.error('Failed to load workflows.'))
+    .catch(() => toast.error(t('workflows:errors.loadFailed')))
     .finally(() => setLoading(false));
   }, []);
 
@@ -99,7 +101,7 @@ export default function Workflows() {
       const updated = await api.workflows.list();
       setWorkflows(updated);
     } catch (err) {
-      toast.error(`Failed to trigger "${pipelineName}" — Is the backend running? Check agent registration.`);
+      toast.error(t('workflows:errors.triggerFailed', { pipeline: pipelineName }));
     }
     setTriggerLoading(false);
   };
@@ -117,18 +119,18 @@ export default function Workflows() {
       setStepResult(result);
     } catch (err) {
       const duration = Date.now() - startTime;
-      toast.error(`Step FAILED: ${actionLabel} via ${agentLabel} — ${duration}ms elapsed. Check backend logs.`);
+      toast.error(t('workflows:errors.stepFailed', { action: actionLabel, agent: agentLabel, duration }));
     }
     setStepRunning(null);
   };
 
   const handleApproval = async (runId: number, stepId: string, approved: boolean) => {
-    const action = approved ? 'Approving' : 'Rejecting';
+    const action = approved ? t('common:actions.approve').toLowerCase() : t('common:actions.reject').toLowerCase();
     try {
       await api.workflows.approve(runId, stepId, approved);
       setWorkflows(prev => prev.map(w => w.id === runId ? { ...w, status: approved ? 'running' : 'cancelled' } : w));
     } catch {
-      toast.error(`Failed to ${action.toLowerCase()} step on run #${runId}. Backend may be down.`);
+      toast.error(t('workflows:errors.approvalFailed', { action: action.toLowerCase(), runId }));
     }
   };
 
@@ -141,37 +143,37 @@ export default function Workflows() {
         const full = await api.workflows.get(runId);
         setWorkflows(prev => prev.map(w => w.id === runId ? { ...w, steps: full.steps } : w));
       } catch {
-        toast.error(`Could not load step details for run #${runId}`);
+        toast.error(t('workflows:errors.loadStepsFailed', { runId }));
       }
     }
   };
 
   const tabItems = [
-    { key: 'pipelines', label: 'Full Pipelines' },
-    { key: 'steps', label: 'Individual Steps' },
-    { key: 'history', label: 'Run History', count: workflows.length },
+    { key: 'pipelines', label: t('workflows:tabs.fullPipelines') },
+    { key: 'steps', label: t('workflows:tabs.individualSteps') },
+    { key: 'history', label: t('workflows:tabs.runHistory'), count: workflows.length },
   ];
 
   return (
     <div className="animate-fadeIn">
       <PageHeader
-        title="Workflows"
-        subtitle="Pipeline execution and manual controls"
+        title={t('workflows:title')}
+        subtitle={t('workflows:subtitle')}
         tabs={<Tabs tabs={tabItems} active={tab} onChange={setTab} />}
       />
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 mb-3">
-        <StatCard label="Completed" value={completed} icon={<CheckCircle className="w-4 h-4" />} color="teal" />
-        <StatCard label="Running" value={running} icon={<Play className="w-4 h-4" />} color="indigo" />
-        <StatCard label="Needs Approval" value={approvals} icon={<AlertTriangle className="w-4 h-4" />} color="orange" />
-        <StatCard label="Total Cost" value={`$${totalCost.toFixed(3)}`} icon={<GitBranch className="w-4 h-4" />} color="pink" />
+        <StatCard label={t('workflows:stats.completed')} value={completed} icon={<CheckCircle className="w-4 h-4" />} color="teal" />
+        <StatCard label={t('workflows:stats.running')} value={running} icon={<Play className="w-4 h-4" />} color="indigo" />
+        <StatCard label={t('workflows:stats.needsApproval')} value={approvals} icon={<AlertTriangle className="w-4 h-4" />} color="orange" />
+        <StatCard label={t('workflows:stats.totalCost')} value={`$${totalCost.toFixed(3)}`} icon={<GitBranch className="w-4 h-4" />} color="pink" />
       </div>
 
       {/* Approval Queue — shows what the agents produced so you know what you're approving */}
       {approvals > 0 && (
         <div className="mb-3 bg-fuega-orange/5 border-l-2 border-fuega-orange rounded-r-lg p-3">
           <h3 className="text-[12px] font-semibold text-fuega-orange flex items-center gap-2 mb-2">
-            <AlertTriangle className="w-3.5 h-3.5" /> Pending Approvals ({approvals})
+            <AlertTriangle className="w-3.5 h-3.5" /> {t('workflows:pendingApprovals', { count: approvals })}
           </h3>
           {workflows.filter(w => w.status === 'paused_for_approval').map(wf => {
             // Extract completed step outputs so we can show what was produced
@@ -189,8 +191,8 @@ export default function Workflows() {
               if (data.outreach_messages) {
                 for (const msg of data.outreach_messages) {
                   summaryItems.push({
-                    label: `${msg.business_name || 'Lead'} — ${msg.channel || 'outreach'}`,
-                    content: msg.subject ? `Subject: ${msg.subject}\n${msg.message}` : msg.message || '',
+                    label: `${msg.business_name || t('workflows:approvalSummary.lead')} — ${msg.channel || t('workflows:approvalSummary.outreach')}`,
+                    content: msg.subject ? `${t('workflows:approvalSummary.subject')}: ${msg.subject}\n${msg.message}` : msg.message || '',
                   });
                 }
               }
@@ -198,8 +200,8 @@ export default function Workflows() {
               else if (data.reviews) {
                 for (const rev of data.reviews) {
                   summaryItems.push({
-                    label: `Review: ${rev.business_name || 'Lead'} — ${rev.decision || 'pending'}`,
-                    content: `Score: ${rev.score}/10 · ${rev.feedback || ''}${rev.revised_message ? `\n\nRevised:\n${rev.revised_message}` : ''}`,
+                    label: `${t('workflows:approvalSummary.review')}: ${rev.business_name || t('workflows:approvalSummary.lead')} — ${rev.decision || t('common:status.pending').toLowerCase()}`,
+                    content: `${t('workflows:approvalSummary.score')}: ${rev.score}/10 · ${rev.feedback || ''}${rev.revised_message ? `\n\n${rev.revised_message}` : ''}`,
                   });
                 }
               }
@@ -207,22 +209,22 @@ export default function Workflows() {
               else if (data.compliance_results) {
                 for (const cr of data.compliance_results) {
                   summaryItems.push({
-                    label: `Compliance: ${cr.business_name || 'Lead'} — ${cr.status}`,
-                    content: cr.issues?.length ? `Issues: ${cr.issues.join(', ')}` : 'No issues found',
+                    label: `${t('workflows:approvalSummary.compliance')}: ${cr.business_name || t('workflows:approvalSummary.lead')} — ${cr.status}`,
+                    content: cr.issues?.length ? `${t('workflows:approvalSummary.issues')}: ${cr.issues.join(', ')}` : t('workflows:approvalSummary.noIssues'),
                   });
                 }
               }
               // Qualified leads
               else if (data.qualified_leads) {
                 summaryItems.push({
-                  label: `${data.qualified_leads.length} leads scored`,
+                  label: t('workflows:approvalSummary.leadsScored', { count: data.qualified_leads.length }),
                   content: data.qualified_leads.map((l: any) => `${l.business_name}: ${l.score}/100 ${l.qualified ? '✓' : '✗'}`).join('\n'),
                 });
               }
               // Content
               else if (data.content) {
                 summaryItems.push({
-                  label: `Content: ${data.content.title || action}`,
+                  label: `${t('workflows:approvalSummary.content')}: ${data.content.title || action}`,
                   content: data.content.body?.slice(0, 300) || JSON.stringify(data.content).slice(0, 300),
                 });
               }
@@ -238,15 +240,15 @@ export default function Workflows() {
                     </p>
                     <p className="text-[10px] text-fuega-text-muted">
                       Run #{wf.id} · Waiting at: <span className="text-fuega-orange">{wf.current_step_id?.replace(/_/g, ' ')}</span>
-                      {completedSteps.length > 0 && ` · ${completedSteps.length} steps completed`}
+                      {completedSteps.length > 0 && ` · ${t('common:stepsCompleted', { count: completedSteps.length })}`}
                     </p>
                   </div>
                   <div className="flex gap-2">
                     <button onClick={() => handleApproval(wf.id, wf.current_step_id, true)} className="flex items-center gap-1 bg-green-500/20 hover:bg-green-500/30 text-green-400 px-2.5 py-1.5 rounded text-[11px] font-medium transition-colors">
-                      <ThumbsUp className="w-3 h-3" /> Approve & Continue
+                      <ThumbsUp className="w-3 h-3" /> {t('workflows:approveAndContinue')}
                     </button>
                     <button onClick={() => handleApproval(wf.id, wf.current_step_id, false)} className="flex items-center gap-1 bg-red-500/20 hover:bg-red-500/30 text-red-400 px-2.5 py-1.5 rounded text-[11px] font-medium transition-colors">
-                      <ThumbsDown className="w-3 h-3" /> Reject
+                      <ThumbsDown className="w-3 h-3" /> {t('workflows:reject')}
                     </button>
                   </div>
                 </div>
@@ -254,7 +256,7 @@ export default function Workflows() {
                 {/* Show what was produced — the actual outreach messages, reviews, etc. */}
                 {summaryItems.length > 0 && (
                   <div className="border-t border-fuega-border/50 p-2.5 space-y-2 max-h-64 overflow-y-auto">
-                    <p className="text-[10px] font-semibold uppercase tracking-wider text-fuega-text-muted">What the agents produced:</p>
+                    <p className="text-[10px] font-semibold uppercase tracking-wider text-fuega-text-muted">{t('workflows:agentsProduced')}</p>
                     {summaryItems.map((item, i) => (
                       <div key={i} className="bg-fuega-surface rounded-lg p-2 border border-fuega-border/30">
                         <p className="text-[11px] font-medium text-fuega-text-primary mb-1">{item.label}</p>
@@ -267,7 +269,7 @@ export default function Workflows() {
                 {/* Fallback if no parsed summaries but steps exist */}
                 {summaryItems.length === 0 && lastOutput?.output_data && (
                   <div className="border-t border-fuega-border/50 p-2.5 max-h-48 overflow-y-auto">
-                    <p className="text-[10px] font-semibold uppercase tracking-wider text-fuega-text-muted mb-1">Latest step output:</p>
+                    <p className="text-[10px] font-semibold uppercase tracking-wider text-fuega-text-muted mb-1">{t('workflows:latestStepOutput')}</p>
                     <pre className="text-[10px] text-fuega-text-secondary whitespace-pre-wrap font-mono bg-fuega-surface rounded-lg p-2 border border-fuega-border/30">
                       {JSON.stringify(lastOutput.output_data, null, 2).slice(0, 1000)}
                     </pre>
@@ -281,7 +283,7 @@ export default function Workflows() {
 
       {/* Full Pipelines Tab */}
       {tab === 'pipelines' && !definitions && (
-        <EmptyState title="No pipeline definitions" description="Start the backend to load workflow definitions from config." />
+        <EmptyState title={t('workflows:pipelines.noDefs')} description={t('workflows:pipelines.noDefsDesc')} />
       )}
       {tab === 'pipelines' && definitions && (
         <div className="space-y-3">
@@ -295,13 +297,13 @@ export default function Workflows() {
                 </div>
                 <div className="flex items-center gap-2">
                   {wf.schedule && <span className="text-[9px] num text-fuega-text-muted px-1.5 py-0.5 bg-fuega-input rounded">{wf.schedule}</span>}
-                  <span className="text-[10px] text-fuega-text-muted">{wf.steps.length} steps</span>
+                  <span className="text-[10px] text-fuega-text-muted">{t('workflows:pipelines.steps', { count: wf.steps.length })}</span>
                   <button
                     onClick={() => handleTrigger(key)}
                     disabled={triggerLoading}
                     className="flex items-center gap-1 bg-fuega-orange hover:bg-fuega-orange/80 text-white px-2.5 py-1 rounded text-[11px] font-medium transition-colors disabled:opacity-50"
                   >
-                    <Play className="w-3 h-3" /> Run All
+                    <Play className="w-3 h-3" /> {t('workflows:pipelines.runAll')}
                   </button>
                   <button
                     onClick={() => setExpandedDef(expandedDef === key ? null : key)}
@@ -330,7 +332,7 @@ export default function Workflows() {
                               <Badge variant="active" label={step.agent_name} />
                             )}
                             {step.model && <Badge variant="running" label={modelShort(step.model)} />}
-                            {step.requires_approval && <Badge variant="paused_for_approval" label="approval" />}
+                            {step.requires_approval && <Badge variant="paused_for_approval" label={t('approvals:approval')} />}
                           </div>
                           <p className="text-[10px] text-fuega-text-muted mt-0.5">{step.description}</p>
                         </div>
@@ -346,14 +348,14 @@ export default function Workflows() {
 
       {/* Individual Steps Tab */}
       {tab === 'steps' && !definitions && (
-        <EmptyState title="No steps available" description="Pipeline definitions must be loaded from the backend to show individual steps." />
+        <EmptyState title={t('workflows:steps.noSteps')} description={t('workflows:steps.noStepsDesc')} />
       )}
       {tab === 'steps' && definitions && (
         <div>
           <div className="flex items-start gap-2 mb-3 bg-fuega-purple/5 border border-fuega-purple/20 rounded-lg p-2.5">
             <Info className="w-3.5 h-3.5 text-fuega-purple flex-shrink-0 mt-0.5" />
             <div className="text-[11px] text-fuega-text-secondary">
-              <strong className="text-fuega-text-primary">Save tokens by running individual steps.</strong> Each button fires a single agent action. Haiku steps cost ~$0.001-0.003, Sonnet ~$0.005-0.015.
+              <strong className="text-fuega-text-primary">{t('workflows:steps.saveTokens')}</strong> {t('workflows:steps.costInfo')}
             </div>
           </div>
 
@@ -367,9 +369,9 @@ export default function Workflows() {
                   <table className="w-full">
                     <thead>
                       <tr className="border-b border-fuega-border">
-                        <th className="text-left text-[10px] font-semibold text-fuega-text-muted uppercase tracking-wider px-3 py-1.5">Step</th>
-                        <th className="text-left text-[10px] font-semibold text-fuega-text-muted uppercase tracking-wider px-3 py-1.5">Agent</th>
-                        <th className="text-left text-[10px] font-semibold text-fuega-text-muted uppercase tracking-wider px-3 py-1.5">Model</th>
+                        <th className="text-left text-[10px] font-semibold text-fuega-text-muted uppercase tracking-wider px-3 py-1.5">{t('workflows:steps.columns.step')}</th>
+                        <th className="text-left text-[10px] font-semibold text-fuega-text-muted uppercase tracking-wider px-3 py-1.5">{t('workflows:steps.columns.agent')}</th>
+                        <th className="text-left text-[10px] font-semibold text-fuega-text-muted uppercase tracking-wider px-3 py-1.5">{t('workflows:steps.columns.model')}</th>
                         <th className="px-3 py-1.5 w-20"></th>
                       </tr>
                     </thead>
@@ -398,7 +400,7 @@ export default function Workflows() {
                                 className="flex items-center gap-1 bg-fuega-input border border-fuega-border hover:border-fuega-orange/50 text-fuega-text-secondary hover:text-fuega-orange px-2 py-1 rounded text-[11px] font-medium transition-all disabled:opacity-50"
                               >
                                 {isRunning ? <div className="w-3 h-3 border-2 border-fuega-orange border-t-transparent rounded-full animate-spin" /> : <Zap className="w-3 h-3" />}
-                                {isRunning ? 'Running...' : 'Run'}
+                                {isRunning ? t('common:status.running') + '...' : t('common:actions.run')}
                               </button>
                             </td>
                           </tr>
@@ -414,11 +416,11 @@ export default function Workflows() {
           {stepResult && (
             <div className="mt-3 bg-fuega-card border border-fuega-border rounded-lg p-3 animate-slideUp">
               <div className="flex items-center justify-between mb-2">
-                <h3 className="text-[12px] font-semibold text-fuega-text-primary">Step Result</h3>
+                <h3 className="text-[12px] font-semibold text-fuega-text-primary">{t('workflows:steps.stepResult')}</h3>
                 <div className="flex items-center gap-3 text-[10px] text-fuega-text-muted num">
-                  <span>Cost: ${stepResult.cost_usd?.toFixed(4) || '0'}</span>
+                  <span>{t('common:labels.cost')}: ${stepResult.cost_usd?.toFixed(4) || '0'}</span>
                   <span>{stepResult.duration_ms || 0}ms</span>
-                  <button onClick={() => setStepResult(null)} className="hover:text-fuega-text-primary">dismiss</button>
+                  <button onClick={() => setStepResult(null)} className="hover:text-fuega-text-primary">{t('common:actions.dismiss')}</button>
                 </div>
               </div>
               <pre className="text-[11px] text-fuega-text-secondary whitespace-pre-wrap font-mono bg-fuega-input rounded-lg p-2.5 border border-fuega-border max-h-48 overflow-y-auto">
@@ -438,19 +440,19 @@ export default function Workflows() {
               onChange={e => setHistoryStatusFilter(e.target.value)}
               className="bg-fuega-input border border-fuega-border rounded-lg px-2.5 py-1.5 text-[12px] text-fuega-text-secondary focus:outline-none"
             >
-              <option value="all">All Statuses</option>
-              <option value="completed">Completed</option>
-              <option value="running">Running</option>
-              <option value="failed">Failed</option>
-              <option value="paused_for_approval">Paused for Approval</option>
+              <option value="all">{t('workflows:history.filterAll')}</option>
+              <option value="completed">{t('workflows:history.filterCompleted')}</option>
+              <option value="running">{t('workflows:history.filterRunning')}</option>
+              <option value="failed">{t('workflows:history.filterFailed')}</option>
+              <option value="paused_for_approval">{t('workflows:history.filterApproval')}</option>
             </select>
             {historyStatusFilter !== 'all' && (
-              <span className="text-[11px] text-fuega-text-muted">{filteredWorkflows.length} result{filteredWorkflows.length !== 1 ? 's' : ''}</span>
+              <span className="text-[11px] text-fuega-text-muted">{filteredWorkflows.length !== 1 ? t('common:pagination.results', { count: filteredWorkflows.length }) : t('common:pagination.result', { count: filteredWorkflows.length })}</span>
             )}
           </div>
-          <ChartCard title="Run History" subtitle={`${filteredWorkflows.length} of ${workflows.length} runs`}>
+          <ChartCard title={t('workflows:history.title')} subtitle={t('common:runsOf', { filtered: filteredWorkflows.length, total: workflows.length })}>
           {filteredWorkflows.length === 0 ? (
-            <EmptyState title={historyStatusFilter === 'all' ? 'No workflow runs yet' : `No ${historyStatusFilter.replace(/_/g, ' ')} runs`} description={historyStatusFilter === 'all' ? 'Trigger a workflow above or wait for the scheduler to run one.' : 'Try selecting a different status filter.'} />
+            <EmptyState title={historyStatusFilter === 'all' ? t('workflows:history.noRuns') : t('workflows:history.noFilteredRuns', { status: historyStatusFilter.replace(/_/g, ' ') })} description={historyStatusFilter === 'all' ? t('workflows:history.noRunsDesc') : t('workflows:history.noFilteredRunsDesc')} />
           ) : (
             <div className="space-y-1.5">
               {filteredWorkflows.map(wf => {
@@ -492,7 +494,7 @@ export default function Workflows() {
                                 {(step.cost_usd > 0 || step.duration_ms > 0) && (
                                   <p className="text-[10px] text-fuega-text-muted mt-0.5 num">
                                     {step.duration_ms}ms · ${step.cost_usd.toFixed(4)}
-                                    {step.retry_count > 0 && <span className="text-yellow-400"> · {step.retry_count} retries</span>}
+                                    {step.retry_count > 0 && <span className="text-yellow-400"> · {t('common:retries', { count: step.retry_count })}</span>}
                                   </p>
                                 )}
                               </div>

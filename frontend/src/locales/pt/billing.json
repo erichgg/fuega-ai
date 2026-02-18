@@ -1,0 +1,34 @@
+{
+  "title": "Faturamento",
+  "subtitle": "Assinatura e uso",
+  "currentPlan": "Plano {{plan}}",
+  "renews": "Renova em {{date}}",
+  "manageSubscription": "Gerenciar Assinatura",
+  "upgrade": {
+    "title": "Atualize seu Plano",
+    "description": "Obtenha mais chamadas de API, limites maiores e suporte prioritário.",
+    "starter": "Starter",
+    "upgradeToPro": "Atualizar para Pro"
+  },
+  "stats": {
+    "apiCalls": "Chamadas de API",
+    "tokensUsed": "Tokens Utilizados",
+    "estCost": "Custo Est.",
+    "avgCostPerCall": "Custo Méd./Chamada"
+  },
+  "charts": {
+    "costTrend": "Tendência de Custos",
+    "daily": "Diário",
+    "costByAgent": "Custo por Agente",
+    "thisPeriod": "Este período"
+  },
+  "tok": "tok",
+  "empty": {
+    "noCostData": "Sem dados de custos ainda",
+    "noAgentCostData": "Sem dados de custos de agentes"
+  },
+  "errors": {
+    "portalFailed": "Falha ao abrir o portal de faturamento",
+    "checkoutFailed": "Falha ao iniciar o processo de pagamento"
+  }
+}

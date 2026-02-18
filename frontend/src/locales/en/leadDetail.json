@@ -1,0 +1,49 @@
+{
+  "title": "Lead",
+  "notFound": "Lead not found",
+  "notFoundDesc": "This lead doesn't exist or the backend is unavailable.",
+  "labels": {
+    "score": "Score",
+    "source": "Source",
+    "stage": "stage"
+  },
+  "convertedSuccess": "Lead converted to Client #{{id}}!",
+  "errors": {
+    "convertFailed": "Failed to convert lead"
+  },
+  "agentActions": {
+    "deepResearch": "Deep Research",
+    "scoreLead": "Score Lead",
+    "draftOutreach": "Draft Outreach",
+    "convertToClient": "Convert to Client"
+  },
+  "digitalPresence": {
+    "title": "Digital Presence",
+    "subtitle": "Scout data",
+    "googleRating": "Google Rating",
+    "reviews": "Reviews",
+    "website": "Website",
+    "socialMedia": "Social Media",
+    "digitalGapScore": "Digital Gap Score",
+    "recommendedTier": "Recommended tier"
+  },
+  "outreach": {
+    "title": "Outreach",
+    "channel": "Channel",
+    "placeholder": "Outreach message draft... Use 'Draft Outreach' agent action to auto-generate.",
+    "saveOutreach": "Save Outreach",
+    "sendEmail": "Send Email"
+  },
+  "research": {
+    "title": "Agent Research",
+    "subtitle": "Deep-dive brief",
+    "noResearch": "No research yet",
+    "noResearchDesc": "Click \"Deep Research\" to generate a research brief."
+  },
+  "notes": {
+    "title": "Notes",
+    "subtitle": "Internal notes",
+    "placeholder": "Add notes about this lead...",
+    "saveNotes": "Save Notes"
+  }
+}

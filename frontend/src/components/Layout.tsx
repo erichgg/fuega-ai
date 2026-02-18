@@ -1,6 +1,7 @@
 // @refresh reset
 import { useState, useCallback, useEffect } from 'react';
 import { Outlet, NavLink, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import {
   LayoutDashboard, Bot, FileText, Users, Search, Megaphone,
   BarChart3, GitBranch, Settings, ChevronRight, Network, MessagesSquare,
@@ -18,41 +19,42 @@ import { ChispaLogo } from './ChispaLogo';
 import { CommandPalette } from './CommandPalette';
 import { ConsolePanel } from './ConsolePanel';
 import { StatusDot } from './StatusDot';
+import { LanguageToggle } from './LanguageToggle';
 
 const navSections = [
   {
-    label: 'Overview',
+    labelKey: 'overview',
     items: [
-      { path: '/', icon: LayoutDashboard, label: 'Dashboard', shortcut: 'G D' },
-      { path: '/control-panel', icon: Joystick, label: 'Control Panel', shortcut: 'G X' },
-      { path: '/analytics', icon: BarChart3, label: 'Analytics', shortcut: 'G N' },
+      { path: '/', icon: LayoutDashboard, labelKey: 'dashboard', shortcut: 'G D' },
+      { path: '/control-panel', icon: Joystick, labelKey: 'controlPanel', shortcut: 'G X' },
+      { path: '/analytics', icon: BarChart3, labelKey: 'analytics', shortcut: 'G N' },
     ],
   },
   {
-    label: 'Operations',
+    labelKey: 'operations',
     items: [
-      { path: '/leads', icon: Target, label: 'Leads', shortcut: 'G R' },
-      { path: '/content', icon: FileText, label: 'Content', shortcut: 'G C' },
-      { path: '/campaigns', icon: Megaphone, label: 'Campaigns', shortcut: 'G P' },
-      { path: '/seo', icon: Search, label: 'SEO', shortcut: 'G E' },
-      { path: '/workflows', icon: GitBranch, label: 'Workflows', shortcut: 'G W' },
+      { path: '/leads', icon: Target, labelKey: 'leads', shortcut: 'G R' },
+      { path: '/content', icon: FileText, labelKey: 'content', shortcut: 'G C' },
+      { path: '/campaigns', icon: Megaphone, labelKey: 'campaigns', shortcut: 'G P' },
+      { path: '/seo', icon: Search, labelKey: 'seo', shortcut: 'G E' },
+      { path: '/workflows', icon: GitBranch, labelKey: 'workflows', shortcut: 'G W' },
     ],
   },
   {
-    label: 'Team',
+    labelKey: 'team',
     items: [
-      { path: '/organization', icon: Network, label: 'Organization', shortcut: 'G O' },
-      { path: '/agents', icon: Bot, label: 'Agents', shortcut: 'G A' },
-      { path: '/team-chat', icon: MessagesSquare, label: 'Team Chat', shortcut: 'G T' },
+      { path: '/organization', icon: Network, labelKey: 'organization', shortcut: 'G O' },
+      { path: '/agents', icon: Bot, labelKey: 'agents', shortcut: 'G A' },
+      { path: '/team-chat', icon: MessagesSquare, labelKey: 'teamChat', shortcut: 'G T' },
     ],
   },
   {
-    label: 'Business',
+    labelKey: 'business',
     items: [
-      { path: '/clients', icon: Users, label: 'Clients', shortcut: 'G L' },
-      { path: '/approvals', icon: ShieldCheck, label: 'Approvals', shortcut: 'G V' },
-      { path: '/billing', icon: CreditCard, label: 'Billing', shortcut: 'G B' },
-      { path: '/settings', icon: Settings, label: 'Settings', shortcut: 'G S' },
+      { path: '/clients', icon: Users, labelKey: 'clients', shortcut: 'G L' },
+      { path: '/approvals', icon: ShieldCheck, labelKey: 'approvals', shortcut: 'G V' },
+      { path: '/billing', icon: CreditCard, labelKey: 'billing', shortcut: 'G B' },
+      { path: '/settings', icon: Settings, labelKey: 'settings', shortcut: 'G S' },
     ],
   },
 ];
@@ -61,6 +63,7 @@ const isMac = typeof navigator !== 'undefined' && /Mac/.test(navigator.platform)
 const modKey = isMac ? '\u2318' : 'Ctrl+';
 
 export function Layout() {
+  const { t } = useTranslation(['nav', 'common']);
   const location = useLocation();
   const { connected, events } = useWebSocket();
   const { theme, toggle } = useTheme();
@@ -148,7 +151,7 @@ export function Layout() {
             <Command className="w-3.5 h-3.5 flex-shrink-0" />
             {sidebarPinned && (
               <>
-                <span className="flex-1 text-left">Search...</span>
+                <span className="flex-1 text-left">{t('nav:search')}</span>
                 <kbd className="text-[9px] px-1 py-0.5 rounded bg-fuega-surface border border-fuega-border font-mono">{modKey}K</kbd>
               </>
             )}
@@ -158,16 +161,17 @@ export function Layout() {
         {/* Nav */}
         <nav aria-label="Main navigation" className="flex-1 py-1 px-1.5 space-y-3 overflow-y-auto">
           {navSections.map((section) => (
-            <div key={section.label}>
+            <div key={section.labelKey}>
               {sidebarPinned && (
                 <p className="px-2 mb-1 text-[9px] font-bold uppercase tracking-[0.15em] text-fuega-text-muted">
-                  {section.label}
+                  {t(`nav:sections.${section.labelKey}`)}
                 </p>
               )}
               <div className="space-y-0.5">
-                {section.items.map(({ path, icon: Icon, label }) => {
+                {section.items.map(({ path, icon: Icon, labelKey }) => {
                   const isActive = path === '/' ? location.pathname === '/' : location.pathname.startsWith(path);
                   const showBadge = path === '/approvals' && pendingCount > 0;
+                  const label = t(`nav:items.${labelKey}`);
                   return (
                     <NavLink
                       key={path}
@@ -242,7 +246,7 @@ export function Layout() {
                     className="flex items-center gap-2 w-full px-3 py-2 text-[11px] text-red-400 hover:bg-red-500/10 transition-colors"
                   >
                     <LogOut className="w-3.5 h-3.5" />
-                    Sign out
+                    {t('nav:signOut')}
                   </button>
                 </div>
               )}
@@ -253,7 +257,7 @@ export function Layout() {
           <div className={clsx('flex items-center gap-2 px-2 py-1.5 rounded-lg', sidebarPinned ? '' : 'justify-center')}>
             <StatusDot status={connected ? 'active' : 'error'} pulse={connected} size="sm" />
             {sidebarPinned && (
-              <span className="text-[11px] text-fuega-text-muted">{connected ? 'Live' : 'Offline'}</span>
+              <span className="text-[11px] text-fuega-text-muted">{connected ? t('common:status.live') : t('common:status.offline')}</span>
             )}
           </div>
 
@@ -264,11 +268,14 @@ export function Layout() {
               'flex items-center gap-2 px-2 py-1.5 rounded-lg text-[11px] text-fuega-text-muted hover:text-fuega-text-primary hover:bg-fuega-card-hover transition-colors w-full',
               sidebarPinned ? '' : 'justify-center'
             )}
-            title={theme === 'dark' ? 'Switch to light' : 'Switch to dark'}
+            title={theme === 'dark' ? t('nav:lightMode') : t('nav:darkMode')}
           >
             {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-            {sidebarPinned && <span>{theme === 'dark' ? 'Light mode' : 'Dark mode'}</span>}
+            {sidebarPinned && <span>{theme === 'dark' ? t('nav:lightMode') : t('nav:darkMode')}</span>}
           </button>
+
+          {/* Language toggle */}
+          <LanguageToggle collapsed={!sidebarPinned} />
 
           {/* Console toggle */}
           <button
@@ -280,10 +287,10 @@ export function Layout() {
                 : 'text-fuega-text-muted hover:text-fuega-text-primary hover:bg-fuega-card-hover',
               sidebarPinned ? '' : 'justify-center'
             )}
-            title={consoleOpen ? 'Hide console' : 'Show console'}
+            title={consoleOpen ? t('nav:hideConsole') : t('nav:console')}
           >
             {consoleOpen ? <PanelRightClose className="w-4 h-4" /> : <Terminal className="w-4 h-4" />}
-            {sidebarPinned && <span>{consoleOpen ? 'Hide Console' : 'Console'}</span>}
+            {sidebarPinned && <span>{consoleOpen ? t('nav:hideConsole') : t('nav:console')}</span>}
           </button>
 
           {/* Collapse toggle */}
@@ -293,10 +300,10 @@ export function Layout() {
               'flex items-center gap-2 px-2 py-1.5 rounded-lg text-[11px] text-fuega-text-muted hover:text-fuega-text-primary hover:bg-fuega-card-hover transition-colors w-full',
               sidebarPinned ? '' : 'justify-center'
             )}
-            title={sidebarPinned ? 'Collapse sidebar' : 'Expand sidebar'}
+            title={sidebarPinned ? t('nav:collapse') : t('nav:collapse')}
           >
             {sidebarPinned ? <PanelLeftClose className="w-4 h-4" /> : <PanelLeft className="w-4 h-4" />}
-            {sidebarPinned && <span>Collapse</span>}
+            {sidebarPinned && <span>{t('nav:collapse')}</span>}
           </button>
         </div>
       </aside>

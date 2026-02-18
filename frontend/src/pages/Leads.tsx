@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import {
   Target, Users, Send, Trophy, LayoutGrid, Table2, Plus, X,
   Globe, Search, MapPin, Play, CheckCircle2, AlertCircle, Loader2,
@@ -13,18 +14,19 @@ import { StatusDot } from '../components/StatusDot';
 import { DataTable, type Column } from '../components/DataTable';
 import { useToast } from '../lib/ToastContext';
 
-const PIPELINE_STAGES = [
-  { key: 'prospect', label: 'Prospects', color: '#6366F1' },
-  { key: 'researched', label: 'Researched', color: '#8B5CF6' },
-  { key: 'qualified', label: 'Qualified', color: '#EAB308' },
-  { key: 'outreach_drafted', label: 'Outreach Drafted', color: '#F97316' },
-  { key: 'outreach_sent', label: 'Outreach Sent', color: '#FF6B2C' },
-  { key: 'responded', label: 'Responded', color: '#00D4AA' },
-  { key: 'won', label: 'Won', color: '#22C55E' },
-  { key: 'lost', label: 'Lost', color: '#EF4444' },
+const PIPELINE_STAGE_KEYS = [
+  { key: 'prospect', labelKey: 'stages.prospect', color: '#6366F1' },
+  { key: 'researched', labelKey: 'stages.researched', color: '#8B5CF6' },
+  { key: 'qualified', labelKey: 'stages.qualified', color: '#EAB308' },
+  { key: 'outreach_drafted', labelKey: 'stages.outreach_drafted', color: '#F97316' },
+  { key: 'outreach_sent', labelKey: 'stages.outreach_sent', color: '#FF6B2C' },
+  { key: 'responded', labelKey: 'stages.responded', color: '#00D4AA' },
+  { key: 'won', labelKey: 'stages.won', color: '#22C55E' },
+  { key: 'lost', labelKey: 'stages.lost', color: '#EF4444' },
 ];
 
 export default function Leads() {
+  const { t } = useTranslation(['leads', 'common']);
   const navigate = useNavigate();
   const toast = useToast();
   const [kanban, setKanban] = useState<any>({ stages: {}, counts: {}, total: 0 });
@@ -45,7 +47,7 @@ export default function Leads() {
   const loadData = () => {
     api.leads.kanban()
       .then(d => setKanban(d))
-      .catch(() => toast.error('Failed to load leads pipeline.'))
+      .catch(() => toast.error(t('common:errors.failedToLoad', { resource: t('leads:title').toLowerCase() })))
       .finally(() => setLoading(false));
   };
 
@@ -53,18 +55,18 @@ export default function Leads() {
 
   const handleAddLead = async () => {
     const name = newLead.business_name.trim();
-    if (!name) { toast.error('Business name is required'); return; }
+    if (!name) { toast.error(t('leads:errors.businessRequired')); return; }
     try {
       await api.leads.create(newLead);
       setNewLead({ business_name: '', industry: '', location: '', email: '' });
       setShowNewLead(false);
       loadData();
-    } catch { toast.error('Failed to create lead'); }
+    } catch { toast.error(t('common:errors.failedToCreate', { resource: 'lead' })); }
   };
 
   const handleScout = async () => {
     const location = scoutLocation.trim();
-    if (!location) { toast.error('Please enter a location to scout'); return; }
+    if (!location) { toast.error(t('leads:errors.enterLocation')); return; }
     setScouting(true);
     setShowScoutForm(false);
     try {
@@ -82,7 +84,7 @@ export default function Leads() {
         loadData();
       }
     } catch {
-      toast.error('Scout action failed');
+      toast.error(t('leads:errors.scoutFailed'));
     }
     setScouting(false);
     setScoutLocation('');
@@ -91,10 +93,10 @@ export default function Leads() {
 
   const handleRunPipeline = async () => {
     const location = pipelineLocation.trim();
-    if (!location) { toast.error('Please enter a target location'); return; }
+    if (!location) { toast.error(t('leads:errors.enterTargetLocation')); return; }
     setPipelineRunning(true);
     setShowPipelineForm(false);
-    setPipelineStatus({ step: 'Starting pipeline...', status: 'running' });
+    setPipelineStatus({ step: t('leads:pipelineStatus.starting'), status: 'running' });
     activityBus.push('workflow', 'Outreach pipeline launched', `Target: ${location}`);
     try {
       const context: Record<string, string> = { location };
@@ -119,18 +121,18 @@ export default function Leads() {
           }
 
           if (run.status === 'completed') {
-            setPipelineStatus({ step: `All ${steps.length} steps completed!`, status: 'completed' });
+            setPipelineStatus({ step: t('leads:pipelineStatus.completed', { count: steps.length }), status: 'completed' });
             activityBus.push('success', `Pipeline complete — ${steps.length} steps done`);
             loadData();
             setTimeout(() => { setPipelineRunning(false); setPipelineStatus(null); }, 4000);
             return;
           } else if (run.status === 'failed') {
-            setPipelineStatus({ step: run.error_message || 'Pipeline failed', status: 'failed' });
+            setPipelineStatus({ step: run.error_message || t('leads:errors.pipelineFailed'), status: 'failed' });
             activityBus.push('error', 'Pipeline failed', run.error_message);
             setTimeout(() => { setPipelineRunning(false); setPipelineStatus(null); }, 5000);
             return;
           } else if (run.status === 'paused_for_approval') {
-            setPipelineStatus({ step: 'Waiting for your approval', status: 'approval' });
+            setPipelineStatus({ step: t('leads:pipelineStatus.waitingApproval'), status: 'approval' });
             activityBus.push('action', 'Approval needed', 'Pipeline paused for human review');
             loadData();
             setTimeout(() => { setPipelineRunning(false); setPipelineStatus(null); }, 5000);
@@ -147,7 +149,7 @@ export default function Leads() {
       // Start polling after a short delay
       setTimeout(poll, 2000);
     } catch {
-      toast.error('Failed to launch pipeline');
+      toast.error(t('leads:errors.pipelineFailed'));
       setPipelineRunning(false);
       setPipelineStatus(null);
     }
@@ -163,6 +165,7 @@ export default function Leads() {
     );
   }
 
+  const PIPELINE_STAGES = PIPELINE_STAGE_KEYS.map(s => ({ ...s, label: t(`leads:${s.labelKey}`) }));
   const stages = kanban.stages || {};
   const counts = kanban.counts || {};
   const allItems: { stage: string; stageLabel: string; lead: any }[] = [];
@@ -178,7 +181,7 @@ export default function Leads() {
   const columns: Column<{ stage: string; stageLabel: string; lead: any }>[] = [
     {
       key: 'business',
-      label: 'Business',
+      label: t('leads:columns.business'),
       sortable: true,
       getValue: (row) => row.lead.business_name,
       render: (row) => (
@@ -189,7 +192,7 @@ export default function Leads() {
     },
     {
       key: 'stage',
-      label: 'Stage',
+      label: t('leads:columns.stage'),
       sortable: true,
       getValue: (row) => row.stageLabel,
       render: (row) => {
@@ -204,28 +207,28 @@ export default function Leads() {
     },
     {
       key: 'score',
-      label: 'Score',
+      label: t('leads:columns.score'),
       sortable: true,
       getValue: (row) => row.lead.score ?? 0,
       render: (row) => <span className={`num text-[11px] ${scoreColor(row.lead.score || 0)}`}>{row.lead.score || 0}</span>,
     },
     {
       key: 'location',
-      label: 'Location',
+      label: t('leads:columns.location'),
       sortable: true,
       getValue: (row) => row.lead.location || '',
       render: (row) => row.lead.location ? <span className="text-[10px] text-fuega-text-secondary">{row.lead.location}</span> : <span className="text-[10px] text-fuega-text-muted">--</span>,
     },
     {
       key: 'industry',
-      label: 'Industry',
+      label: t('leads:columns.industry'),
       sortable: true,
       getValue: (row) => row.lead.industry || '',
       render: (row) => row.lead.industry ? <span className="text-[10px] px-1.5 py-0.5 rounded bg-fuega-input text-fuega-text-secondary">{row.lead.industry}</span> : <span className="text-[10px] text-fuega-text-muted">--</span>,
     },
     {
       key: 'source',
-      label: 'Source',
+      label: t('leads:columns.source'),
       sortable: true,
       getValue: (row) => row.lead.source || '',
       render: (row) => row.lead.source ? <span className="text-[9px] text-fuega-text-muted">{row.lead.source}</span> : <span className="text-[10px] text-fuega-text-muted">--</span>,
@@ -233,18 +236,18 @@ export default function Leads() {
   ];
 
   const viewTabs = [
-    { key: 'kanban', label: 'Pipeline', icon: <LayoutGrid className="w-3.5 h-3.5" /> },
-    { key: 'table', label: 'Table', icon: <Table2 className="w-3.5 h-3.5" /> },
+    { key: 'kanban', label: t('leads:views.pipeline'), icon: <LayoutGrid className="w-3.5 h-3.5" /> },
+    { key: 'table', label: t('leads:views.table'), icon: <Table2 className="w-3.5 h-3.5" /> },
   ];
 
   return (
     <div className="animate-fadeIn">
       <PageHeader
-        title="Leads Pipeline"
-        subtitle={`${kanban.total || 0} leads across all stages`}
+        title={t('leads:title')}
+        subtitle={t('leads:subtitle', { count: kanban.total || 0 })}
         breadcrumbs={[
-          { label: 'Dashboard', href: '/' },
-          { label: 'Leads' },
+          { label: t('common:breadcrumbs.dashboard'), href: '/' },
+          { label: t('leads:title') },
         ]}
         action={
           <div className="flex items-center gap-2">
@@ -259,7 +262,7 @@ export default function Leads() {
               ) : (
                 <Play className="w-3.5 h-3.5" />
               )}
-              {pipelineRunning ? 'Running...' : 'Run Full Pipeline'}
+              {pipelineRunning ? t('leads:actions.running') : t('leads:actions.runFullPipeline')}
             </button>
             <button
               onClick={() => setShowScoutForm(!showScoutForm)}
@@ -271,14 +274,14 @@ export default function Leads() {
               ) : (
                 <Globe className="w-3.5 h-3.5" />
               )}
-              {scouting ? 'Scouting...' : 'Scout Only'}
+              {scouting ? t('leads:actions.scouting') : t('leads:actions.scoutOnly')}
             </button>
             <button
               onClick={() => setShowNewLead(true)}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-fuega-orange text-white text-[12px] font-medium hover:bg-fuega-orange/90 transition-colors"
             >
               <Plus className="w-3.5 h-3.5" />
-              Add Lead
+              {t('leads:actions.addLead')}
             </button>
           </div>
         }
@@ -292,31 +295,31 @@ export default function Leads() {
             value={newLead.business_name}
             onChange={e => setNewLead(prev => ({ ...prev, business_name: e.target.value }))}
             onKeyDown={e => e.key === 'Enter' && handleAddLead()}
-            placeholder="Business name..."
+            placeholder={t('leads:form.businessName')}
             className="flex-1 bg-fuega-input border border-fuega-border rounded px-2 py-1 text-sm text-fuega-text-primary placeholder:text-fuega-text-muted focus:outline-none focus:border-fuega-orange/50"
           />
           <input
             value={newLead.industry}
             onChange={e => setNewLead(prev => ({ ...prev, industry: e.target.value }))}
             onKeyDown={e => e.key === 'Enter' && handleAddLead()}
-            placeholder="Industry"
+            placeholder={t('leads:form.industry')}
             className="w-28 bg-fuega-input border border-fuega-border rounded px-2 py-1 text-sm text-fuega-text-primary placeholder:text-fuega-text-muted focus:outline-none focus:border-fuega-orange/50"
           />
           <input
             value={newLead.location}
             onChange={e => setNewLead(prev => ({ ...prev, location: e.target.value }))}
             onKeyDown={e => e.key === 'Enter' && handleAddLead()}
-            placeholder="Location"
+            placeholder={t('leads:form.location')}
             className="w-28 bg-fuega-input border border-fuega-border rounded px-2 py-1 text-sm text-fuega-text-primary placeholder:text-fuega-text-muted focus:outline-none focus:border-fuega-orange/50"
           />
           <input
             value={newLead.email}
             onChange={e => setNewLead(prev => ({ ...prev, email: e.target.value }))}
             onKeyDown={e => e.key === 'Enter' && handleAddLead()}
-            placeholder="Email"
+            placeholder={t('leads:form.email')}
             className="w-36 bg-fuega-input border border-fuega-border rounded px-2 py-1 text-sm text-fuega-text-primary placeholder:text-fuega-text-muted focus:outline-none focus:border-fuega-orange/50"
           />
-          <button onClick={handleAddLead} className="px-3 py-1 rounded bg-fuega-orange text-white text-xs font-medium hover:bg-fuega-orange/90 transition-colors">Add</button>
+          <button onClick={handleAddLead} className="px-3 py-1 rounded bg-fuega-orange text-white text-xs font-medium hover:bg-fuega-orange/90 transition-colors">{t('common:actions.add')}</button>
           <button onClick={() => { setShowNewLead(false); setNewLead({ business_name: '', industry: '', location: '', email: '' }); }} className="p-1 rounded text-fuega-text-muted hover:text-fuega-text-primary transition-colors"><X className="w-4 h-4" /></button>
         </div>
       )}
@@ -330,17 +333,17 @@ export default function Leads() {
             value={scoutLocation}
             onChange={e => setScoutLocation(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && handleScout()}
-            placeholder="Location (e.g. Mexico City, Condesa)"
+            placeholder={t('leads:scout.locationPlaceholder')}
             className="flex-1 bg-fuega-input border border-fuega-border rounded px-2 py-1 text-sm text-fuega-text-primary placeholder:text-fuega-text-muted focus:outline-none focus:border-green-500/50"
           />
           <input
             value={scoutIndustry}
             onChange={e => setScoutIndustry(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && handleScout()}
-            placeholder="Industry (optional)"
+            placeholder={t('leads:scout.industryPlaceholder')}
             className="w-36 bg-fuega-input border border-fuega-border rounded px-2 py-1 text-sm text-fuega-text-primary placeholder:text-fuega-text-muted focus:outline-none focus:border-green-500/50"
           />
-          <button onClick={handleScout} className="px-3 py-1 rounded bg-green-500 text-white text-xs font-medium hover:bg-green-600 transition-colors">Scout</button>
+          <button onClick={handleScout} className="px-3 py-1 rounded bg-green-500 text-white text-xs font-medium hover:bg-green-600 transition-colors">{t('leads:scout.scout')}</button>
           <button onClick={() => setShowScoutForm(false)} className="p-1 rounded text-fuega-text-muted hover:text-fuega-text-primary transition-colors"><X className="w-4 h-4" /></button>
         </div>
       )}
@@ -350,8 +353,8 @@ export default function Leads() {
         <div className="mb-2 bg-gradient-to-r from-fuega-orange/5 to-orange-500/5 border border-fuega-orange/20 rounded-lg p-3">
           <div className="flex items-center gap-2 mb-2">
             <Play className="w-4 h-4 text-fuega-orange flex-shrink-0" />
-            <span className="text-xs font-semibold text-fuega-text-primary">Run Full Outreach Pipeline</span>
-            <span className="text-[10px] text-fuega-text-muted ml-1">Scout → Research → Score → Draft Outreach → Review → Compliance → Approval</span>
+            <span className="text-xs font-semibold text-fuega-text-primary">{t('leads:pipeline.title')}</span>
+            <span className="text-[10px] text-fuega-text-muted ml-1">{t('leads:pipeline.steps')}</span>
           </div>
           <div className="flex items-center gap-2">
             <input
@@ -359,18 +362,18 @@ export default function Leads() {
               value={pipelineLocation}
               onChange={e => setPipelineLocation(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && handleRunPipeline()}
-              placeholder="Target location (e.g. Monterrey, Mexico)"
+              placeholder={t('leads:pipeline.targetLocation')}
               className="flex-1 bg-fuega-input border border-fuega-border rounded px-2 py-1.5 text-sm text-fuega-text-primary placeholder:text-fuega-text-muted focus:outline-none focus:border-fuega-orange/50"
             />
             <input
               value={pipelineIndustry}
               onChange={e => setPipelineIndustry(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && handleRunPipeline()}
-              placeholder="Industry (optional)"
+              placeholder={t('leads:pipeline.industryOptional')}
               className="w-40 bg-fuega-input border border-fuega-border rounded px-2 py-1.5 text-sm text-fuega-text-primary placeholder:text-fuega-text-muted focus:outline-none focus:border-fuega-orange/50"
             />
             <button onClick={handleRunPipeline} className="px-4 py-1.5 rounded bg-gradient-to-r from-fuega-orange to-orange-500 text-white text-xs font-bold hover:from-fuega-orange/90 hover:to-orange-500/90 transition-all shadow-lg shadow-fuega-orange/20">
-              Launch
+              {t('common:actions.launch')}
             </button>
             <button onClick={() => setShowPipelineForm(false)} className="p-1 rounded text-fuega-text-muted hover:text-fuega-text-primary transition-colors"><X className="w-4 h-4" /></button>
           </div>
@@ -402,10 +405,10 @@ export default function Leads() {
 
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 mb-2">
-        <StatCard label="Prospects" value={counts.prospect || 0} icon={<Search className="w-5 h-5" />} color="indigo" />
-        <StatCard label="Qualified" value={counts.qualified || 0} icon={<Target className="w-5 h-5" />} color="yellow" />
-        <StatCard label="Outreach" value={(counts.outreach_drafted || 0) + (counts.outreach_sent || 0)} icon={<Send className="w-5 h-5" />} color="orange" />
-        <StatCard label="Won" value={counts.won || 0} icon={<Trophy className="w-5 h-5" />} color="teal" />
+        <StatCard label={t('leads:stats.prospects')} value={counts.prospect || 0} icon={<Search className="w-5 h-5" />} color="indigo" />
+        <StatCard label={t('leads:stats.qualified')} value={counts.qualified || 0} icon={<Target className="w-5 h-5" />} color="yellow" />
+        <StatCard label={t('leads:stats.outreach')} value={(counts.outreach_drafted || 0) + (counts.outreach_sent || 0)} icon={<Send className="w-5 h-5" />} color="orange" />
+        <StatCard label={t('leads:stats.won')} value={counts.won || 0} icon={<Trophy className="w-5 h-5" />} color="teal" />
       </div>
 
       {/* Kanban View */}
@@ -430,7 +433,7 @@ export default function Leads() {
                   {/* Cards */}
                   <div className="p-1.5 flex-1 space-y-1.5 overflow-y-auto max-h-[calc(100vh-340px)]">
                     {items.length === 0 && (
-                      <div className="text-[10px] text-fuega-text-muted text-center py-4 opacity-50">No leads</div>
+                      <div className="text-[10px] text-fuega-text-muted text-center py-4 opacity-50">{t('leads:empty.noLeads')}</div>
                     )}
                     {items.map((lead: any) => (
                       <button
@@ -472,7 +475,7 @@ export default function Leads() {
           data={allItems}
           getRowKey={(row) => `${row.stage}-${row.lead.id}`}
           compact
-          emptyMessage="No leads found. Scout for prospects or add a lead manually."
+          emptyMessage={t('leads:empty.emptyTable')}
         />
       )}
     </div>

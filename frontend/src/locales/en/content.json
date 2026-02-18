@@ -1,0 +1,63 @@
+{
+  "title": "Content Pipeline",
+  "subtitle": "{{count}} items across all stages",
+  "stages": {
+    "ideas": "Ideas",
+    "approved": "Approved",
+    "writing": "Writing",
+    "review": "Review",
+    "revision": "Revision",
+    "ready": "Ready to Publish",
+    "published": "Published"
+  },
+  "views": {
+    "kanban": "Kanban",
+    "table": "Table"
+  },
+  "newIdea": "New Idea",
+  "form": {
+    "ideaTitle": "Idea title...",
+    "platform": "Platform"
+  },
+  "stats": {
+    "ideas": "Ideas",
+    "inProduction": "In Production",
+    "readyToPublish": "Ready to Publish",
+    "published": "Published"
+  },
+  "columns": {
+    "title": "Title",
+    "stage": "Stage",
+    "platform": "Platform",
+    "score": "Score"
+  },
+  "untitled": "Untitled",
+  "noItems": "No items",
+  "emptyTable": "No content items found",
+  "contentByPlatform": "Content by Platform",
+  "distributionSubtitle": "Distribution across channels",
+  "media": {
+    "voice": "Voice",
+    "photos": "Photos",
+    "aiImg": "AI Img",
+    "generateVoiceover": "Generate Voiceover",
+    "findStockPhotos": "Find Stock Photos",
+    "generateImage": "Generate Image"
+  },
+  "agents": {
+    "seoAnalyst": "SEO Analyst",
+    "ceo": "CEO",
+    "contentWriter": "Content Writer",
+    "editor": "Editor",
+    "socialMediaManager": "Social Media Manager",
+    "analyticsAgent": "Analytics Agent"
+  },
+  "chartLabel": "Content pieces",
+  "errors": {
+    "enterTitle": "Please enter a title",
+    "failedToSaveIdea": "Failed to save idea",
+    "voiceoverFailed": "Voiceover generation failed",
+    "stockPhotoFailed": "Stock photo search failed",
+    "imageGenerationFailed": "Image generation failed"
+  }
+}

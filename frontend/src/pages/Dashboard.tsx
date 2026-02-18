@@ -1,6 +1,7 @@
 // @refresh reset
 import { useEffect, useState, useMemo, useCallback } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Line } from 'react-chartjs-2';
 import {
   DollarSign, Users, Bot, TrendingUp, Activity, Clock,
@@ -34,6 +35,7 @@ const FEED_COLORS: Record<string, { dot: 'active' | 'error' | 'paused'; icon: Re
 };
 
 export default function Dashboard() {
+  const { t } = useTranslation(['dashboard', 'common']);
   const toast = useToast();
   const [kpis, setKpis] = useState<any>(null);
   const [activity, setActivity] = useState<any[]>([]);
@@ -116,7 +118,7 @@ export default function Dashboard() {
     try {
       await api.workflows.approve(runId, stepId, approved);
       setPendingApprovals(prev => prev.filter(p => p.id !== runId));
-    } catch { toast.error('Failed to process approval'); }
+    } catch { toast.error(t('common:errors.failedAction', { action: t('common:actions.approve') })); }
   };
 
   if (loading) {
@@ -130,28 +132,28 @@ export default function Dashboard() {
   if (!kpis) {
     return (
       <div>
-        <PageHeader title="Command Center" subtitle="Start the backend to populate data" />
-        <div className="text-center py-12 text-fuega-text-muted text-sm animate-fadeIn">No data available. Start the backend API.</div>
+        <PageHeader title={t('dashboard:title')} subtitle={t('dashboard:subtitle')} />
+        <div className="text-center py-12 text-fuega-text-muted text-sm animate-fadeIn">{t('dashboard:noData')}</div>
       </div>
     );
   }
 
   const revenueChartData = revenueChart?.labels?.length ? {
     labels: revenueChart.labels,
-    datasets: [{ label: 'Revenue', data: revenueChart.revenue, borderColor: '#00D4AA', backgroundColor: '#00D4AA20', fill: true, tension: 0.4, pointRadius: 2, borderWidth: 2 }],
+    datasets: [{ label: t('dashboard:charts.revenueDataset'), data: revenueChart.revenue, borderColor: '#00D4AA', backgroundColor: '#00D4AA20', fill: true, tension: 0.4, pointRadius: 2, borderWidth: 2 }],
   } : null;
 
   const costChartData = costChart?.labels?.length ? {
     labels: costChart.labels,
     datasets: [
-      { label: 'Costs', data: costChart.costs, borderColor: '#FF6B2C', backgroundColor: '#FF6B2C15', fill: true, tension: 0.4, pointRadius: 2, borderWidth: 2 },
+      { label: t('dashboard:charts.costsDataset'), data: costChart.costs, borderColor: '#FF6B2C', backgroundColor: '#FF6B2C15', fill: true, tension: 0.4, pointRadius: 2, borderWidth: 2 },
     ],
   } : null;
 
   return (
     <div className="animate-fadeIn">
       <PageHeader
-        title="Command Center"
+        title={t('dashboard:title')}
         action={
           <div className="flex items-center gap-3">
             <Link
@@ -159,10 +161,10 @@ export default function Dashboard() {
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-fuega-orange text-white text-[12px] font-medium hover:bg-fuega-orange/90 transition-colors"
             >
               <Joystick className="w-3.5 h-3.5" />
-              Control Panel
+              {t('dashboard:controlPanel')}
             </Link>
             <span className="text-[11px] text-fuega-text-muted">
-              <StatusDot status="active" pulse label={`${activeAgents.length}/${agents.length} active`} size="sm" />
+              <StatusDot status="active" pulse label={t('dashboard:activeCount', { active: activeAgents.length, total: agents.length })} size="sm" />
             </span>
           </div>
         }
@@ -173,13 +175,13 @@ export default function Dashboard() {
         <div className="mb-3 bg-fuega-orange/5 border-l-2 border-fuega-orange rounded-r-lg px-3 py-2 animate-slideUp">
           <div className="flex items-center gap-2 mb-1.5">
             <AlertTriangle className="w-3.5 h-3.5 text-fuega-orange" />
-            <span className="text-[12px] font-semibold text-fuega-orange">{pendingApprovals.length} Pending Approval{pendingApprovals.length > 1 ? 's' : ''}</span>
+            <span className="text-[12px] font-semibold text-fuega-orange">{pendingApprovals.length > 1 ? t('dashboard:pendingApprovalsPlural', { count: pendingApprovals.length }) : t('dashboard:pendingApprovals', { count: pendingApprovals.length })}</span>
           </div>
           {pendingApprovals.map(pa => (
             <div key={pa.id} className="flex items-center gap-2 py-1">
               <span className="text-[12px] text-fuega-text-primary flex-1">{pa.workflow_name?.replace(/_/g, ' ')} #{pa.id} — {pa.current_step_id?.replace(/_/g, ' ')}</span>
-              <button onClick={() => handleApproval(pa.id, pa.current_step_id, true)} className="flex items-center gap-1 bg-green-500/20 hover:bg-green-500/30 text-green-400 px-2 py-1 rounded text-[11px] font-medium transition-colors"><ThumbsUp className="w-3 h-3" /> Approve</button>
-              <button onClick={() => handleApproval(pa.id, pa.current_step_id, false)} className="flex items-center gap-1 bg-red-500/20 hover:bg-red-500/30 text-red-400 px-2 py-1 rounded text-[11px] font-medium transition-colors"><ThumbsDown className="w-3 h-3" /> Reject</button>
+              <button onClick={() => handleApproval(pa.id, pa.current_step_id, true)} className="flex items-center gap-1 bg-green-500/20 hover:bg-green-500/30 text-green-400 px-2 py-1 rounded text-[11px] font-medium transition-colors"><ThumbsUp className="w-3 h-3" /> {t('common:actions.approve')}</button>
+              <button onClick={() => handleApproval(pa.id, pa.current_step_id, false)} className="flex items-center gap-1 bg-red-500/20 hover:bg-red-500/30 text-red-400 px-2 py-1 rounded text-[11px] font-medium transition-colors"><ThumbsDown className="w-3 h-3" /> {t('common:actions.reject')}</button>
             </div>
           ))}
         </div>
@@ -187,23 +189,23 @@ export default function Dashboard() {
 
       {/* KPIs — 6 columns tight */}
       <div className="grid grid-cols-3 lg:grid-cols-6 gap-2 mb-3">
-        <StatCard label="Revenue" value={`$${(kpis.revenue?.monthly_usd || 0).toLocaleString()}`} icon={<DollarSign className="w-4 h-4" />} color="teal" sparklineData={revenueChart?.revenue?.slice(-7)} />
-        <StatCard label="Clients" value={kpis.clients?.total || 0} icon={<Users className="w-4 h-4" />} color="orange" />
-        <StatCard label="Agents" value={`${kpis.agents?.active || 0}/${kpis.agents?.total || 0}`} icon={<Bot className="w-4 h-4" />} color="indigo" />
-        <StatCard label="API Costs" value={`$${totalSpent.toFixed(2)}`} subValue={`/${totalBudget}`} icon={<TrendingUp className="w-4 h-4" />} color="pink" sparklineData={costChart?.costs?.slice(-7)} />
-        <StatCard label="Profit" value={`$${(kpis.profit?.monthly_usd || 0).toFixed(0)}`} icon={<Activity className="w-4 h-4" />} color="yellow" />
-        <Link to="/leads"><StatCard label="Leads" value={leadsCount} icon={<Target className="w-4 h-4" />} color="orange" /></Link>
+        <StatCard label={t('dashboard:stats.revenue')} value={`$${(kpis.revenue?.monthly_usd || 0).toLocaleString()}`} icon={<DollarSign className="w-4 h-4" />} color="teal" sparklineData={revenueChart?.revenue?.slice(-7)} />
+        <StatCard label={t('dashboard:stats.clients')} value={kpis.clients?.total || 0} icon={<Users className="w-4 h-4" />} color="orange" />
+        <StatCard label={t('dashboard:stats.agents')} value={`${kpis.agents?.active || 0}/${kpis.agents?.total || 0}`} icon={<Bot className="w-4 h-4" />} color="indigo" />
+        <StatCard label={t('dashboard:stats.apiCosts')} value={`$${totalSpent.toFixed(2)}`} subValue={`/${totalBudget}`} icon={<TrendingUp className="w-4 h-4" />} color="pink" sparklineData={costChart?.costs?.slice(-7)} />
+        <StatCard label={t('dashboard:stats.profit')} value={`$${(kpis.profit?.monthly_usd || 0).toFixed(0)}`} icon={<Activity className="w-4 h-4" />} color="yellow" />
+        <Link to="/leads"><StatCard label={t('dashboard:stats.leads')} value={leadsCount} icon={<Target className="w-4 h-4" />} color="orange" /></Link>
       </div>
 
       {/* Fleet health summary — compact */}
       <div className="bg-fuega-card border border-fuega-border rounded-lg mb-3 overflow-hidden">
         <div className="flex items-center justify-between px-3 py-2 border-b border-fuega-border">
-          <h3 className="text-[11px] uppercase tracking-wider font-mono font-semibold text-fuega-text-primary">Agent Fleet</h3>
+          <h3 className="text-[11px] uppercase tracking-wider font-mono font-semibold text-fuega-text-primary">{t('dashboard:agentFleet')}</h3>
           <div className="flex items-center gap-4 text-[11px]">
-            <StatusDot status="active" label={`${activeAgents.length} active`} size="sm" />
-            <StatusDot status="paused" label={`${pausedAgents.length} paused`} size="sm" />
-            {overBudget.length > 0 && <StatusDot status="error" label={`${overBudget.length} over-budget`} size="sm" />}
-            <Link to="/agents" className="text-[10px] text-fuega-orange hover:underline">Manage</Link>
+            <StatusDot status="active" label={`${activeAgents.length} ${t('dashboard:fleet.active').toLowerCase()}`} size="sm" />
+            <StatusDot status="paused" label={`${pausedAgents.length} ${t('dashboard:fleet.paused').toLowerCase()}`} size="sm" />
+            {overBudget.length > 0 && <StatusDot status="error" label={`${overBudget.length} ${t('dashboard:fleet.overBudget').toLowerCase()}`} size="sm" />}
+            <Link to="/agents" className="text-[10px] text-fuega-orange hover:underline">{t('dashboard:manage')}</Link>
           </div>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-8">
@@ -233,40 +235,40 @@ export default function Dashboard() {
 
       {/* Charts row */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 mb-3">
-        <ChartCard title="Revenue" subtitle="Monthly">
+        <ChartCard title={t('dashboard:charts.revenue')} subtitle={t('dashboard:charts.monthly')}>
           <div className="h-40">
             {revenueChartData ? (
               <Line data={revenueChartData} options={{ ...defaultChartOptions, plugins: { ...defaultChartOptions.plugins, legend: { display: false } } } as any} />
             ) : (
-              <div className="flex items-center justify-center h-full text-[11px] text-fuega-text-muted">No data</div>
+              <div className="flex items-center justify-center h-full text-[11px] text-fuega-text-muted">{t('dashboard:charts.noData')}</div>
             )}
           </div>
         </ChartCard>
 
-        <ChartCard title="API Costs" subtitle="Daily">
+        <ChartCard title={t('dashboard:charts.apiCosts')} subtitle={t('dashboard:charts.daily')}>
           <div className="h-40">
             {costChartData ? (
               <Line data={costChartData} options={{ ...defaultChartOptions, plugins: { ...defaultChartOptions.plugins, legend: { display: false } } } as any} />
             ) : (
-              <div className="flex items-center justify-center h-full text-[11px] text-fuega-text-muted">No data</div>
+              <div className="flex items-center justify-center h-full text-[11px] text-fuega-text-muted">{t('dashboard:charts.noData')}</div>
             )}
           </div>
         </ChartCard>
 
-        <ChartCard title="Fleet" subtitle="Status">
+        <ChartCard title={t('dashboard:charts.fleet')} subtitle={t('dashboard:charts.status')}>
           <div className="h-40 flex flex-col items-center justify-center gap-3">
             <div className="grid grid-cols-3 gap-4 w-full text-center">
               <div>
                 <p className="text-2xl font-bold text-green-400 num">{activeAgents.length}</p>
-                <p className="text-[10px] text-fuega-text-muted">Active</p>
+                <p className="text-[10px] text-fuega-text-muted">{t('dashboard:fleet.active')}</p>
               </div>
               <div>
                 <p className="text-2xl font-bold text-yellow-400 num">{pausedAgents.length}</p>
-                <p className="text-[10px] text-fuega-text-muted">Paused</p>
+                <p className="text-[10px] text-fuega-text-muted">{t('dashboard:fleet.paused')}</p>
               </div>
               <div>
                 <p className="text-2xl font-bold text-red-400 num">{overBudget.length}</p>
-                <p className="text-[10px] text-fuega-text-muted">Over Budget</p>
+                <p className="text-[10px] text-fuega-text-muted">{t('dashboard:fleet.overBudget')}</p>
               </div>
             </div>
           </div>
@@ -275,13 +277,13 @@ export default function Dashboard() {
 
       {/* Activity Feed + Budget Table */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 mb-3">
-        <ChartCard title="Live Feed" subtitle={`${activity.length} recent`}>
+        <ChartCard title={t('dashboard:liveFeed')} subtitle={t('dashboard:recent', { count: activity.length })}>
           <div className="space-y-0.5 max-h-56 overflow-y-auto">
-            {activity.length === 0 && <EmptyState title="No activity yet" />}
+            {activity.length === 0 && <EmptyState title={t('dashboard:noActivityYet')} />}
             {activity.map((item, i) => (
               <div key={item.id ?? i} className="flex items-center gap-2 py-1.5 px-1 rounded hover:bg-fuega-card-hover transition-colors">
                 <StatusDot status="active" size="sm" />
-                <span className="text-[11px] text-fuega-text-primary flex-1 truncate">{item.action || item.output_summary || 'Agent action'}</span>
+                <span className="text-[11px] text-fuega-text-primary flex-1 truncate">{item.action || item.output_summary || t('dashboard:agentAction')}</span>
                 {item.cost_usd > 0 && <span className="text-[10px] text-fuega-text-muted num">${item.cost_usd.toFixed(4)}</span>}
                 <span className="text-[10px] text-fuega-text-muted">{item.created_at ? new Date(item.created_at).toLocaleTimeString('en', { hour: '2-digit', minute: '2-digit' }) : ''}</span>
               </div>
@@ -289,7 +291,7 @@ export default function Dashboard() {
           </div>
         </ChartCard>
 
-        <ChartCard title="Budget Overview" subtitle={`$${totalSpent.toFixed(2)} / $${totalBudget} used`} collapsible>
+        <ChartCard title={t('dashboard:budgetOverview')} subtitle={t('dashboard:usedLabel', { spent: totalSpent.toFixed(2), total: totalBudget })} collapsible>
           <div className="space-y-1 max-h-56 overflow-y-auto">
             {agents.map(agent => {
               const pct = agent.monthly_budget_usd ? ((agent.month_spend_usd || 0) / agent.monthly_budget_usd) * 100 : 0;
@@ -309,8 +311,8 @@ export default function Dashboard() {
 
       {/* Real-time Activity Feed (WebSocket powered) */}
       <ChartCard
-        title="Real-time Activity"
-        subtitle={`${filteredFeed.length} events`}
+        title={t('dashboard:realTimeActivity')}
+        subtitle={t('dashboard:events', { count: filteredFeed.length })}
         action={
           <div className="flex items-center gap-1.5">
             <Filter className="w-3 h-3 text-fuega-text-muted" />
@@ -319,11 +321,11 @@ export default function Dashboard() {
               onChange={e => setFeedFilter(e.target.value)}
               className="bg-fuega-input border border-fuega-border rounded px-1.5 py-0.5 text-[10px] text-fuega-text-secondary focus:outline-none focus:border-fuega-orange/50"
             >
-              <option value="all">All events</option>
-              <option value="agent_action">Agent Actions</option>
-              <option value="workflow_complete">Workflows</option>
-              <option value="approval_request">Approvals</option>
-              <option value="error">Errors</option>
+              <option value="all">{t('dashboard:filters.allEvents')}</option>
+              <option value="agent_action">{t('dashboard:filters.agentActions')}</option>
+              <option value="workflow_complete">{t('dashboard:filters.workflows')}</option>
+              <option value="approval_request">{t('dashboard:filters.approvals')}</option>
+              <option value="error">{t('dashboard:filters.errors')}</option>
               {feedAgents.map(agent => (
                 <option key={agent} value={agent}>{agent.replace(/_/g, ' ')}</option>
               ))}
@@ -333,7 +335,7 @@ export default function Dashboard() {
       >
         <div className="space-y-0.5 max-h-64 overflow-y-auto">
           {filteredFeed.length === 0 && (
-            <EmptyState title="No real-time events yet" description="Events from agents and workflows will stream here via WebSocket." />
+            <EmptyState title={t('dashboard:noRealTimeEvents')} description={t('dashboard:realTimeDescription')} />
           )}
           {filteredFeed.map((item) => {
             const style = FEED_COLORS[item.type] || FEED_COLORS.activity;

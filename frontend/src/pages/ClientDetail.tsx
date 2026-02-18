@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { MapPin, Globe, Mail, DollarSign, CheckCircle2, Clock, Circle } from 'lucide-react';
 import { api } from '../lib/api';
 import { useToast } from '../lib/ToastContext';
@@ -15,6 +16,7 @@ const timelineIcon = (status: string) => {
 };
 
 export default function ClientDetail() {
+  const { t } = useTranslation(['clientDetail', 'clients', 'common']);
   const { id } = useParams<{ id: string }>();
   const [client, setClient] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -24,7 +26,7 @@ export default function ClientDetail() {
     if (!id) return;
     api.clients.get(Number(id))
       .then(setClient)
-      .catch(() => toast.error('Failed to load client details.'))
+      .catch(() => toast.error(t('common:errors.failedToLoad', { resource: t('clientDetail:title').toLowerCase() })))
       .finally(() => setLoading(false));
   }, [id]);
 
@@ -40,13 +42,13 @@ export default function ClientDetail() {
     return (
       <div className="animate-fadeIn">
         <PageHeader
-          title="Client"
+          title={t('clientDetail:title')}
           breadcrumbs={[
-            { label: 'Clients', href: '/clients' },
-            { label: 'Not found' },
+            { label: t('clients:title'), href: '/clients' },
+            { label: t('clientDetail:notFound') },
           ]}
         />
-        <EmptyState title="Client not found" description="This client doesn't exist or the backend is unavailable." />
+        <EmptyState title={t('clientDetail:notFound')} description={t('clientDetail:notFoundDesc')} />
       </div>
     );
   }
@@ -57,10 +59,10 @@ export default function ClientDetail() {
   return (
     <div className="animate-fadeIn">
       <PageHeader
-        title={client.business_name || client.name || 'Unnamed Client'}
+        title={client.business_name || client.name || t('clientDetail:title')}
         subtitle={client.name}
         breadcrumbs={[
-          { label: 'Clients', href: '/clients' },
+          { label: t('clients:title'), href: '/clients' },
           { label: client.name },
         ]}
         status={<Badge variant={client.status} />}
@@ -77,9 +79,9 @@ export default function ClientDetail() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
         {/* Deliverables as activity timeline */}
-        <ChartCard title="Deliverables" subtitle={`${deliverables.length} items`}>
+        <ChartCard title={t('clientDetail:deliverables.title')} subtitle={t('clientDetail:deliverables.items', { count: deliverables.length })}>
           {deliverables.length === 0 ? (
-            <EmptyState title="No deliverables" />
+            <EmptyState title={t('clientDetail:deliverables.none')} />
           ) : (
             <div className="relative pl-6">
               {/* Timeline line */}
@@ -93,7 +95,7 @@ export default function ClientDetail() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm text-fuega-text-primary truncate">{d.title}</p>
-                      <p className="text-[10px] text-fuega-text-muted">{d.service_type} {d.due_date ? `\u00b7 Due ${d.due_date}` : ''}</p>
+                      <p className="text-[10px] text-fuega-text-muted">{d.service_type} {d.due_date ? `\u00b7 ${t('clientDetail:deliverables.due', { date: d.due_date })}` : ''}</p>
                     </div>
                     <Badge variant={d.status} />
                   </div>
@@ -104,9 +106,9 @@ export default function ClientDetail() {
         </ChartCard>
 
         {/* Invoices */}
-        <ChartCard title="Invoices" subtitle={`${invoices.length} records`}>
+        <ChartCard title={t('clientDetail:invoices.title')} subtitle={t('clientDetail:invoices.records', { count: invoices.length })}>
           {invoices.length === 0 ? (
-            <EmptyState title="No invoices" />
+            <EmptyState title={t('clientDetail:invoices.none')} />
           ) : (
             <div className="space-y-1">
               {invoices.map((inv: any) => (
@@ -114,7 +116,7 @@ export default function ClientDetail() {
                   <DollarSign className="w-4 h-4 text-fuega-text-muted flex-shrink-0" />
                   <div className="flex-1">
                     <p className="num text-sm text-fuega-text-primary">${inv.amount_usd}</p>
-                    <p className="text-[10px] text-fuega-text-muted">Period: {inv.period_start}</p>
+                    <p className="text-[10px] text-fuega-text-muted">{t('clientDetail:invoices.period')}: {inv.period_start}</p>
                   </div>
                   <Badge variant={inv.status === 'paid' ? 'completed' : 'pending'} label={inv.status} />
                 </div>

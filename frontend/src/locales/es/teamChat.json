@@ -1,0 +1,33 @@
+{
+  "title": "Chat de Equipo",
+  "subtitle": "Discusión grupal multi-agente",
+  "selectAgents": "Seleccionar Agentes para la Reunión",
+  "selectAll": "Seleccionar Todo",
+  "clear": "Limpiar",
+  "divisions": {
+    "content": "Contenido",
+    "growth": "Crecimiento",
+    "finance": "Finanzas",
+    "outreach": "Alcance",
+    "operations": "Operaciones"
+  },
+  "agentsSelected": "{{count}} agente seleccionado",
+  "agentsSelectedPlural": "{{count}} agentes seleccionados",
+  "presets": {
+    "statusReport": "Reporte de estado",
+    "weeklySummary": "Resumen semanal",
+    "budgetCheck": "Revisión de presupuesto"
+  },
+  "messagePlaceholder": "Escribe tu mensaje al equipo...",
+  "ctrlEnterToSend": "Ctrl+Enter para enviar",
+  "sendToTeam": "Enviar al Equipo",
+  "agentsThinking": "Agentes pensando...",
+  "responses": "Respuestas",
+  "totalCost": "Costo total",
+  "you": "Tú",
+  "toAgents": "a {{count}} agente",
+  "toAgentsPlural": "a {{count}} agentes",
+  "responded": "respondió",
+  "skipped": "omitido",
+  "message": "mensaje"
+}

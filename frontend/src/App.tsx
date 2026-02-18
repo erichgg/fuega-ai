@@ -1,3 +1,4 @@
+import './lib/i18n';
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { ThemeProvider } from './lib/ThemeContext';
 import { ToastProvider } from './lib/ToastContext';

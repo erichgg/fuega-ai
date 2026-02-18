@@ -1,0 +1,44 @@
+{
+  "title": "Lead",
+  "notFound": "Lead não encontrado",
+  "notFoundDesc": "Este lead não existe ou o backend está indisponível.",
+  "labels": {
+    "score": "Pontuação",
+    "source": "Fonte"
+  },
+  "agentActions": {
+    "deepResearch": "Pesquisa Aprofundada",
+    "scoreLead": "Pontuar Lead",
+    "draftOutreach": "Redigir Contato",
+    "convertToClient": "Converter em Cliente"
+  },
+  "digitalPresence": {
+    "title": "Presença Digital",
+    "subtitle": "Dados de exploração",
+    "googleRating": "Avaliação no Google",
+    "reviews": "Avaliações",
+    "website": "Site",
+    "socialMedia": "Redes Sociais",
+    "digitalGapScore": "Pontuação de Lacuna Digital",
+    "recommendedTier": "Plano recomendado"
+  },
+  "outreach": {
+    "title": "Contato",
+    "channel": "Canal",
+    "placeholder": "Rascunho da mensagem de contato... Use a ação 'Redigir Contato' para gerar automaticamente.",
+    "saveOutreach": "Salvar Contato",
+    "sendEmail": "Enviar E-mail"
+  },
+  "research": {
+    "title": "Pesquisa do Agente",
+    "subtitle": "Relatório detalhado",
+    "noResearch": "Sem pesquisa ainda",
+    "noResearchDesc": "Clique em \"Pesquisa Aprofundada\" para gerar um relatório."
+  },
+  "notes": {
+    "title": "Notas",
+    "subtitle": "Notas internas",
+    "placeholder": "Adicionar notas sobre este lead...",
+    "saveNotes": "Salvar Notas"
+  }
+}

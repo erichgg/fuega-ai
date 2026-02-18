@@ -1,0 +1,26 @@
+{
+  "title": "Aprovações",
+  "subtitle": "{{count}} pendentes",
+  "approveAll": "Aprovar Tudo ({{count}})",
+  "approve": "Aprovar",
+  "reject": "Rejeitar",
+  "approved": "Aprovado",
+  "rejected": "Rejeitado",
+  "togglePayload": "Mostrar/ocultar payload",
+  "editPayload": "Editar payload antes de aprovar:",
+  "approveWithChanges": "Aprovar com Alterações",
+  "rejectReason": "Motivo da rejeição:",
+  "rejectPlaceholder": "Por que isso está sendo rejeitado?",
+  "confirmReject": "Confirmar Rejeição",
+  "empty": {
+    "noRequests": "Sem solicitações de aprovação",
+    "noRequestsDesc": "Quando os agentes precisarem de aprovação humana para ações, elas aparecerão aqui."
+  },
+  "errors": {
+    "provideReason": "Por favor, forneça um motivo",
+    "invalidJson": "Payload JSON inválido",
+    "bulkApproveFailed": "Falha na aprovacao em massa"
+  },
+  "bulkApprovedSuccess": "{{count}} itens aprovados",
+  "approval": "aprovacao"
+}

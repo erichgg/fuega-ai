@@ -1,7 +1,7 @@
 import { activityBus } from './activityBus';
 import { getAccessToken } from './auth';
 
-const API_BASE = '/api';
+const API_BASE = import.meta.env.VITE_API_URL || '/api';
 
 /** Human-readable labels for API paths so the console shows meaningful names. */
 const PATH_LABELS: Record<string, string> = {

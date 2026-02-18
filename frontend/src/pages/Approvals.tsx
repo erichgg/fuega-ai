@@ -1,5 +1,6 @@
 // @refresh reset
 import { useEffect, useState, useCallback, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   CheckCircle, XCircle, Clock, Bot, Mail, Twitter,
   Search, Globe, ChevronDown, ChevronRight, CheckCheck, Edit3,
@@ -19,15 +20,15 @@ const ACTION_ICONS: Record<string, React.ReactNode> = {
   web_search: <Globe className="w-4 h-4" />,
 };
 
-function timeAgo(dateStr: string): string {
+function timeAgo(dateStr: string, t: (key: string, opts?: Record<string, unknown>) => string): string {
   const diff = Date.now() - new Date(dateStr).getTime();
   const mins = Math.floor(diff / 60000);
-  if (mins < 1) return 'just now';
-  if (mins < 60) return `${mins} min ago`;
+  if (mins < 1) return t('common:time.justNow');
+  if (mins < 60) return t('common:time.minAgo', { count: mins });
   const hrs = Math.floor(mins / 60);
-  if (hrs < 24) return `${hrs}h ago`;
+  if (hrs < 24) return t('common:time.hAgo', { count: hrs });
   const days = Math.floor(hrs / 24);
-  return `${days}d ago`;
+  return t('common:time.dAgo', { count: days });
 }
 
 interface Approval {
@@ -56,6 +57,7 @@ export default function Approvals() {
   const [processingIds, setProcessingIds] = useState<Set<number>>(new Set());
   const toast = useToast();
   const { events } = useWebSocket();
+  const { t } = useTranslation(['approvals', 'common']);
 
   const pendingApprovals = useMemo(
     () => approvals.filter(a => a.status === 'pending'),
@@ -98,16 +100,16 @@ export default function Approvals() {
       await api.approvals.approve(id, modifiedPayload);
       setApprovals(prev => prev.map(a => a.id === id ? { ...a, status: 'approved' } : a));
       setEditingId(null);
-      toast.success('Approved');
+      toast.success(t('approvals:approved'));
     } catch {
-      toast.error('Failed to approve');
+      toast.error(t('common:errors.failedAction', { action: t('approvals:approve') }));
     }
     setProcessingIds(prev => { const next = new Set(prev); next.delete(id); return next; });
   };
 
   const handleReject = async (id: number) => {
     if (!rejectReason.trim()) {
-      toast.error('Please provide a reason');
+      toast.error(t('approvals:errors.provideReason'));
       return;
     }
     setProcessingIds(prev => new Set(prev).add(id));
@@ -116,9 +118,9 @@ export default function Approvals() {
       setApprovals(prev => prev.map(a => a.id === id ? { ...a, status: 'rejected' } : a));
       setRejectingId(null);
       setRejectReason('');
-      toast.success('Rejected');
+      toast.success(t('approvals:rejected'));
     } catch {
-      toast.error('Failed to reject');
+      toast.error(t('common:errors.failedAction', { action: t('approvals:reject') }));
     }
     setProcessingIds(prev => { const next = new Set(prev); next.delete(id); return next; });
   };
@@ -130,9 +132,9 @@ export default function Approvals() {
     try {
       await api.approvals.bulkApprove(ids);
       setApprovals(prev => prev.map(a => ids.includes(a.id) ? { ...a, status: 'approved' } : a));
-      toast.success(`Approved ${ids.length} items`);
+      toast.success(t('approvals:bulkApprovedSuccess', { count: ids.length }));
     } catch {
-      toast.error('Bulk approve failed');
+      toast.error(t('approvals:errors.bulkApproveFailed'));
     }
     setProcessingIds(new Set());
   };
@@ -148,8 +150,8 @@ export default function Approvals() {
   return (
     <div className="animate-fadeIn">
       <PageHeader
-        title="Approvals"
-        subtitle={`${pendingApprovals.length} pending`}
+        title={t('approvals:title')}
+        subtitle={t('approvals:subtitle', { count: pendingApprovals.length })}
         action={
           pendingApprovals.length > 1 ? (
             <button
@@ -157,7 +159,7 @@ export default function Approvals() {
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-green-500/20 text-green-400 text-[12px] font-medium hover:bg-green-500/30 transition-colors"
             >
               <CheckCheck className="w-3.5 h-3.5" />
-              Approve All ({pendingApprovals.length})
+              {t('approvals:approveAll', { count: pendingApprovals.length })}
             </button>
           ) : undefined
         }
@@ -165,8 +167,8 @@ export default function Approvals() {
 
       {approvals.length === 0 ? (
         <EmptyState
-          title="No approval requests"
-          description="When agents need human approval for actions, they will appear here."
+          title={t('approvals:empty.noRequests')}
+          description={t('approvals:empty.noRequestsDesc')}
         />
       ) : (
         <div className="space-y-2">
@@ -197,7 +199,7 @@ export default function Approvals() {
                     </div>
                     <div className="flex items-center gap-2 mt-0.5">
                       <Clock className="w-3 h-3 text-fuega-text-muted" />
-                      <span className="text-[10px] text-fuega-text-muted">{timeAgo(approval.created_at)}</span>
+                      <span className="text-[10px] text-fuega-text-muted">{timeAgo(approval.created_at, t)}</span>
                       {!isPending && <Badge variant={approval.status === 'approved' ? 'completed' : 'failed'} />}
                     </div>
                   </div>
@@ -206,7 +208,7 @@ export default function Approvals() {
                   <button
                     onClick={() => setExpandedId(isExpanded ? null : approval.id)}
                     className="p-1 text-fuega-text-muted hover:text-fuega-text-primary transition-colors"
-                    title="Toggle payload"
+                    title={t('approvals:togglePayload')}
                   >
                     {isExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
                   </button>
@@ -221,7 +223,7 @@ export default function Approvals() {
                         }}
                         disabled={isProcessing}
                         className="flex items-center gap-1 px-2 py-1 rounded text-[11px] font-medium bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 transition-colors disabled:opacity-50"
-                        title="Edit payload before approving"
+                        title={t('approvals:editPayload')}
                       >
                         <Edit3 className="w-3 h-3" />
                       </button>
@@ -231,7 +233,7 @@ export default function Approvals() {
                         className="flex items-center gap-1 px-2.5 py-1 rounded text-[11px] font-medium bg-green-500/15 text-green-400 hover:bg-green-500/25 transition-colors disabled:opacity-50"
                       >
                         {isProcessing ? <Spinner size="sm" /> : <CheckCircle className="w-3.5 h-3.5" />}
-                        Approve
+                        {t('approvals:approve')}
                       </button>
                       <button
                         onClick={() => setRejectingId(isRejecting ? null : approval.id)}
@@ -239,7 +241,7 @@ export default function Approvals() {
                         className="flex items-center gap-1 px-2.5 py-1 rounded text-[11px] font-medium bg-red-500/15 text-red-400 hover:bg-red-500/25 transition-colors disabled:opacity-50"
                       >
                         <XCircle className="w-3.5 h-3.5" />
-                        Reject
+                        {t('approvals:reject')}
                       </button>
                     </div>
                   )}
@@ -257,7 +259,7 @@ export default function Approvals() {
                 {/* Payload editor */}
                 {isEditing && isPending && (
                   <div className="px-3 pb-2.5 border-t border-fuega-border/50 animate-slideDown">
-                    <p className="text-[10px] text-fuega-text-muted mt-2 mb-1">Edit payload before approving:</p>
+                    <p className="text-[10px] text-fuega-text-muted mt-2 mb-1">{t('approvals:editPayload')}</p>
                     <textarea
                       value={editPayload}
                       onChange={e => setEditPayload(e.target.value)}
@@ -269,7 +271,7 @@ export default function Approvals() {
                         onClick={() => setEditingId(null)}
                         className="px-2.5 py-1 rounded text-[11px] text-fuega-text-muted hover:text-fuega-text-primary transition-colors"
                       >
-                        Cancel
+                        {t('common:actions.cancel')}
                       </button>
                       <button
                         onClick={() => {
@@ -277,12 +279,12 @@ export default function Approvals() {
                             const parsed = JSON.parse(editPayload);
                             handleApprove(approval.id, parsed);
                           } catch {
-                            toast.error('Invalid JSON payload');
+                            toast.error(t('approvals:errors.invalidJson'));
                           }
                         }}
                         className="px-2.5 py-1 rounded text-[11px] font-medium bg-green-500/15 text-green-400 hover:bg-green-500/25 transition-colors"
                       >
-                        Approve with Changes
+                        {t('approvals:approveWithChanges')}
                       </button>
                     </div>
                   </div>
@@ -291,14 +293,14 @@ export default function Approvals() {
                 {/* Reject reason input */}
                 {isRejecting && isPending && (
                   <div className="px-3 pb-2.5 border-t border-fuega-border/50 animate-slideDown">
-                    <p className="text-[10px] text-fuega-text-muted mt-2 mb-1">Rejection reason:</p>
+                    <p className="text-[10px] text-fuega-text-muted mt-2 mb-1">{t('approvals:rejectReason')}</p>
                     <div className="flex gap-2">
                       <input
                         type="text"
                         value={rejectReason}
                         onChange={e => setRejectReason(e.target.value)}
                         onKeyDown={e => e.key === 'Enter' && handleReject(approval.id)}
-                        placeholder="Why is this being rejected?"
+                        placeholder={t('approvals:rejectPlaceholder')}
                         className="flex-1 bg-fuega-input border border-fuega-border rounded-lg px-3 py-1.5 text-[12px] text-fuega-text-primary placeholder-fuega-text-muted focus:outline-none focus:border-red-500/50"
                         autoFocus
                       />
@@ -306,7 +308,7 @@ export default function Approvals() {
                         onClick={() => handleReject(approval.id)}
                         className="px-2.5 py-1.5 rounded-lg text-[11px] font-medium bg-red-500/15 text-red-400 hover:bg-red-500/25 transition-colors"
                       >
-                        Confirm Reject
+                        {t('approvals:confirmReject')}
                       </button>
                     </div>
                   </div>

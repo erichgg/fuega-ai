@@ -1,0 +1,95 @@
+{
+  "actions": {
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "search": "Buscar",
+    "close": "Cerrar",
+    "clear": "Limpiar",
+    "add": "Agregar",
+    "run": "Ejecutar",
+    "approve": "Aprobar",
+    "reject": "Rechazar",
+    "export": "Exportar",
+    "import": "Importar",
+    "create": "Crear",
+    "update": "Actualizar",
+    "send": "Enviar",
+    "back": "Volver",
+    "viewResult": "Ver resultado",
+    "dismiss": "descartar",
+    "launch": "Lanzar"
+  },
+  "status": {
+    "active": "Activo",
+    "paused": "Pausado",
+    "running": "Ejecutando",
+    "completed": "Completado",
+    "failed": "Fallido",
+    "pending": "Pendiente",
+    "error": "Error",
+    "live": "En vivo",
+    "offline": "Desconectado",
+    "loading": "Cargando...",
+    "saving": "Guardando...",
+    "saved": "Guardado",
+    "creating": "Creando..."
+  },
+  "time": {
+    "justNow": "justo ahora",
+    "minAgo": "hace {{count}} min",
+    "hAgo": "hace {{count}}h",
+    "dAgo": "hace {{count}}d"
+  },
+  "empty": {
+    "title": "Sin datos aun",
+    "description": "Los datos apareceran aqui una vez que el sistema comience a generarlos.",
+    "noResults": "No se encontraron resultados"
+  },
+  "pagination": {
+    "result": "{{count}} resultado",
+    "results": "{{count}} resultados"
+  },
+  "labels": {
+    "yes": "Si",
+    "no": "No",
+    "none": "Ninguno",
+    "total": "Total",
+    "session": "Sesion",
+    "cost": "Costo",
+    "budget": "Presupuesto",
+    "revenue": "Ingresos",
+    "profit": "Ganancia",
+    "spend": "Gasto",
+    "calls": "Llamadas",
+    "usage": "Uso"
+  },
+  "errors": {
+    "backendCheck": "Verifica que el backend este ejecutandose.",
+    "failedToLoad": "Error al cargar {{resource}}.",
+    "failedToUpdate": "Error al actualizar {{resource}}.",
+    "failedToCreate": "Error al crear {{resource}}.",
+    "failedToSend": "Error al enviar {{resource}}.",
+    "failedAction": "{{action}} fallo.",
+    "nameRequired": "El nombre es obligatorio.",
+    "actionFailed": "La accion fallo"
+  },
+  "breadcrumbs": {
+    "dashboard": "Panel",
+    "agents": "Agentes"
+  },
+  "alt": {
+    "stockPhoto": "Foto de stock",
+    "aiGenerated": "Generada por IA"
+  },
+  "changeLanguage": "Cambiar idioma",
+  "clickToEdit": "Clic para editar",
+  "margin": "margen",
+  "noCallsYet": "Sin llamadas aun",
+  "callsTotal": "{{count}} llamadas en total",
+  "budgetOf": "{{pct}}% de ${{budget}} presupuesto",
+  "retries": "{{count}} reintentos",
+  "stepsCompleted": "{{count}} pasos completados",
+  "runsOf": "{{filtered}} de {{total}} ejecuciones"
+}

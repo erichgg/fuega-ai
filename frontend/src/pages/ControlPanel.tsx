@@ -1,6 +1,7 @@
 // @refresh reset
 import { useEffect, useState, useMemo, useRef } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import {
   Play, Zap, Bot, Send, MessageSquare,
   PenTool, Search, Megaphone, Mail, BarChart3,
@@ -20,6 +21,7 @@ import { useWebSocket } from '../lib/useWebSocket';
 
 interface AgentAction {
   label: string;
+  labelKey: string;
   agent: string;
   action: string;
   icon: React.ReactNode;
@@ -27,80 +29,87 @@ interface AgentAction {
   cost?: string;
 }
 
-const ACTION_CATEGORIES: { label: string; icon: React.ReactNode; color: string; actions: AgentAction[] }[] = [
+const ACTION_CATEGORIES: { label: string; categoryKey: string; icon: React.ReactNode; color: string; actions: AgentAction[] }[] = [
   {
     label: 'Content Operations',
+    categoryKey: 'contentOperations',
     icon: <PenTool className="w-3.5 h-3.5" />,
     color: '#FF6B2C',
     actions: [
-      { label: 'Research Keywords', agent: 'seo_analyst', action: 'research_keywords', icon: <Search className="w-3 h-3" />, description: 'Find keyword opportunities for clients', cost: '~$0.002' },
-      { label: 'Write Content', agent: 'content_writer', action: 'write_content', icon: <PenTool className="w-3 h-3" />, description: 'Generate a content piece from approved topic', cost: '~$0.003' },
-      { label: 'Review Content', agent: 'editor', action: 'review_and_score', icon: <FileText className="w-3 h-3" />, description: 'QA review and scoring (1-10)', cost: '~$0.008' },
-      { label: 'Schedule Posts', agent: 'social_media_manager', action: 'format_and_publish', icon: <Send className="w-3 h-3" />, description: 'Format and schedule approved content', cost: '~$0.001' },
-      { label: 'Post to Twitter', agent: 'twitter_integration', action: 'post_tweet', icon: <Share2 className="w-3 h-3" />, description: 'Publish a post to Twitter/X via API', cost: 'free' },
+      { label: 'Research Keywords', labelKey: 'researchKeywords', agent: 'seo_analyst', action: 'research_keywords', icon: <Search className="w-3 h-3" />, description: 'Find keyword opportunities for clients', cost: '~$0.002' },
+      { label: 'Write Content', labelKey: 'writeContent', agent: 'content_writer', action: 'write_content', icon: <PenTool className="w-3 h-3" />, description: 'Generate a content piece from approved topic', cost: '~$0.003' },
+      { label: 'Review Content', labelKey: 'reviewContent', agent: 'editor', action: 'review_and_score', icon: <FileText className="w-3 h-3" />, description: 'QA review and scoring (1-10)', cost: '~$0.008' },
+      { label: 'Schedule Posts', labelKey: 'schedulePosts', agent: 'social_media_manager', action: 'format_and_publish', icon: <Send className="w-3 h-3" />, description: 'Format and schedule approved content', cost: '~$0.001' },
+      { label: 'Post to Twitter', labelKey: 'postToTwitter', agent: 'twitter_integration', action: 'post_tweet', icon: <Share2 className="w-3 h-3" />, description: 'Publish a post to Twitter/X via API', cost: 'free' },
     ],
   },
   {
     label: 'SEO & Analytics',
+    categoryKey: 'seoAnalytics',
     icon: <Search className="w-3.5 h-3.5" />,
     color: '#6366F1',
     actions: [
-      { label: 'Site Audit', agent: 'seo_analyst', action: 'audit_client_site', icon: <Globe className="w-3 h-3" />, description: 'Technical SEO audit for a client site', cost: '~$0.003' },
-      { label: 'Find Opportunities', agent: 'seo_analyst', action: 'find_opportunities', icon: <Target className="w-3 h-3" />, description: 'Keyword gap and opportunity analysis', cost: '~$0.002' },
-      { label: 'Collect Metrics', agent: 'analytics_agent', action: 'collect_all_metrics', icon: <BarChart3 className="w-3 h-3" />, description: 'Pull all platform metrics', cost: '~$0.002' },
-      { label: 'Generate Report', agent: 'analytics_agent', action: 'generate_report', icon: <ClipboardList className="w-3 h-3" />, description: 'Build performance report', cost: '~$0.003' },
+      { label: 'Site Audit', labelKey: 'siteAudit', agent: 'seo_analyst', action: 'audit_client_site', icon: <Globe className="w-3 h-3" />, description: 'Technical SEO audit for a client site', cost: '~$0.003' },
+      { label: 'Find Opportunities', labelKey: 'findOpportunities', agent: 'seo_analyst', action: 'find_opportunities', icon: <Target className="w-3 h-3" />, description: 'Keyword gap and opportunity analysis', cost: '~$0.002' },
+      { label: 'Collect Metrics', labelKey: 'collectMetrics', agent: 'analytics_agent', action: 'collect_all_metrics', icon: <BarChart3 className="w-3 h-3" />, description: 'Pull all platform metrics', cost: '~$0.002' },
+      { label: 'Generate Report', labelKey: 'generateReport', agent: 'analytics_agent', action: 'generate_report', icon: <ClipboardList className="w-3 h-3" />, description: 'Build performance report', cost: '~$0.003' },
     ],
   },
   {
     label: 'Sales & Outreach',
+    categoryKey: 'salesOutreach',
     icon: <Phone className="w-3.5 h-3.5" />,
     color: '#00D4AA',
     actions: [
-      { label: 'Find New Prospects', agent: 'local_outreach', action: 'scout_local_businesses', icon: <Globe className="w-3 h-3" />, description: 'Scout local mom & pop shops, restaurants, salons — businesses needing digital help', cost: '~$0.003' },
-      { label: 'Deep-Dive Research', agent: 'smb_researcher', action: 'research_businesses', icon: <Search className="w-3 h-3" />, description: 'Analyze a prospect\'s online presence, competitors, and service gaps', cost: '~$0.003' },
-      { label: 'Score & Qualify Leads', agent: 'prospector', action: 'score_and_qualify', icon: <Target className="w-3 h-3" />, description: 'Rank all current leads by fit, budget potential, and urgency', cost: '~$0.002' },
-      { label: 'Draft Outreach Messages', agent: 'local_outreach', action: 'draft_outreach', icon: <Mail className="w-3 h-3" />, description: 'Write personalized ES/EN pitch emails for top-scored leads', cost: '~$0.002' },
+      { label: 'Find New Prospects', labelKey: 'findNewProspects', agent: 'local_outreach', action: 'scout_local_businesses', icon: <Globe className="w-3 h-3" />, description: 'Scout local mom & pop shops, restaurants, salons — businesses needing digital help', cost: '~$0.003' },
+      { label: 'Deep-Dive Research', labelKey: 'deepDiveResearch', agent: 'smb_researcher', action: 'research_businesses', icon: <Search className="w-3 h-3" />, description: 'Analyze a prospect\'s online presence, competitors, and service gaps', cost: '~$0.003' },
+      { label: 'Score & Qualify Leads', labelKey: 'scoreQualifyLeads', agent: 'prospector', action: 'score_and_qualify', icon: <Target className="w-3 h-3" />, description: 'Rank all current leads by fit, budget potential, and urgency', cost: '~$0.002' },
+      { label: 'Draft Outreach Messages', labelKey: 'draftOutreachMessages', agent: 'local_outreach', action: 'draft_outreach', icon: <Mail className="w-3 h-3" />, description: 'Write personalized ES/EN pitch emails for top-scored leads', cost: '~$0.002' },
     ],
   },
   {
     label: 'Advertising',
+    categoryKey: 'advertising',
     icon: <Megaphone className="w-3.5 h-3.5" />,
     color: '#FF6B8A',
     actions: [
-      { label: 'Research Audience', agent: 'ads_manager', action: 'research_and_plan', icon: <Users className="w-3 h-3" />, description: 'Audience research and targeting plan', cost: '~$0.002' },
-      { label: 'Create Ad Copy', agent: 'ads_manager', action: 'create_ad_copy', icon: <PenTool className="w-3 h-3" />, description: 'Generate ad variations', cost: '~$0.003' },
-      { label: 'Track Ad Metrics', agent: 'analytics_agent', action: 'track_ad_metrics', icon: <TrendingUp className="w-3 h-3" />, description: 'Campaign performance tracking', cost: '~$0.002' },
+      { label: 'Research Audience', labelKey: 'researchAudience', agent: 'ads_manager', action: 'research_and_plan', icon: <Users className="w-3 h-3" />, description: 'Audience research and targeting plan', cost: '~$0.002' },
+      { label: 'Create Ad Copy', labelKey: 'createAdCopy', agent: 'ads_manager', action: 'create_ad_copy', icon: <PenTool className="w-3 h-3" />, description: 'Generate ad variations', cost: '~$0.003' },
+      { label: 'Track Ad Metrics', labelKey: 'trackAdMetrics', agent: 'analytics_agent', action: 'track_ad_metrics', icon: <TrendingUp className="w-3 h-3" />, description: 'Campaign performance tracking', cost: '~$0.002' },
     ],
   },
   {
     label: 'Email & Campaigns',
+    categoryKey: 'emailCampaigns',
     icon: <Mail className="w-3.5 h-3.5" />,
     color: '#A855F7',
     actions: [
-      { label: 'Design Campaign', agent: 'email_marketing_agent', action: 'design_campaign', icon: <Mail className="w-3 h-3" />, description: 'Build email campaign from scratch', cost: '~$0.002' },
-      { label: 'Review Email', agent: 'editor', action: 'review_email', icon: <FileText className="w-3 h-3" />, description: 'QA review on email content', cost: '~$0.005' },
-      { label: 'Track Email Metrics', agent: 'analytics_agent', action: 'track_email_metrics', icon: <BarChart3 className="w-3 h-3" />, description: 'Open/click/unsubscribe tracking', cost: '~$0.002' },
+      { label: 'Design Campaign', labelKey: 'designCampaign', agent: 'email_marketing_agent', action: 'design_campaign', icon: <Mail className="w-3 h-3" />, description: 'Build email campaign from scratch', cost: '~$0.002' },
+      { label: 'Review Email', labelKey: 'reviewEmail', agent: 'editor', action: 'review_email', icon: <FileText className="w-3 h-3" />, description: 'QA review on email content', cost: '~$0.005' },
+      { label: 'Track Email Metrics', labelKey: 'trackEmailMetrics', agent: 'analytics_agent', action: 'track_email_metrics', icon: <BarChart3 className="w-3 h-3" />, description: 'Open/click/unsubscribe tracking', cost: '~$0.002' },
     ],
   },
   {
     label: 'Finance & Compliance',
+    categoryKey: 'financeCompliance',
     icon: <DollarSign className="w-3.5 h-3.5" />,
     color: '#EAB308',
     actions: [
-      { label: 'Budget Status', agent: 'cfo_agent', action: 'budget_report', icon: <DollarSign className="w-3 h-3" />, description: 'Current budget usage and forecast', cost: '~$0.002' },
-      { label: 'Client Profitability', agent: 'cfo_agent', action: 'client_profitability', icon: <TrendingUp className="w-3 h-3" />, description: 'Revenue vs cost per client', cost: '~$0.002' },
-      { label: 'Compliance Check', agent: 'legal_bot', action: 'compliance_review', icon: <Shield className="w-3 h-3" />, description: 'Review content for legal compliance', cost: '~$0.002' },
-      { label: 'Delivery Status', agent: 'fulfillment_agent', action: 'delivery_status', icon: <Briefcase className="w-3 h-3" />, description: 'Check all deliverable deadlines', cost: '~$0.002' },
+      { label: 'Budget Status', labelKey: 'budgetStatus', agent: 'cfo_agent', action: 'budget_report', icon: <DollarSign className="w-3 h-3" />, description: 'Current budget usage and forecast', cost: '~$0.002' },
+      { label: 'Client Profitability', labelKey: 'clientProfitability', agent: 'cfo_agent', action: 'client_profitability', icon: <TrendingUp className="w-3 h-3" />, description: 'Revenue vs cost per client', cost: '~$0.002' },
+      { label: 'Compliance Check', labelKey: 'complianceCheck', agent: 'legal_bot', action: 'compliance_review', icon: <Shield className="w-3 h-3" />, description: 'Review content for legal compliance', cost: '~$0.002' },
+      { label: 'Delivery Status', labelKey: 'deliveryStatus', agent: 'fulfillment_agent', action: 'delivery_status', icon: <Briefcase className="w-3 h-3" />, description: 'Check all deliverable deadlines', cost: '~$0.002' },
     ],
   },
   {
     label: 'Strategic',
+    categoryKey: 'strategic',
     icon: <Briefcase className="w-3.5 h-3.5" />,
     color: '#FF9F43',
     actions: [
-      { label: 'CEO Assessment', agent: 'ceo', action: 'strategic_assessment', icon: <Briefcase className="w-3 h-3" />, description: 'Portfolio health and strategic priorities', cost: '~$0.010' },
-      { label: 'Score Ideas', agent: 'ceo', action: 'score_and_approve', icon: <Target className="w-3 h-3" />, description: 'Score and prioritize content ideas', cost: '~$0.008' },
-      { label: 'Resource Allocation', agent: 'ceo', action: 'allocate_resources', icon: <Users className="w-3 h-3" />, description: 'Optimize team workload allocation', cost: '~$0.010' },
+      { label: 'CEO Assessment', labelKey: 'ceoAssessment', agent: 'ceo', action: 'strategic_assessment', icon: <Briefcase className="w-3 h-3" />, description: 'Portfolio health and strategic priorities', cost: '~$0.010' },
+      { label: 'Score Ideas', labelKey: 'scoreIdeas', agent: 'ceo', action: 'score_and_approve', icon: <Target className="w-3 h-3" />, description: 'Score and prioritize content ideas', cost: '~$0.008' },
+      { label: 'Resource Allocation', labelKey: 'resourceAllocation', agent: 'ceo', action: 'allocate_resources', icon: <Users className="w-3 h-3" />, description: 'Optimize team workload allocation', cost: '~$0.010' },
     ],
   },
 ];
@@ -120,6 +129,7 @@ interface ActionLog {
 let logIdCounter = 0;
 
 export default function ControlPanel() {
+  const { t } = useTranslation(['controlPanel', 'common']);
   const toast = useToast();
   const { events, connected } = useWebSocket();
   const [agents, setAgents] = useState<any[]>([]);
@@ -197,7 +207,7 @@ export default function ControlPanel() {
       updateLog(logId, { status: 'success' });
     } catch {
       updateLog(logId, { status: 'error' });
-      toast.error(`Failed to update ${agentName}`);
+      toast.error(t('controlPanel:errors.updateFailed', { agent: agentName }));
     }
   };
 
@@ -257,7 +267,7 @@ export default function ControlPanel() {
       }
     } catch (err) {
       updateLog(logId, { status: 'error', duration: Date.now() - startTime });
-      toast.error(`${action.label} FAILED — ${agentName} could not complete the action`);
+      toast.error(t('controlPanel:errors.actionFailed', { action: action.label, agent: agentName }));
     }
     setRunningAction(null);
   };
@@ -272,7 +282,7 @@ export default function ControlPanel() {
       updateLog(logId, { status: 'success', result: `Run #${result.run_id} started` });
     } catch {
       updateLog(logId, { status: 'error' });
-      toast.error(`Failed to trigger "${pipelineName}" — Is the backend running?`);
+      toast.error(t('controlPanel:errors.triggerFailed', { pipeline: pipelineName }));
     }
     setQuickRunning(null);
   };
@@ -301,7 +311,7 @@ export default function ControlPanel() {
       setPromptText('');
     } catch {
       updateLog(logId, { status: 'error', duration: Date.now() - startTime });
-      toast.error(`Failed to reach ${agentName} — Is the agent active and backend running?`);
+      toast.error(t('controlPanel:errors.promptFailed', { agent: agentName }));
     } finally {
       setPromptSending(false);
     }
@@ -316,10 +326,10 @@ export default function ControlPanel() {
   }
 
   const tabItems = [
-    { key: 'actions', label: 'Actions', icon: <Zap className="w-3.5 h-3.5" /> },
-    { key: 'fleet', label: 'Agent Fleet', icon: <Bot className="w-3.5 h-3.5" /> },
-    { key: 'pipelines', label: 'Pipelines', icon: <Play className="w-3.5 h-3.5" /> },
-    { key: 'prompt', label: 'Direct Prompt', icon: <MessageSquare className="w-3.5 h-3.5" /> },
+    { key: 'actions', label: t('controlPanel:tabs.actions'), icon: <Zap className="w-3.5 h-3.5" /> },
+    { key: 'fleet', label: t('controlPanel:tabs.fleet'), icon: <Bot className="w-3.5 h-3.5" /> },
+    { key: 'pipelines', label: t('controlPanel:tabs.pipelines'), icon: <Play className="w-3.5 h-3.5" /> },
+    { key: 'prompt', label: t('controlPanel:tabs.prompt'), icon: <MessageSquare className="w-3.5 h-3.5" /> },
   ];
 
   const totalSessionCost = actionResults.reduce((s, l) => s + (l.cost || 0), 0);
@@ -327,13 +337,13 @@ export default function ControlPanel() {
   return (
     <div className="animate-fadeIn">
       <PageHeader
-        title="Control Panel"
-        subtitle={`${activeAgents.length}/${agents.length} agents active — Fire commands, run operations, control the fleet`}
+        title={t('controlPanel:title')}
+        subtitle={t('controlPanel:subtitle', { active: activeAgents.length, total: agents.length })}
         tabs={<Tabs tabs={tabItems} active={tab} onChange={setTab} />}
         action={
           <div className="flex items-center gap-2 text-[10px]">
-            <StatusDot status={connected ? 'active' : 'error'} pulse={connected} label={connected ? 'Live' : 'Offline'} size="sm" />
-            {totalSessionCost > 0 && <span className="text-fuega-text-muted num">Session: ${totalSessionCost.toFixed(4)}</span>}
+            <StatusDot status={connected ? 'active' : 'error'} pulse={connected} label={connected ? t('common:status.live') : t('common:status.offline')} size="sm" />
+            {totalSessionCost > 0 && <span className="text-fuega-text-muted num">{t('common:labels.session')}: ${totalSessionCost.toFixed(4)}</span>}
           </div>
         }
       />
@@ -350,8 +360,8 @@ export default function ControlPanel() {
             <div key={cat.label} className="bg-fuega-card border border-fuega-border rounded-lg overflow-hidden">
               <div className="flex items-center gap-2 px-3 py-2 border-b border-fuega-border">
                 <span style={{ color: cat.color }}>{cat.icon}</span>
-                <h3 className="text-[11px] uppercase tracking-wider font-mono font-semibold text-fuega-text-primary">{cat.label}</h3>
-                <span className="text-[10px] text-fuega-text-muted">{cat.actions.length} actions</span>
+                <h3 className="text-[11px] uppercase tracking-wider font-mono font-semibold text-fuega-text-primary">{t(`controlPanel:categories.${cat.categoryKey}`)}</h3>
+                <span className="text-[10px] text-fuega-text-muted">{t('controlPanel:actions.actionsCount', { count: cat.actions.length })}</span>
               </div>
               <div className="p-2 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-1.5">
                 {cat.actions.map(action => {
@@ -372,11 +382,11 @@ export default function ControlPanel() {
                         )}
                       </div>
                       <div className="min-w-0 flex-1">
-                        <p className="text-[11px] font-semibold text-fuega-text-primary truncate">{action.label}</p>
-                        <p className="text-[9px] text-fuega-text-muted leading-tight">{action.description}</p>
+                        <p className="text-[11px] font-semibold text-fuega-text-primary truncate">{t(`controlPanel:actionLabels.${action.labelKey}`)}</p>
+                        <p className="text-[9px] text-fuega-text-muted leading-tight">{t(`controlPanel:actionDescriptions.${action.labelKey}`)}</p>
                         <div className="flex items-center gap-2 mt-1">
                           <span className="text-[9px] text-fuega-text-muted num">{action.cost}</span>
-                          <span className="text-[9px] text-fuega-text-muted">via {action.agent.replace(/_/g, ' ')}</span>
+                          <span className="text-[9px] text-fuega-text-muted">{t('controlPanel:actions.via', { agent: action.agent.replace(/_/g, ' ') })}</span>
                         </div>
                       </div>
                     </button>
@@ -399,23 +409,23 @@ export default function ControlPanel() {
               onClick={() => bulkToggle('active')}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-green-500/10 border border-green-500/20 text-green-400 text-[11px] font-medium hover:bg-green-500/20 transition-colors"
             >
-              <PlayCircle className="w-3.5 h-3.5" /> Activate All
+              <PlayCircle className="w-3.5 h-3.5" /> {t('controlPanel:fleet.activateAll')}
             </button>
             <button
               onClick={() => bulkToggle('paused')}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-yellow-500/10 border border-yellow-500/20 text-yellow-400 text-[11px] font-medium hover:bg-yellow-500/20 transition-colors"
             >
-              <PauseCircle className="w-3.5 h-3.5" /> Pause All
+              <PauseCircle className="w-3.5 h-3.5" /> {t('controlPanel:fleet.pauseAll')}
             </button>
             <Link
               to="/agents"
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-fuega-input border border-fuega-border text-fuega-text-secondary text-[11px] font-medium hover:text-fuega-text-primary transition-colors"
             >
-              <Bot className="w-3.5 h-3.5" /> Manage Agents
+              <Bot className="w-3.5 h-3.5" /> {t('controlPanel:fleet.manageAgents')}
             </Link>
             <div className="ml-auto flex items-center gap-2 text-[11px]">
-              <StatusDot status="active" label={`${activeAgents.length} active`} size="sm" />
-              <StatusDot status="paused" label={`${agents.length - activeAgents.length} paused`} size="sm" />
+              <StatusDot status="active" label={t('controlPanel:fleet.activeCount', { count: activeAgents.length })} size="sm" />
+              <StatusDot status="paused" label={t('controlPanel:fleet.pausedCount', { count: agents.length - activeAgents.length })} size="sm" />
             </div>
           </div>
 
@@ -466,8 +476,8 @@ export default function ControlPanel() {
           <div className="flex items-start gap-2 mb-3 bg-fuega-purple/5 border border-fuega-purple/20 rounded-lg p-2.5">
             <AlertTriangle className="w-3.5 h-3.5 text-fuega-purple flex-shrink-0 mt-0.5" />
             <p className="text-[11px] text-fuega-text-secondary">
-              Pipelines run multiple agents in sequence. Each pipeline triggers the full workflow end-to-end.
-              <Link to="/workflows" className="text-fuega-orange hover:underline ml-1">View detailed workflow management →</Link>
+              {t('controlPanel:pipelines.info')}
+              <Link to="/workflows" className="text-fuega-orange hover:underline ml-1">{t('controlPanel:pipelines.viewWorkflows')}</Link>
             </p>
           </div>
 
@@ -481,7 +491,7 @@ export default function ControlPanel() {
                 <p className="text-[10px] text-fuega-text-muted mb-2 leading-relaxed">{wf.description}</p>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2 text-[9px] text-fuega-text-muted">
-                    <span>{wf.steps?.length || 0} steps</span>
+                    <span>{t('controlPanel:pipelines.steps', { count: wf.steps?.length || 0 })}</span>
                     {wf.schedule && <span className="num">{wf.schedule}</span>}
                   </div>
                   <button
@@ -494,7 +504,7 @@ export default function ControlPanel() {
                     ) : (
                       <Play className="w-3 h-3" />
                     )}
-                    Run
+                    {t('controlPanel:pipelines.runAll')}
                   </button>
                 </div>
               </div>
@@ -506,7 +516,7 @@ export default function ControlPanel() {
       {/* === DIRECT PROMPT TAB === */}
       {tab === 'prompt' && (
         <div>
-          <p className="text-[11px] text-fuega-text-muted mb-3">Select an agent and send them a direct message. Use this for ad-hoc queries or custom instructions.</p>
+          <p className="text-[11px] text-fuega-text-muted mb-3">{t('controlPanel:prompt.description')}</p>
 
           {/* Agent selector grid */}
           <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-7 gap-1.5 mb-3">
@@ -542,7 +552,7 @@ export default function ControlPanel() {
                   onClick={() => { setPromptAgent(null); setPromptResponse(null); }}
                   className="text-[10px] text-fuega-text-muted hover:text-fuega-text-primary"
                 >
-                  Close
+                  {t('controlPanel:prompt.close')}
                 </button>
               </div>
               <div className="flex gap-2">
@@ -551,7 +561,7 @@ export default function ControlPanel() {
                   value={promptText}
                   onChange={e => setPromptText(e.target.value)}
                   onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSendPrompt(); } }}
-                  placeholder="Ask anything... (Enter to send)"
+                  placeholder={t('controlPanel:prompt.placeholder')}
                   rows={3}
                   className="flex-1 bg-fuega-input border border-fuega-border rounded-lg px-2.5 py-1.5 text-[12px] text-fuega-text-primary placeholder-fuega-text-muted resize-none focus:outline-none focus:border-fuega-orange/50"
                 />
@@ -568,13 +578,13 @@ export default function ControlPanel() {
                 </button>
               </div>
               <div className="flex gap-1 mt-1.5 flex-wrap">
-                {['Status report', 'What are you working on?', 'Budget check', 'Any blockers?', 'Weekly summary', 'Top priorities'].map(preset => (
+                {(['statusReport', 'workingOn', 'budgetCheck', 'anyBlockers', 'weeklySummary', 'topPriorities'] as const).map(presetKey => (
                   <button
-                    key={preset}
-                    onClick={() => setPromptText(preset)}
+                    key={presetKey}
+                    onClick={() => setPromptText(t(`controlPanel:prompt.presets.${presetKey}`))}
                     className="text-[9px] px-2 py-0.5 rounded bg-fuega-input border border-fuega-border text-fuega-text-muted hover:text-fuega-orange hover:border-fuega-orange/30 transition-colors"
                   >
-                    {preset}
+                    {t(`controlPanel:prompt.presets.${presetKey}`)}
                   </button>
                 ))}
               </div>
@@ -600,7 +610,7 @@ export default function ControlPanel() {
 
           {!promptAgent && (
             <div className="text-center py-8 text-fuega-text-muted text-[12px]">
-              Select an agent above to send them a direct message
+              {t('controlPanel:prompt.selectAgent')}
             </div>
           )}
         </div>
@@ -613,15 +623,15 @@ export default function ControlPanel() {
             <div className="flex items-center justify-between px-3 py-2 border-b border-fuega-border">
               <div className="flex items-center gap-2">
                 <Radio className="w-3.5 h-3.5 text-fuega-orange" />
-                <h3 className="text-[11px] uppercase tracking-wider font-mono font-semibold text-fuega-text-primary">Live Feed</h3>
+                <h3 className="text-[11px] uppercase tracking-wider font-mono font-semibold text-fuega-text-primary">{t('controlPanel:liveFeed.title')}</h3>
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-[9px] text-fuega-text-muted num">{actionResults.length} events</span>
+                <span className="text-[9px] text-fuega-text-muted num">{t('controlPanel:liveFeed.events', { count: actionResults.length })}</span>
                 {actionResults.length > 0 && (
                   <button
                     onClick={() => setActionResults([])}
                     className="text-fuega-text-muted hover:text-fuega-text-primary transition-colors"
-                    title="Clear feed"
+                    title={t('controlPanel:liveFeed.clearFeed')}
                   >
                     <Trash2 className="w-3 h-3" />
                   </button>
@@ -633,8 +643,8 @@ export default function ControlPanel() {
               {actionResults.length === 0 && (
                 <div className="text-center py-8 text-[10px] text-fuega-text-muted">
                   <Radio className="w-5 h-5 mx-auto mb-2 opacity-30" />
-                  <p>No activity yet</p>
-                  <p className="mt-1">Run an action to see progress here</p>
+                  <p>{t('controlPanel:liveFeed.noActivity')}</p>
+                  <p className="mt-1">{t('controlPanel:liveFeed.runAction')}</p>
                 </div>
               )}
               {actionResults.map(log => (
@@ -667,7 +677,7 @@ export default function ControlPanel() {
                   {log.result && (
                     <details className="mt-1">
                       <summary className="text-[9px] text-fuega-text-muted cursor-pointer hover:text-fuega-text-secondary">
-                        View result
+                        {t('common:actions.viewResult')}
                       </summary>
                       <pre className="mt-1 text-[9px] text-fuega-text-secondary whitespace-pre-wrap font-mono bg-fuega-surface rounded p-1.5 max-h-32 overflow-y-auto border border-fuega-border/50">
                         {log.result}
@@ -683,11 +693,11 @@ export default function ControlPanel() {
             {actionResults.length > 0 && (
               <div className="px-3 py-1.5 border-t border-fuega-border text-[9px] text-fuega-text-muted flex items-center justify-between">
                 <span>
-                  {actionResults.filter(l => l.status === 'success').length} ok /
-                  {actionResults.filter(l => l.status === 'error').length} err /
-                  {actionResults.filter(l => l.status === 'running').length} running
+                  {actionResults.filter(l => l.status === 'success').length} {t('controlPanel:liveFeed.ok')} /
+                  {actionResults.filter(l => l.status === 'error').length} {t('controlPanel:liveFeed.err')} /
+                  {actionResults.filter(l => l.status === 'running').length} {t('controlPanel:liveFeed.running')}
                 </span>
-                {totalSessionCost > 0 && <span className="num">Total: ${totalSessionCost.toFixed(4)}</span>}
+                {totalSessionCost > 0 && <span className="num">{t('controlPanel:liveFeed.total')}: ${totalSessionCost.toFixed(4)}</span>}
               </div>
             )}
           </div>

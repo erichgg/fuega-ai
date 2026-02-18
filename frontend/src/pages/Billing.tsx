@@ -1,4 +1,5 @@
 import { useEffect, useState, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Line } from 'react-chartjs-2';
 import {
   CreditCard, ExternalLink, ArrowUpCircle, DollarSign,
@@ -22,6 +23,7 @@ export default function Billing() {
   const [portalLoading, setPortalLoading] = useState(false);
   const [checkoutLoading, setCheckoutLoading] = useState(false);
   const toast = useToast();
+  const { t } = useTranslation(['billing', 'common']);
 
   // Usage is an array of per-agent breakdowns from /billing/usage
   const perAgentCosts: { agent: string; calls: number; tokens: number; cost: number }[] = useMemo(() => {
@@ -39,7 +41,7 @@ export default function Billing() {
     return {
       labels: costChart.labels,
       datasets: [{
-        label: 'Daily Cost',
+        label: t('billing:charts.daily'),
         data: costChart.costs,
         borderColor: '#FF6B2C',
         backgroundColor: '#FF6B2C15',
@@ -49,7 +51,7 @@ export default function Billing() {
         borderWidth: 2,
       }],
     };
-  }, [costChart]);
+  }, [costChart, t]);
 
   useEffect(() => {
     Promise.all([
@@ -71,7 +73,7 @@ export default function Billing() {
         window.open(res.portal_url, '_blank');
       }
     } catch {
-      toast.error('Failed to open billing portal');
+      toast.error(t('billing:errors.portalFailed'));
     }
     setPortalLoading(false);
   };
@@ -88,7 +90,7 @@ export default function Billing() {
         window.location.href = res.checkout_url;
       }
     } catch {
-      toast.error('Failed to start checkout');
+      toast.error(t('billing:errors.checkoutFailed'));
     }
     setCheckoutLoading(false);
   };
@@ -114,7 +116,7 @@ export default function Billing() {
 
   return (
     <div className="animate-fadeIn">
-      <PageHeader title="Billing" subtitle="Subscription & usage" />
+      <PageHeader title={t('billing:title')} subtitle={t('billing:subtitle')} />
 
       {/* Current Plan */}
       <div className="bg-fuega-card border border-fuega-border rounded-lg p-4 mb-3">
@@ -125,11 +127,11 @@ export default function Billing() {
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h2 className="text-sm font-bold text-fuega-text-primary capitalize">{plan} Plan</h2>
+                <h2 className="text-sm font-bold text-fuega-text-primary capitalize">{t('billing:currentPlan', { plan })}</h2>
                 <Badge variant={planStatus === 'active' ? 'active' : planStatus === 'trialing' ? 'running' : 'paused'} label={planStatus} />
               </div>
               {renewalDate && (
-                <p className="text-[11px] text-fuega-text-muted mt-0.5">Renews {renewalDate}</p>
+                <p className="text-[11px] text-fuega-text-muted mt-0.5">{t('billing:renews', { date: renewalDate })}</p>
               )}
             </div>
           </div>
@@ -140,7 +142,7 @@ export default function Billing() {
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-fuega-input border border-fuega-border text-[12px] font-medium text-fuega-text-secondary hover:text-fuega-text-primary hover:border-fuega-orange/50 transition-colors disabled:opacity-50"
             >
               {portalLoading ? <Spinner size="sm" /> : <ExternalLink className="w-3.5 h-3.5" />}
-              Manage Subscription
+              {t('billing:manageSubscription')}
             </button>
           </div>
         </div>
@@ -153,10 +155,10 @@ export default function Billing() {
             <div>
               <h3 className="text-[13px] font-semibold text-fuega-text-primary flex items-center gap-2">
                 <ArrowUpCircle className="w-4 h-4 text-fuega-orange" />
-                Upgrade Your Plan
+                {t('billing:upgrade.title')}
               </h3>
               <p className="text-[11px] text-fuega-text-muted mt-0.5">
-                Get more API calls, higher limits, and priority support.
+                {t('billing:upgrade.description')}
               </p>
             </div>
             <div className="flex gap-2">
@@ -166,7 +168,7 @@ export default function Billing() {
                   disabled={checkoutLoading}
                   className="px-3 py-1.5 rounded-lg bg-fuega-input border border-fuega-border text-[12px] font-medium text-fuega-text-secondary hover:border-fuega-orange/50 transition-colors disabled:opacity-50"
                 >
-                  Starter
+                  {t('billing:upgrade.starter')}
                 </button>
               )}
               <button
@@ -175,7 +177,7 @@ export default function Billing() {
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-fuega-orange text-white text-[12px] font-medium hover:bg-fuega-orange/90 transition-colors disabled:opacity-50"
               >
                 {checkoutLoading ? <Spinner size="sm" /> : <Zap className="w-3.5 h-3.5" />}
-                Upgrade to Pro
+                {t('billing:upgrade.upgradeToPro')}
               </button>
             </div>
           </div>
@@ -184,38 +186,38 @@ export default function Billing() {
 
       {/* Usage KPIs */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 mb-3">
-        <StatCard label="API Calls" value={totalCalls.toLocaleString()} icon={<Zap className="w-4 h-4" />} color="orange" />
-        <StatCard label="Tokens Used" value={totalTokens >= 1_000_000 ? `${(totalTokens / 1_000_000).toFixed(1)}M` : totalTokens.toLocaleString()} icon={<Cpu className="w-4 h-4" />} color="indigo" />
-        <StatCard label="Est. Cost" value={`$${estimatedCost.toFixed(2)}`} icon={<DollarSign className="w-4 h-4" />} color="pink" />
-        <StatCard label="Avg Cost/Call" value={totalCalls > 0 ? `$${(estimatedCost / totalCalls).toFixed(4)}` : '$0'} icon={<TrendingUp className="w-4 h-4" />} color="teal" />
+        <StatCard label={t('billing:stats.apiCalls')} value={totalCalls.toLocaleString()} icon={<Zap className="w-4 h-4" />} color="orange" />
+        <StatCard label={t('billing:stats.tokensUsed')} value={totalTokens >= 1_000_000 ? `${(totalTokens / 1_000_000).toFixed(1)}M` : totalTokens.toLocaleString()} icon={<Cpu className="w-4 h-4" />} color="indigo" />
+        <StatCard label={t('billing:stats.estCost')} value={`$${estimatedCost.toFixed(2)}`} icon={<DollarSign className="w-4 h-4" />} color="pink" />
+        <StatCard label={t('billing:stats.avgCostPerCall')} value={totalCalls > 0 ? `$${(estimatedCost / totalCalls).toFixed(4)}` : '$0'} icon={<TrendingUp className="w-4 h-4" />} color="teal" />
       </div>
 
       {/* Charts + Per-Agent table */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
         {/* Cost trend chart */}
-        <ChartCard title="Cost Trend" subtitle="Daily">
+        <ChartCard title={t('billing:charts.costTrend')} subtitle={t('billing:charts.daily')}>
           <div className="h-48">
             {costTrendData ? (
               <Line data={costTrendData} options={{ ...defaultChartOptions, plugins: { ...defaultChartOptions.plugins, legend: { display: false } } } as any} />
             ) : (
-              <EmptyState title="No cost data yet" />
+              <EmptyState title={t('billing:empty.noCostData')} />
             )}
           </div>
         </ChartCard>
 
         {/* Per-agent cost table */}
-        <ChartCard title="Cost by Agent" subtitle="This period">
+        <ChartCard title={t('billing:charts.costByAgent')} subtitle={t('billing:charts.thisPeriod')}>
           <div className="max-h-48 overflow-y-auto">
             {perAgentCosts.length === 0 ? (
-              <EmptyState title="No agent cost data" />
+              <EmptyState title={t('billing:empty.noAgentCostData')} />
             ) : (
               <div className="space-y-1">
                 {perAgentCosts.map(row => (
                   <div key={row.agent} className="flex items-center gap-2 py-1.5 px-1 rounded hover:bg-fuega-card-hover transition-colors">
                     <Bot className="w-3.5 h-3.5 text-fuega-text-muted flex-shrink-0" />
                     <span className="text-[11px] text-fuega-text-primary flex-1 truncate">{row.agent.replace(/_/g, ' ')}</span>
-                    <span className="text-[10px] text-fuega-text-muted num">{row.calls} calls</span>
-                    <span className="text-[10px] text-fuega-text-muted num w-16 text-right">{row.tokens >= 1000 ? `${(row.tokens / 1000).toFixed(0)}K` : row.tokens} tok</span>
+                    <span className="text-[10px] text-fuega-text-muted num">{row.calls} {t('common:labels.calls').toLowerCase()}</span>
+                    <span className="text-[10px] text-fuega-text-muted num w-16 text-right">{row.tokens >= 1000 ? `${(row.tokens / 1000).toFixed(0)}K` : row.tokens} {t('billing:tok')}</span>
                     <span className="text-[11px] font-medium text-fuega-text-primary num w-16 text-right">${row.cost.toFixed(4)}</span>
                   </div>
                 ))}

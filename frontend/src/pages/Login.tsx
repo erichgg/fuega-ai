@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../lib/auth';
 import { ChispaLogo } from '../components/ChispaLogo';
@@ -10,6 +11,7 @@ export default function Login() {
   const [submitting, setSubmitting] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
+  const { t } = useTranslation(['auth', 'common']);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -19,7 +21,7 @@ export default function Login() {
       await login(email, password);
       navigate('/', { replace: true });
     } catch (err: any) {
-      setError(err.message || 'Login failed');
+      setError(err.message || t('auth:errors.loginFailed'));
     } finally {
       setSubmitting(false);
     }
@@ -35,7 +37,7 @@ export default function Login() {
             <span className="gradient-text">Fuega</span>{' '}
             <span className="text-fuega-text-secondary font-normal">AI</span>
           </h1>
-          <p className="text-[12px] text-fuega-text-muted mt-1">Sign in to your operator dashboard</p>
+          <p className="text-[12px] text-fuega-text-muted mt-1">{t('auth:login.subtitle')}</p>
         </div>
 
         {/* Form */}
@@ -48,7 +50,7 @@ export default function Login() {
 
           <div>
             <label htmlFor="email" className="block text-[11px] font-medium text-fuega-text-muted uppercase tracking-wider mb-1">
-              Email
+              {t('auth:login.email')}
             </label>
             <input
               id="email"
@@ -59,13 +61,13 @@ export default function Login() {
               autoFocus
               autoComplete="email"
               className="w-full bg-fuega-input border border-fuega-border rounded-lg px-3 py-2 text-sm text-fuega-text-primary placeholder-fuega-text-muted focus:outline-none focus:border-fuega-orange/50 transition-colors"
-              placeholder="you@example.com"
+              placeholder={t('auth:login.emailPlaceholder')}
             />
           </div>
 
           <div>
             <label htmlFor="password" className="block text-[11px] font-medium text-fuega-text-muted uppercase tracking-wider mb-1">
-              Password
+              {t('auth:login.password')}
             </label>
             <input
               id="password"
@@ -75,7 +77,7 @@ export default function Login() {
               required
               autoComplete="current-password"
               className="w-full bg-fuega-input border border-fuega-border rounded-lg px-3 py-2 text-sm text-fuega-text-primary placeholder-fuega-text-muted focus:outline-none focus:border-fuega-orange/50 transition-colors"
-              placeholder="Enter your password"
+              placeholder={t('auth:login.passwordPlaceholder')}
             />
           </div>
 
@@ -87,19 +89,19 @@ export default function Login() {
             {submitting ? (
               <span className="flex items-center justify-center gap-2">
                 <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                Signing in...
+                {t('auth:login.signingIn')}
               </span>
             ) : (
-              'Sign In'
+              t('auth:login.signIn')
             )}
           </button>
         </form>
 
         {/* Register link */}
         <p className="text-center text-[12px] text-fuega-text-muted mt-4">
-          First time setup?{' '}
+          {t('auth:login.firstTimeSetup')}{' '}
           <Link to="/register" className="text-fuega-orange hover:underline">
-            Create an account
+            {t('auth:login.createAccount')}
           </Link>
         </p>
       </div>

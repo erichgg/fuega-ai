@@ -1,0 +1,52 @@
+{
+  "title": "Centro de Comando",
+  "subtitle": "Inicia el backend para llenar los datos",
+  "noData": "No hay datos disponibles. Inicia la API del backend.",
+  "controlPanel": "Panel de Control",
+  "agentFleet": "Flota de Agentes",
+  "manage": "Gestionar",
+  "activeCount": "{{active}}/{{total}} activos",
+  "stats": {
+    "revenue": "Ingresos",
+    "clients": "Clientes",
+    "agents": "Agentes",
+    "apiCosts": "Costos de API",
+    "profit": "Ganancia",
+    "leads": "Prospectos"
+  },
+  "charts": {
+    "revenue": "Ingresos",
+    "monthly": "Mensual",
+    "apiCosts": "Costos de API",
+    "daily": "Diario",
+    "fleet": "Flota",
+    "status": "Estado",
+    "noData": "Sin datos",
+    "revenueDataset": "Ingresos",
+    "costsDataset": "Costos"
+  },
+  "fleet": {
+    "active": "Activos",
+    "paused": "Pausados",
+    "overBudget": "Sobre Presupuesto"
+  },
+  "liveFeed": "Feed en Vivo",
+  "recent": "{{count}} recientes",
+  "noActivityYet": "Sin actividad aun",
+  "agentAction": "Accion del agente",
+  "budgetOverview": "Resumen de Presupuesto",
+  "usedLabel": "${{spent}} / ${{total}} usado",
+  "pendingApprovals": "{{count}} Aprobacion Pendiente",
+  "pendingApprovalsPlural": "{{count}} Aprobaciones Pendientes",
+  "realTimeActivity": "Actividad en Tiempo Real",
+  "events": "{{count}} eventos",
+  "noRealTimeEvents": "Sin eventos en tiempo real aun",
+  "realTimeDescription": "Los eventos de agentes y flujos de trabajo se transmitiran aqui via WebSocket.",
+  "filters": {
+    "allEvents": "Todos los eventos",
+    "agentActions": "Acciones de Agentes",
+    "workflows": "Flujos de Trabajo",
+    "approvals": "Aprobaciones",
+    "errors": "Errores"
+  }
+}

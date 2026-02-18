@@ -90,7 +90,7 @@ class Agent(Base):
     role = Column(String(100), nullable=False)
     description = Column(Text)
     model = Column(String(100), nullable=False)
-    status = Column(SAEnum(AgentStatus), default=AgentStatus.ACTIVE)
+    status = Column(SAEnum(AgentStatus), default=AgentStatus.PAUSED)
     monthly_budget_usd = Column(Float, default=0.0)
     month_spend_usd = Column(Float, default=0.0)
     total_calls = Column(Integer, default=0)

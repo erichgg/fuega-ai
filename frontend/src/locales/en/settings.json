@@ -1,0 +1,33 @@
+{
+  "title": "Settings",
+  "subtitle": "Configuration management",
+  "tabs": {
+    "brand": "Brand",
+    "services": "Services",
+    "agents": "Agents",
+    "workflows": "Workflows",
+    "budget": "Budget",
+    "platforms": "Platforms"
+  },
+  "brand": {
+    "agencyName": "Agency Name",
+    "taglineEn": "Tagline (EN)",
+    "mission": "Mission",
+    "brandVoice": "Brand Voice Guidelines"
+  },
+  "budget": {
+    "agentBudgets": "Agent Budgets (USD/month)",
+    "fixedCosts": "Fixed Costs (USD/month)"
+  },
+  "platforms": {
+    "postsPerDay": "Posts/day"
+  },
+  "workflows": {
+    "schedule": "Schedule",
+    "needsApproval": "needs approval"
+  },
+  "agents": {
+    "message": "Agent configuration is managed on the Agents page.",
+    "goToAgents": "Go to Agents"
+  }
+}

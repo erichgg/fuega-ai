@@ -1,0 +1,123 @@
+{
+  "title": "Panel de Control",
+  "subtitle": "{{active}}/{{total}} agentes activos — Ejecuta comandos, opera y controla la flota",
+  "tabs": {
+    "actions": "Acciones",
+    "fleet": "Flota de Agentes",
+    "pipelines": "Pipelines",
+    "prompt": "Prompt Directo"
+  },
+  "actions": {
+    "actionsCount": "{{count}} acciones",
+    "via": "via {{agent}}"
+  },
+  "fleet": {
+    "activateAll": "Activar Todos",
+    "pauseAll": "Pausar Todos",
+    "manageAgents": "Gestionar Agentes",
+    "activeCount": "{{count}} activos",
+    "pausedCount": "{{count}} pausados"
+  },
+  "pipelines": {
+    "info": "Los pipelines ejecutan multiples agentes en secuencia. Cada pipeline activa el flujo de trabajo completo de principio a fin.",
+    "viewWorkflows": "Ver gestion detallada de flujos de trabajo →",
+    "steps": "{{count}} pasos",
+    "runAll": "Ejecutar"
+  },
+  "prompt": {
+    "description": "Selecciona un agente y enviale un mensaje directo. Usa esto para consultas puntuales o instrucciones personalizadas.",
+    "selectAgent": "Selecciona un agente arriba para enviarle un mensaje directo",
+    "placeholder": "Pregunta lo que sea... (Enter para enviar)",
+    "close": "Cerrar",
+    "presets": {
+      "statusReport": "Reporte de estado",
+      "workingOn": "En que estas trabajando?",
+      "budgetCheck": "Revision de presupuesto",
+      "anyBlockers": "Algun bloqueo?",
+      "weeklySummary": "Resumen semanal",
+      "topPriorities": "Prioridades principales"
+    }
+  },
+  "liveFeed": {
+    "title": "Feed en Vivo",
+    "events": "{{count}} eventos",
+    "clearFeed": "Limpiar feed",
+    "noActivity": "Sin actividad aun",
+    "runAction": "Ejecuta una accion para ver el progreso aqui",
+    "ok": "ok",
+    "err": "err",
+    "running": "ejecutando",
+    "total": "Total"
+  },
+  "categories": {
+    "contentOperations": "Operaciones de Contenido",
+    "seoAnalytics": "SEO y Analitica",
+    "salesOutreach": "Ventas y Prospeccion",
+    "advertising": "Publicidad",
+    "emailCampaigns": "Email y Campanas",
+    "financeCompliance": "Finanzas y Cumplimiento",
+    "strategic": "Estrategico"
+  },
+  "actionLabels": {
+    "researchKeywords": "Investigar Palabras Clave",
+    "writeContent": "Escribir Contenido",
+    "reviewContent": "Revisar Contenido",
+    "schedulePosts": "Programar Publicaciones",
+    "postToTwitter": "Publicar en Twitter",
+    "siteAudit": "Auditoria del Sitio",
+    "findOpportunities": "Encontrar Oportunidades",
+    "collectMetrics": "Recopilar Metricas",
+    "generateReport": "Generar Reporte",
+    "findNewProspects": "Encontrar Nuevos Prospectos",
+    "deepDiveResearch": "Investigacion a Fondo",
+    "scoreQualifyLeads": "Calificar Prospectos",
+    "draftOutreachMessages": "Redactar Mensajes de Prospeccion",
+    "researchAudience": "Investigar Audiencia",
+    "createAdCopy": "Crear Texto Publicitario",
+    "trackAdMetrics": "Rastrear Metricas de Anuncios",
+    "designCampaign": "Disenar Campana",
+    "reviewEmail": "Revisar Email",
+    "trackEmailMetrics": "Rastrear Metricas de Email",
+    "budgetStatus": "Estado del Presupuesto",
+    "clientProfitability": "Rentabilidad del Cliente",
+    "complianceCheck": "Verificacion de Cumplimiento",
+    "deliveryStatus": "Estado de Entrega",
+    "ceoAssessment": "Evaluacion del CEO",
+    "scoreIdeas": "Calificar Ideas",
+    "resourceAllocation": "Asignacion de Recursos"
+  },
+  "errors": {
+    "updateFailed": "Error al actualizar {{agent}}",
+    "actionFailed": "{{action}} FALLO — {{agent}} no pudo completar la accion",
+    "triggerFailed": "Error al ejecutar \"{{pipeline}}\" — Esta el backend corriendo?",
+    "promptFailed": "No se pudo contactar a {{agent}} — Esta el agente activo y el backend corriendo?"
+  },
+  "actionDescriptions": {
+    "researchKeywords": "Encontrar oportunidades de palabras clave para clientes",
+    "writeContent": "Generar una pieza de contenido desde un tema aprobado",
+    "reviewContent": "Revision de calidad y puntuacion (1-10)",
+    "schedulePosts": "Formatear y programar contenido aprobado",
+    "postToTwitter": "Publicar un post en Twitter/X via API",
+    "siteAudit": "Auditoria tecnica SEO para un sitio de cliente",
+    "findOpportunities": "Analisis de brechas y oportunidades de palabras clave",
+    "collectMetrics": "Obtener metricas de todas las plataformas",
+    "generateReport": "Construir reporte de rendimiento",
+    "findNewProspects": "Buscar negocios locales — tiendas, restaurantes, salones — que necesiten ayuda digital",
+    "deepDiveResearch": "Analizar la presencia online, competidores y brechas de servicio de un prospecto",
+    "scoreQualifyLeads": "Clasificar leads actuales por ajuste, potencial de presupuesto y urgencia",
+    "draftOutreachMessages": "Escribir emails de propuesta personalizados en ES/EN para leads mejor calificados",
+    "researchAudience": "Investigacion de audiencia y plan de segmentacion",
+    "createAdCopy": "Generar variaciones de anuncios",
+    "trackAdMetrics": "Seguimiento de rendimiento de campanas",
+    "designCampaign": "Construir campana de email desde cero",
+    "reviewEmail": "Revision de calidad de contenido de email",
+    "trackEmailMetrics": "Seguimiento de apertura/clic/desuscripcion",
+    "budgetStatus": "Uso actual del presupuesto y pronostico",
+    "clientProfitability": "Ingresos vs costo por cliente",
+    "complianceCheck": "Revisar contenido para cumplimiento legal",
+    "deliveryStatus": "Verificar fechas limite de entregables",
+    "ceoAssessment": "Salud del portafolio y prioridades estrategicas",
+    "scoreIdeas": "Calificar y priorizar ideas de contenido",
+    "resourceAllocation": "Optimizar asignacion de carga de trabajo del equipo"
+  }
+}

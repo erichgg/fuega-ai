@@ -1,0 +1,34 @@
+{
+  "title": "Billing",
+  "subtitle": "Subscription & usage",
+  "currentPlan": "{{plan}} Plan",
+  "renews": "Renews {{date}}",
+  "manageSubscription": "Manage Subscription",
+  "upgrade": {
+    "title": "Upgrade Your Plan",
+    "description": "Get more API calls, higher limits, and priority support.",
+    "starter": "Starter",
+    "upgradeToPro": "Upgrade to Pro"
+  },
+  "stats": {
+    "apiCalls": "API Calls",
+    "tokensUsed": "Tokens Used",
+    "estCost": "Est. Cost",
+    "avgCostPerCall": "Avg Cost/Call"
+  },
+  "charts": {
+    "costTrend": "Cost Trend",
+    "daily": "Daily",
+    "costByAgent": "Cost by Agent",
+    "thisPeriod": "This period"
+  },
+  "tok": "tok",
+  "empty": {
+    "noCostData": "No cost data yet",
+    "noAgentCostData": "No agent cost data"
+  },
+  "errors": {
+    "portalFailed": "Failed to open billing portal",
+    "checkoutFailed": "Failed to start checkout"
+  }
+}

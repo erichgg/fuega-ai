@@ -1,0 +1,34 @@
+{
+  "title": "Facturación",
+  "subtitle": "Suscripción y uso",
+  "currentPlan": "Plan {{plan}}",
+  "renews": "Se renueva el {{date}}",
+  "manageSubscription": "Gestionar Suscripción",
+  "upgrade": {
+    "title": "Mejora tu Plan",
+    "description": "Obtén más llamadas de API, límites más altos y soporte prioritario.",
+    "starter": "Starter",
+    "upgradeToPro": "Actualizar a Pro"
+  },
+  "stats": {
+    "apiCalls": "Llamadas de API",
+    "tokensUsed": "Tokens Usados",
+    "estCost": "Costo Est.",
+    "avgCostPerCall": "Costo Prom./Llamada"
+  },
+  "charts": {
+    "costTrend": "Tendencia de Costos",
+    "daily": "Diario",
+    "costByAgent": "Costo por Agente",
+    "thisPeriod": "Este período"
+  },
+  "tok": "tok",
+  "empty": {
+    "noCostData": "Sin datos de costos aún",
+    "noAgentCostData": "Sin datos de costos de agentes"
+  },
+  "errors": {
+    "portalFailed": "Error al abrir el portal de facturacion",
+    "checkoutFailed": "Error al iniciar el proceso de pago"
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "sections": {
+    "overview": "Visao Geral",
+    "operations": "Operacoes",
+    "team": "Equipe",
+    "business": "Negocios"
+  },
+  "items": {
+    "dashboard": "Painel",
+    "controlPanel": "Painel de Controle",
+    "analytics": "Analiticos",
+    "leads": "Leads",
+    "content": "Conteudo",
+    "campaigns": "Campanhas",
+    "seo": "SEO",
+    "workflows": "Fluxos de Trabalho",
+    "organization": "Organizacao",
+    "agents": "Agentes",
+    "teamChat": "Chat da Equipe",
+    "clients": "Clientes",
+    "approvals": "Aprovacoes",
+    "billing": "Faturamento",
+    "settings": "Configuracoes"
+  },
+  "search": "Buscar...",
+  "signOut": "Sair",
+  "lightMode": "Modo claro",
+  "darkMode": "Modo escuro",
+  "hideConsole": "Ocultar Console",
+  "console": "Console",
+  "collapse": "Recolher",
+  "pages": "Paginas",
+  "searchPlaceholder": "Digite um comando ou busque...",
+  "navigate": "Navegar",
+  "open": "Abrir"
+}

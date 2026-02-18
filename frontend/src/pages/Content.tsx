@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   PenTool, CheckCircle, Eye, Send, RotateCcw, Lightbulb, Bot,
   LayoutGrid, Table2, Plus, X, Mic, Image, Camera,
@@ -14,19 +15,20 @@ import { DataTable, type Column } from '../components/DataTable';
 import { useToast } from '../lib/ToastContext';
 import { defaultChartOptions, CHART_COLORS } from '../lib/chartConfig';
 
-const PIPELINE_STAGES = [
-  { key: 'ideas', label: 'Ideas', icon: Lightbulb, color: '#6366F1', agent: 'SEO Analyst' },
-  { key: 'approved', label: 'Approved', icon: CheckCircle, color: '#EAB308', agent: 'CEO' },
-  { key: 'writing', label: 'Writing', icon: PenTool, color: '#FF6B2C', agent: 'Content Writer' },
-  { key: 'review', label: 'Review', icon: Eye, color: '#EC4899', agent: 'Editor' },
-  { key: 'revision', label: 'Revision', icon: RotateCcw, color: '#F97316', agent: 'Content Writer' },
-  { key: 'ready', label: 'Ready to Publish', icon: Send, color: '#00D4AA', agent: 'Social Media Manager' },
-  { key: 'published', label: 'Published', icon: CheckCircle, color: '#22C55E', agent: 'Analytics Agent' },
+const PIPELINE_STAGE_KEYS = [
+  { key: 'ideas', labelKey: 'stages.ideas', icon: Lightbulb, color: '#6366F1', agentKey: 'agents.seoAnalyst' },
+  { key: 'approved', labelKey: 'stages.approved', icon: CheckCircle, color: '#EAB308', agentKey: 'agents.ceo' },
+  { key: 'writing', labelKey: 'stages.writing', icon: PenTool, color: '#FF6B2C', agentKey: 'agents.contentWriter' },
+  { key: 'review', labelKey: 'stages.review', icon: Eye, color: '#EC4899', agentKey: 'agents.editor' },
+  { key: 'revision', labelKey: 'stages.revision', icon: RotateCcw, color: '#F97316', agentKey: 'agents.contentWriter' },
+  { key: 'ready', labelKey: 'stages.ready', icon: Send, color: '#00D4AA', agentKey: 'agents.socialMediaManager' },
+  { key: 'published', labelKey: 'stages.published', icon: CheckCircle, color: '#22C55E', agentKey: 'agents.analyticsAgent' },
 ];
 
 const emptyKanban = { ideas: [], approved: [], writing: [], review: [], revision: [], ready: [], published: [] };
 
 export default function Content() {
+  const { t } = useTranslation(['content', 'common']);
   const [kanban, setKanban] = useState<any>(emptyKanban);
   const [loading, setLoading] = useState(true);
   const [view, setView] = useState<'kanban' | 'table'>('kanban');
@@ -34,6 +36,8 @@ export default function Content() {
   const [newIdeaTitle, setNewIdeaTitle] = useState('');
   const [newIdeaPlatform, setNewIdeaPlatform] = useState('');
   const toast = useToast();
+
+  const PIPELINE_STAGES = PIPELINE_STAGE_KEYS.map(s => ({ ...s, label: t(`content:${s.labelKey}`), agent: t(`content:${s.agentKey}`) }));
 
   // Integration states — ALL hooks must be before any early return
   const [mediaLoading, setMediaLoading] = useState<string | null>(null);
@@ -44,7 +48,7 @@ export default function Content() {
   useEffect(() => {
     api.content.kanban()
       .then(d => setKanban(d))
-      .catch(() => toast.error('Failed to load content pipeline. Check that the backend is running.'))
+      .catch(() => toast.error(t('common:errors.failedToLoad', { resource: t('content:title').toLowerCase() }) + ' ' + t('common:errors.backendCheck')))
       .finally(() => setLoading(false));
   }, []);
 
@@ -52,7 +56,7 @@ export default function Content() {
 
   const handleAddIdea = async () => {
     const title = newIdeaTitle.trim();
-    if (!title) { toast.error('Please enter a title'); return; }
+    if (!title) { toast.error(t('content:errors.enterTitle')); return; }
     setAddingIdea(true);
     try {
       const created = await api.content.createIdea({ title, target_platform: newIdeaPlatform || undefined });
@@ -61,7 +65,7 @@ export default function Content() {
       setNewIdeaPlatform('');
       setShowNewIdea(false);
     } catch {
-      toast.error('Failed to save idea');
+      toast.error(t('content:errors.failedToSaveIdea'));
     }
     setAddingIdea(false);
   };
@@ -73,7 +77,7 @@ export default function Content() {
       const result = await api.integrations.elevenlabs.generate(text);
       setVoiceoverResult({ itemId, audio_url: result.audio_url });
     } catch {
-      toast.error('Voiceover generation failed');
+      toast.error(t('content:errors.voiceoverFailed'));
     }
     setMediaLoading(null);
   };
@@ -85,7 +89,7 @@ export default function Content() {
       const result = await api.integrations.pexels.searchPhotos(query);
       setStockPhotos({ itemId, photos: result.photos || [] });
     } catch {
-      toast.error('Stock photo search failed');
+      toast.error(t('content:errors.stockPhotoFailed'));
     }
     setMediaLoading(null);
   };
@@ -97,7 +101,7 @@ export default function Content() {
       const result = await api.integrations.openai.generateImage(prompt);
       setGeneratedImage({ itemId, image_url: result.image_url || result.url });
     } catch {
-      toast.error('Image generation failed');
+      toast.error(t('content:errors.imageGenerationFailed'));
     }
     setMediaLoading(null);
   };
@@ -126,7 +130,7 @@ export default function Content() {
   const platformChartData = {
     labels: Object.keys(platformCounts),
     datasets: [{
-      label: 'Content pieces',
+      label: t('content:chartLabel'),
       data: Object.values(platformCounts),
       backgroundColor: CHART_COLORS.map(c => c + '99'),
       borderColor: CHART_COLORS,
@@ -139,14 +143,14 @@ export default function Content() {
   const contentColumns: Column<{ stage: string; stageLabel: string; item: any }>[] = [
     {
       key: 'title',
-      label: 'Title',
+      label: t('content:columns.title'),
       sortable: true,
-      getValue: (row) => row.item.title || 'Untitled',
-      render: (row) => <span className="text-[12px] text-fuega-text-primary font-medium">{row.item.title || 'Untitled'}</span>,
+      getValue: (row) => row.item.title || t('content:untitled'),
+      render: (row) => <span className="text-[12px] text-fuega-text-primary font-medium">{row.item.title || t('content:untitled')}</span>,
     },
     {
       key: 'stage',
-      label: 'Stage',
+      label: t('content:columns.stage'),
       sortable: true,
       getValue: (row) => row.stageLabel,
       render: (row) => {
@@ -167,7 +171,7 @@ export default function Content() {
     },
     {
       key: 'platform',
-      label: 'Platform',
+      label: t('content:columns.platform'),
       sortable: true,
       getValue: (row) => row.item.platform || '',
       render: (row) => row.item.platform ? (
@@ -180,7 +184,7 @@ export default function Content() {
     },
     {
       key: 'score',
-      label: 'Score',
+      label: t('content:columns.score'),
       sortable: true,
       getValue: (row) => row.item.score ?? -1,
       render: (row) => row.item.score !== null && row.item.score !== undefined ? (
@@ -194,18 +198,18 @@ export default function Content() {
   ];
 
   const viewTabs = [
-    { key: 'kanban', label: 'Kanban', icon: <LayoutGrid className="w-3.5 h-3.5" /> },
-    { key: 'table', label: 'Table', icon: <Table2 className="w-3.5 h-3.5" /> },
+    { key: 'kanban', label: t('content:views.kanban'), icon: <LayoutGrid className="w-3.5 h-3.5" /> },
+    { key: 'table', label: t('content:views.table'), icon: <Table2 className="w-3.5 h-3.5" /> },
   ];
 
   return (
     <div className="animate-fadeIn">
       <PageHeader
-        title="Content Pipeline"
-        subtitle={`${totalItems} items across all stages`}
+        title={t('content:title')}
+        subtitle={t('content:subtitle', { count: totalItems })}
         breadcrumbs={[
-          { label: 'Dashboard', href: '/' },
-          { label: 'Content' },
+          { label: t('common:breadcrumbs.dashboard'), href: '/' },
+          { label: t('content:title') },
         ]}
         action={
           <div className="flex items-center gap-2">
@@ -215,7 +219,7 @@ export default function Content() {
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-fuega-orange text-white text-[12px] font-medium hover:bg-fuega-orange/90 transition-colors"
             >
               <Plus className="w-3.5 h-3.5" />
-              New Idea
+              {t('content:newIdea')}
             </button>
           </div>
         }
@@ -229,21 +233,21 @@ export default function Content() {
             value={newIdeaTitle}
             onChange={e => setNewIdeaTitle(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && handleAddIdea()}
-            placeholder="Idea title..."
+            placeholder={t('content:form.ideaTitle')}
             className="flex-1 bg-fuega-input border border-fuega-border rounded px-2 py-1 text-sm text-fuega-text-primary placeholder:text-fuega-text-muted focus:outline-none focus:border-fuega-orange/50"
           />
           <input
             value={newIdeaPlatform}
             onChange={e => setNewIdeaPlatform(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && handleAddIdea()}
-            placeholder="Platform"
+            placeholder={t('content:form.platform')}
             className="w-28 bg-fuega-input border border-fuega-border rounded px-2 py-1 text-sm text-fuega-text-primary placeholder:text-fuega-text-muted focus:outline-none focus:border-fuega-orange/50"
           />
           <button
             onClick={handleAddIdea}
             className="px-3 py-1 rounded bg-fuega-orange text-white text-xs font-medium hover:bg-fuega-orange/90 transition-colors"
           >
-            Add
+            {t('common:actions.add')}
           </button>
           <button
             onClick={() => { setShowNewIdea(false); setNewIdeaTitle(''); setNewIdeaPlatform(''); }}
@@ -256,15 +260,15 @@ export default function Content() {
 
       {/* Stats row */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 mb-2">
-        <StatCard label="Ideas" value={kanban.ideas?.length || 0} icon={<Lightbulb className="w-5 h-5" />} color="indigo" />
-        <StatCard label="In Production" value={(kanban.writing?.length || 0) + (kanban.review?.length || 0) + (kanban.revision?.length || 0)} icon={<PenTool className="w-5 h-5" />} color="orange" />
-        <StatCard label="Ready to Publish" value={kanban.ready?.length || 0} icon={<Send className="w-5 h-5" />} color="teal" />
-        <StatCard label="Published" value={kanban.published?.length || 0} icon={<CheckCircle className="w-5 h-5" />} color="pink" />
+        <StatCard label={t('content:stats.ideas')} value={kanban.ideas?.length || 0} icon={<Lightbulb className="w-5 h-5" />} color="indigo" />
+        <StatCard label={t('content:stats.inProduction')} value={(kanban.writing?.length || 0) + (kanban.review?.length || 0) + (kanban.revision?.length || 0)} icon={<PenTool className="w-5 h-5" />} color="orange" />
+        <StatCard label={t('content:stats.readyToPublish')} value={kanban.ready?.length || 0} icon={<Send className="w-5 h-5" />} color="teal" />
+        <StatCard label={t('content:stats.published')} value={kanban.published?.length || 0} icon={<CheckCircle className="w-5 h-5" />} color="pink" />
       </div>
 
       {/* Platform breakdown */}
       {Object.keys(platformCounts).length > 0 && (
-        <ChartCard title="Content by Platform" subtitle="Distribution across channels" className="mb-2">
+        <ChartCard title={t('content:contentByPlatform')} subtitle={t('content:distributionSubtitle')} className="mb-2">
           <div className="h-48">
             <Bar data={platformChartData} options={{
               ...defaultChartOptions,
@@ -308,7 +312,7 @@ export default function Content() {
                   <div className="p-1.5 flex-1 space-y-1.5 overflow-y-auto max-h-[calc(100vh-380px)]">
                     {items.length === 0 && (
                       <div className="text-[10px] text-fuega-text-muted text-center py-4 opacity-50">
-                        No items
+                        {t('content:noItems')}
                       </div>
                     )}
                     {items.map((item: any) => (
@@ -317,7 +321,7 @@ export default function Content() {
                         className="bg-fuega-bg border border-fuega-border rounded-md p-2 hover:border-fuega-orange/30 transition-all cursor-default group"
                       >
                         <p className="text-[11px] font-medium text-fuega-text-primary leading-tight mb-1.5 line-clamp-2">
-                          {item.title || 'Untitled'}
+                          {item.title || t('content:untitled')}
                         </p>
                         <div className="flex items-center gap-1.5 flex-wrap">
                           {item.platform && (
@@ -344,40 +348,40 @@ export default function Content() {
                               onClick={(e) => { e.stopPropagation(); handleVoiceover(`${stage.key}-${item.id}`, item.title); }}
                               disabled={!!mediaLoading}
                               className="flex items-center gap-0.5 text-[8px] px-1.5 py-0.5 rounded bg-fuega-surface border border-fuega-border text-fuega-text-muted hover:text-purple-400 hover:border-purple-400/30 transition-colors disabled:opacity-40"
-                              title="Generate Voiceover"
+                              title={t('content:media.generateVoiceover')}
                             >
                               {mediaLoading === `voiceover-${stage.key}-${item.id}` ? (
                                 <div className="w-2.5 h-2.5 border border-current border-t-transparent rounded-full animate-spin" />
                               ) : (
                                 <Mic className="w-2.5 h-2.5" />
                               )}
-                              Voice
+                              {t('content:media.voice')}
                             </button>
                             <button
                               onClick={(e) => { e.stopPropagation(); handleStockPhotos(`${stage.key}-${item.id}`, item.title); }}
                               disabled={!!mediaLoading}
                               className="flex items-center gap-0.5 text-[8px] px-1.5 py-0.5 rounded bg-fuega-surface border border-fuega-border text-fuega-text-muted hover:text-teal-400 hover:border-teal-400/30 transition-colors disabled:opacity-40"
-                              title="Find Stock Photos"
+                              title={t('content:media.findStockPhotos')}
                             >
                               {mediaLoading === `photos-${stage.key}-${item.id}` ? (
                                 <div className="w-2.5 h-2.5 border border-current border-t-transparent rounded-full animate-spin" />
                               ) : (
                                 <Camera className="w-2.5 h-2.5" />
                               )}
-                              Photos
+                              {t('content:media.photos')}
                             </button>
                             <button
                               onClick={(e) => { e.stopPropagation(); handleGenerateImage(`${stage.key}-${item.id}`, item.title); }}
                               disabled={!!mediaLoading}
                               className="flex items-center gap-0.5 text-[8px] px-1.5 py-0.5 rounded bg-fuega-surface border border-fuega-border text-fuega-text-muted hover:text-pink-400 hover:border-pink-400/30 transition-colors disabled:opacity-40"
-                              title="Generate Image"
+                              title={t('content:media.generateImage')}
                             >
                               {mediaLoading === `image-${stage.key}-${item.id}` ? (
                                 <div className="w-2.5 h-2.5 border border-current border-t-transparent rounded-full animate-spin" />
                               ) : (
                                 <Image className="w-2.5 h-2.5" />
                               )}
-                              AI Img
+                              {t('content:media.aiImg')}
                             </button>
                           </div>
                         )}
@@ -397,7 +401,7 @@ export default function Content() {
                                 <img
                                   key={idx}
                                   src={photo.src?.tiny || photo.src?.small || photo.url}
-                                  alt={photo.alt || 'Stock photo'}
+                                  alt={photo.alt || t('common:alt.stockPhoto')}
                                   className="w-full h-12 object-cover rounded"
                                 />
                               ))}
@@ -410,7 +414,7 @@ export default function Content() {
                           <div className="mt-1.5 pt-1.5 border-t border-fuega-border/50">
                             <img
                               src={generatedImage.image_url}
-                              alt="AI generated"
+                              alt={t('common:alt.aiGenerated')}
                               className="w-full rounded"
                             />
                           </div>
@@ -432,7 +436,7 @@ export default function Content() {
           data={allItems}
           getRowKey={(row) => `${row.stage}-${row.item.id}`}
           compact
-          emptyMessage="No content items found"
+          emptyMessage={t('content:emptyTable')}
         />
       )}
     </div>

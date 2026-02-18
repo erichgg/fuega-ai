@@ -1,0 +1,65 @@
+{
+  "title": "Fluxos de Trabalho",
+  "subtitle": "Execução de pipelines e controles manuais",
+  "tabs": {
+    "fullPipelines": "Pipelines Completos",
+    "individualSteps": "Passos Individuais",
+    "runHistory": "Histórico de Execução"
+  },
+  "stats": {
+    "completed": "Concluídos",
+    "running": "Em Execução",
+    "needsApproval": "Requer Aprovação",
+    "totalCost": "Custo Total"
+  },
+  "pendingApprovals": "Aprovações Pendentes ({{count}})",
+  "approveAndContinue": "Aprovar e Continuar",
+  "reject": "Rejeitar",
+  "agentsProduced": "O que os agentes produziram:",
+  "latestStepOutput": "Resultado do último passo:",
+  "pipelines": {
+    "noDefs": "Sem definições de pipeline",
+    "noDefsDesc": "Inicie o backend para carregar as definições de fluxos de trabalho a partir da configuração.",
+    "steps": "{{count}} passos",
+    "runAll": "Executar Tudo"
+  },
+  "steps": {
+    "noSteps": "Sem passos disponíveis",
+    "noStepsDesc": "As definições de pipeline devem ser carregadas do backend para exibir os passos individuais.",
+    "saveTokens": "Economize tokens executando passos individuais.",
+    "costInfo": "Cada botão executa uma ação de agente. Passos Haiku custam ~$0.001-0.003, Sonnet ~$0.005-0.015.",
+    "columns": { "step": "Passo", "agent": "Agente", "model": "Modelo" },
+    "stepResult": "Resultado do Passo"
+  },
+  "errors": {
+    "loadFailed": "Falha ao carregar fluxos de trabalho.",
+    "triggerFailed": "Falha ao executar \"{{pipeline}}\" — O backend esta em execucao? Verifique o registro de agentes.",
+    "stepFailed": "Passo FALHOU: {{action}} via {{agent}} — {{duration}}ms decorridos. Verifique os logs do backend.",
+    "approvalFailed": "Falha ao {{action}} passo na execucao #{{runId}}. O backend pode estar fora do ar.",
+    "loadStepsFailed": "Nao foi possivel carregar os detalhes do passo para execucao #{{runId}}"
+  },
+  "approvalSummary": {
+    "lead": "Prospecto",
+    "outreach": "divulgacao",
+    "subject": "Assunto",
+    "review": "Revisao",
+    "score": "Pontuacao",
+    "compliance": "Conformidade",
+    "issues": "Problemas",
+    "noIssues": "Sem problemas encontrados",
+    "leadsScored": "{{count}} prospectos pontuados",
+    "content": "Conteudo"
+  },
+  "history": {
+    "title": "Histórico de Execução",
+    "filterAll": "Todos os Status",
+    "filterCompleted": "Concluídos",
+    "filterRunning": "Em Execução",
+    "filterFailed": "Falhos",
+    "filterApproval": "Pausados para Aprovação",
+    "noRuns": "Sem execuções de fluxos ainda",
+    "noRunsDesc": "Execute um fluxo de trabalho acima ou aguarde o agendador executar um.",
+    "noFilteredRuns": "Sem execuções {{status}}",
+    "noFilteredRunsDesc": "Tente selecionar um filtro de status diferente."
+  }
+}

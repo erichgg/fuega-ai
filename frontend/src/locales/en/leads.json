@@ -1,0 +1,72 @@
+{
+  "title": "Leads Pipeline",
+  "subtitle": "{{count}} leads across all stages",
+  "stages": {
+    "prospect": "Prospects",
+    "researched": "Researched",
+    "qualified": "Qualified",
+    "outreach_drafted": "Outreach Drafted",
+    "outreach_sent": "Outreach Sent",
+    "responded": "Responded",
+    "won": "Won",
+    "lost": "Lost"
+  },
+  "views": {
+    "pipeline": "Pipeline",
+    "table": "Table"
+  },
+  "actions": {
+    "runFullPipeline": "Run Full Pipeline",
+    "running": "Running...",
+    "scoutOnly": "Scout Only",
+    "scouting": "Scouting...",
+    "addLead": "Add Lead"
+  },
+  "form": {
+    "businessName": "Business name...",
+    "industry": "Industry",
+    "location": "Location",
+    "email": "Email"
+  },
+  "scout": {
+    "locationPlaceholder": "Location (e.g. Mexico City, Condesa)",
+    "industryPlaceholder": "Industry (optional)",
+    "scout": "Scout"
+  },
+  "pipeline": {
+    "title": "Run Full Outreach Pipeline",
+    "steps": "Scout → Research → Score → Draft Outreach → Review → Compliance → Approval",
+    "targetLocation": "Target location (e.g. Monterrey, Mexico)",
+    "industryOptional": "Industry (optional)"
+  },
+  "stats": {
+    "prospects": "Prospects",
+    "qualified": "Qualified",
+    "outreach": "Outreach",
+    "won": "Won"
+  },
+  "columns": {
+    "business": "Business",
+    "stage": "Stage",
+    "score": "Score",
+    "location": "Location",
+    "industry": "Industry",
+    "source": "Source"
+  },
+  "empty": {
+    "noLeads": "No leads",
+    "emptyTable": "No leads found. Scout for prospects or add a lead manually."
+  },
+  "pipelineStatus": {
+    "starting": "Starting pipeline...",
+    "completed": "All {{count}} steps completed!",
+    "waitingApproval": "Waiting for your approval"
+  },
+  "errors": {
+    "businessRequired": "Business name is required",
+    "enterLocation": "Please enter a location to scout",
+    "enterTargetLocation": "Please enter a target location",
+    "scoutFailed": "Scout action failed",
+    "pipelineFailed": "Failed to launch pipeline"
+  }
+}

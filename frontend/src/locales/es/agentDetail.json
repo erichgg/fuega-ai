@@ -1,0 +1,67 @@
+{
+  "tabs": {
+    "chat": "Chat",
+    "actions": "Acciones",
+    "hitlControls": "Controles HITL",
+    "logs": "Registros"
+  },
+  "notFound": "Agente no encontrado",
+  "notFoundDesc": "Este agente no existe o el backend no esta disponible.",
+  "back": "Volver",
+  "export": "Exportar",
+  "import": "Importar",
+  "labels": {
+    "spend": "Gasto",
+    "budget": "Presupuesto",
+    "calls": "Llamadas",
+    "usage": "Uso",
+    "modelTools": "Modelo y Herramientas",
+    "inputs": "Entradas",
+    "outputs": "Salidas",
+    "performance": "Rendimiento",
+    "success": "Exito",
+    "noneSpecified": "No especificado"
+  },
+  "systemPrompt": "Prompt del Sistema",
+  "chat": {
+    "title": "Chat Directo",
+    "session": "Sesion",
+    "clear": "Limpiar",
+    "sendMessage": "Envia un mensaje para chatear con {{name}}",
+    "placeholder": "Preguntale a {{name}}...",
+    "requestFailed": "La solicitud fallo. Verifica el backend."
+  },
+  "actions": {
+    "title": "Acciones Disponibles para {{name}}",
+    "description": "Ejecuta pasos individuales del flujo de trabajo. Cada uno realiza una sola llamada API a este agente.",
+    "noActions": "No hay acciones de flujo de trabajo asignadas",
+    "running": "Ejecutando...",
+    "result": "Resultado"
+  },
+  "hitl": {
+    "title": "Controles Humano-en-el-Ciclo",
+    "description": "Configura cuales acciones requieren aprobacion humana antes de ejecutarse.",
+    "auto": "Auto",
+    "approve": "Aprobar",
+    "manual": "Manual",
+    "noActions": "No hay acciones configuradas",
+    "noActionsDesc": "Las acciones del agente apareceran aqui una vez que el backend las proporcione."
+  },
+  "logs": {
+    "title": "Registro de Actividad",
+    "noActivity": "Sin actividad aun",
+    "action": "Accion"
+  },
+  "errors": {
+    "updateActionMode": "Error al actualizar modo de accion",
+    "exportFailed": "Error al exportar configuracion",
+    "importFailed": "Error al importar configuracion",
+    "actionFailed": "La accion fallo",
+    "statusFailed": "Error al actualizar estado"
+  },
+  "modeSetTo": "{{action}} configurado a {{mode}}",
+  "configExported": "Configuracion exportada",
+  "configImported": "Configuracion importada exitosamente",
+  "pauseAgent": "Pausar agente",
+  "activateAgent": "Activar agente"
+}

@@ -1,0 +1,33 @@
+{
+  "title": "Analytics",
+  "subtitle": "Financial performance and cost tracking",
+  "ranges": { "7d": "7d", "30d": "30d", "90d": "90d" },
+  "stats": {
+    "monthlyRevenue": "Monthly Revenue",
+    "totalApiCosts": "Total API Costs",
+    "netProfit": "Net Profit",
+    "costPerCall": "Cost per Call",
+    "activeAgents": "Active Agents",
+    "profitable": "Profitable",
+    "loss": "Loss"
+  },
+  "charts": {
+    "costTrend": "Cost Trend",
+    "dailyCosts": "Daily API costs ({{range}})",
+    "costPerAgent": "Cost per Agent",
+    "apiSpend": "API spend breakdown",
+    "plBreakdown": "P&L Breakdown",
+    "thisMonth": "This month"
+  },
+  "pl": {
+    "revenue": "Revenue",
+    "apiCosts": "API Costs",
+    "netProfit": "Net Profit"
+  },
+  "empty": {
+    "noData": "No analytics data",
+    "noDataDesc": "Run some workflows so agents generate cost and revenue data.",
+    "noAgentCosts": "No agent costs yet"
+  },
+  "vsLastPeriod": "vs last period"
+}

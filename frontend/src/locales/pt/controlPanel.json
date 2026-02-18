@@ -1,0 +1,95 @@
+{
+  "title": "Painel de Controle",
+  "subtitle": "{{active}}/{{total}} agentes ativos — Dispare comandos, execute operacoes, controle a frota",
+  "tabs": {
+    "actions": "Acoes",
+    "fleet": "Frota de Agentes",
+    "pipelines": "Pipelines",
+    "prompt": "Prompt Direto"
+  },
+  "actions": {
+    "actionsCount": "{{count}} acoes",
+    "via": "via {{agent}}"
+  },
+  "fleet": {
+    "activateAll": "Ativar Todos",
+    "pauseAll": "Pausar Todos",
+    "manageAgents": "Gerenciar Agentes",
+    "activeCount": "{{count}} ativos",
+    "pausedCount": "{{count}} pausados"
+  },
+  "pipelines": {
+    "info": "Pipelines executam multiplos agentes em sequencia. Cada pipeline aciona o fluxo de trabalho completo de ponta a ponta.",
+    "viewWorkflows": "Ver gerenciamento detalhado de fluxos de trabalho →",
+    "steps": "{{count}} etapas",
+    "runAll": "Executar"
+  },
+  "prompt": {
+    "description": "Selecione um agente e envie uma mensagem direta. Use isso para consultas pontuais ou instrucoes personalizadas.",
+    "selectAgent": "Selecione um agente acima para enviar uma mensagem direta",
+    "placeholder": "Pergunte qualquer coisa... (Enter para enviar)",
+    "close": "Fechar",
+    "presets": {
+      "statusReport": "Relatorio de status",
+      "workingOn": "No que voce esta trabalhando?",
+      "budgetCheck": "Verificacao de orcamento",
+      "anyBlockers": "Algum bloqueio?",
+      "weeklySummary": "Resumo semanal",
+      "topPriorities": "Principais prioridades"
+    }
+  },
+  "liveFeed": {
+    "title": "Feed ao Vivo",
+    "events": "{{count}} eventos",
+    "clearFeed": "Limpar feed",
+    "noActivity": "Sem atividade ainda",
+    "runAction": "Execute uma acao para ver o progresso aqui",
+    "ok": "ok",
+    "err": "err",
+    "running": "executando",
+    "total": "Total"
+  },
+  "categories": {
+    "contentOperations": "Operacoes de Conteudo",
+    "seoAnalytics": "SEO e Analiticos",
+    "salesOutreach": "Vendas e Prospeccao",
+    "advertising": "Publicidade",
+    "emailCampaigns": "Email e Campanhas",
+    "financeCompliance": "Financas e Conformidade",
+    "strategic": "Estrategico"
+  },
+  "actionLabels": {
+    "researchKeywords": "Pesquisar Palavras-chave",
+    "writeContent": "Escrever Conteudo",
+    "reviewContent": "Revisar Conteudo",
+    "schedulePosts": "Agendar Publicacoes",
+    "postToTwitter": "Publicar no Twitter",
+    "siteAudit": "Auditoria do Site",
+    "findOpportunities": "Encontrar Oportunidades",
+    "collectMetrics": "Coletar Metricas",
+    "generateReport": "Gerar Relatorio",
+    "findNewProspects": "Encontrar Novos Prospects",
+    "deepDiveResearch": "Pesquisa Aprofundada",
+    "scoreQualifyLeads": "Qualificar Leads",
+    "draftOutreachMessages": "Redigir Mensagens de Prospeccao",
+    "researchAudience": "Pesquisar Audiencia",
+    "createAdCopy": "Criar Texto Publicitario",
+    "trackAdMetrics": "Rastrear Metricas de Anuncios",
+    "designCampaign": "Projetar Campanha",
+    "reviewEmail": "Revisar Email",
+    "trackEmailMetrics": "Rastrear Metricas de Email",
+    "budgetStatus": "Status do Orcamento",
+    "clientProfitability": "Rentabilidade do Cliente",
+    "complianceCheck": "Verificacao de Conformidade",
+    "deliveryStatus": "Status de Entrega",
+    "ceoAssessment": "Avaliacao do CEO",
+    "scoreIdeas": "Pontuar Ideias",
+    "resourceAllocation": "Alocacao de Recursos"
+  },
+  "errors": {
+    "updateFailed": "Falha ao atualizar {{agent}}",
+    "actionFailed": "{{action}} FALHOU — {{agent}} nao conseguiu completar a acao",
+    "triggerFailed": "Falha ao executar \"{{pipeline}}\" — O backend esta em execucao?",
+    "promptFailed": "Falha ao contactar {{agent}} — O agente esta ativo e o backend em execucao?"
+  }
+}

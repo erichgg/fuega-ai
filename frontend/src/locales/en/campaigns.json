@@ -1,0 +1,44 @@
+{
+  "title": "Campaigns",
+  "subtitle": "Paid ads and email marketing",
+  "tabs": {
+    "paidAds": "Paid Ads",
+    "email": "Email"
+  },
+  "stats": {
+    "totalAdSpend": "Total Ad Spend",
+    "totalClicks": "Total Clicks",
+    "avgRoas": "Avg ROAS",
+    "emailCampaigns": "Email Campaigns"
+  },
+  "searchPlaceholder": "Search campaigns...",
+  "adColumns": {
+    "campaign": "Campaign",
+    "platform": "Platform",
+    "status": "Status",
+    "spend": "Spend",
+    "clicks": "Clicks",
+    "ctr": "CTR",
+    "cpc": "CPC",
+    "roas": "ROAS"
+  },
+  "emailColumns": {
+    "campaign": "Campaign",
+    "subject": "Subject",
+    "status": "Status",
+    "sent": "Sent",
+    "openRate": "Open Rate",
+    "clickRate": "Click Rate"
+  },
+  "adPerformance": "Ad Performance",
+  "adPerformanceSubtitle": "Clicks and impressions by campaign",
+  "impressionsLabel": "Impressions (÷100)",
+  "empty": {
+    "noAds": "No ad campaigns",
+    "noAdsDesc": "Ad campaigns will appear after running the ads pipeline.",
+    "noEmails": "No email campaigns",
+    "noEmailsDesc": "Email campaigns will appear after running the email pipeline.",
+    "noAdsMatch": "No ad campaigns match your search",
+    "noEmailsMatch": "No email campaigns match your search"
+  }
+}

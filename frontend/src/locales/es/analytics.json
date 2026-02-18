@@ -1,0 +1,33 @@
+{
+  "title": "Analíticas",
+  "subtitle": "Rendimiento financiero y seguimiento de costos",
+  "ranges": { "7d": "7d", "30d": "30d", "90d": "90d" },
+  "stats": {
+    "monthlyRevenue": "Ingresos Mensuales",
+    "totalApiCosts": "Costos Totales de API",
+    "netProfit": "Ganancia Neta",
+    "costPerCall": "Costo por Llamada",
+    "activeAgents": "Agentes Activos",
+    "profitable": "Rentable",
+    "loss": "Pérdida"
+  },
+  "charts": {
+    "costTrend": "Tendencia de Costos",
+    "dailyCosts": "Costos diarios de API ({{range}})",
+    "costPerAgent": "Costo por Agente",
+    "apiSpend": "Desglose de gastos de API",
+    "plBreakdown": "Desglose de P&L",
+    "thisMonth": "Este mes"
+  },
+  "pl": {
+    "revenue": "Ingresos",
+    "apiCosts": "Costos de API",
+    "netProfit": "Ganancia Neta"
+  },
+  "empty": {
+    "noData": "Sin datos analíticos",
+    "noDataDesc": "Ejecuta algunos flujos de trabajo para que los agentes generen datos de costos e ingresos.",
+    "noAgentCosts": "Sin costos de agentes aún"
+  },
+  "vsLastPeriod": "vs período anterior"
+}

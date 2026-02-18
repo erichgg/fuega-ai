@@ -1,0 +1,70 @@
+{
+  "title": "Pipeline de Leads",
+  "subtitle": "{{count}} leads em todas as etapas",
+  "stages": {
+    "prospect": "Prospectos",
+    "researched": "Pesquisados",
+    "qualified": "Qualificados",
+    "outreach_drafted": "Contato Redigido",
+    "outreach_sent": "Contato Enviado",
+    "responded": "Responderam",
+    "won": "Ganhos",
+    "lost": "Perdidos"
+  },
+  "views": {
+    "pipeline": "Pipeline",
+    "table": "Tabela"
+  },
+  "actions": {
+    "runFullPipeline": "Executar Pipeline Completo",
+    "running": "Executando...",
+    "scoutOnly": "Apenas Explorar",
+    "scouting": "Explorando...",
+    "addLead": "Adicionar Lead"
+  },
+  "form": {
+    "businessName": "Nome do negócio...",
+    "industry": "Setor",
+    "location": "Localização",
+    "email": "E-mail"
+  },
+  "scout": {
+    "locationPlaceholder": "Localização (ex. Cidade do México, Condesa)",
+    "industryPlaceholder": "Setor (opcional)",
+    "scout": "Explorar"
+  },
+  "pipeline": {
+    "title": "Executar Pipeline de Contato Completo",
+    "steps": "Explorar → Pesquisar → Pontuar → Redigir Contato → Revisar → Conformidade → Aprovação",
+    "targetLocation": "Localização alvo (ex. Monterrey, México)",
+    "industryOptional": "Setor (opcional)"
+  },
+  "stats": {
+    "prospects": "Prospectos",
+    "qualified": "Qualificados",
+    "outreach": "Contato",
+    "won": "Ganhos"
+  },
+  "columns": {
+    "business": "Negócio",
+    "stage": "Etapa",
+    "score": "Pontuação",
+    "location": "Localização",
+    "industry": "Setor",
+    "source": "Fonte"
+  },
+  "empty": {
+    "noLeads": "Sem leads",
+    "emptyTable": "Nenhum lead encontrado. Explore prospectos ou adicione um lead manualmente."
+  },
+  "pipelineStatus": {
+    "starting": "Iniciando pipeline...",
+    "completed": "Todos os {{count}} passos concluídos!",
+    "waitingApproval": "Aguardando sua aprovação"
+  },
+  "errors": {
+    "businessRequired": "O nome do negócio é obrigatório",
+    "enterLocation": "Insira uma localização para explorar",
+    "enterTargetLocation": "Insira uma localização alvo"
+  }
+}
