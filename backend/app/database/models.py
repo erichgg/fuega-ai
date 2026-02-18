@@ -82,8 +82,8 @@ class Agent(Base):
     total_calls = Column(Integer, default=0)
     total_tokens = Column(Integer, default=0)
     success_rate = Column(Float, default=1.0)
-    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
-    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
+    created_at = Column(DateTime, default=lambda: datetime.utcnow())
+    updated_at = Column(DateTime, default=lambda: datetime.utcnow(), onupdate=lambda: datetime.utcnow())
 
     logs = relationship("AgentLog", back_populates="agent")
     memories = relationship("AgentMemory", back_populates="agent")
@@ -103,7 +103,7 @@ class AgentLog(Base):
     success = Column(Boolean, default=True)
     error_message = Column(Text)
     metadata_ = Column("metadata", JSON)
-    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), index=True)
+    created_at = Column(DateTime, default=lambda: datetime.utcnow(), index=True)
 
     agent = relationship("Agent", back_populates="logs")
 
@@ -116,8 +116,8 @@ class AgentMemory(Base):
     key = Column(String(200), nullable=False)
     value = Column(JSON)
     confidence = Column(Float, default=0.5)
-    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
-    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
+    created_at = Column(DateTime, default=lambda: datetime.utcnow())
+    updated_at = Column(DateTime, default=lambda: datetime.utcnow(), onupdate=lambda: datetime.utcnow())
 
     agent = relationship("Agent", back_populates="memories")
 
@@ -142,8 +142,8 @@ class Client(Base):
     social_profiles = Column(JSON)
     status = Column(String(20), default="active")
     start_date = Column(DateTime)
-    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
-    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
+    created_at = Column(DateTime, default=lambda: datetime.utcnow())
+    updated_at = Column(DateTime, default=lambda: datetime.utcnow(), onupdate=lambda: datetime.utcnow())
 
     deliverables = relationship("ClientDeliverable", back_populates="client")
     invoices = relationship("Invoice", back_populates="client")
@@ -183,8 +183,8 @@ class Lead(Base):
     notes = Column(Text)
     assigned_agent = Column(String(50))
     client_id = Column(Integer, ForeignKey("clients.id"), index=True)
-    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
-    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
+    created_at = Column(DateTime, default=lambda: datetime.utcnow())
+    updated_at = Column(DateTime, default=lambda: datetime.utcnow(), onupdate=lambda: datetime.utcnow())
 
 
 class ClientDeliverable(Base):
@@ -197,7 +197,7 @@ class ClientDeliverable(Base):
     status = Column(SAEnum(DeliverableStatus), default=DeliverableStatus.PENDING)
     due_date = Column(DateTime)
     delivered_date = Column(DateTime)
-    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    created_at = Column(DateTime, default=lambda: datetime.utcnow())
 
     client = relationship("Client", back_populates="deliverables")
 
@@ -216,7 +216,7 @@ class ContentIdea(Base):
     ceo_feedback = Column(Text)
     source_agent = Column(String(50))
     status = Column(SAEnum(ContentStatus), default=ContentStatus.IDEA)
-    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    created_at = Column(DateTime, default=lambda: datetime.utcnow())
 
 
 class ContentDraft(Base):
@@ -237,8 +237,8 @@ class ContentDraft(Base):
     editor_scores_detail = Column(JSON)
     revision_count = Column(Integer, default=0)
     status = Column(SAEnum(ContentStatus), default=ContentStatus.WRITING)
-    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
-    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
+    created_at = Column(DateTime, default=lambda: datetime.utcnow())
+    updated_at = Column(DateTime, default=lambda: datetime.utcnow(), onupdate=lambda: datetime.utcnow())
 
 
 class PublishedContent(Base):
@@ -249,7 +249,7 @@ class PublishedContent(Base):
     platform = Column(String(50), nullable=False)
     platform_post_id = Column(String(200))
     url = Column(String(500))
-    published_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    published_at = Column(DateTime, default=lambda: datetime.utcnow())
 
     metrics = relationship("ContentMetric", back_populates="content")
 
@@ -266,7 +266,7 @@ class ContentMetric(Base):
     comments = Column(Integer, default=0)
     reach = Column(Integer, default=0)
     engagement_rate = Column(Float, default=0.0)
-    collected_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    collected_at = Column(DateTime, default=lambda: datetime.utcnow())
 
     content = relationship("PublishedContent", back_populates="metrics")
 
@@ -282,7 +282,7 @@ class SEOAudit(Base):
     backlink_score = Column(Float)
     findings = Column(JSON)
     recommendations = Column(JSON)
-    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    created_at = Column(DateTime, default=lambda: datetime.utcnow())
 
 
 class SEOKeyword(Base):
@@ -296,8 +296,8 @@ class SEOKeyword(Base):
     search_volume = Column(Integer)
     difficulty = Column(Float)
     opportunity_score = Column(Float)
-    tracked_since = Column(DateTime, default=lambda: datetime.now(timezone.utc))
-    last_checked = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    tracked_since = Column(DateTime, default=lambda: datetime.utcnow())
+    last_checked = Column(DateTime, default=lambda: datetime.utcnow())
 
 
 class AdCampaign(Base):
@@ -320,8 +320,8 @@ class AdCampaign(Base):
     targeting = Column(JSON)
     start_date = Column(DateTime)
     end_date = Column(DateTime)
-    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
-    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
+    created_at = Column(DateTime, default=lambda: datetime.utcnow())
+    updated_at = Column(DateTime, default=lambda: datetime.utcnow(), onupdate=lambda: datetime.utcnow())
 
 
 class EmailCampaign(Base):
@@ -343,7 +343,7 @@ class EmailCampaign(Base):
     click_rate = Column(Float, default=0.0)
     scheduled_at = Column(DateTime)
     sent_at = Column(DateTime)
-    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    created_at = Column(DateTime, default=lambda: datetime.utcnow())
 
 
 class WorkflowRun(Base):
@@ -357,7 +357,7 @@ class WorkflowRun(Base):
     error_message = Column(Text)
     started_at = Column(DateTime)
     completed_at = Column(DateTime)
-    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    created_at = Column(DateTime, default=lambda: datetime.utcnow())
 
     steps = relationship("WorkflowStep", back_populates="run")
 
@@ -392,7 +392,7 @@ class Invoice(Base):
     period_end = Column(DateTime, nullable=False)
     status = Column(String(20), default="pending")
     paid_at = Column(DateTime)
-    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    created_at = Column(DateTime, default=lambda: datetime.utcnow())
 
     client = relationship("Client", back_populates="invoices")
 
@@ -406,8 +406,8 @@ class BudgetTracking(Base):
     actual_usd = Column(Float, default=0.0)
     variance_usd = Column(Float, default=0.0)
     notes = Column(Text)
-    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
-    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
+    created_at = Column(DateTime, default=lambda: datetime.utcnow())
+    updated_at = Column(DateTime, default=lambda: datetime.utcnow(), onupdate=lambda: datetime.utcnow())
 
 
 class RevenueEvent(Base):
@@ -418,4 +418,4 @@ class RevenueEvent(Base):
     amount_mxn = Column(Float)
     description = Column(String(300))
     event_type = Column(String(50))
-    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    created_at = Column(DateTime, default=lambda: datetime.utcnow())
