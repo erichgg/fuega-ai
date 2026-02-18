@@ -4,8 +4,15 @@ from backend.app.config import get_settings
 
 settings = get_settings()
 
+# Railway provides postgresql:// URLs but asyncpg needs postgresql+asyncpg://
+_db_url = settings.database_url
+if _db_url.startswith("postgresql://"):
+    _db_url = _db_url.replace("postgresql://", "postgresql+asyncpg://", 1)
+elif _db_url.startswith("postgres://"):
+    _db_url = _db_url.replace("postgres://", "postgresql+asyncpg://", 1)
+
 engine = create_async_engine(
-    settings.database_url,
+    _db_url,
     echo=False,
     pool_pre_ping=True,
 )
