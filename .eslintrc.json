@@ -1,0 +1,12 @@
+{
+  "extends": "next/core-web-vitals",
+  "rules": {
+    "no-restricted-syntax": [
+      "error",
+      {
+        "selector": "TSTypeReference[typeName.name='any']",
+        "message": "Do not use 'any' type. Use 'unknown' or a specific type instead."
+      }
+    ]
+  }
+}

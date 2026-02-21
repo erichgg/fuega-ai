@@ -1,0 +1,81 @@
+# Environment secrets - NEVER commit
+.env
+.env.*
+!.env.example
+
+# Dependencies
+node_modules/
+
+# Next.js
+.next/
+out/
+
+# Build output
+dist/
+build/
+
+# Database
+*.db
+*.db-shm
+*.db-wal
+data/*.db
+
+# Logs
+*.log
+build_log.txt
+build_log_detail.txt
+
+# Builder state
+.builder_state.json
+.temp_prompt_*.txt
+outputs/
+
+# BFG / scrubbing
+passwords.txt
+preserved_keys.txt
+
+# Keys and certs
+*.pem
+*.key
+*.cert
+
+# OS files
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# IDE
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Python (builder script)
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.venv/
+
+# Vercel
+.vercel
+
+# TypeScript
+*.tsbuildinfo
+
+# Debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Testing
+coverage/
+.nyc_output/
+
+# Misc
+*.bak
+*.tmp
+*.swp
