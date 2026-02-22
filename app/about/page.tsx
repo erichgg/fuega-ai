@@ -84,8 +84,22 @@ const comparisonRows: {
     fuega: "yes",
   },
   {
-    feature: "No premium tiers",
+    feature: "No influence / premium tiers",
     reddit: "no",
+    discord: "no",
+    x: "no",
+    fuega: "yes",
+  },
+  {
+    feature: "No ID / photo verification",
+    reddit: "no",
+    discord: "no",
+    x: "no",
+    fuega: "yes",
+  },
+  {
+    feature: "No phone number required",
+    reddit: "partial",
     discord: "no",
     x: "no",
     fuega: "yes",
@@ -139,9 +153,9 @@ function CellIcon({ value }: { value: CellValue }) {
     case "yes":
       return <Check className="mx-auto h-4 w-4 text-flame-400" />;
     case "no":
-      return <X className="mx-auto h-4 w-4 text-ash-600" />;
+      return <X className="mx-auto h-4 w-4 text-ember-500" />;
     case "partial":
-      return <Minus className="mx-auto h-4 w-4 text-ash-500" />;
+      return <Minus className="mx-auto h-4 w-4 text-ash-400" />;
     case "paid":
       return <span className="text-xs text-ash-500">$</span>;
     default:
@@ -261,9 +275,9 @@ export default function AboutPage() {
           <p className="mt-4 text-xs text-ash-600">
             <Check className="mr-1 inline h-3 w-3 text-flame-400" /> = yes
             <span className="mx-2 text-ash-700">·</span>
-            <Minus className="mr-1 inline h-3 w-3 text-ash-500" /> = partial / inconsistent
+            <Minus className="mr-1 inline h-3 w-3 text-ash-400" /> = partial / inconsistent
             <span className="mx-2 text-ash-700">·</span>
-            <X className="mr-1 inline h-3 w-3 text-ash-600" /> = no
+            <X className="mr-1 inline h-3 w-3 text-ember-500" /> = no
           </p>
         </section>
 
