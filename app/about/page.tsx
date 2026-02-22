@@ -211,7 +211,7 @@ export default function AboutPage() {
             overlords. No hidden algorithms.
           </p>
           <p className="mt-4 text-base leading-relaxed text-ash-400">
-            No ads. No premium tiers. No data harvesting. <F /> is
+            No ads. No influence. No data harvesting. <F /> is
             tip-supported — if you want to help keep the lights on, you get a
             badge and some cosmetics. That&apos;s the entire business model.
           </p>

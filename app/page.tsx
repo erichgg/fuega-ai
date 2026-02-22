@@ -18,21 +18,21 @@ import { CommunityPrefix } from "@/components/fuega/community-prefix";
 const principles = [
   {
     icon: Scale,
-    title: "You write the rules",
+    title: "You write the rules. AI enforces.",
     description:
-      "Every community writes and votes on its own AI moderator prompt. No corporate overlords. No secret algorithms. The community decides what's acceptable — then AI enforces it, transparently.",
+      "Every community writes and votes on its own moderation rules. AI enforces exactly what was decided — nothing more. Every prompt is public. Every decision is auditable.",
   },
   {
     icon: Eye,
     title: "Every decision is public",
     description:
-      "Every single moderation action is logged with full reasoning. See exactly why something was approved, flagged, or removed. Disagree? Challenge it. The log doesn't lie.",
+      "Every moderation action is logged with full reasoning. See exactly why something was approved, flagged, or removed. Disagree? Challenge it. The log doesn't lie.",
   },
   {
     icon: Shield,
     title: "Real anonymity, not theatre",
     description:
-      "No email. No phone. No tracking pixels. IPs are SHA-256 hashed with rotating salts and deleted after 30 days. We can't identify you even if we wanted to.",
+      "No email. No phone. No ID verification. No photo uploads. No tracking pixels. IPs are SHA-256 hashed with rotating salts and deleted after 30 days. We can't identify you even if we wanted to.",
   },
   {
     icon: Vote,
@@ -42,9 +42,9 @@ const principles = [
   },
   {
     icon: FileCode2,
-    title: "AI serves the community",
+    title: "You choose the AI",
     description:
-      "AI doesn't make the rules — you do. AI enforces what the community voted for, nothing more. Every prompt is public. Every decision is auditable. AI is the tool, not the authority.",
+      "Communities vote on which AI model drives their moderation. Don't trust a provider's training data? Vote it out. Starting with Anthropic — built to support any model from day one.",
   },
   {
     icon: Heart,
