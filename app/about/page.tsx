@@ -203,17 +203,21 @@ export default function AboutPage() {
             Why <F /> exists
           </h1>
           <p className="mt-5 text-base leading-relaxed text-ash-300">
-            Online discussion is broken. Not because people are bad — but because
-            platforms profit from outrage, sell your data, and hide how they
-            moderate. <F /> is different. Communities write their own rules, vote
-            on them, and AI enforces exactly what was decided — nothing more.
-            Every decision is public, every prompt is auditable, and the
-            governance belongs to the people who actually use the space.
+            X floods your For You page with engagement-farmed bot replies until
+            you&apos;re convinced half the country hates you — when it&apos;s
+            really just a few thousand accounts running 24/7. Discord now
+            requires ID verification in some servers and hands data to
+            governments under laws like the UK&apos;s Online Safety Act. Reddit
+            sold 16 years of your posts to Google for $60M to train AI models
+            you&apos;ll never benefit from. These platforms don&apos;t work for
+            you. They work on you.
           </p>
           <p className="mt-4 text-base leading-relaxed text-ash-400">
-            The whole thing is tip-supported — if you want to help keep the
-            lights on, you get a badge and some cosmetics. That&apos;s the entire
-            business model. No ads, no data harvesting, no influence for sale.
+            <F /> is the opposite. Communities write their own rules, vote on
+            them, and AI enforces exactly what was decided — nothing more. The
+            whole thing is tip-supported: help keep the lights on and you get a
+            badge and some cosmetics. That&apos;s it. No ads, no data
+            harvesting, no influence for sale.
           </p>
         </section>
 
@@ -287,19 +291,19 @@ export default function AboutPage() {
             Open source social media
           </h2>
           <p className="mt-4 text-ash-300 leading-relaxed">
-            <F /> isn&apos;t a product — it&apos;s a project. The code is open,
-            the moderation prompts are public, and the governance is democratic.
-            If you don&apos;t like how something works, you can propose a change,
-            rally votes, and actually fix it. That&apos;s not a support ticket —
-            that&apos;s real power, in your hands.
+            <F /> isn&apos;t a product — it&apos;s a project. The code is
+            public, the moderation prompts are readable, and if you don&apos;t
+            like how something works you can propose a change, rally votes, and
+            actually fix it. Try doing that on a platform owned by a billionaire
+            who changes the rules based on what he had for breakfast.
           </p>
           <p className="mt-4 text-ash-400 leading-relaxed">
-            We believe social media lost its way when platforms started
-            optimizing for engagement instead of community — when algorithms
-            learned that outrage keeps people scrolling and &quot;moderation&quot;
-            became a black box nobody could audit. <F /> is an attempt to
-            course-correct, to prove that communities can govern themselves
-            when you give them the right tools and full transparency.
+            Most platforms optimize for engagement because that&apos;s what
+            sells ads. Outrage gets clicks, clicks get impressions, impressions
+            get revenue. That&apos;s why your feed is full of rage bait instead
+            of things you actually care about. <F /> doesn&apos;t have that
+            incentive — there are no ads to sell, so there&apos;s no reason to
+            keep you angry.
           </p>
 
           <div className="mt-6 grid gap-4 sm:grid-cols-3">
@@ -309,7 +313,8 @@ export default function AboutPage() {
                 Fully open source
               </p>
               <p className="mt-1 text-xs text-ash-500">
-                Audit the code. Fork it. Contribute. We have nothing to hide.
+                Audit the code, fork it, contribute. If you can read code, you
+                can verify every claim we make.
               </p>
             </div>
             <div className="border border-ash-800 bg-ash-900/30 p-4">
@@ -318,8 +323,8 @@ export default function AboutPage() {
                 Tip-supported
               </p>
               <p className="mt-1 text-xs text-ash-500">
-                Tips get you a badge and cosmetics. Everyone uses the same
-                platform — nobody pays to shape what you see.
+                Tips get you a badge and cosmetics. The platform itself is
+                identical for everyone — paying doesn&apos;t buy reach.
               </p>
             </div>
             <div className="border border-ash-800 bg-ash-900/30 p-4">
@@ -328,8 +333,8 @@ export default function AboutPage() {
                 Built on feedback
               </p>
               <p className="mt-1 text-xs text-ash-500">
-                Every feature started as a community proposal. We build what
-                you vote for, not what investors want.
+                Features come from community proposals and votes, not product
+                managers chasing quarterly metrics.
               </p>
             </div>
           </div>
@@ -338,29 +343,31 @@ export default function AboutPage() {
         {/* The Bigger Picture */}
         <section className="mt-12">
           <h2 className="text-2xl font-bold text-ash-100 sm:text-3xl">
-            Bringing accountability back
+            How governance actually works
           </h2>
           <p className="mt-4 text-ash-300 leading-relaxed">
-            Somewhere along the way, the internet forgot that communities work
-            best when people set their own standards. <F /> brings that back.
-            Find people who share your values, set the rules together, and hold
-            each other — and the AI — accountable. Every moderation decision is
-            logged, reasoned, and challengeable.
+            Every community on <F /> has three layers of governance: community,
+            category, and platform. Rules flow upward from the people, not down
+            from admins. If your community wants strict sourcing requirements
+            on claims, you vote that in. If another community wants loose,
+            anything-goes discussion, that&apos;s their call. Neither group
+            gets to impose on the other.
           </p>
           <p className="mt-4 text-ash-400 leading-relaxed">
-            This isn&apos;t about being a &quot;free speech platform&quot; or a
-            &quot;safe space.&quot; It&apos;s about self-determination — your
-            community decides what&apos;s acceptable, not a corporation or an
-            algorithm or some trust &amp; safety team you&apos;ll never meet.
-            The people who actually use the space are the ones in charge.
+            This isn&apos;t &quot;free speech absolutism&quot; and it&apos;s
+            not a &quot;safe space.&quot; It&apos;s self-determination.
+            When Reddit banned r/TheDonald, millions of people had zero say.
+            When X algorithmically amplifies certain political content into
+            everyone&apos;s feed, there&apos;s no opt-out. On <F />, your
+            community&apos;s rules are yours to write, change, or scrap entirely
+            through a vote.
           </p>
           <p className="mt-4 text-ash-400 leading-relaxed">
-            You even choose the AI. Communities vote on which model API drives
-            their moderation — starting with Anthropic, with the architecture
+            You even choose which AI does the moderating. Communities vote on
+            the model API — starting with Anthropic, with the architecture
             built to support any provider. Don&apos;t trust a particular
-            model&apos;s training data? Vote it out. Want to try a new one?
-            Propose it. The community decides which knowledge shapes their
-            moderation, not us.
+            model&apos;s training data? Vote it out. The community controls
+            which knowledge shapes their moderation, not us.
           </p>
         </section>
 
