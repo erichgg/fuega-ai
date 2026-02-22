@@ -7,6 +7,7 @@ import {
   Flame,
   ArrowRight,
   Lock,
+  Heart,
   MessageSquare,
   FileCode2,
   Scale,
@@ -46,10 +47,10 @@ const principles = [
       "AI doesn't make the rules — you do. AI enforces what the community voted for, nothing more. Every prompt is public. Every decision is auditable. AI is the tool, not the authority.",
   },
   {
-    icon: Lock,
-    title: "Security-first architecture",
+    icon: Heart,
+    title: "No ads. No premium. Tip-supported.",
     description:
-      "7-layer security. Parameterized queries only. Rate limiting on every endpoint. CSP headers. CSRF protection. Prompt injection defenses. We built this like we're the target.",
+      "No ads, no paywalls, no \"premium\" tiers that split the community. Everyone gets the same platform. If you want to support us, tip — you'll get a badge and some cosmetics. That's it. We don't sell your attention.",
   },
 ];
 
@@ -163,6 +164,10 @@ export default function LandingPage() {
                 <span className="text-flame-500/70 mr-2">&gt;</span>
                 <span className="text-ash-500">Every moderation decision is public and auditable.</span>
               </p>
+              <p>
+                <span className="text-flame-500/70 mr-2">&gt;</span>
+                <span className="text-ash-600">No ads. No premium tiers. Tip-supported.</span>
+              </p>
             </div>
 
             <div className="mt-8 flex flex-col gap-3 sm:flex-row lg:mt-8">
@@ -185,6 +190,16 @@ export default function LandingPage() {
               <span className="font-mono">
                 <span className="text-flame-500/50">[</span>
                 no email
+                <span className="text-flame-500/50">]</span>
+              </span>
+              <span className="font-mono">
+                <span className="text-flame-500/50">[</span>
+                no ads
+                <span className="text-flame-500/50">]</span>
+              </span>
+              <span className="font-mono">
+                <span className="text-flame-500/50">[</span>
+                no premium tiers
                 <span className="text-flame-500/50">]</span>
               </span>
               <span className="font-mono">
@@ -304,8 +319,8 @@ export default function LandingPage() {
             Find your people. Set your standards.
           </h2>
           <p className="mt-3 text-sm text-ash-400">
-            Communities that govern themselves. Rules you actually voted for.
-            People who share your standards, not some algorithm&apos;s idea of engagement.
+            No algorithms deciding what you see. No ads. No premium tiers.
+            Just communities that govern themselves and people who share your standards.
           </p>
           <Link
             href="/signup"
