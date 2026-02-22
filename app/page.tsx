@@ -48,9 +48,9 @@ const principles = [
   },
   {
     icon: Heart,
-    title: "No ads. No premium. Tip-supported.",
+    title: "No ads. No influence. Tip-supported.",
     description:
-      "No ads, no paywalls, no \"premium\" tiers that split the community. Everyone gets the same platform. If you want to support us, tip — you'll get a badge and some cosmetics. That's it. We don't sell your attention.",
+      "No paywalls, no sponsored content, no one paying to shape what you see. Everyone gets the same platform. Want to support us? Tip — you get a badge and some cosmetics. That's it.",
   },
 ];
 
@@ -166,7 +166,7 @@ export default function LandingPage() {
               </p>
               <p>
                 <span className="text-flame-500/70 mr-2">&gt;</span>
-                <span className="text-ash-600">No ads. No premium tiers. Tip-supported.</span>
+                <span className="text-ash-600">No ads. No influence. Tip-supported.</span>
               </p>
             </div>
 
@@ -199,7 +199,7 @@ export default function LandingPage() {
               </span>
               <span className="font-mono">
                 <span className="text-flame-500/50">[</span>
-                no premium tiers
+                no influence
                 <span className="text-flame-500/50">]</span>
               </span>
               <span className="font-mono">
@@ -319,7 +319,7 @@ export default function LandingPage() {
             Find your people. Set your standards.
           </h2>
           <p className="mt-3 text-sm text-ash-400">
-            No algorithms deciding what you see. No ads. No premium tiers.
+            No algorithms deciding what you see. No ads. No influence.
             Just communities that govern themselves and people who share your standards.
           </p>
           <Link
