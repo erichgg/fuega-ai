@@ -192,7 +192,7 @@ export default function PostDetailPage() {
         className="inline-flex items-center gap-1.5 text-sm text-ash-500 transition-colors hover:text-ash-300"
       >
         <ArrowLeft className="h-3.5 w-3.5" />
-        f/{communitySlug}
+        <span className="text-lava-hot">f</span><span className="text-smoke mx-1">|</span><span>{communitySlug}</span>
       </Link>
 
       {/* Post */}
@@ -210,7 +210,7 @@ export default function PostDetailPage() {
                 href={`/f/${post.community}`}
                 className="font-medium text-flame-400 hover:underline"
               >
-                f/{post.community}
+                <span className="text-lava-hot">f</span><span className="text-smoke mx-1">|</span><span>{post.community}</span>
               </Link>
               <span>·</span>
               <UserAvatar username={post.author} size="sm" />

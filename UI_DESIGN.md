@@ -2,6 +2,10 @@
 
 > Definitive design reference for the fuega.ai discussion platform.
 > All components, colors, typography, and visual effects defined here.
+>
+> **Authoritative source:** The fuega-site codebase at `../fuega-site/`
+> is the reference implementation. When this doc and the source code conflict,
+> the source code wins. This doc was last synced from fuega-site on 2026-02-21.
 
 ---
 
@@ -120,26 +124,23 @@ Core principles:
 ### Font Family
 
 ```css
-:root {
+@theme inline {
   --font-sans: "JetBrains Mono", monospace;
   --font-mono: "JetBrains Mono", monospace;
 }
 ```
 
-Load via Google Fonts:
-```html
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap" rel="stylesheet">
-```
-
-Or via `next/font`:
+Loaded via `next/font` in `layout.tsx`:
 ```typescript
 import { JetBrains_Mono } from 'next/font/google'
 
 const jetbrainsMono = JetBrains_Mono({
   subsets: ['latin'],
-  variable: '--font-mono',
+  variable: '--font-jetbrains',
 })
 ```
+
+Body applies: `className={`${jetbrainsMono.variable} font-mono antialiased bg-void text-foreground`}`
 
 ### Type Scale
 
@@ -147,7 +148,7 @@ All text uses JetBrains Mono. No sans-serif anywhere.
 
 | Element             | Tailwind Classes                           | Notes                    |
 |---------------------|--------------------------------------------|--------------------------|
-| Hero title          | `text-5xl sm:text-6xl md:text-7xl font-bold` | Per-character animation |
+| Hero title          | `text-4xl sm:text-7xl md:text-8xl font-bold` | Per-character animation |
 | Section heading     | `text-3xl sm:text-4xl font-bold`           | With glow-text           |
 | Card title          | `text-lg sm:text-xl font-semibold`         |                          |
 | Body text           | `text-sm sm:text-base`                     | Default                  |
@@ -231,104 +232,20 @@ Every component: `rounded-none` or inherits `--radius: 0px`.
 
 ## Tailwind Configuration
 
-### tailwind.config.ts
+### IMPORTANT: Tailwind CSS v4
 
-```typescript
-import type { Config } from "tailwindcss"
-
-const config: Config = {
-  darkMode: ["class"],
-  content: [
-    "./pages/**/*.{ts,tsx}",
-    "./components/**/*.{ts,tsx}",
-    "./app/**/*.{ts,tsx}",
-    "./src/**/*.{ts,tsx}",
-  ],
-  theme: {
-    extend: {
-      fontFamily: {
-        sans: ["var(--font-mono)", "monospace"],
-        mono: ["var(--font-mono)", "monospace"],
-      },
-      colors: {
-        // Brand fire palette
-        "lava-hot": "#FF4500",
-        "lava": "#FF5722",
-        "lava-mid": "#FF6B2C",
-        "ember": "#FF3D00",
-        "fire": "#FF4500",
-
-        // Neutral palette
-        "ash": "#8B8B8B",
-        "smoke": "#555555",
-        "charcoal": "#1A1A1A",
-        "void": "#000000",
-        "coal": "#0A0A0A",
-
-        // Accent
-        "teal": "#00D4AA",
-
-        // Semantic (shadcn/ui compatible)
-        background: "var(--background)",
-        foreground: "var(--foreground)",
-        card: {
-          DEFAULT: "var(--card)",
-          foreground: "var(--foreground)",
-        },
-        primary: {
-          DEFAULT: "var(--primary)",
-          foreground: "var(--primary-foreground)",
-        },
-        secondary: {
-          DEFAULT: "var(--secondary)",
-          foreground: "var(--foreground)",
-        },
-        muted: {
-          DEFAULT: "var(--muted)",
-          foreground: "var(--muted-foreground)",
-        },
-        destructive: {
-          DEFAULT: "var(--destructive)",
-          foreground: "var(--foreground)",
-        },
-        border: "var(--border)",
-        ring: "var(--ring)",
-      },
-      borderRadius: {
-        lg: "var(--radius)",
-        md: "var(--radius)",
-        sm: "var(--radius)",
-      },
-      keyframes: {
-        "cursor-blink": {
-          "0%, 100%": { opacity: "1" },
-          "50%": { opacity: "0" },
-        },
-        "ember-rise": {
-          "0%": { transform: "translateY(0) scale(1)", opacity: "1" },
-          "100%": { transform: "translateY(-100vh) scale(0)", opacity: "0" },
-        },
-      },
-      animation: {
-        "cursor-blink": "cursor-blink 1s step-end infinite",
-        "ember-rise": "ember-rise 4s ease-out forwards",
-      },
-    },
-  },
-  plugins: [require("tailwindcss-animate")],
-}
-
-export default config
-```
+fuega-site uses **Tailwind CSS v4** with the new CSS-first configuration.
+There is **NO `tailwind.config.ts` file**. All theme customization is done
+via `@theme inline` blocks in `globals.css`.
 
 ### globals.css
 
 ```css
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+@import "tw-animate-css";
 
 :root {
+  /* Lava brand tokens */
   --lava-hot: #FF4500;
   --lava: #FF5722;
   --lava-mid: #FF6B2C;
@@ -338,108 +255,221 @@ export default config
   --charcoal: #1A1A1A;
   --void: #000000;
   --coal: #0A0A0A;
-  --fire: #FF4500;
-  --teal: #00D4AA;
 
+  /* Legacy aliases */
+  --fire: #FF4500;
+  --fire-light: #FF5722;
+  --fire-dark: #CC4A10;
+  --teal: #00D4AA;
+  --teal-light: #33E0BE;
+  --teal-dark: #00A888;
+  --navy: #1A1A1A;
+  --navy-light: #1A1A1A;
+  --navy-dark: #000000;
+
+  /* shadcn/ui semantic tokens */
+  --radius: 0px;
   --background: #000000;
   --foreground: #F0F0F0;
   --card: #0A0A0A;
+  --card-foreground: #F0F0F0;
+  --popover: #0A0A0A;
+  --popover-foreground: #F0F0F0;
   --primary: #FF4500;
   --primary-foreground: #000000;
   --secondary: #00D4AA;
+  --secondary-foreground: #FFFFFF;
   --muted: #1A1A1A;
   --muted-foreground: #8B8B8B;
-  --border: rgba(255, 69, 0, 0.2);
+  --accent: #1A1A1A;
+  --accent-foreground: #F0F0F0;
   --destructive: #EF4444;
+  --destructive-foreground: #FFFFFF;
+  --border: rgba(255, 69, 0, 0.2);
+  --input: rgba(255, 69, 0, 0.2);
   --ring: #FF4500;
-  --radius: 0px;
+  --foreground-muted: #8B8B8B;
+
+  /* Chart colors */
+  --chart-1: #FF4500;
+  --chart-2: #00D4AA;
+  --chart-3: #FF5722;
+  --chart-4: #33E0BE;
+  --chart-5: #CC4A10;
+}
+
+@theme inline {
+  /* Lava colors */
+  --color-lava-hot: var(--lava-hot);
+  --color-lava: var(--lava);
+  --color-lava-mid: var(--lava-mid);
+  --color-ember: var(--ember);
+  --color-ash: var(--ash);
+  --color-smoke: var(--smoke);
+  --color-charcoal: var(--charcoal);
+  --color-void: var(--void);
+  --color-coal: var(--coal);
+
+  /* Legacy aliases */
+  --color-fire: var(--fire);
+  --color-fire-light: var(--fire-light);
+  --color-fire-dark: var(--fire-dark);
+  --color-navy: var(--navy);
+  --color-navy-light: var(--navy-light);
+  --color-navy-dark: var(--navy-dark);
+  --color-teal: var(--teal);
+  --color-teal-light: var(--teal-light);
+  --color-teal-dark: var(--teal-dark);
+  --color-foreground-muted: var(--foreground-muted);
+
+  /* shadcn/ui semantic colors */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+
+  --radius-sm: 0px;
+  --radius-md: 0px;
+  --radius-lg: 0px;
+  --radius-xl: 0px;
 
   --font-sans: "JetBrains Mono", monospace;
   --font-mono: "JetBrains Mono", monospace;
 }
 
-/* ===== CRT SCANLINE OVERLAY ===== */
-body::after {
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-mono);
+  overflow-x: hidden;
+}
+
+/* CRT scanline overlay — uses body::before (NOT ::after) */
+body::before {
   content: "";
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
+  inset: 0;
   z-index: 9999;
+  pointer-events: none;
+  opacity: 0.03;
   background: repeating-linear-gradient(
     0deg,
-    rgba(0, 0, 0, 0.03) 0px,
-    rgba(0, 0, 0, 0.03) 1px,
-    transparent 1px,
-    transparent 2px
+    transparent,
+    transparent 2px,
+    rgba(255, 69, 0, 0.03) 2px,
+    rgba(255, 69, 0, 0.03) 4px
   );
-  opacity: 0.03;
 }
 
-/* ===== GLOW TEXT CLASSES ===== */
-@layer utilities {
-  .glow-text {
-    text-shadow:
-      0 0 20px rgba(255, 69, 0, 0.5),
-      0 0 40px rgba(255, 69, 0, 0.3);
-  }
-
-  .glow-text-subtle {
-    text-shadow:
-      0 0 10px rgba(255, 69, 0, 0.3);
-  }
-
-  .glow-text-intense {
-    text-shadow:
-      0 0 10px rgba(255, 69, 0, 0.8),
-      0 0 30px rgba(255, 69, 0, 0.6),
-      0 0 60px rgba(255, 69, 0, 0.4),
-      0 0 100px rgba(255, 69, 0, 0.2);
-  }
+/* Glow text */
+.glow-text {
+  text-shadow: 0 0 20px rgba(255, 69, 0, 0.4), 0 0 40px rgba(255, 69, 0, 0.15);
 }
 
-/* ===== SCROLLBAR ===== */
-::-webkit-scrollbar {
-  width: 4px;
+.glow-text-subtle {
+  text-shadow: 0 0 10px rgba(255, 69, 0, 0.3);
 }
 
-::-webkit-scrollbar-track {
-  background: #000000;
+.glow-text-intense {
+  text-shadow:
+    0 0 10px rgba(255, 69, 0, 0.8),
+    0 0 30px rgba(255, 69, 0, 0.5),
+    0 0 60px rgba(255, 69, 0, 0.3),
+    0 0 100px rgba(255, 69, 0, 0.15);
 }
 
-::-webkit-scrollbar-thumb {
-  background: #FF4500;
+/* Blinking cursor */
+.cursor-blink {
+  animation: blink 1s step-end infinite;
 }
 
-/* Firefox */
-* {
-  scrollbar-width: thin;
-  scrollbar-color: #FF4500 #000000;
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
 }
 
-/* ===== TEXT SELECTION ===== */
+/* Terminal card */
+.terminal-card {
+  background: var(--coal);
+  border: 1px solid rgba(255, 69, 0, 0.2);
+}
+.terminal-card:hover {
+  border-color: rgba(255, 69, 0, 0.4);
+}
+
+/* Prompt prefix */
+.prompt::before {
+  content: "$ ";
+  color: var(--lava-hot);
+}
+
+/* Lava rule */
+hr.lava-rule {
+  border: none;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 69, 0, 0.4), transparent);
+}
+
+/* Ember particles */
+@keyframes ember-rise {
+  0% { transform: translateY(0) scale(1); opacity: 0.8; }
+  100% { transform: translateY(-100vh) scale(0); opacity: 0; }
+}
+
+.ember {
+  position: absolute;
+  width: 3px;
+  height: 3px;
+  background: var(--lava-hot);
+  border-radius: 50%;
+  animation: ember-rise linear infinite;
+  box-shadow: 0 0 6px rgba(255, 69, 0, 0.6);
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: #000; }
+::-webkit-scrollbar-thumb { background: var(--lava-hot); border-radius: 0; }
+
+/* Selection */
 ::selection {
   background: rgba(255, 69, 0, 0.3);
+  color: white;
 }
 
-/* ===== FOCUS RING ===== */
+/* Focus ring */
 *:focus-visible {
-  outline: 2px solid #FF4500;
+  outline: 2px solid var(--lava-hot);
   outline-offset: 2px;
 }
 
-/* ===== LAVA RULE (HR) ===== */
-.lava-rule {
-  border: none;
-  height: 1px;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    #FF4500,
-    transparent
-  );
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 ```
 
@@ -494,45 +524,54 @@ All buttons use `rounded-none` (0px border-radius).
 </button>
 ```
 
-#### Button Size Variants
+#### Button Size Variants (CVA-based)
 
-| Size    | Padding        | Text      |
-|---------|----------------|-----------|
-| sm      | `px-3 py-1.5`  | `text-xs` |
-| default | `px-4 py-2`    | `text-sm` |
-| lg      | `px-6 py-3`    | `text-base` |
-| icon    | `p-2`          | `text-sm` |
+| Size      | Classes                                                    |
+|-----------|------------------------------------------------------------|
+| default   | `h-9 px-4 py-2 has-[>svg]:px-3`                           |
+| xs        | `h-6 gap-1 px-2 text-xs has-[>svg]:px-1.5`                |
+| sm        | `h-8 gap-1.5 px-3 has-[>svg]:px-2.5`                      |
+| lg        | `h-10 px-6 has-[>svg]:px-4`                                |
+| icon      | `size-9`                                                   |
+| icon-xs   | `size-6 [&_svg:not([class*='size-'])]:size-3`              |
+| icon-sm   | `size-8`                                                   |
+| icon-lg   | `size-10`                                                  |
 
 ### Cards
 
-#### Standard Card
+#### Standard Card (shadcn/ui)
 ```html
-<div class="bg-coal border border-lava-hot/20 rounded-none p-4
-  hover:border-lava-hot/40 transition-colors">
-  <h3 class="text-lg font-semibold text-foreground">Title</h3>
-  <p class="text-sm text-ash mt-2">Description text here.</p>
+<div class="bg-coal text-card-foreground flex flex-col gap-6 rounded-none
+  border border-lava-hot/20 py-6 shadow-sm">
+  <!-- CardHeader uses px-6, CardContent uses px-6, CardFooter uses px-6 -->
+  <div class="px-6">
+    <h3 class="leading-none font-semibold">Title</h3>
+    <p class="text-muted-foreground text-sm">Description text here.</p>
+  </div>
 </div>
 ```
 
 #### Terminal Card
+
+Uses the `.terminal-card` CSS class (defined in globals.css):
+
 ```html
-<div class="bg-coal rounded-none overflow-hidden"
-  style="border: 1px solid rgba(255, 69, 0, 0.2);">
-  <!-- Title bar -->
+<div class="terminal-card">
+  <!-- Title bar — dots use <span> NOT <div>, NO rounded-full -->
   <div class="flex items-center gap-2 px-4 py-2 border-b border-lava-hot/20">
-    <div class="w-3 h-3 rounded-full bg-ember"></div>
-    <div class="w-3 h-3 rounded-full bg-lava-mid"></div>
-    <div class="w-3 h-3 rounded-full bg-ash"></div>
-    <span class="text-xs text-smoke ml-2">terminal</span>
+    <span class="w-3 h-3 bg-ember" />
+    <span class="w-3 h-3 bg-lava-mid" />
+    <span class="w-3 h-3 bg-ash/40" />
+    <span class="text-xs text-ash ml-2">fuega.ai -- bash</span>
   </div>
   <!-- Content -->
-  <div class="p-4 font-mono text-sm">
+  <div class="p-4 sm:p-6 font-mono text-sm">
     <span class="text-lava-hot font-bold">$ </span>
     <span class="text-foreground">command output here</span>
   </div>
 </div>
 ```
-On hover, the border color transitions to `rgba(255, 69, 0, 0.4)`.
+On hover, the border color transitions to `rgba(255, 69, 0, 0.4)` via CSS.
 
 #### Post Card (Discussion Platform)
 ```html
@@ -540,8 +579,8 @@ On hover, the border color transitions to `rgba(255, 69, 0, 0.4)`.
   hover:border-lava-hot/40 transition-colors">
   <!-- Header -->
   <div class="flex items-center gap-2 text-xs text-ash mb-2">
-    <span class="text-lava-hot">f/community</span>
-    <span class="text-smoke">|</span>
+    <span class="text-lava-hot">f</span><span class="text-smoke mx-1">|</span><span class="text-foreground">community</span>
+    <span class="text-smoke ml-1">·</span>
     <span>3h ago</span>
   </div>
   <!-- Title -->
@@ -654,14 +693,14 @@ On hover, the border color transitions to `rgba(255, 69, 0, 0.4)`.
 - Neutral state: `text-smoke`
 - Score color: `text-lava-hot` when positive, `text-teal` when negative, `text-smoke` when zero
 
-### Community Header (f/ page)
+### Community Header (f | page)
 
 ```html
 <div class="border-b border-lava-hot/20 pb-6 mb-6">
   <div class="flex items-start justify-between">
     <div>
       <h1 class="text-2xl sm:text-3xl font-bold text-foreground">
-        <span class="text-lava-hot">f/</span>community_name
+        <span class="text-lava-hot">f</span><span class="text-smoke mx-1">|</span>community_name
       </h1>
       <p class="text-sm text-ash mt-1">Community description here</p>
       <div class="flex items-center gap-4 mt-3 text-xs text-smoke">
@@ -841,27 +880,25 @@ Examples:
 
 ### CRT Scanline Overlay
 
-Applied to `body::after`. A full-screen fixed overlay of repeating horizontal
-lines at 0.03 opacity. Creates a subtle CRT monitor effect.
+Applied to `body::before` (NOT `::after`). A full-screen fixed overlay using
+**lava-tinted** scanlines (not black) at 0.03 opacity. Creates a subtle CRT
+monitor effect with a warm orange tone.
 
 ```css
-body::after {
+body::before {
   content: "";
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
+  inset: 0;
   z-index: 9999;
+  pointer-events: none;
+  opacity: 0.03;
   background: repeating-linear-gradient(
     0deg,
-    rgba(0, 0, 0, 0.03) 0px,
-    rgba(0, 0, 0, 0.03) 1px,
-    transparent 1px,
-    transparent 2px
+    transparent,
+    transparent 2px,
+    rgba(255, 69, 0, 0.03) 2px,
+    rgba(255, 69, 0, 0.03) 4px
   );
-  opacity: 0.03;
 }
 ```
 
@@ -869,78 +906,53 @@ body::after {
 
 Three levels of text glow using `text-shadow`:
 
-| Class                | Shadows                                          |
-|----------------------|--------------------------------------------------|
-| `.glow-text`         | 20px @ 0.5 opacity, 40px @ 0.3 opacity           |
-| `.glow-text-subtle`  | 10px @ 0.3 opacity                                |
-| `.glow-text-intense` | 10px @ 0.8, 30px @ 0.6, 60px @ 0.4, 100px @ 0.2 |
+| Class                | Shadows                                           |
+|----------------------|---------------------------------------------------|
+| `.glow-text`         | 20px @ 0.4 opacity, 40px @ 0.15 opacity           |
+| `.glow-text-subtle`  | 10px @ 0.3 opacity                                 |
+| `.glow-text-intense` | 10px @ 0.8, 30px @ 0.5, 60px @ 0.3, 100px @ 0.15 |
 
 All shadows use `rgba(255, 69, 0, ...)` (lava-hot).
 
-### Ember Particles (CSS)
+### Ember Particles (CSS-based component)
 
-Small dots that float upward from the bottom of the viewport:
+`EmberParticles` is a simple React component that renders CSS-animated
+ember dots. They use the `.ember` class from globals.css:
 
 ```css
-.ember-particle {
-  position: fixed;
-  bottom: 0;
+.ember {
+  position: absolute;
   width: 3px;
   height: 3px;
-  background: #FF4500;
-  box-shadow: 0 0 6px rgba(255, 69, 0, 0.5);
-  animation: ember-rise 4s ease-out forwards;
-  pointer-events: none;
-  z-index: 1;
-}
-
-@keyframes ember-rise {
-  0% {
-    transform: translateY(0) scale(1);
-    opacity: 1;
-  }
-  100% {
-    transform: translateY(-100vh) scale(0);
-    opacity: 0;
-  }
+  background: var(--lava-hot);
+  border-radius: 50%;
+  animation: ember-rise linear infinite;
+  box-shadow: 0 0 6px rgba(255, 69, 0, 0.6);
 }
 ```
 
-### FireParticles (Canvas)
-
-A canvas-based particle system for the hero section.
-Particles have magnetic attraction to the mouse cursor.
-
-Particle colors:
-- `#FF6B2C` (lava-mid)
-- `#FF8F5C` (light orange)
-- `#CC4A10` (dark ember)
-- `#00D4AA` (teal)
-- `#33E0BE` (light teal)
-
-Behavior:
-- Particles drift slowly by default
-- On mouse move, particles within a radius are attracted toward the cursor
-- Teal particles are rarer (roughly 20% of total)
-- Canvas covers the hero section, positioned absolute behind content
+Note: The ember particles start at `opacity: 0.8` (not 1) and use
+`linear` easing (not `ease-out`). See globals.css keyframes.
 
 ### Cursor Blink Animation
 
+Uses `.cursor-blink` class (NOT `.animate-cursor-blink`):
+
 ```css
-@keyframes cursor-blink {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0; }
+.cursor-blink {
+  animation: blink 1s step-end infinite;
 }
 
-.animate-cursor-blink {
-  animation: cursor-blink 1s step-end infinite;
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
 }
 ```
 
 Used for:
 - Terminal-style loading indicators
+- Typewriter cursor: `<span class="inline-block w-2 h-4 bg-lava-hot ml-0.5 cursor-blink" />`
 - Text input cursor effects
-- Typewriter animation endpoints
 
 ### Lava Rule (Horizontal Divider)
 
@@ -1026,40 +1038,44 @@ All focusable elements get a lava-hot outline on keyboard focus.
 ### Scroll Behavior
 
 ```typescript
-// Nav becomes opaque on scroll
+// Nav becomes opaque on scroll (threshold: 50px, NOT 10)
 const [scrolled, setScrolled] = useState(false)
 
 useEffect(() => {
-  const handleScroll = () => setScrolled(window.scrollY > 10)
-  window.addEventListener('scroll', handleScroll)
-  return () => window.removeEventListener('scroll', handleScroll)
+  const onScroll = () => setScrolled(window.scrollY > 50)
+  window.addEventListener('scroll', onScroll, { passive: true })
+  return () => window.removeEventListener('scroll', onScroll)
 }, [])
 
-// Apply: bg-transparent -> bg-void/90 backdrop-blur-md
+// Scrolled: bg-void/90 backdrop-blur-sm border-b border-lava-hot/10
+// Not scrolled: bg-transparent
 ```
 
 ### Mobile Nav (Sheet)
 
+Uses shadcn/ui `Sheet` component from the right side:
+
 ```html
-<!-- Sheet slides in from right -->
-<div class="fixed inset-y-0 right-0 z-50 w-48 sm:w-56 bg-coal
-  border-l border-lava-hot/20 p-6 transform transition-transform">
-  <div class="flex flex-col gap-4">
-    <a href="/communities" class="text-sm text-ash hover:text-lava-hot
-      transition-colors">Communities</a>
-    <a href="/feed" class="text-sm text-ash hover:text-lava-hot
-      transition-colors">Feed</a>
-    <a href="/about" class="text-sm text-ash hover:text-lava-hot
-      transition-colors">About</a>
-    <div class="lava-rule my-2"></div>
-    <a href="/login" class="text-sm text-lava-hot">Login</a>
+<!-- SheetContent slides in from right -->
+<SheetContent side="right"
+  class="bg-void border-lava-hot/10 w-48 sm:w-56 overflow-hidden px-6 pt-6">
+  <SheetTitle class="text-lava-hot font-bold truncate">fuega.ai</SheetTitle>
+  <div class="flex flex-col gap-4 mt-6 overflow-hidden pl-1">
+    <!-- Nav links (same as desktop but stacked) -->
+    <a class="text-ash hover:text-lava-hot transition-colors text-sm
+      tracking-wide truncate">Link</a>
+    <!-- Separator with kbd shortcut hint -->
+    <div class="pt-3 border-t border-lava-hot/10">
+      <kbd class="text-xs text-smoke border border-lava-hot/20
+        px-1.5 py-0.5 font-mono">⌘K</kbd>
+    </div>
   </div>
-</div>
+</SheetContent>
 ```
 
 - Width: `w-48` (192px) -> `sm:w-56` (224px)
-- Background: `bg-coal` with `border-l border-lava-hot/20`
-- Overlay behind: `bg-void/50` with click-to-close
+- Background: `bg-void` (NOT bg-coal), `border-lava-hot/10` (NOT /20)
+- Overlay behind: built-in Sheet overlay with click-to-close
 
 ---
 
@@ -1067,72 +1083,81 @@ useEffect(() => {
 
 ### Structure
 
+The hero is NOT full-screen. It uses `min-h-[40vh] sm:min-h-[50vh]` with
+flexbox centering. The entire content is wrapped in a `.terminal-card` with
+a `visitor@fuega` prompt line above the title.
+
 ```html
-<section class="relative min-h-screen flex flex-col items-center
-  justify-center overflow-hidden">
-  <!-- FireParticles canvas (background) -->
-  <canvas class="absolute inset-0 z-0"></canvas>
-
-  <!-- Content -->
-  <div class="relative z-10 text-center px-3 sm:px-6">
-    <!-- Terminal window -->
-    <div class="bg-coal rounded-none overflow-hidden mb-8 max-w-xl mx-auto"
-      style="border: 1px solid rgba(255, 69, 0, 0.2);">
-      <!-- Title bar with dots -->
+<section class="relative min-h-[40vh] sm:min-h-[50vh] flex items-center
+  justify-center overflow-hidden py-8 sm:py-12">
+  <div class="relative z-10 w-full max-w-7xl mx-auto px-3 sm:px-6 lg:px-12">
+    <!-- Terminal window (uses .terminal-card CSS class) -->
+    <div class="terminal-card">
+      <!-- Title bar — dots use <span>, NO rounded-full -->
       <div class="flex items-center gap-2 px-4 py-2 border-b border-lava-hot/20">
-        <div class="w-3 h-3 rounded-full bg-ember"></div>
-        <div class="w-3 h-3 rounded-full bg-lava-mid"></div>
-        <div class="w-3 h-3 rounded-full bg-ash"></div>
-        <span class="text-xs text-smoke ml-2">bash</span>
+        <span class="w-3 h-3 bg-ember" />
+        <span class="w-3 h-3 bg-lava-mid" />
+        <span class="w-3 h-3 bg-ash/40" />
+        <span class="text-xs text-ash ml-2">fuega.ai -- bash</span>
       </div>
-      <!-- Terminal content -->
-      <div class="p-4">
-        <span class="text-lava-hot font-bold text-sm">$ </span>
-        <span class="text-foreground text-sm">initializing fuega.ai...</span>
+
+      <!-- Terminal body -->
+      <div class="p-4 sm:p-6">
+        <!-- Prompt line: visitor@fuega:~$ echo "welcome" -->
+        <p class="text-sm text-ash mb-6">
+          <span class="text-lava-hot">visitor@fuega</span>
+          <span class="text-smoke">:</span>
+          <span class="text-ash">~</span>
+          <span class="text-smoke">$ </span>
+          <span class="text-foreground/60">echo "welcome"</span>
+        </p>
+
+        <!-- Giant title — text-4xl sm:text-7xl md:text-8xl -->
+        <h1 class="text-4xl sm:text-7xl md:text-8xl font-bold mb-4
+          glow-text-intense">
+          <!-- Each character animated individually via framer-motion -->
+          <!-- Characters are text-lava-hot, "." is text-ash -->
+          <span class="text-lava-hot">f</span>
+          <span class="text-lava-hot">u</span>
+          <span class="text-lava-hot">e</span>
+          <span class="text-lava-hot">g</span>
+          <span class="text-lava-hot">a</span>
+          <span class="text-ash">.</span>
+          <span class="text-lava-hot">a</span>
+          <span class="text-lava-hot">i</span>
+        </h1>
+
+        <!-- Typewriter tagline -->
+        <div class="h-8 mb-6">
+          <p class="text-sm sm:text-base text-ash">
+            <span class="text-lava-hot">> </span>
+            <!-- Typed text here -->
+            <span class="inline-block w-2 h-4 bg-lava-hot ml-0.5
+              cursor-blink" />
+          </p>
+        </div>
+
+        <!-- CTAs — use Button variant="terminal" size="lg" -->
+        <div class="flex flex-wrap gap-3">
+          <Button variant="terminal" size="lg">Explore Projects</Button>
+          <Button variant="terminal" size="lg">Sign Guestbook</Button>
+        </div>
       </div>
-    </div>
-
-    <!-- Giant title -->
-    <h1 class="text-5xl sm:text-6xl md:text-7xl font-bold text-foreground
-      glow-text-intense mb-4">
-      <!-- Each character animated individually -->
-      <span>f</span><span>u</span><span>e</span><span>g</span>
-      <span>a</span><span class="text-smoke">.</span>
-      <span class="text-ash">a</span><span class="text-ash">i</span>
-    </h1>
-
-    <!-- Typewriter tagline -->
-    <p class="text-lg sm:text-xl text-ash mb-8 h-8">
-      <!-- Cycles through phrases with typewriter effect -->
-      <span class="text-lava-hot">></span> community-driven moderation_
-      <span class="inline-block w-2 h-5 bg-lava-hot animate-cursor-blink
-        align-middle ml-1"></span>
-    </p>
-
-    <!-- CTA buttons -->
-    <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
-      <button class="bg-transparent text-lava-hot rounded-none px-6 py-3
-        text-sm font-medium uppercase tracking-wider border border-lava-hot
-        hover:bg-lava-hot hover:text-black transition-all">
-        $ explore communities
-      </button>
-      <button class="bg-charcoal/50 backdrop-blur text-foreground rounded-none
-        px-6 py-3 text-sm font-medium border border-lava-hot/20
-        hover:border-lava-hot/40 transition-all">
-        Learn more
-      </button>
     </div>
   </div>
+
+  <!-- EmberParticles component (CSS-based, NOT canvas) -->
+  <EmberParticles />
 </section>
 ```
 
 ### Typewriter Phrases
 
-Cycle through these taglines:
-- `community-driven moderation_`
-- `transparent AI governance_`
-- `your rules, your community_`
-- `spark the conversation_`
+Cycle through these taglines (type at 40ms/char, erase at 20ms/char, 2s pause):
+- `Projects. Experiments. Live demos.`
+- `Where wild ideas become software.`
+- `Built at the intersection of AI & web.`
+- `A digital workshop powered by fire.`
 
 ---
 
@@ -1204,8 +1229,8 @@ Cycle through these taglines:
       <div class="flex-1">
         <!-- Header -->
         <div class="flex items-center gap-2 text-xs text-ash mb-2">
-          <span class="text-lava-hot">f/community</span>
-          <span class="text-smoke">|</span>
+          <span class="text-lava-hot">f</span><span class="text-smoke mx-1">|</span><span class="text-foreground">community</span>
+          <span class="text-smoke ml-1">·</span>
           <span>posted 3h ago</span>
         </div>
         <h1 class="text-xl sm:text-2xl font-bold text-foreground mb-4">
@@ -1298,7 +1323,7 @@ Cycle through these taglines:
 | Section padding   | `py-8`          | `py-12`         | `py-12`         | `py-12`         |
 | Grid columns      | 1               | 1               | 2               | 3               |
 | Nav links         | Sheet (right)   | Sheet           | Inline flex     | Inline flex     |
-| Hero title        | `text-5xl`      | `text-6xl`      | `text-7xl`      | `text-7xl`      |
+| Hero title        | `text-4xl`      | `text-7xl`      | `text-8xl`      | `text-8xl`      |
 | Sidebar           | Hidden          | Hidden          | Hidden          | Visible (300px) |
 | Card titles       | `text-lg`       | `text-xl`       | `text-xl`       | `text-xl`       |
 | Mobile nav sheet  | `w-48`          | `w-56`          | Hidden          | Hidden          |
@@ -1532,13 +1557,24 @@ function getScoreColor(score: number): string {
 
 ### Community Prefix
 
-Always render community names with the `f/` prefix in lava-hot:
+Always **display** community names with spaced pipe: `f | name` (NOT `f/name` or `f|name`).
+URL routes still use `/f/[community]`. Search must normalize all formats.
 
 ```html
+<!-- Display format: f | community_name -->
 <span>
-  <span class="text-lava-hot font-medium">f/</span>
+  <span class="text-lava-hot font-medium">f</span>
+  <span class="text-smoke mx-1">|</span>
   <span class="text-foreground">community_name</span>
 </span>
+```
+
+Search normalization (handle all input formats):
+```typescript
+function normalizeCommunityQuery(input: string): string {
+  // Handle: "f | name", "f|name", "f/name", "f/ name", just "name"
+  return input.replace(/^f\s*[|\/]\s*/i, '').trim();
+}
 ```
 
 ### Moderation Status Indicators
@@ -1581,24 +1617,138 @@ Always render community names with the `f/` prefix in lava-hot:
 
 ## File Reference
 
-When implementing, these are the key files that define the design system:
+The authoritative source is `../fuega-site/`.
+When implementing for the fuega.ai platform, use these files as reference:
 
-| File                        | Purpose                              |
-|-----------------------------|--------------------------------------|
-| `globals.css`               | CSS custom properties, base styles   |
-| `tailwind.config.ts`        | Extended theme, custom colors        |
-| `components/ui/button.tsx`  | Button variants (shadcn/ui)          |
-| `components/ui/card.tsx`    | Card component (shadcn/ui)           |
-| `components/ui/input.tsx`   | Input component (shadcn/ui)          |
-| `components/ui/badge.tsx`   | Badge variants (shadcn/ui)           |
-| `components/ui/sheet.tsx`   | Mobile nav sheet (shadcn/ui)         |
-| `components/nav.tsx`        | Navigation bar                       |
-| `components/fire-particles.tsx` | Canvas particle system           |
-| `app/layout.tsx`            | Root layout, font loading            |
+| fuega-site File                           | Purpose                              |
+|-------------------------------------------|--------------------------------------|
+| `src/app/globals.css`                     | ALL CSS: vars, @theme, effects       |
+| `src/app/layout.tsx`                      | Root layout, font loading, providers |
+| `src/components/ui/button.tsx`            | Button variants (CVA-based)          |
+| `src/components/ui/card.tsx`              | Card component (shadcn/ui)           |
+| `src/components/ui/input.tsx`             | Input component (shadcn/ui)          |
+| `src/components/ui/sheet.tsx`             | Mobile nav sheet (shadcn/ui)         |
+| `src/components/ui/tooltip.tsx`           | Tooltip component                    |
+| `src/components/sections/nav.tsx`         | Navigation bar                       |
+| `src/components/sections/hero.tsx`        | Hero section with terminal card      |
+| `src/components/sections/footer.tsx`      | Footer with copyright                |
+| `src/components/sections/about.tsx`       | About section                        |
+| `src/components/sections/guestbook.tsx`   | Guestbook feature                    |
+| `src/components/EmberParticles.tsx`       | CSS ember particles                  |
+
+**NOTE:** There is NO `tailwind.config.ts`. Tailwind v4 config is inline in `globals.css`.
 
 ---
 
-*This document is the single source of truth for all fuega.ai UI decisions.
-All components must conform to these specifications. When in doubt,
-default to the terminal aesthetic: sharp corners, monospace, dark background,
-lava-hot accents, and prompt-style prefixes.*
+## Light Mode
+
+fuega.ai supports both dark (default) and light mode. Light mode inverts the background
+while keeping the lava accent identity. The red is **darkened** in light mode to maintain
+contrast against the bright background (instead of the bright red that glows against dark).
+
+### Light Mode Color Overrides
+
+```css
+/* Add to globals.css inside @theme inline or as CSS custom properties */
+.light,
+[data-theme="light"] {
+  --color-void: #F5F5F5;        /* light gray background */
+  --color-coal: #FFFFFF;         /* white surface */
+  --color-charcoal: #E5E5E5;    /* light border */
+  --color-ash: #666666;          /* darker secondary text */
+  --color-smoke: #999999;        /* lighter tertiary text */
+  --color-foreground: #1A1A1A;   /* near-black text */
+
+  /* Darkened reds for light background contrast */
+  --color-lava-hot: #CC3700;     /* darkened OrangeRed */
+  --color-lava-mid: #B85A2B;     /* darkened mid */
+  --color-lava-glow: #CC7000;    /* darkened DarkOrange */
+  --color-ember: #992900;        /* deep warm accent */
+
+  /* Semantic colors adjusted for light bg */
+  --color-spark: #B85A2B;        /* darkened spark */
+  --color-douse: #2E7AD6;        /* darkened douse */
+  --color-teal: #0D9488;         /* same teal */
+  --color-destructive: #DC2626;  /* slightly darker red */
+}
+```
+
+### Light Mode CRT Overlay
+
+The CRT scanline overlay switches to a very subtle dark tint instead of the lava tint:
+
+```css
+.light body::before,
+[data-theme="light"] body::before {
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(0, 0, 0, 0.015),
+    rgba(0, 0, 0, 0.015) 1px,
+    transparent 1px,
+    transparent 2px
+  );
+}
+```
+
+### Light Mode Glow Effects
+
+Glow effects are replaced with subtle shadows in light mode:
+
+```css
+.light .glow-text,
+[data-theme="light"] .glow-text {
+  text-shadow: none;
+  color: var(--color-lava-hot);
+}
+
+.light .glow-text-intense,
+[data-theme="light"] .glow-text-intense {
+  text-shadow: 0 1px 3px rgba(204, 55, 0, 0.2);
+}
+
+.light .terminal-card,
+[data-theme="light"] .terminal-card {
+  background: var(--color-coal);
+  border: 1px solid var(--color-charcoal);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+```
+
+### Theme Toggle Implementation
+
+```typescript
+// In ThemeContext.tsx or a useTheme hook
+const [theme, setTheme] = useState<'dark' | 'light'>(() => {
+  if (typeof window !== 'undefined') {
+    return (localStorage.getItem('fuega-theme') as 'dark' | 'light') || 'dark';
+  }
+  return 'dark';
+});
+
+useEffect(() => {
+  document.documentElement.classList.remove('dark', 'light');
+  document.documentElement.classList.add(theme);
+  document.documentElement.setAttribute('data-theme', theme);
+  localStorage.setItem('fuega-theme', theme);
+}, [theme]);
+```
+
+### Design Principle
+
+| Element        | Dark Mode                        | Light Mode                       |
+|---------------|----------------------------------|----------------------------------|
+| Background    | #050505 (void)                   | #F5F5F5 (light gray)            |
+| Surface       | #111111 (coal)                   | #FFFFFF (white)                  |
+| Primary text  | #FFFFFF                          | #1A1A1A                          |
+| Accent red    | #FF4500 (bright, glows)          | #CC3700 (darkened, contrasts)    |
+| Borders       | lava-hot/20 (subtle glow)        | charcoal (subtle gray)           |
+| Cards         | Coal bg, lava glow               | White bg, soft shadow            |
+| Scanlines     | Lava-tinted rgba(255,69,0,0.03)  | Dark-tinted rgba(0,0,0,0.015)   |
+
+---
+
+*This document reflects the fuega-site reference implementation.
+All fuega.ai platform components must conform to these specifications.
+When in doubt, check the fuega-site source code and default to the terminal
+aesthetic: sharp corners, monospace, dark background, lava-hot accents,
+and prompt-style prefixes.*

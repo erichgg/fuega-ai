@@ -123,7 +123,7 @@ export function Sidebar({
                       className="flex items-center gap-2 rounded-md px-3 py-1.5 text-sm text-ash-400 transition-colors hover:bg-ash-800/50 hover:text-ash-200"
                     >
                       <Flame className="h-3.5 w-3.5 text-flame-500" />
-                      <span className="truncate">f/{c.name}</span>
+                      <span className="truncate"><span className="text-lava-hot">f</span><span className="text-smoke mx-1">|</span><span>{c.name}</span></span>
                       <span className="ml-auto text-[10px] text-ash-600">
                         {c.memberCount}
                       </span>

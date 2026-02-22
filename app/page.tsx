@@ -57,7 +57,7 @@ const howItWorks = [
     step: "01",
     title: "Join or create a community",
     description:
-      "Find your people in f/tech, f/science, f/gaming — or start your own.",
+      "Find your people in f | tech, f | science, f | gaming — or start your own.",
   },
   {
     step: "02",

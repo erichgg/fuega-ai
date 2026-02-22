@@ -18,7 +18,7 @@ function getMockCommunity(slug: string) {
   return {
     id: slug,
     name: slug,
-    description: `Welcome to f/${slug}. A community for open discussion about ${slug}-related topics with transparent AI moderation.`,
+    description: `Welcome to f | ${slug}. A community for open discussion about ${slug}-related topics with transparent AI moderation.`,
     category: "technology" as const,
     memberCount: 12400 + Math.floor(Math.random() * 5000),
     activeCount: 340 + Math.floor(Math.random() * 200),
@@ -119,7 +119,7 @@ export default function CommunityPage() {
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <h1 className="text-2xl font-bold text-flame-400">
-              f/{community.name}
+              <span className="text-lava-hot">f</span><span className="text-smoke mx-1">|</span><span>{community.name}</span>
             </h1>
             <p className="mt-1 text-sm text-ash-400">
               {community.description}
@@ -205,7 +205,7 @@ export default function CommunityPage() {
         {posts.length === 0 ? (
           <div className="py-16 text-center">
             <p className="text-ash-400">
-              No posts in f/{community.name} yet. Be the first!
+              No posts in <span className="text-lava-hot">f</span><span className="text-smoke mx-1">|</span><span>{community.name}</span> yet. Be the first!
             </p>
           </div>
         ) : (

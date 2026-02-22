@@ -54,7 +54,7 @@ To avoid losing essential functionality, v1 MUST support:
   - Vote weight = 1 per user per item
 
 #### Community Features
-- **Browse Communities** (f/name not r/name)
+- **Browse Communities** (displayed as `f | name`, NOT r/name)
   - Search by name
   - Browse by category
   - Sort: Hot, New, Top (hour/day/week/month/all time), Rising

@@ -52,7 +52,7 @@ const MOCK_POSTS: Post[] = [
   },
   {
     id: "3",
-    title: "Proposal: Update f/science moderation prompt to allow more speculative discussion",
+    title: "Proposal: Update f | science moderation prompt to allow more speculative discussion",
     body: "The current prompt is too strict on speculative content. I think we should allow more hypothesis-driven posts as long as they're clearly labeled.",
     author: "science_nerd_42",
     community: "science",
@@ -73,7 +73,7 @@ const MOCK_POSTS: Post[] = [
   },
   {
     id: "5",
-    title: "First governance vote results are in! f/tech community prompt updated",
+    title: "First governance vote results are in! f | tech community prompt updated",
     body: "The community voted 78% in favor of adding more nuance to the tech community's moderation prompt. The new prompt takes effect immediately.",
     author: "governance_watch",
     community: "tech",

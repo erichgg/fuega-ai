@@ -240,7 +240,7 @@ export default function UserProfilePage() {
                   </span>{" "}
                   in{" "}
                   <span className="text-flame-400">
-                    f/{comment.postCommunity}
+                    <span className="text-lava-hot">f</span><span className="text-smoke mx-1">|</span><span>{comment.postCommunity}</span>
                   </span>{" "}
                   · {timeAgo(comment.createdAt)}
                 </div>

@@ -45,7 +45,7 @@ export function CommunityCard({
           <div>
             <CardTitle className="text-base">
               <span className="text-flame-400 cursor-pointer hover:underline">
-                f/{community.name}
+                <span className="text-lava-hot">f</span><span className="text-smoke mx-1">|</span><span>{community.name}</span>
               </span>
             </CardTitle>
             <Badge

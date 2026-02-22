@@ -265,7 +265,7 @@ export default function SecurityPage() {
             <p className="text-sm text-ash-300">
               Found a security vulnerability? We take security seriously and
               appreciate responsible disclosure. Please report security issues
-              through our dedicated f/security community on the platform, or
+              through our dedicated f | security community on the platform, or
               reach out through our contact channels. We commit to acknowledging
               reports within 24 hours and providing updates within 72 hours.
             </p>

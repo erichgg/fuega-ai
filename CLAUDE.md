@@ -14,14 +14,17 @@ Spark/douse voting. Three-tier governance (community → category → platform).
 - **Auth:** JWT (stored httpOnly cookie), bcrypt passwords
 
 ## Terminology — ALWAYS USE THESE
-| Platform Term | fuega.ai Term | NEVER Say |
-|---------------|---------------|-----------|
-| Subreddit     | Community     | subreddit |
-| r/name        | f/name        | r/name    |
-| Upvote        | Spark         | upvote    |
-| Downvote      | Douse         | downvote  |
-| Karma         | Spark score   | karma     |
-| Moderator     | AI agent      | mod/moderator |
+| Platform Term | fuega.ai Term        | NEVER Say |
+|---------------|----------------------|-----------|
+| Subreddit     | Community            | subreddit |
+| r/name        | f \| name (display)  | r/name    |
+| Upvote        | Spark                | upvote    |
+| Downvote      | Douse                | downvote  |
+| Karma         | Spark score          | karma     |
+| Moderator     | AI agent             | mod/moderator |
+
+**Community prefix display:** Always `f | name` (with spaces around pipe).
+URL routes still use `/f/[community]`. Search must handle: `f|name`, `f/name`, `f | name`.
 
 ## File Structure
 ```
@@ -93,7 +96,7 @@ NEXT_PUBLIC_APP_URL   → https://fuega.ai (production)
 ## Key Design Decisions
 - **Sync moderation:** AI checks posts in real-time (<3s), not async queues
 - **Public mod logs:** Every AI decision visible with reasoning
-- **Community autonomy:** Each f/ writes its own AI prompt via governance vote
+- **Community autonomy:** Each community writes its own AI prompt via governance vote
 - **Vote fuzzing:** Display counts are approximate to prevent manipulation
 - **Edit history:** All post/comment edits stored and publicly visible
 
@@ -112,11 +115,11 @@ NEXT_PUBLIC_APP_URL   → https://fuega.ai (production)
 - `DEPLOYMENT.md` → Railway + Cloudflare infrastructure
 - `INJECTION.md` → AI prompt injection defenses
 
-## Current Phase: 2/3 — Backend V2 + Frontend
+## Current Phase: 2/3 — Backend + Frontend
 - [x] Phase 0: Project setup (0.1-0.3) — COMPLETE
 - [x] Phase 1: Database schema (1.1-1.3) — COMPLETE
-- [ ] Phase 1.4: V2 database migrations (gamification tables) — NEXT UP
+- [ ] Phase 1.4: Database migrations (gamification tables) — NEXT UP
 - [x] Phase 2: Core backend (2.1-2.4) — COMPLETE
-- [ ] Phase 2: V2 backend (2.5-2.10) — badges, notifications, referrals, cosmetics, tips, structured AI
+- [ ] Phase 2: Backend (2.5-2.10) — badges, notifications, referrals, cosmetics, tips, structured AI
 - [x] Phase 3: Frontend core (3.1-3.2) — COMPLETE
 - [ ] Phase 3: Frontend remaining (3.3-3.8) — state mgmt, nav, badges UI, notifications UI, shop UI, referral UI

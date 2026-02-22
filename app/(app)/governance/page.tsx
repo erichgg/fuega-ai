@@ -76,7 +76,7 @@ const typeLabels: Record<string, string> = {
 const MOCK_PROPOSALS: Proposal[] = [
   {
     id: "prop_1",
-    title: "Update f/tech moderation to allow more technical debates",
+    title: "Update f | tech moderation to allow more technical debates",
     description:
       "Current prompt is too aggressive in flagging technical disagreements. Proposed change would recognize technical debates as healthy discourse.",
     community: "tech",
@@ -91,7 +91,7 @@ const MOCK_PROPOSALS: Proposal[] = [
   },
   {
     id: "prop_2",
-    title: "Add misinformation detection addendum to f/science prompt",
+    title: "Add misinformation detection addendum to f | science prompt",
     description:
       "Propose adding an addendum specifically targeting scientific misinformation while still allowing speculative discussion.",
     community: "science",
@@ -106,7 +106,7 @@ const MOCK_PROPOSALS: Proposal[] = [
   },
   {
     id: "prop_3",
-    title: "Reduce voting period from 7 days to 5 days for f/gaming",
+    title: "Reduce voting period from 7 days to 5 days for f | gaming",
     description:
       "The gaming community moves fast. 7 days is too long for governance decisions. Proposing 5-day voting period.",
     community: "gaming",
@@ -121,7 +121,7 @@ const MOCK_PROPOSALS: Proposal[] = [
   },
   {
     id: "prop_4",
-    title: "Stricter hate speech detection in f/politics",
+    title: "Stricter hate speech detection in f | politics",
     description:
       "Proposing updated moderation prompt with better hate speech detection while preserving political debate.",
     community: "politics",
@@ -180,7 +180,7 @@ export default function GovernancePage() {
           <h1 className="text-2xl font-bold text-ash-100">Governance</h1>
           <p className="mt-1 text-sm text-ash-400">
             {communityFilter
-              ? `Proposals for f/${communityFilter}`
+              ? `Proposals for f | ${communityFilter}`
               : "Active proposals across all communities"}
           </p>
         </div>
@@ -242,7 +242,7 @@ export default function GovernancePage() {
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2 text-xs text-ash-500">
                       <span className="font-medium text-flame-400">
-                        f/{proposal.community}
+                        <span className="text-lava-hot">f</span><span className="text-smoke mx-1">|</span><span>{proposal.community}</span>
                       </span>
                       <span>·</span>
                       <span>{proposal.author}</span>

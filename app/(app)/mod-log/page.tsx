@@ -294,7 +294,7 @@ export default function ModLogPage() {
                     </p>
                     <div className="flex items-center gap-2 text-[10px] text-ash-500">
                       <span className="text-flame-400">
-                        f/{entry.community}
+                        <span className="text-lava-hot">f</span><span className="text-smoke mx-1">|</span><span>{entry.community}</span>
                       </span>
                       <span>·</span>
                       <span>{entry.contentType}</span>

@@ -1,4 +1,4 @@
-# 🔥 FUEGA.AI V2 COMPLETE PACKAGE
+# 🔥 FUEGA.AI V1 COMPLETE PACKAGE
 
 **CRITICAL FILES INCLUDED:**
 1. ✅ **BOOTSTRAP.md** - Claude Code reads this FIRST, updates ALL docs
@@ -42,18 +42,18 @@ python fuega_builder.py
    - Updates PROMPT.md (adds 9 new prompts, references new docs)
    - Deletes BOOTSTRAP.md
 4. **Builder continues with Prompt 0.1** (or resumes from checkpoint)
-5. **Builds fuega.ai V2** with all features
+5. **Builds fuega.ai V1** with all features
 
 ### 4. Git Push
 When build completes:
 ```bash
 cd /path/to/fuega
 git add .
-git commit -m "V2: Gamification, badges, cosmetics, notifications, structured AI config, iOS"
+git commit -m "V1: Gamification, badges, cosmetics, notifications, structured AI config, iOS"
 git push origin main
 ```
 
-## WHAT V2 INCLUDES:
+## WHAT V1 INCLUDES:
 
 **New Features:**
 - Badge system (V1 Founder #0001-#5000, 25+ earnable badges)

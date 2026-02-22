@@ -187,7 +187,7 @@ export default function AboutPage() {
           <p className="mt-4 text-ash-300">
             The best way to reach us is through the platform itself. Have a
             suggestion? Create a governance proposal. Found a bug? Post in
-            f/meta. Security concern? See our{" "}
+            f | meta. Security concern? See our{" "}
             <Link href="/security" className="text-flame-400 hover:underline">
               security page
             </Link>{" "}

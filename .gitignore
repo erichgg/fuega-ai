@@ -28,6 +28,7 @@ build_log_detail.txt
 # Builder state
 .builder_state.json
 .temp_prompt_*.txt
+.design_fixup_done
 outputs/
 
 # BFG / scrubbing

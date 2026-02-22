@@ -51,6 +51,7 @@ BOOTSTRAP_FILE = PROJECT_DIR / "BOOTSTRAP.md"
 LOG_FILE = PROJECT_DIR / "build_log.txt"
 DETAIL_LOG_FILE = PROJECT_DIR / "build_log_detail.txt"
 STATE_FILE = PROJECT_DIR / ".builder_state.json"
+FIXUP_MARKER = PROJECT_DIR / ".design_fixup_done"
 
 # Timing
 MAX_SESSION_TIME = 3600       # 1 hour max per prompt
@@ -443,6 +444,12 @@ AUTOMATIC DECISIONS:
 - Mock vs Real data? -> Mock, clearly marked
 - Missing info? -> Make reasonable assumption
 
+ERROR HANDLING — CRITICAL:
+- If you encounter ANY build errors (TypeScript, import, runtime) — FIX THEM IMMEDIATELY
+- Fix errors regardless of which phase or prompt they came from
+- Run `npm run build` or `npx tsc --noEmit` to verify no errors before finishing
+- Do NOT leave broken code — every prompt must leave the project in a buildable state
+
 COMPLETION SIGNAL: PROMPT_COMPLETE
 
 ===================================================================
@@ -701,11 +708,125 @@ COMPLETION SIGNAL: PROMPT_COMPLETE
         self.log_error(f"Bootstrap failed after {MAX_RETRIES_PER_PROMPT} attempts")
         return False
 
+    def get_design_fixup_prompt(self):
+        """Build a fixup prompt that audits completed Phase 3 code against updated UI_DESIGN.md"""
+        return """
+CONTEXT: The design docs (UI_DESIGN.md, PROMPT.md) have been updated with the correct
+fuega.ai terminal/lava aesthetic from the fuega-site reference codebase. Some Phase 3
+code may have been built with an older, incorrect design system (fire-red, dark-bg,
+dark-surface, dark-border, text-primary, text-secondary, Inter font, tailwind.config.js).
+
+READ: UI_DESIGN.md (the authoritative design spec — lava/void/coal color system, JetBrains Mono, Tailwind v4)
+READ: CLAUDE.md (project context and terminology)
+
+TASK — DESIGN SYSTEM AUDIT & FIX:
+
+1. SCAN all files in app/ and components/ for these WRONG patterns:
+   - CSS classes: dark-bg, dark-surface, dark-border, text-primary, text-secondary, text-tertiary, fire-red, fire-orange, fire-yellow, bg-fire-gradient
+   - Font references: "Inter", "System UI" (should be JetBrains Mono)
+   - Tailwind v3: tailwind.config.js or tailwind.config.ts (should use @theme inline in globals.css)
+   - Wrong color hex codes: #1a1a1a, #2a2a2a, #0a0a0a (should be void #050505, coal #111111)
+
+2. REPLACE with correct fuega.ai design system from UI_DESIGN.md:
+   - dark-bg → bg-void
+   - dark-surface → bg-coal
+   - dark-border → border-lava-hot/20 or border-lava-hot/10
+   - text-primary → text-foreground
+   - text-secondary → text-ash
+   - text-tertiary → text-smoke
+   - fire-red / fire-orange → lava-hot
+   - fire-yellow → lava-glow
+   - bg-fire-gradient → bg-gradient-to-r from-lava-hot to-lava-glow
+   - "Inter" font → JetBrains Mono (font-mono class)
+
+3. VERIFY globals.css uses Tailwind v4 @theme inline (NOT tailwind.config.js)
+
+4. VERIFY app/layout.tsx loads JetBrains Mono via next/font with --font-jetbrains variable
+
+5. ADD light mode support:
+   - Add .light / [data-theme="light"] CSS overrides to globals.css per UI_DESIGN.md Light Mode section
+   - Ensure ThemeContext toggles dark/light class on documentElement
+
+6. FIX community prefix display:
+   - Community names must display as "f | name" (spaced pipe), NOT "f/name"
+   - HTML: <span class="text-lava-hot">f</span><span class="text-smoke mx-1">|</span><span>name</span>
+   - URL routes stay as /f/[community] (slash in URL path is fine)
+   - Search should normalize: handle "f|name", "f/name", "f | name" inputs
+
+7. FIX any build errors found (TypeScript, missing imports, etc.) — fix ALL errors regardless of which phase they came from.
+
+OUTPUT: List every file changed and what was fixed.
+"""
+
+    def run_design_fixup(self):
+        """Run a one-time design system fixup on completed Phase 3 code."""
+        if FIXUP_MARKER.exists():
+            self.log("Design fixup already completed, skipping", Colors.YELLOW)
+            return True
+
+        # Only run if we've completed any Phase 3 prompts
+        completed = self.state.get("completed_prompts", [])
+        phase3_done = [p for p in completed if p.startswith("3.")]
+        if not phase3_done:
+            self.log("No Phase 3 prompts completed yet, skipping design fixup", Colors.YELLOW)
+            return True
+
+        self.log("=" * 60, Colors.HEADER)
+        self.log("DESIGN SYSTEM FIXUP — Aligning code with updated UI_DESIGN.md", Colors.HEADER + Colors.BOLD)
+        self.log("=" * 60, Colors.HEADER)
+        self.log(f"Phase 3 prompts to audit: {', '.join(phase3_done)}", Colors.CYAN)
+
+        fixup_prompt = self.get_design_fixup_prompt()
+
+        for attempt in range(MAX_RETRIES_PER_PROMPT):
+            result, output, elapsed = self.run_claude_code(fixup_prompt, "FIXUP")
+
+            if result == "success":
+                self.log_success("Design fixup complete — code aligned with UI_DESIGN.md")
+                FIXUP_MARKER.touch()
+                self.git_push("FIXUP")
+                return True
+
+            elif result == "rate_limit":
+                analysis = self.analyze_failure(output, 1, elapsed)
+                self.wait_with_countdown(analysis.wait_seconds, analysis.message)
+                continue
+
+            elif result in ("token_limit", "timeout"):
+                self.log(f"Fixup attempt {attempt+1} returned {result}, retrying...", Colors.YELLOW)
+                time.sleep(RETRY_BACKOFF_BASE * (2 ** attempt))
+                continue
+
+            else:
+                self.log_error(f"Fixup failed with result: {result}")
+                if attempt < MAX_RETRIES_PER_PROMPT - 1:
+                    wait = RETRY_BACKOFF_BASE * (2 ** attempt)
+                    self.log(f"Retrying in {wait}s...", Colors.YELLOW)
+                    time.sleep(wait)
+                    continue
+                # Don't block the build on fixup failure — continue with remaining prompts
+                self.log("Design fixup failed but continuing build...", Colors.YELLOW)
+                return True
+
+        self.log("Design fixup exhausted retries, continuing build...", Colors.YELLOW)
+        return True
+
     def run_build(self):
         """Main build loop"""
         self.log("=" * 60, Colors.BOLD)
         self.log("FUEGA.AI AUTOMATED BUILDER", Colors.BOLD)
         self.log("=" * 60, Colors.BOLD)
+
+        # Doc update notification
+        self.log("", Colors.CYAN)
+        self.log("📋 DOC UPDATES DETECTED:", Colors.CYAN + Colors.BOLD)
+        self.log("  ✅ UI_DESIGN.md — Updated with fuega-site source (terminal/lava aesthetic)", Colors.GREEN)
+        self.log("  ✅ PROMPT.md — Fixed design system refs, added READ directives, V1 terminology", Colors.GREEN)
+        self.log("  ✅ UI_DESIGN.md — Light mode spec added (dark red contrast on light bg)", Colors.GREEN)
+        self.log("  ✅ GAMIFICATION.md, DATA_SCHEMA.md, SECURITY.md, DEPLOYMENT.md — Referenced in prompts", Colors.GREEN)
+        self.log("  ✅ Builder — Design fixup loop will audit completed code against updated specs", Colors.GREEN)
+        self.log("", Colors.CYAN)
+
         self.log(f"Total prompts: {len(self.prompts)}", Colors.CYAN)
         self.log(f"Resuming from prompt index: {self.current_prompt}", Colors.CYAN)
         self.log(f"Current phase: {self.current_phase}", Colors.CYAN)
@@ -719,6 +840,10 @@ COMPLETION SIGNAL: PROMPT_COMPLETE
             if not self.run_bootstrap():
                 return "failed"
             print("", flush=True)
+
+        # Run design fixup if Phase 3 code needs alignment with updated docs
+        self.run_design_fixup()
+        print("", flush=True)
 
         if not self.prompts:
             self.log_error("No prompts found in PROMPT.md!")

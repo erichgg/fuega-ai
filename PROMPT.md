@@ -105,7 +105,7 @@ STRUCTURE (keep under 150 lines):
 - Claude API (Anthropic)
 
 ## Terminology (NEVER use Reddit terms)
-- Communities: f|name (NOT r/name)
+- Communities: f | name — display with spaced pipe (NOT f/name, NOT r/name). URL routes: /f/[community]
 - Upvote: Spark (NOT upvote)
 - Downvote: Douse (NOT downvote)
 - Karma: Spark score (NOT karma)
@@ -358,9 +358,9 @@ RUN: npm test tests/unit/database/
 ALL TESTS MUST PASS before Phase 2.
 ```
 
-### Prompt 1.4: V2 Database Migrations (Gamification Tables)
+### Prompt 1.4: Database Migrations (Gamification Tables)
 ```
-CONTEXT: Adding 7 new tables and modifying 4 existing tables for V2 gamification features.
+CONTEXT: Adding 7 new tables and modifying 4 existing tables for gamification features.
 
 READ: GAMIFICATION.md (complete spec), DATA_SCHEMA.md (existing schema)
 
@@ -617,7 +617,7 @@ Content passes through in order, stops at first removal.
 
 PROMPT STRUCTURE:
 """
-System: You are a moderator for f/{community}.
+System: You are a moderator for f | {community}.
 Evaluate ONLY if USER_CONTENT violates COMMUNITY_RULES.
 Respond with valid JSON only: {"decision": "approve|remove|flag", "reason": "brief explanation"}
 
@@ -1383,56 +1383,38 @@ EOF
 ```
 CREATE design system and base components:
 
+READ: UI_DESIGN.md (CRITICAL - this is the authoritative design reference from fuega-site source code)
+
 USE: Excalidraw MCP to create wireframes if helpful
 
 FILES TO CREATE:
-- app/globals.css
-- components/ui/* (shadcn/ui components)
+- app/globals.css (from UI_DESIGN.md globals.css section — Tailwind v4, @theme inline)
+- components/ui/* (shadcn/ui components styled per UI_DESIGN.md)
 - components/fuega/* (custom components)
 - lib/utils.ts
-- tailwind.config.js (custom theme)
 
-DESIGN SYSTEM:
+DESIGN SYSTEM (from UI_DESIGN.md):
 
-Color Palette (Fire Theme):
-```javascript
-// tailwind.config.js
-module.exports = {
-  theme: {
-    extend: {
-      colors: {
-        // Fire gradient
-        'fire-red': '#FF4500',
-        'fire-orange': '#FF6B35',
-        'fire-yellow': '#FFA500',
-        
-        // Dark theme
-        'dark-bg': '#0a0a0a',
-        'dark-surface': '#1a1a1a',
-        'dark-border': '#2a2a2a',
-        
-        // Text
-        'text-primary': '#ffffff',
-        'text-secondary': '#a0a0a0',
-        'text-tertiary': '#666666',
-        
-        // Semantic
-        'spark': '#FF6B35',
-        'douse': '#4A9EFF',
-        'success': '#10B981',
-        'warning': '#F59E0B',
-        'error': '#EF4444',
-      },
-    },
-  },
-}
-```
+IMPORTANT: fuega.ai uses Tailwind CSS v4 with @theme inline blocks in globals.css.
+There is NO tailwind.config.js file. All theme tokens are defined in globals.css.
+
+Color System (Terminal/Lava Theme):
+- void: #050505 (deepest background)
+- coal: #111111 (surface/card background)
+- ash: #999999 (secondary text)
+- smoke: #666666 (tertiary text)
+- ember: #CC3700 (warm accent)
+- lava-hot: #FF4500 (primary accent — OrangeRed)
+- lava-mid: #FF6B35 (gradient midpoint)
+- lava-glow: #FF8C00 (DarkOrange highlight)
+- spark: #FF6B35 (upvote color)
+- douse: #4A9EFF (downvote color)
 
 TYPOGRAPHY:
-- Font: Inter or System UI
-- Body: 16px minimum
-- Headers: Bold, fire gradient on h1
-- Code: JetBrains Mono
+- Font: JetBrains Mono (monospace, loaded via next/font)
+- CSS variable: --font-jetbrains on <html>
+- Body: font-mono class on <body>
+- Headers: Bold, glow-text-intense class on h1
 - Line height: 1.6 for readability
 
 COMPONENTS TO CREATE:
@@ -1508,7 +1490,7 @@ export function CommentThread({ comment, depth = 0 }) {
 // Special badge for first 5000 users
 export function FounderBadge({ number }) {
   return (
-    <Badge variant="founder" className="bg-fire-gradient">
+    <Badge variant="founder" className="bg-gradient-to-r from-lava-hot to-lava-glow">
       <Crown className="w-3 h-3" />
       <span>Founder #{number}</span>
     </Badge>
@@ -1552,6 +1534,8 @@ TEST:
 ### Prompt 3.2: Core Pages
 ```
 IMPLEMENT core pages:
+
+READ: UI_DESIGN.md (use terminal/lava aesthetic, correct color classes, JetBrains Mono font)
 
 PUBLIC PAGES:
 
@@ -1662,9 +1646,10 @@ SEO:
 
 ### Prompt 3.3: State Management & API Integration
 ```
-IMPLEMENT client-side state including V2 gamification features:
+IMPLEMENT client-side state including gamification features:
 
 READ: GAMIFICATION.md (Feature Flags section for client-side feature checking)
+READ: UI_DESIGN.md (color system, component specs, terminal aesthetic)
 
 FILES TO CREATE:
 - lib/api/client.ts (API wrapper)
@@ -1831,7 +1816,19 @@ OPTIMISTIC UI:
 
 ### Prompt 3.4: Navigation & Layout
 ```
-IMPLEMENT navigation and layout:
+IMPLEMENT navigation and layout using fuega.ai's terminal/lava aesthetic.
+
+READ: UI_DESIGN.md (CRITICAL - use exact color system, component specs, and terminal aesthetic from this file)
+READ: GAMIFICATION.md (notification bell integration)
+
+IMPORTANT: Use the fuega.ai design system from UI_DESIGN.md. Key colors:
+- bg-void (#050505) for backgrounds
+- bg-coal (#111111) for surfaces
+- border-lava-hot/20 for borders
+- text-lava-hot (#FF4500) for accents
+- text-ash (#999999) for secondary text
+- Font: JetBrains Mono (--font-jetbrains variable)
+- Tailwind v4 (@theme inline in globals.css, NO tailwind.config.js)
 
 FILES TO CREATE:
 - components/fuega/Navbar.tsx
@@ -1839,190 +1836,32 @@ FILES TO CREATE:
 - components/fuega/Footer.tsx
 - app/layout.tsx (root layout)
 
-NAVBAR (Desktop & Mobile):
-```typescript
-// components/fuega/Navbar.tsx
-export function Navbar() {
-  const { user } = useAuth();
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  
-  return (
-    <nav className="sticky top-0 z-50 bg-dark-surface border-b border-dark-border">
-      <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between h-16">
-          {/* Logo */}
-          <Link href="/" className="flex items-center gap-2">
-            <Flame className="w-6 h-6 text-fire-orange" />
-            <span className="text-xl font-bold">fuega</span>
-          </Link>
-          
-          {/* Search (desktop) */}
-          <div className="hidden md:block flex-1 max-w-2xl mx-8">
-            <Search />
-          </div>
-          
-          {/* User menu */}
-          <div className="flex items-center gap-4">
-            {user ? (
-              <>
-                <Button variant="ghost" asChild>
-                  <Link href="/home">Home</Link>
-                </Button>
-                <Button variant="primary" asChild>
-                  <Link href="/create">Create Post</Link>
-                </Button>
-                <UserMenu user={user} />
-              </>
-            ) : (
-              <>
-                <Button variant="ghost" asChild>
-                  <Link href="/login">Log In</Link>
-                </Button>
-                <Button variant="primary" asChild>
-                  <Link href="/signup">Sign Up</Link>
-                </Button>
-              </>
-            )}
-            
-            {/* Mobile menu button */}
-            <button 
-              className="md:hidden"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            >
-              <Menu />
-            </button>
-          </div>
-        </div>
-        
-        {/* Mobile menu */}
-        {mobileMenuOpen && (
-          <MobileMenu user={user} />
-        )}
-      </div>
-    </nav>
-  );
-}
-```
+NAVBAR: Follow the nav pattern from UI_DESIGN.md:
+- Sticky top, bg-void/80 backdrop-blur-md
+- Scroll detection at scrollY > 50 adds bg-coal/90 border-b border-lava-hot/20
+- Logo: "fuega.ai" in text-lava-hot with glow-text class
+- Mobile: Sheet component with bg-void border-lava-hot/10
+- Include NotificationBell component (from GAMIFICATION.md)
+- Search bar (desktop), user menu
 
 SIDEBAR (Communities List):
-```typescript
-// components/fuega/Sidebar.tsx
-export function Sidebar() {
-  const { communities, loading } = useCommunities();
-  const { user } = useAuth();
-  
-  return (
-    <aside className="w-64 border-r border-dark-border p-4">
-      {/* Joined communities */}
-      {user && (
-        <div className="mb-6">
-          <h3 className="font-semibold mb-2">Your Communities</h3>
-          {communities.joined.map(c => (
-            <CommunityLink key={c.id} community={c} />
-          ))}
-        </div>
-      )}
-      
-      {/* Popular communities */}
-      <div>
-        <h3 className="font-semibold mb-2">Popular</h3>
-        {communities.popular.map(c => (
-          <CommunityLink key={c.id} community={c} />
-        ))}
-      </div>
-      
-      {/* Create community */}
-      <Button 
-        variant="outline" 
-        className="w-full mt-4"
-        asChild
-      >
-        <Link href="/create-community">
-          <Plus className="w-4 h-4 mr-2" />
-          Create Community
-        </Link>
-      </Button>
-    </aside>
-  );
-}
-```
+- w-64, border-r border-lava-hot/10
+- bg-coal for sidebar background
+- Joined communities section + Popular section
+- Create community button (terminal variant)
 
-FOOTER:
-```typescript
-// components/fuega/Footer.tsx
-export function Footer() {
-  return (
-    <footer className="border-t border-dark-border mt-20">
-      <div className="container mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          <div>
-            <h4 className="font-semibold mb-4">fuega.ai</h4>
-            <p className="text-sm text-text-secondary">
-              Community-governed discussions powered by transparent AI moderation.
-            </p>
-          </div>
-          
-          <div>
-            <h4 className="font-semibold mb-4">Product</h4>
-            <ul className="space-y-2 text-sm">
-              <li><Link href="/about">About</Link></li>
-              <li><Link href="/security">Security</Link></li>
-              <li><Link href="/mod-log">Moderation Log</Link></li>
-            </ul>
-          </div>
-          
-          <div>
-            <h4 className="font-semibold mb-4">Legal</h4>
-            <ul className="space-y-2 text-sm">
-              <li><Link href="/terms">Terms of Service</Link></li>
-              <li><Link href="/privacy">Privacy Policy</Link></li>
-              <li><Link href="/content-policy">Content Policy</Link></li>
-            </ul>
-          </div>
-          
-          <div>
-            <h4 className="font-semibold mb-4">Community</h4>
-            <ul className="space-y-2 text-sm">
-              <li><Link href="/governance">Governance</Link></li>
-              <li><a href="https://github.com/fuega-ai">GitHub</a></li>
-              <li><Link href="/feedback">Feedback</Link></li>
-            </ul>
-          </div>
-        </div>
-        
-        <div className="mt-8 pt-8 border-t border-dark-border text-center text-sm text-text-secondary">
-          © 2026 fuega.ai - Built with transparency
-        </div>
-      </div>
-    </footer>
-  );
-}
-```
+FOOTER: Minimal terminal aesthetic
+- border-t border-lava-hot/10
+- bg-void background
+- text-ash for secondary text
+- Grid layout: About, Product, Legal, Community columns
 
 ROOT LAYOUT:
-```typescript
-// app/layout.tsx
-export default function RootLayout({ children }) {
-  return (
-    <html lang="en" className="dark">
-      <head>
-        <link rel="icon" href="/favicon.ico" />
-      </head>
-      <body className="bg-dark-bg text-text-primary">
-        <AuthProvider>
-          <ThemeProvider>
-            <Navbar />
-            <main className="min-h-screen">
-              {children}
-            </main>
-            <Footer />
-          </ThemeProvider>
-        </AuthProvider>
-      </body>
-    </html>
-  );
-}
-```
+- html className="dark" with JetBrains Mono font (--font-jetbrains)
+- body className="bg-void text-foreground font-mono"
+- AuthProvider > ThemeProvider > NotificationProvider
+- Navbar + main + Footer
+- CRT scanline overlay via globals.css body::before
 
 KEYBOARD SHORTCUTS:
 - / → Focus search
@@ -2395,7 +2234,7 @@ test('new user can sign up, join community, create post, get sparks', async ({ p
   
   // 4. Browse communities
   await page.goto('/home');
-  await page.click('text=f|technology');
+  await page.click('text=f | technology');
   
   // 5. Join community
   await page.click('button:has-text("Join")');
@@ -3215,7 +3054,7 @@ LEGAL:
 ✓ No personal info in code/commits
 
 LAUNCH:
-1. Create announcement post on f|fuega (meta community)
+1. Create announcement post on f | fuega (meta community)
 2. Post on HN: "Show HN: fuega.ai - Community-governed discussions with transparent AI moderation"
 3. Share on relevant subreddits (if allowed)
 4. Tweet from @fuega_ai (if created)
