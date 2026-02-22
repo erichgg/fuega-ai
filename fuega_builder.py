@@ -468,6 +468,28 @@ ANIMATIONS & STYLING:
 - Community references: ALWAYS use <CommunityPrefix name="x" linked /> component from @/components/fuega/community-prefix
 - Community prefix display: f | name (orange colored, linked to /f/name)
 
+BRANDING — CRITICAL:
+- The word "fuega" in body text MUST always be orange: <span className="text-flame-400 font-semibold">fuega</span>
+- Or use the <F /> helper component pattern (const F = () => <span className="text-flame-400 font-semibold">fuega</span>)
+- "fuega.ai" in logos uses the FlameLogo component, but inline text refs use the orange span
+- This applies to ALL pages — about, security, terms, privacy, everywhere
+
+CONTENT STYLE — CRITICAL:
+- When comparing fuega to other platforms, use TABLES not lists (see about page for pattern)
+- Compare against Reddit, Discord, X specifically with check/x/partial icons
+- Use CellIcon pattern: yes=flame check, no=ash X, partial=ash minus
+- No generic "traditional platforms" — name the competitors directly
+- Advertise: no ads, no premium tiers, no tracking, tip-supported — weave naturally, not cringe
+- Mod logs are PER-COMMUNITY (scoped to the level the AI agent moderates), not a single global feed
+- The /mod-log route should show community-scoped logs with community filter, not a flat global list
+
+MOD LOG SCOPING:
+- Moderation logs belong to the community where moderation happened
+- The mod log page should default to showing logs from communities the user belongs to
+- Global /mod-log is an aggregate view with community filter, not the primary experience
+- Each community page (f/name) should have its own mod log tab/section
+- agent_level field (community/category/platform) determines which tier made the decision
+
 COMPLETION SIGNAL: PROMPT_COMPLETE
 
 ===================================================================

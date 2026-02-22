@@ -1,14 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import {
-  Bot,
-  Shield,
-  Vote,
-  Eye,
   ArrowLeft,
   Flame,
-  Scale,
-  UserX,
+  Check,
+  X,
+  Minus,
 } from "lucide-react";
 import { FlameLogo } from "@/components/fuega/flame-logo";
 
@@ -23,44 +20,130 @@ export const metadata: Metadata = {
   },
 };
 
-const differences = [
+const F = () => <span className="text-flame-400 font-semibold">fuega</span>;
+
+type CellValue = "yes" | "no" | "partial" | "paid" | string;
+
+const comparisonRows: {
+  feature: string;
+  reddit: CellValue;
+  discord: CellValue;
+  x: CellValue;
+  fuega: CellValue;
+}[] = [
   {
-    icon: Bot,
-    traditional: "Human moderators with hidden agendas and inconsistent enforcement",
-    fuega: "AI moderation with public reasoning for every single decision",
+    feature: "Community-written rules",
+    reddit: "partial",
+    discord: "partial",
+    x: "no",
+    fuega: "yes",
   },
   {
-    icon: Vote,
-    traditional: "Rules set by platform owners, enforced arbitrarily",
-    fuega: "Communities write and vote on their own moderation prompts",
+    feature: "AI moderation",
+    reddit: "no",
+    discord: "no",
+    x: "partial",
+    fuega: "yes",
   },
   {
-    icon: Eye,
-    traditional: "Shadow bans, hidden algorithms, opaque content ranking",
-    fuega: "Every moderation action logged publicly with full transparency",
+    feature: "Public mod logs",
+    reddit: "no",
+    discord: "no",
+    x: "no",
+    fuega: "yes",
   },
   {
-    icon: Shield,
-    traditional: "Extensive data collection, behavioral tracking, ad targeting",
-    fuega: "No email required, IPs hashed and deleted after 30 days",
+    feature: "Vote on moderation rules",
+    reddit: "no",
+    discord: "no",
+    x: "no",
+    fuega: "yes",
   },
   {
-    icon: Scale,
-    traditional: "Top-down governance with no community input",
-    fuega: "Three-tier governance: community → category → platform",
+    feature: "True anonymity",
+    reddit: "no",
+    discord: "no",
+    x: "no",
+    fuega: "yes",
   },
   {
-    icon: UserX,
-    traditional: "Real identity required, data sold to advertisers",
-    fuega: "True anonymity as a core design principle",
+    feature: "No email required",
+    reddit: "no",
+    discord: "no",
+    x: "no",
+    fuega: "yes",
+  },
+  {
+    feature: "No ads",
+    reddit: "no",
+    discord: "yes",
+    x: "no",
+    fuega: "yes",
+  },
+  {
+    feature: "No premium tiers",
+    reddit: "no",
+    discord: "no",
+    x: "no",
+    fuega: "yes",
+  },
+  {
+    feature: "No tracking / data selling",
+    reddit: "no",
+    discord: "partial",
+    x: "no",
+    fuega: "yes",
+  },
+  {
+    feature: "Spam protection",
+    reddit: "partial",
+    discord: "partial",
+    x: "partial",
+    fuega: "yes",
+  },
+  {
+    feature: "Troll / extremism filtering",
+    reddit: "partial",
+    discord: "partial",
+    x: "partial",
+    fuega: "yes",
+  },
+  {
+    feature: "Democratic governance",
+    reddit: "no",
+    discord: "no",
+    x: "no",
+    fuega: "yes",
+  },
+  {
+    feature: "Transparent algorithms",
+    reddit: "no",
+    discord: "no",
+    x: "no",
+    fuega: "yes",
   },
 ];
+
+function CellIcon({ value }: { value: CellValue }) {
+  switch (value) {
+    case "yes":
+      return <Check className="mx-auto h-4 w-4 text-flame-400" />;
+    case "no":
+      return <X className="mx-auto h-4 w-4 text-ash-600" />;
+    case "partial":
+      return <Minus className="mx-auto h-4 w-4 text-ash-500" />;
+    case "paid":
+      return <span className="text-xs text-ash-500">$</span>;
+    default:
+      return <span className="text-xs text-ash-500">{value}</span>;
+  }
+}
 
 export default function AboutPage() {
   return (
     <div className="min-h-screen bg-background">
       <nav className="sticky top-0 z-50 border-b border-ash-800 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4">
+        <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4 2xl:px-8">
           <Link href="/">
             <FlameLogo size="sm" />
           </Link>
@@ -73,7 +156,7 @@ export default function AboutPage() {
             </Link>
             <Link
               href="/signup"
-              className="inline-flex items-center gap-1.5 rounded-md bg-flame-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-flame-600"
+              className="inline-flex items-center gap-1.5 bg-flame-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-flame-600"
             >
               Sign up
             </Link>
@@ -81,7 +164,7 @@ export default function AboutPage() {
         </div>
       </nav>
 
-      <main className="mx-auto max-w-4xl px-4 py-16">
+      <main className="mx-auto max-w-7xl px-4 py-12 2xl:px-8">
         <Link
           href="/"
           className="inline-flex items-center gap-1.5 text-sm text-ash-500 transition-colors hover:text-ash-300"
@@ -91,88 +174,108 @@ export default function AboutPage() {
         </Link>
 
         {/* Mission */}
-        <section className="mt-8">
-          <h1 className="text-4xl font-bold text-ash-100 sm:text-5xl">
-            Our mission
+        <section className="mt-8 max-w-3xl">
+          <h1 className="text-3xl font-bold text-ash-100 sm:text-4xl">
+            Why <F /> exists
           </h1>
-          <p className="mt-6 text-lg leading-relaxed text-ash-300">
-            fuega.ai exists because we believe online discussion can be better.
-            Not through more rules, more moderators, or more surveillance — but
-            through{" "}
-            <span className="text-flame-400 font-semibold">transparency</span>,{" "}
-            <span className="text-flame-400 font-semibold">community ownership</span>,
-            and{" "}
-            <span className="text-flame-400 font-semibold">AI accountability</span>.
+          <p className="mt-5 text-base leading-relaxed text-ash-300">
+            Online discussion is broken. Not because people are bad — but because
+            platforms profit from outrage, sell your data, and hide how they
+            moderate. <F /> is different. Communities write their own rules, vote
+            on them, and AI enforces exactly what was decided — nothing more.
+            Every decision is public. Every prompt is auditable. No corporate
+            overlords. No hidden algorithms.
           </p>
-          <p className="mt-4 text-lg leading-relaxed text-ash-300">
-            We&apos;re building a platform where every moderation decision is
-            public. Where communities write and vote on their own AI moderator
-            prompts. Where anonymity is a right, not a privilege. And where the
-            people who use the platform are the ones who govern it.
+          <p className="mt-4 text-base leading-relaxed text-ash-400">
+            No ads. No premium tiers. No data harvesting. <F /> is
+            tip-supported — if you want to help keep the lights on, you get a
+            badge and some cosmetics. That&apos;s the entire business model.
           </p>
         </section>
 
-        {/* How fuega is different */}
-        <section className="mt-20">
-          <h2 className="text-3xl font-bold text-ash-100">
-            How fuega is different
+        {/* Comparison Table */}
+        <section className="mt-12">
+          <h2 className="text-2xl font-bold text-ash-100 sm:text-3xl">
+            How <F /> compares
           </h2>
-          <p className="mt-3 text-ash-400">
-            A side-by-side comparison with traditional platforms.
+          <p className="mt-2 text-sm text-ash-500">
+            Feature-by-feature against the platforms you already know.
           </p>
 
-          <div className="mt-10 space-y-6">
-            {differences.map((diff, i) => {
-              const Icon = diff.icon;
-              return (
-                <div
-                  key={i}
-                  className="rounded-xl border border-ash-800 bg-ash-900/30 p-5"
-                >
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-flame-500/10">
-                      <Icon className="h-4 w-4 text-flame-400" />
-                    </div>
-                  </div>
-                  <div className="grid gap-4 sm:grid-cols-2">
-                    <div>
-                      <span className="text-xs font-semibold uppercase tracking-wider text-red-400/70">
-                        Traditional platforms
-                      </span>
-                      <p className="mt-1 text-sm text-ash-400">
-                        {diff.traditional}
-                      </p>
-                    </div>
-                    <div>
-                      <span className="text-xs font-semibold uppercase tracking-wider text-flame-400/70">
-                        fuega.ai
-                      </span>
-                      <p className="mt-1 text-sm text-ash-200">{diff.fuega}</p>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
+          <div className="mt-6 overflow-x-auto">
+            <table className="w-full border-collapse text-sm">
+              <thead>
+                <tr className="border-b border-ash-800">
+                  <th className="py-3 pr-4 text-left text-xs font-semibold uppercase tracking-wider text-ash-500">
+                    Feature
+                  </th>
+                  <th className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider text-ash-500">
+                    Reddit
+                  </th>
+                  <th className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider text-ash-500">
+                    Discord
+                  </th>
+                  <th className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider text-ash-500">
+                    X
+                  </th>
+                  <th className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider text-flame-400">
+                    <F />
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {comparisonRows.map((row) => (
+                  <tr
+                    key={row.feature}
+                    className="border-b border-ash-800/50 transition-colors hover:bg-ash-900/30"
+                  >
+                    <td className="py-3 pr-4 text-ash-300">{row.feature}</td>
+                    <td className="px-4 py-3 text-center">
+                      <CellIcon value={row.reddit} />
+                    </td>
+                    <td className="px-4 py-3 text-center">
+                      <CellIcon value={row.discord} />
+                    </td>
+                    <td className="px-4 py-3 text-center">
+                      <CellIcon value={row.x} />
+                    </td>
+                    <td className="px-4 py-3 text-center">
+                      <CellIcon value={row.fuega} />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
+
+          <p className="mt-4 text-xs text-ash-600">
+            <Check className="mr-1 inline h-3 w-3 text-flame-400" /> = yes
+            <span className="mx-2 text-ash-700">·</span>
+            <Minus className="mr-1 inline h-3 w-3 text-ash-500" /> = partial / inconsistent
+            <span className="mx-2 text-ash-700">·</span>
+            <X className="mr-1 inline h-3 w-3 text-ash-600" /> = no
+          </p>
         </section>
 
         {/* Team */}
-        <section className="mt-20">
-          <h2 className="text-3xl font-bold text-ash-100">The team</h2>
+        <section className="mt-12 max-w-3xl">
+          <h2 className="text-2xl font-bold text-ash-100 sm:text-3xl">
+            The team
+          </h2>
           <p className="mt-4 text-ash-300 leading-relaxed">
-            fuega.ai is built by a small team that believes in practicing what
-            we preach. We operate anonymously — just like our users. We don&apos;t
-            believe knowing our names makes the platform better. What matters is
-            the code, the transparency, and the community.
+            <F /> is built by a small team that practices what we preach. We
+            operate anonymously — just like our users. We don&apos;t believe
+            knowing our names makes the platform better. What matters is the
+            code, the transparency, and the community.
           </p>
-          <div className="mt-6 rounded-xl border border-ash-800 bg-ash-900/30 p-6">
+          <div className="mt-6 border border-ash-800 bg-ash-900/30 p-5">
             <div className="flex items-center gap-3">
-              <Flame className="h-6 w-6 text-flame-400" />
+              <Flame className="h-5 w-5 text-flame-400" />
               <div>
                 <p className="text-sm font-medium text-ash-200">
                   Open source contributors welcome
                 </p>
-                <p className="text-sm text-ash-400">
+                <p className="text-xs text-ash-400">
                   The platform is built in the open. Contributions, audits, and
                   feedback are always welcome.
                 </p>
@@ -182,16 +285,21 @@ export default function AboutPage() {
         </section>
 
         {/* Contact */}
-        <section className="mt-20 pb-16">
-          <h2 className="text-3xl font-bold text-ash-100">Contact</h2>
+        <section className="mt-12 max-w-3xl pb-12">
+          <h2 className="text-2xl font-bold text-ash-100 sm:text-3xl">
+            Contact
+          </h2>
           <p className="mt-4 text-ash-300">
             The best way to reach us is through the platform itself. Have a
-            suggestion? Create a governance proposal. Found a bug? Post in
-            f | meta. Security concern? See our{" "}
+            suggestion? Create a governance proposal. Found a bug? Post in{" "}
+            <span className="text-flame-400 font-semibold">f</span>
+            <span className="text-ash-500 mx-0.5">|</span>
+            <span className="text-flame-400 font-semibold">meta</span>.
+            Security concern? See our{" "}
             <Link href="/security" className="text-flame-400 hover:underline">
               security page
             </Link>{" "}
-            for responsible disclosure information.
+            for responsible disclosure.
           </p>
         </section>
       </main>
