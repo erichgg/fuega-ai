@@ -202,15 +202,35 @@ export default function AboutPage() {
           <h1 className="text-3xl font-bold text-ash-100 sm:text-4xl">
             Why <F /> exists
           </h1>
-          <p className="mt-5 text-base leading-relaxed text-ash-300">
-            X floods your For You page with engagement-farmed bot replies until
-            you&apos;re convinced half the country hates you — when it&apos;s
-            really just a few thousand accounts running 24/7. Discord now
-            requires ID verification in some servers and hands data to
-            governments under laws like the UK&apos;s Online Safety Act. Reddit
-            sold 16 years of your posts to Google for $60M to train AI models
-            you&apos;ll never benefit from. These platforms don&apos;t work for
-            you. They work on you.
+          <div className="mt-5 space-y-3">
+            <div className="flex gap-3">
+              <Flame className="mt-0.5 h-4 w-4 shrink-0 text-flame-400" />
+              <p className="text-base leading-relaxed text-ash-300">
+                <span className="font-medium text-ash-200">X</span> floods your
+                For You page with engagement-farmed bot replies until you&apos;re
+                convinced half the country hates you — when it&apos;s really
+                just a few thousand accounts running 24/7.
+              </p>
+            </div>
+            <div className="flex gap-3">
+              <Flame className="mt-0.5 h-4 w-4 shrink-0 text-flame-400" />
+              <p className="text-base leading-relaxed text-ash-300">
+                <span className="font-medium text-ash-200">Discord</span> now
+                requires ID verification in some servers and hands your data to
+                governments under laws like the UK&apos;s Online Safety Act.
+              </p>
+            </div>
+            <div className="flex gap-3">
+              <Flame className="mt-0.5 h-4 w-4 shrink-0 text-flame-400" />
+              <p className="text-base leading-relaxed text-ash-300">
+                <span className="font-medium text-ash-200">Reddit</span> sold
+                16 years of your posts to Google for $60M to train AI models
+                you&apos;ll never benefit from.
+              </p>
+            </div>
+          </div>
+          <p className="mt-4 text-base leading-relaxed text-ash-400">
+            These platforms don&apos;t work for you. They work on you.
           </p>
           <p className="mt-4 text-base leading-relaxed text-ash-400">
             <F /> is the opposite. Communities write their own rules, vote on
@@ -295,7 +315,8 @@ export default function AboutPage() {
             public, the moderation prompts are readable, and if you don&apos;t
             like how something works you can propose a change, rally votes, and
             actually fix it. Try doing that on a platform owned by a billionaire
-            who changes the rules based on what he had for breakfast.
+            who changes the rules whenever he feels like it because some files
+            got released.
           </p>
           <p className="mt-4 text-ash-400 leading-relaxed">
             Most platforms optimize for engagement because that&apos;s what
@@ -346,10 +367,12 @@ export default function AboutPage() {
             How governance actually works
           </h2>
           <p className="mt-4 text-ash-300 leading-relaxed">
-            <F /> uses four tiers of governance. Each tier has a specific job,
-            and rules only apply within that tier&apos;s scope. Higher tiers
-            set floors, not ceilings — they define minimums that lower tiers
-            can build on but can&apos;t undercut.
+            <F /> uses multi-level governance — four tiers, each with a specific
+            job. The right decisions get made at the right level. Site-wide
+            questions (like which AI APIs are available) get decided site-wide.
+            Topic-level standards get decided by everyone in that topic.
+            Community-specific rules stay in that community. Each tier sets
+            a floor that lower tiers build on but can&apos;t undercut.
           </p>
 
           <div className="mt-6 space-y-4">
@@ -376,11 +399,13 @@ export default function AboutPage() {
                 </span>
               </p>
               <p className="mt-1 text-sm text-ash-400 leading-relaxed">
-                Sets shared standards across all communities in that category.
-                For example, the Politics category might require &quot;no
-                doxxing elected officials&quot; across every political
-                community. The Food category might ban health misinformation.
-                These rules apply to all communities and cohorts underneath.
+                Sets shared standards across all communities in that category —
+                and everyone in the category votes on them together. In the
+                Politics category, Democrats and Republicans both vote on which
+                AI APIs are fair to use for moderation. They have to agree.
+                Neither side gets to rig the tools. The Food category might ban
+                health misinformation site-wide. These rules apply to all
+                communities and cohorts underneath.
               </p>
             </div>
 
@@ -444,11 +469,14 @@ export default function AboutPage() {
           </div>
 
           <p className="mt-6 text-ash-400 leading-relaxed">
-            You also choose which AI does the moderating. Communities vote on
-            the model API — starting with Anthropic, with the architecture
+            That&apos;s multi-level governance: site-wide questions get decided
+            site-wide, shared standards get decided by everyone in the topic,
+            and community-specific rules stay in that community. Each tier
+            sets a floor that lower tiers build on but can&apos;t undercut.
+            You also choose which AI does the moderating — communities vote on
+            the model API, starting with Anthropic, with the architecture
             built to support any provider. Don&apos;t trust a particular
-            model&apos;s training data? Vote it out. The community controls
-            which knowledge shapes their moderation, not us.
+            model&apos;s training data? Vote it out.
           </p>
         </section>
 
