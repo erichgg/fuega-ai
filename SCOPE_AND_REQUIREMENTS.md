@@ -119,6 +119,13 @@ Community Agents (Community-Configured)
   - Community members propose prompt changes
   - Voting mechanism for approval
   - Version history of all prompts
+- **AI Model Selection** (Governance Vote)
+  - Communities vote on which AI model API drives their moderation
+  - V1: Anthropic (Claude) only — architecture is model-agnostic from day one
+  - Future: communities can vote to add/remove model providers (OpenAI, Grok, Llama, etc.)
+  - Model changes are governance proposals like any other — propose, vote, majority wins
+  - Addresses data legitimacy: the community controls which AI's knowledge drives decisions
+  - moderation_log.ai_model field tracks which model made each decision for full auditability
 - **Moderation Actions**
   - Approve: Post/comment goes live
   - Remove: Post/comment hidden, reason logged

@@ -500,6 +500,18 @@ VOICE & PHILOSOPHY:
 - Tip-supported: no ads, no premium tiers, no data selling. Tips = badge + cosmetics. Same platform for everyone.
 - Don't be cringe about any of this — state facts, let the values speak for themselves
 
+AI MODEL GOVERNANCE (FUTURE — DESIGN FOR THIS NOW):
+- Communities will vote on which AI model APIs drive their moderation
+- V1 starts with Anthropic (Claude) only — but the architecture MUST be model-agnostic
+- Future: communities can vote to add OpenAI, remove Grok, switch to Llama, etc.
+- The community decides which model's "knowledge" drives their moderation decisions
+- This addresses data legitimacy concerns — users control the AI, not just the rules
+- DB schema: communities table should support a model_config or ai_provider field
+- Moderation engine should abstract the AI call behind a provider interface
+- moderation_log already has ai_model field — use it to track which model made each decision
+- On the frontend, community settings should eventually show which AI model is active
+- This is a governance vote like any other — propose model change, community votes, majority wins
+
 COMPLETION SIGNAL: PROMPT_COMPLETE
 
 ===================================================================

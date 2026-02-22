@@ -129,6 +129,11 @@ CREATE TABLE communities (
         "keyword_flag_list": []
     }'::jsonb,
 
+    -- AI Model Selection (community votes on provider)
+    ai_provider VARCHAR(50) NOT NULL DEFAULT 'anthropic', -- V1: anthropic only. Future: openai, grok, llama, etc.
+    ai_model VARCHAR(100) NOT NULL DEFAULT 'claude-sonnet-4-20250514', -- Specific model version
+    -- Model changes are governance proposals — propose, vote, majority wins
+
     -- Governance settings (JSON for flexibility)
     governance_config JSONB DEFAULT '{
         "voting_type": "simple_majority",

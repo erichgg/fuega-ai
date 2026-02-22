@@ -125,6 +125,13 @@ const comparisonRows: {
     x: "no",
     fuega: "yes",
   },
+  {
+    feature: "Community chooses AI model",
+    reddit: "no",
+    discord: "no",
+    x: "no",
+    fuega: "yes",
+  },
 ];
 
 function CellIcon({ value }: { value: CellValue }) {
@@ -332,6 +339,14 @@ export default function AboutPage() {
             community decides what&apos;s acceptable. Not a corporation. Not an
             algorithm. Not some trust &amp; safety team you&apos;ll never meet.
             You. The people who actually use the space.
+          </p>
+          <p className="mt-4 text-ash-400 leading-relaxed">
+            You even choose the AI. Communities vote on which model API drives
+            their moderation — starting with Anthropic, with the architecture
+            built to support any provider. Don&apos;t trust a particular
+            model&apos;s training data? Vote it out. Want to try a new one?
+            Propose it. The community decides which knowledge shapes their
+            moderation, not us.
           </p>
         </section>
 
