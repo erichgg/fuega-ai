@@ -375,7 +375,7 @@ export default function AboutPage() {
             Post in{" "}
             <span className="text-flame-400 font-semibold">f</span>
             <span className="text-ash-500 mx-0.5">|</span>
-            <span className="text-flame-400 font-semibold">meta</span>.
+            <span className="text-flame-400 font-semibold">fuega</span>.
             Want to contribute code? The repo is public. Security concern?
             See our{" "}
             <Link href="/security" className="text-flame-400 hover:underline">
