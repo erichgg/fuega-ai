@@ -123,13 +123,13 @@ export default function LandingPage() {
       </nav>
 
       {/* Hero */}
-      <section className="relative overflow-hidden px-4 pb-12 pt-16 sm:pb-16 sm:pt-20 lg:pb-12 lg:pt-16 2xl:px-8">
+      <section className="relative flex min-h-[calc(100vh-3.5rem)] items-center overflow-hidden px-4 2xl:px-8">
         <div className="absolute inset-0 -z-10">
           <div className="absolute left-1/2 top-0 h-[400px] w-[900px] -translate-x-1/2 rounded-full bg-flame-500/5 blur-3xl" />
           <div className="absolute left-1/3 top-10 h-[250px] w-[600px] -translate-x-1/2 rounded-full bg-ember-500/5 blur-3xl" />
         </div>
 
-        <div className="mx-auto max-w-7xl">
+        <div className="mx-auto w-full max-w-7xl">
           <div className="mx-auto max-w-4xl text-center lg:max-w-5xl">
             <h1 className="text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl 2xl:text-7xl">
               <span className="text-gradient-fire">Your platform.</span>
@@ -278,11 +278,12 @@ export default function LandingPage() {
         <div className="mx-auto max-w-3xl text-center">
           <MessageSquare className="mx-auto h-10 w-10 text-flame-400" />
           <h2 className="mt-4 text-2xl font-bold text-ash-100 sm:text-3xl">
-            Stop asking permission to speak.
+            Find your people. Set your standards.
           </h2>
           <p className="mt-3 text-sm text-ash-400">
+            Communities that govern themselves. Rules you actually voted for.
+            People who share your standards, not some algorithm&apos;s idea of engagement.
             First 5,000 users get a permanent Founder badge.
-            No email. No phone. Pick a username. That&apos;s it.
           </p>
           <Link
             href="/signup"
