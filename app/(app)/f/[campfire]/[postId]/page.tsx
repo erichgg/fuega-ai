@@ -23,13 +23,13 @@ import { PostDetailSkeleton } from "@/components/fuega/page-skeleton";
 import { useAuth } from "@/lib/contexts/auth-context";
 
 // TEST_DATA - DELETE BEFORE PRODUCTION
-function getMockPost(community: string, postId: string) {
+function getMockPost(campfire: string, postId: string) {
   return {
     id: postId,
-    title: "Welcome to fuega.ai — the future of community discussion",
-    body: `We're building something different here. A platform where AI moderation is transparent, communities govern themselves, and privacy is a right.\n\nEvery moderation decision is public. Every community writes its own AI moderator prompt. Every voice matters.\n\nHere's what makes fuega different:\n\n1. **Transparent AI moderation** — Every decision logged publicly with reasoning\n2. **Community governance** — You write and vote on moderation rules\n3. **True anonymity** — No email required, IPs hashed and deleted\n4. **Spark & Douse** — Vote on quality, not popularity\n\nJoin the conversation. Shape the rules. Build something better.`,
+    title: "Welcome to fuega.ai — the future of campfire discussion",
+    body: `We're building something different here. A platform where AI moderation is transparent, campfires govern themselves, and privacy is a right.\n\nEvery moderation decision is public. Every campfire writes its own AI moderator prompt. Every voice matters.\n\nHere's what makes fuega different:\n\n1. **Transparent AI moderation** — Every decision logged publicly with reasoning\n2. **Campfire governance** — You write and vote on moderation rules\n3. **True anonymity** — No email required, IPs hashed and deleted\n4. **Spark & Douse** — Vote on quality, not popularity\n\nJoin the conversation. Shape the rules. Build something better.`,
     author: "fuega_team",
-    community,
+    campfire,
     sparkCount: 247,
     commentCount: 5,
     createdAt: new Date(Date.now() - 3600000).toISOString(),
@@ -70,7 +70,7 @@ function getMockComments() {
     },
     {
       id: "cm4",
-      body: "Great question. The AI uses confidence scores — low-confidence decisions get flagged for community review rather than auto-removed. Communities can tune this threshold through governance.",
+      body: "Great question. The AI uses confidence scores — low-confidence decisions get flagged for campfire review rather than auto-removed. Campfires can tune this threshold through governance.",
       author: "fuega_team",
       sparkCount: 56,
       replyCount: 0,
@@ -103,7 +103,7 @@ function timeAgo(dateStr: string): string {
 export default function PostDetailPage() {
   const params = useParams();
   const { user } = useAuth();
-  const communitySlug = params.community as string;
+  const campfireSlug = params.campfire as string;
   const postId = params.postId as string;
 
   const [post, setPost] = React.useState<ReturnType<typeof getMockPost> | null>(
@@ -124,12 +124,12 @@ export default function PostDetailPage() {
 
   React.useEffect(() => {
     const timer = setTimeout(() => {
-      setPost(getMockPost(communitySlug, postId));
+      setPost(getMockPost(campfireSlug, postId));
       setComments(getMockComments());
       setLoading(false);
     }, 300);
     return () => clearTimeout(timer);
-  }, [communitySlug, postId]);
+  }, [campfireSlug, postId]);
 
   const handlePostVote = (vote: "spark" | "douse") => {
     const voteState = vote === "spark" ? "sparked" : "doused";
@@ -188,11 +188,11 @@ export default function PostDetailPage() {
     <div>
       {/* Back link */}
       <Link
-        href={`/f/${communitySlug}`}
+        href={`/f/${campfireSlug}`}
         className="inline-flex items-center gap-1.5 text-sm text-ash-500 transition-colors hover:text-ash-300"
       >
         <ArrowLeft className="h-3.5 w-3.5" />
-        <span className="text-lava-hot">f</span><span className="text-smoke mx-1">|</span><span>{communitySlug}</span>
+        <span className="text-lava-hot">f</span><span className="text-smoke mx-1">|</span><span>{campfireSlug}</span>
       </Link>
 
       {/* Post */}
@@ -207,10 +207,10 @@ export default function PostDetailPage() {
             {/* Meta */}
             <div className="flex items-center gap-2 text-xs text-ash-400">
               <Link
-                href={`/f/${post.community}`}
+                href={`/f/${post.campfire}`}
                 className="font-medium text-flame-400 hover:underline"
               >
-                <span className="text-lava-hot">f</span><span className="text-smoke mx-1">|</span><span>{post.community}</span>
+                <span className="text-lava-hot">f</span><span className="text-smoke mx-1">|</span><span>{post.campfire}</span>
               </Link>
               <span>·</span>
               <UserAvatar username={post.author} size="sm" />

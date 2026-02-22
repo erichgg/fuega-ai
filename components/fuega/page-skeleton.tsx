@@ -54,7 +54,7 @@ export function PostDetailSkeleton() {
   );
 }
 
-export function CommunitySkeleton() {
+export function CampfireSkeleton() {
   return (
     <div className="space-y-4">
       <div className="rounded-lg border border-ash-800 bg-ash-900/50 p-6">

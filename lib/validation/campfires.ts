@@ -1,14 +1,6 @@
 import { z } from "zod";
 
-const VALID_CATEGORIES = [
-  "technology",
-  "science",
-  "politics",
-  "entertainment",
-  "sports",
-] as const;
-
-export const createCommunitySchema = z.object({
+export const createCampfireSchema = z.object({
   name: z
     .string()
     .min(3, "Name must be at least 3 characters")
@@ -25,14 +17,9 @@ export const createCommunitySchema = z.object({
     .string()
     .min(1, "Description is required")
     .max(500, "Description must be at most 500 characters"),
-  category: z.enum(VALID_CATEGORIES, {
-    errorMap: () => ({
-      message: `Category must be one of: ${VALID_CATEGORIES.join(", ")}`,
-    }),
-  }),
 });
 
-export const updateCommunitySchema = z.object({
+export const updateCampfireSchema = z.object({
   display_name: z
     .string()
     .min(1, "Display name is required")
@@ -45,13 +32,12 @@ export const updateCommunitySchema = z.object({
     .optional(),
 });
 
-export const listCommunitiesSchema = z.object({
-  category: z.string().optional(),
+export const listCampfiresSchema = z.object({
   sort: z.enum(["members", "activity", "created_at"]).default("members"),
   limit: z.coerce.number().int().min(1).max(100).default(25),
   offset: z.coerce.number().int().min(0).default(0),
 });
 
-export type CreateCommunityInput = z.infer<typeof createCommunitySchema>;
-export type UpdateCommunityInput = z.infer<typeof updateCommunitySchema>;
-export type ListCommunitiesInput = z.infer<typeof listCommunitiesSchema>;
+export type CreateCampfireInput = z.infer<typeof createCampfireSchema>;
+export type UpdateCampfireInput = z.infer<typeof updateCampfireSchema>;
+export type ListCampfiresInput = z.infer<typeof listCampfiresSchema>;

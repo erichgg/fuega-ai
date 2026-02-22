@@ -17,13 +17,13 @@ import { ModLogSkeleton } from "@/components/fuega/page-skeleton";
 import { cn } from "@/lib/utils";
 
 type Decision = "approved" | "flagged" | "removed";
-type Tier = "community" | "cohort" | "category" | "platform";
+type Tier = "campfire" | "platform";
 
 interface ModLogEntry {
   id: string;
   contentSnippet: string;
   contentType: "post" | "comment";
-  community: string;
+  campfire: string;
   decision: Decision;
   confidence: number;
   reasoning: string;
@@ -53,9 +53,7 @@ const decisionConfig: Record<
 };
 
 const tierLabels: Record<Tier, string> = {
-  community: "Community",
-  cohort: "Cohort",
-  category: "Category",
+  campfire: "Campfire",
   platform: "Platform",
 };
 
@@ -64,14 +62,14 @@ const MOCK_LOG_ENTRIES: ModLogEntry[] = [
   {
     id: "ml1",
     contentSnippet:
-      "Welcome to fuega.ai — the future of community discussion...",
+      "Welcome to fuega.ai — the future of campfire discussion...",
     contentType: "post",
-    community: "meta",
+    campfire: "meta",
     decision: "approved",
     confidence: 0.98,
     reasoning:
-      "Content is constructive, introduces platform features, and encourages community participation. No violations detected.",
-    tier: "community",
+      "Content is constructive, introduces platform features, and encourages campfire participation. No violations detected.",
+    tier: "campfire",
     createdAt: new Date(Date.now() - 1800000).toISOString(),
   },
   {
@@ -79,23 +77,23 @@ const MOCK_LOG_ENTRIES: ModLogEntry[] = [
     contentSnippet:
       "You're an idiot if you think this approach will work. Absolute garbage...",
     contentType: "comment",
-    community: "tech",
+    campfire: "tech",
     decision: "flagged",
     confidence: 0.74,
     reasoning:
-      "Contains potentially hostile language ('idiot', 'garbage'). However, may be heated technical debate. Flagged for community review due to low confidence.",
-    tier: "community",
+      "Contains potentially hostile language ('idiot', 'garbage'). However, may be heated technical debate. Flagged for campfire review due to low confidence.",
+    tier: "campfire",
     createdAt: new Date(Date.now() - 3600000).toISOString(),
   },
   {
     id: "ml3",
     contentSnippet: "Buy cheap followers at [spam link]...",
     contentType: "post",
-    community: "general",
+    campfire: "general",
     decision: "removed",
     confidence: 0.99,
     reasoning:
-      "Clear spam content with commercial link. Violates community and platform guidelines.",
+      "Clear spam content with commercial link. Violates campfire and platform guidelines.",
     tier: "platform",
     createdAt: new Date(Date.now() - 5400000).toISOString(),
   },
@@ -104,12 +102,12 @@ const MOCK_LOG_ENTRIES: ModLogEntry[] = [
     contentSnippet:
       "New study shows promising results in quantum computing error correction...",
     contentType: "post",
-    community: "science",
+    campfire: "science",
     decision: "approved",
     confidence: 0.96,
     reasoning:
-      "Scientific discussion with reference to published research. Content is factual and relevant to the community.",
-    tier: "community",
+      "Scientific discussion with reference to published research. Content is factual and relevant to the campfire.",
+    tier: "campfire",
     createdAt: new Date(Date.now() - 7200000).toISOString(),
   },
   {
@@ -117,12 +115,12 @@ const MOCK_LOG_ENTRIES: ModLogEntry[] = [
     contentSnippet:
       "I think the moderation prompt should be updated to...",
     contentType: "comment",
-    community: "meta",
+    campfire: "meta",
     decision: "approved",
     confidence: 0.95,
     reasoning:
-      "Meta-discussion about moderation is encouraged on this community. No personal attacks or violations.",
-    tier: "community",
+      "Meta-discussion about moderation is encouraged on this campfire. No personal attacks or violations.",
+    tier: "campfire",
     createdAt: new Date(Date.now() - 10800000).toISOString(),
   },
   {
@@ -130,23 +128,23 @@ const MOCK_LOG_ENTRIES: ModLogEntry[] = [
     contentSnippet:
       "This political party is full of corrupt criminals who should all be...",
     contentType: "comment",
-    community: "politics",
+    campfire: "politics",
     decision: "flagged",
     confidence: 0.68,
     reasoning:
-      "Strong political opinion that borders on generalized hate speech. Low confidence — flagged for community review as political expression vs. hate speech is context-dependent.",
-    tier: "category",
+      "Strong political opinion that borders on generalized hate speech. Low confidence — flagged for campfire review as political expression vs. hate speech is context-dependent.",
+    tier: "campfire",
     createdAt: new Date(Date.now() - 14400000).toISOString(),
   },
   {
     id: "ml7",
     contentSnippet: "Great analysis! I completely agree with your points...",
     contentType: "comment",
-    community: "tech",
+    campfire: "tech",
     decision: "approved",
     confidence: 0.99,
     reasoning: "Positive, constructive comment. No violations.",
-    tier: "community",
+    tier: "campfire",
     createdAt: new Date(Date.now() - 18000000).toISOString(),
   },
   {
@@ -154,7 +152,7 @@ const MOCK_LOG_ENTRIES: ModLogEntry[] = [
     contentSnippet:
       "[Graphic violent content describing harm to specific individuals]",
     contentType: "post",
-    community: "general",
+    campfire: "general",
     decision: "removed",
     confidence: 0.99,
     reasoning:
@@ -180,7 +178,7 @@ export default function ModLogPage() {
   const [decisionFilter, setDecisionFilter] = React.useState<Decision | "all">(
     "all",
   );
-  const [communityFilter, setCommunityFilter] = React.useState("");
+  const [campfireFilter, setCampfireFilter] = React.useState("");
   const [searchQuery, setSearchQuery] = React.useState("");
 
   React.useEffect(() => {
@@ -195,10 +193,10 @@ export default function ModLogPage() {
     if (decisionFilter !== "all" && entry.decision !== decisionFilter)
       return false;
     if (
-      communityFilter &&
-      !entry.community
+      campfireFilter &&
+      !entry.campfire
         .toLowerCase()
-        .includes(communityFilter.toLowerCase())
+        .includes(campfireFilter.toLowerCase())
     )
       return false;
     if (
@@ -240,9 +238,9 @@ export default function ModLogPage() {
             />
           </div>
           <Input
-            placeholder="Filter by community..."
-            value={communityFilter}
-            onChange={(e) => setCommunityFilter(e.target.value)}
+            placeholder="Filter by campfire..."
+            value={campfireFilter}
+            onChange={(e) => setCampfireFilter(e.target.value)}
             className="h-9 w-full border-ash-800 bg-ash-900 text-sm placeholder:text-ash-600 focus-visible:ring-flame-500/50 sm:w-48"
           />
         </div>
@@ -295,7 +293,7 @@ export default function ModLogPage() {
                     </p>
                     <div className="flex items-center gap-2 text-[10px] text-ash-500">
                       <span className="text-flame-400">
-                        <span className="text-lava-hot">f</span><span className="text-smoke mx-1">|</span><span>{entry.community}</span>
+                        <span className="text-lava-hot">f</span><span className="text-smoke mx-1">|</span><span>{entry.campfire}</span>
                       </span>
                       <span>·</span>
                       <span>{entry.contentType}</span>

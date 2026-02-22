@@ -1,35 +1,35 @@
 import { NextResponse } from "next/server";
 import { authenticate } from "@/lib/auth/jwt";
-import { updateCommunitySchema } from "@/lib/validation/communities";
+import { updateCampfireSchema } from "@/lib/validation/campfires";
 import {
-  getCommunityById,
-  updateCommunity,
+  getCampfireById,
+  updateCampfire,
   ServiceError,
-} from "@/lib/services/communities.service";
+} from "@/lib/services/campfires.service";
 
 interface RouteParams {
   params: Promise<{ id: string }>;
 }
 
 /**
- * GET /api/communities/:id
- * Get full community details.
+ * GET /api/campfires/:id
+ * Get full campfire details.
  */
 export async function GET(req: Request, { params }: RouteParams) {
   try {
     const { id } = await params;
 
-    const community = await getCommunityById(id);
-    if (!community) {
+    const campfire = await getCampfireById(id);
+    if (!campfire) {
       return NextResponse.json(
-        { error: "Community not found", code: "COMMUNITY_NOT_FOUND" },
+        { error: "Campfire not found", code: "CAMPFIRE_NOT_FOUND" },
         { status: 404 }
       );
     }
 
-    return NextResponse.json({ community });
+    return NextResponse.json({ campfire });
   } catch (err) {
-    console.error("Get community error:", err);
+    console.error("Get campfire error:", err);
     return NextResponse.json(
       { error: "Internal server error", code: "INTERNAL_ERROR" },
       { status: 500 }
@@ -38,8 +38,8 @@ export async function GET(req: Request, { params }: RouteParams) {
 }
 
 /**
- * PATCH /api/communities/:id
- * Update community settings. Admin only.
+ * PATCH /api/campfires/:id
+ * Update campfire settings. Admin only.
  * Cannot directly update AI prompt (must use proposal).
  */
 export async function PATCH(req: Request, { params }: RouteParams) {
@@ -55,7 +55,7 @@ export async function PATCH(req: Request, { params }: RouteParams) {
     const { id } = await params;
 
     const body = await req.json();
-    const parsed = updateCommunitySchema.safeParse(body);
+    const parsed = updateCampfireSchema.safeParse(body);
     if (!parsed.success) {
       return NextResponse.json(
         {
@@ -66,9 +66,9 @@ export async function PATCH(req: Request, { params }: RouteParams) {
       );
     }
 
-    const community = await updateCommunity(id, user.userId, parsed.data);
+    const campfire = await updateCampfire(id, user.userId, parsed.data);
 
-    return NextResponse.json({ community });
+    return NextResponse.json({ campfire });
   } catch (err) {
     if (err instanceof ServiceError) {
       return NextResponse.json(
@@ -76,7 +76,7 @@ export async function PATCH(req: Request, { params }: RouteParams) {
         { status: err.status }
       );
     }
-    console.error("Update community error:", err);
+    console.error("Update campfire error:", err);
     return NextResponse.json(
       { error: "Internal server error", code: "INTERNAL_ERROR" },
       { status: 500 }

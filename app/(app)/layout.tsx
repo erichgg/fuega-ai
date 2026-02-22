@@ -6,7 +6,7 @@ import { Sidebar } from "@/components/fuega/sidebar";
 import { ErrorBoundary } from "@/components/fuega/error-boundary";
 import { useAuth } from "@/lib/contexts/auth-context";
 
-const DEMO_COMMUNITIES = [
+const DEMO_CAMPFIRES = [
   { name: "tech", memberCount: 12400 },
   { name: "science", memberCount: 8900 },
   { name: "gaming", memberCount: 15200 },
@@ -26,7 +26,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       />
       <div className="flex">
         <Sidebar
-          communities={user ? DEMO_COMMUNITIES : []}
+          campfires={user ? DEMO_CAMPFIRES : []}
           open={sidebarOpen}
           onClose={() => setSidebarOpen(false)}
         />

@@ -17,7 +17,7 @@ function getMockProfile(username: string) {
     username,
     sparkScore: 1247 + Math.floor(Math.random() * 500),
     founderBadge: true,
-    bio: "Passionate about transparent AI and community governance. Early adopter and active contributor.",
+    bio: "Passionate about transparent AI and campfire governance. Early adopter and active contributor.",
     createdAt: "2024-01-15T00:00:00Z",
     postCount: 23,
     commentCount: 156,
@@ -32,7 +32,7 @@ function getMockUserPosts(username: string) {
       title: "My thoughts on transparent AI moderation after one month",
       body: "After using fuega for a month, here are my observations about how AI moderation changes the discussion dynamic...",
       author: username,
-      community: "meta",
+      campfire: "meta",
       sparkCount: 89,
       commentCount: 23,
       createdAt: new Date(Date.now() - 86400000).toISOString(),
@@ -42,7 +42,7 @@ function getMockUserPosts(username: string) {
       id: "up2",
       title: "Proposal for improved governance voting UI",
       author: username,
-      community: "meta",
+      campfire: "meta",
       sparkCount: 45,
       commentCount: 12,
       createdAt: new Date(Date.now() - 172800000).toISOString(),
@@ -56,16 +56,16 @@ function getMockUserComments(username: string) {
     {
       id: "uc1",
       postTitle: "How AI moderation actually works on fuega",
-      postCommunity: "tech",
+      postCampfire: "tech",
       postId: "2",
-      body: "The confidence scoring system is brilliant. Low-confidence decisions go to community review instead of auto-removal.",
+      body: "The confidence scoring system is brilliant. Low-confidence decisions go to campfire review instead of auto-removal.",
       sparkCount: 34,
       createdAt: new Date(Date.now() - 43200000).toISOString(),
     },
     {
       id: "uc2",
       postTitle: "Welcome to fuega.ai",
-      postCommunity: "meta",
+      postCampfire: "meta",
       postId: "1",
       body: "Excited to be part of this from the beginning. The Founder badge is a nice touch!",
       sparkCount: 12,
@@ -240,7 +240,7 @@ export default function UserProfilePage() {
                   </span>{" "}
                   in{" "}
                   <span className="text-flame-400">
-                    <span className="text-lava-hot">f</span><span className="text-smoke mx-1">|</span><span>{comment.postCommunity}</span>
+                    <span className="text-lava-hot">f</span><span className="text-smoke mx-1">|</span><span>{comment.postCampfire}</span>
                   </span>{" "}
                   · {timeAgo(comment.createdAt)}
                 </div>

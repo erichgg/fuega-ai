@@ -8,7 +8,7 @@ interface UserMetrics {
   total_approved_posts: number;
   total_comments: number;
   total_approved_comments: number;
-  communities_joined: number;
+  campfires_joined: number;
   total_sparks_received: number;
   max_post_sparks: number;
   consecutive_active_days: number;
@@ -17,8 +17,8 @@ interface UserMetrics {
   total_proposals_created: number;
   total_proposals_passed: number;
   referral_count: number;
-  communities_created: number;
-  max_community_members_created: number;
+  campfires_created: number;
+  max_campfire_members_created: number;
   nighttime_activity_count: number;
   founder_number: number | null;
 }
@@ -39,8 +39,8 @@ const THRESHOLD_BADGES: ThresholdBadge[] = [
   { badge_id: "first_comment", metric: "total_comments", threshold: 1 },
   { badge_id: "conversationalist", metric: "total_approved_comments", threshold: 100 },
   { badge_id: "discussion_veteran", metric: "total_approved_comments", threshold: 1000 },
-  { badge_id: "community_explorer", metric: "communities_joined", threshold: 10 },
-  { badge_id: "community_nomad", metric: "communities_joined", threshold: 50 },
+  { badge_id: "community_explorer", metric: "campfires_joined", threshold: 10 },
+  { badge_id: "community_nomad", metric: "campfires_joined", threshold: 50 },
   { badge_id: "night_owl", metric: "nighttime_activity_count", threshold: 25 },
   { badge_id: "streak_7", metric: "consecutive_active_days", threshold: 7 },
   { badge_id: "streak_30", metric: "consecutive_active_days", threshold: 30 },
@@ -55,8 +55,8 @@ const THRESHOLD_BADGES: ThresholdBadge[] = [
   { badge_id: "legendary_contributor", metric: "total_sparks_received", threshold: 100000 },
   { badge_id: "hot_post", metric: "max_post_sparks", threshold: 100 },
   { badge_id: "viral_post", metric: "max_post_sparks", threshold: 1000 },
-  { badge_id: "community_builder", metric: "max_community_members_created", threshold: 100 },
-  { badge_id: "community_architect", metric: "max_community_members_created", threshold: 1000 },
+  { badge_id: "community_builder", metric: "max_campfire_members_created", threshold: 100 },
+  { badge_id: "community_architect", metric: "max_campfire_members_created", threshold: 1000 },
 
   // Governance
   { badge_id: "first_vote", metric: "total_proposal_votes", threshold: 1 },
@@ -72,7 +72,7 @@ const THRESHOLD_BADGES: ThresholdBadge[] = [
   { badge_id: "v1_legend", metric: "referral_count", threshold: 100 },
 
   // Special
-  { badge_id: "community_creator", metric: "communities_created", threshold: 1 },
+  { badge_id: "community_creator", metric: "campfires_created", threshold: 1 },
 ];
 
 // ─── Fetch all metrics for a user ────────────────────────────
@@ -82,7 +82,7 @@ async function getUserMetrics(userId: string): Promise<UserMetrics> {
   const [
     postCounts,
     commentCounts,
-    communitiesJoined,
+    campfiresJoined,
     sparksReceived,
     maxPostSparks,
     streakDays,
@@ -91,8 +91,8 @@ async function getUserMetrics(userId: string): Promise<UserMetrics> {
     proposalsCreated,
     proposalsPassed,
     referralCount,
-    communitiesCreated,
-    maxCommunityMembers,
+    campfiresCreated,
+    maxCampfireMembers,
     nightActivity,
     founderInfo,
   ] = await Promise.all([
@@ -116,10 +116,10 @@ async function getUserMetrics(userId: string): Promise<UserMetrics> {
       [userId]
     ),
 
-    // Communities joined (active memberships)
+    // Campfires joined (active memberships)
     queryOne<{ count: string }>(
       `SELECT COUNT(*) AS count
-       FROM community_members
+       FROM campfire_members
        WHERE user_id = $1 AND left_at IS NULL`,
       [userId]
     ),
@@ -198,18 +198,18 @@ async function getUserMetrics(userId: string): Promise<UserMetrics> {
       [userId]
     ).catch(() => ({ count: "0" })),
 
-    // Communities created
+    // Campfires created
     queryOne<{ count: string }>(
       `SELECT COUNT(*) AS count
-       FROM communities
+       FROM campfires
        WHERE created_by = $1 AND deleted_at IS NULL`,
       [userId]
     ),
 
-    // Max community members (of communities created by user)
+    // Max campfire members (of communities created by user)
     queryOne<{ max_members: string }>(
       `SELECT COALESCE(MAX(member_count), 0) AS max_members
-       FROM communities
+       FROM campfires
        WHERE created_by = $1 AND deleted_at IS NULL`,
       [userId]
     ),
@@ -240,7 +240,7 @@ async function getUserMetrics(userId: string): Promise<UserMetrics> {
     total_approved_posts: parseInt(postCounts?.approved ?? "0", 10),
     total_comments: parseInt(commentCounts?.total ?? "0", 10),
     total_approved_comments: parseInt(commentCounts?.approved ?? "0", 10),
-    communities_joined: parseInt(communitiesJoined?.count ?? "0", 10),
+    campfires_joined: parseInt(campfiresJoined?.count ?? "0", 10),
     total_sparks_received:
       (sparksReceived?.post_sparks ?? 0) + (sparksReceived?.comment_sparks ?? 0),
     max_post_sparks: parseInt(maxPostSparks?.max_sparks ?? "0", 10),
@@ -250,8 +250,8 @@ async function getUserMetrics(userId: string): Promise<UserMetrics> {
     total_proposals_created: parseInt(proposalsCreated?.count ?? "0", 10),
     total_proposals_passed: parseInt(proposalsPassed?.count ?? "0", 10),
     referral_count: parseInt(referralCount?.count ?? "0", 10),
-    communities_created: parseInt(communitiesCreated?.count ?? "0", 10),
-    max_community_members_created: parseInt(maxCommunityMembers?.max_members ?? "0", 10),
+    campfires_created: parseInt(campfiresCreated?.count ?? "0", 10),
+    max_campfire_members_created: parseInt(maxCampfireMembers?.max_members ?? "0", 10),
     nighttime_activity_count: parseInt(nightActivity?.count ?? "0", 10),
     founder_number: founderInfo?.founder_number ?? null,
   };
@@ -418,7 +418,7 @@ export async function checkBadgesAfterSpark(userId: string): Promise<AwardResult
   return eligible.length > 0 ? awardBadges(userId, eligible) : [];
 }
 
-export async function checkBadgesAfterCommunityJoin(userId: string): Promise<AwardResult[]> {
+export async function checkBadgesAfterCampfireJoin(userId: string): Promise<AwardResult[]> {
   const metrics = await getUserMetrics(userId);
   const owned = await queryAll<{ badge_id: string }>(
     `SELECT badge_id FROM user_badges WHERE user_id = $1`,
@@ -429,8 +429,8 @@ export async function checkBadgesAfterCommunityJoin(userId: string): Promise<Awa
   const eligible: string[] = [];
 
   const joinBadges: ThresholdBadge[] = [
-    { badge_id: "community_explorer", metric: "communities_joined", threshold: 10 },
-    { badge_id: "community_nomad", metric: "communities_joined", threshold: 50 },
+    { badge_id: "community_explorer", metric: "campfires_joined", threshold: 10 },
+    { badge_id: "community_nomad", metric: "campfires_joined", threshold: 50 },
   ];
 
   for (const tb of joinBadges) {

@@ -15,7 +15,7 @@ interface PostCardProps {
     title: string;
     body?: string;
     author: string;
-    community: string;
+    campfire: string;
     sparkCount: number;
     commentCount: number;
     createdAt: string;
@@ -66,7 +66,7 @@ export function PostCard({
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2 text-xs text-ash-400">
             <span className="font-medium text-flame-400 hover:underline cursor-pointer">
-              <span className="text-lava-hot">f</span><span className="text-smoke mx-1">|</span><span>{post.community}</span>
+              <span className="text-lava-hot">f</span><span className="text-smoke mx-1">|</span><span>{post.campfire}</span>
             </span>
             <span>·</span>
             <UserAvatar username={post.author} size="sm" />

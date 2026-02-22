@@ -11,23 +11,23 @@ import {
 } from "@/lib/services/governance.service";
 
 /**
- * GET /api/proposals?community_id=&status=&limit=&offset=
- * List proposals for a community.
+ * GET /api/proposals?campfire_id=&status=&limit=&offset=
+ * List proposals for a campfire.
  */
 export async function GET(req: Request) {
   try {
     const url = new URL(req.url);
-    const communityId = url.searchParams.get("community_id");
+    const campfireId = url.searchParams.get("campfire_id");
 
-    if (!communityId) {
+    if (!campfireId) {
       return NextResponse.json(
-        { error: "community_id is required", code: "VALIDATION_ERROR" },
+        { error: "campfire_id is required", code: "VALIDATION_ERROR" },
         { status: 400 }
       );
     }
 
     const parsed = listProposalsSchema.safeParse({
-      community_id: communityId,
+      campfire_id: campfireId,
       status: url.searchParams.get("status") ?? undefined,
       limit: url.searchParams.get("limit") ?? "25",
       offset: url.searchParams.get("offset") ?? "0",

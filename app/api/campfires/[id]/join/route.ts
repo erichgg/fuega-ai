@@ -1,17 +1,17 @@
 import { NextResponse } from "next/server";
 import { authenticate } from "@/lib/auth/jwt";
 import {
-  joinCommunity,
+  joinCampfire,
   ServiceError,
-} from "@/lib/services/communities.service";
+} from "@/lib/services/campfires.service";
 
 interface RouteParams {
   params: Promise<{ id: string }>;
 }
 
 /**
- * POST /api/communities/:id/join
- * Join a community. Auth required.
+ * POST /api/campfires/:id/join
+ * Join a campfire. Auth required.
  */
 export async function POST(req: Request, { params }: RouteParams) {
   try {
@@ -25,7 +25,7 @@ export async function POST(req: Request, { params }: RouteParams) {
 
     const { id } = await params;
 
-    const membership = await joinCommunity(id, user.userId);
+    const membership = await joinCampfire(id, user.userId);
 
     return NextResponse.json({ membership }, { status: 201 });
   } catch (err) {
@@ -35,7 +35,7 @@ export async function POST(req: Request, { params }: RouteParams) {
         { status: err.status }
       );
     }
-    console.error("Join community error:", err);
+    console.error("Join campfire error:", err);
     return NextResponse.json(
       { error: "Internal server error", code: "INTERNAL_ERROR" },
       { status: 500 }

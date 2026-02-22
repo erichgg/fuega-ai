@@ -233,7 +233,7 @@ export default function AboutPage() {
             These platforms don&apos;t work for you. They work on you.
           </p>
           <p className="mt-4 text-base leading-relaxed text-ash-400">
-            <F /> is the opposite. Communities write their own rules, vote on
+            <F /> is the opposite. Communities — we call them campfires — write their own rules, vote on
             them, and AI enforces exactly what was decided — nothing more. The
             whole thing is tip-supported: help keep the lights on and you get a
             badge and some cosmetics. That&apos;s it. No ads, no data
@@ -354,130 +354,40 @@ export default function AboutPage() {
                 Built on feedback
               </p>
               <p className="mt-1 text-xs text-ash-500">
-                Features come from community proposals and votes, not product
+                Features come from campfire proposals and votes, not product
                 managers chasing quarterly metrics.
               </p>
             </div>
           </div>
         </section>
 
-        {/* Governance */}
+        {/* How It Works teaser */}
         <section className="mt-12">
           <h2 className="text-2xl font-bold text-ash-100 sm:text-3xl">
-            How governance actually works
+            How it works
           </h2>
           <p className="mt-4 text-ash-300 leading-relaxed">
-            <F /> uses multi-level governance — four tiers, each with a specific
-            job. The right decisions get made at the right level. Site-wide
-            questions (like which AI APIs are available) get decided site-wide.
-            Topic-level standards get decided by everyone in that topic.
-            Community-specific rules stay in that community. Each tier sets
-            a floor that lower tiers build on but can&apos;t undercut.
+            Each campfire on <F /> governs itself. Members vote on governance
+            settings — toxicity thresholds, spam sensitivity, content rules —
+            and the system compiles those settings into an AI moderator called
+            a <span className="font-medium text-ash-200">Tender</span>. No
+            human writes moderation rules directly. Campfires turn dials; the
+            Tender enforces what was decided.
           </p>
-
-          <div className="mt-6 space-y-4">
-            <div className="border-l-2 border-flame-500/60 pl-4">
-              <p className="text-sm font-semibold text-ash-200">
-                Platform{" "}
-                <span className="text-xs font-normal text-ash-500">
-                  (site-wide)
-                </span>
-              </p>
-              <p className="mt-1 text-sm text-ash-400 leading-relaxed">
-                Controls which AI APIs are available, sets legal baselines
-                (no CSAM, no doxxing), and manages infrastructure decisions.
-                Platform rules apply everywhere and can&apos;t be overridden
-                by any lower tier.
-              </p>
-            </div>
-
-            <div className="border-l-2 border-flame-500/40 pl-4">
-              <p className="text-sm font-semibold text-ash-200">
-                Category{" "}
-                <span className="text-xs font-normal text-ash-500">
-                  (broad topic — Politics, Food, Gaming, Tech, Sports)
-                </span>
-              </p>
-              <p className="mt-1 text-sm text-ash-400 leading-relaxed">
-                Sets shared standards across all communities in that category —
-                and everyone in the category votes on them together. In the
-                Politics category, Democrats and Republicans both vote on which
-                AI APIs are fair to use for moderation. They have to agree.
-                Neither side gets to rig the tools. The Food category might ban
-                health misinformation site-wide. These rules apply to all
-                communities and cohorts underneath.
-              </p>
-            </div>
-
-            <div className="border-l-2 border-flame-500/25 pl-4">
-              <p className="text-sm font-semibold text-ash-200">
-                Community{" "}
-                <span className="text-xs font-normal text-ash-500">
-                  (specific group — {" "}
-                  <span className="text-flame-400">f</span>
-                  <span className="text-ash-500 mx-0.5">|</span>
-                  <span className="text-flame-400">politics</span>
-                  <span className="text-ash-500 mx-0.5">|</span>
-                  <span className="text-flame-400">democrats</span>,{" "}
-                  <span className="text-flame-400">f</span>
-                  <span className="text-ash-500 mx-0.5">|</span>
-                  <span className="text-flame-400">food</span>
-                  <span className="text-ash-500 mx-0.5">|</span>
-                  <span className="text-flame-400">cooking</span>)
-                </span>
-              </p>
-              <p className="mt-1 text-sm text-ash-400 leading-relaxed">
-                Writes its own specific rules through governance votes. If{" "}
-                <span className="text-flame-400">f</span>
-                <span className="text-ash-500 mx-0.5">|</span>
-                <span className="text-flame-400">politics</span>
-                <span className="text-ash-500 mx-0.5">|</span>
-                <span className="text-flame-400">democrats</span>{" "}
-                has a rule about sourcing claims, that doesn&apos;t affect{" "}
-                <span className="text-flame-400">f</span>
-                <span className="text-ash-500 mx-0.5">|</span>
-                <span className="text-flame-400">politics</span>
-                <span className="text-ash-500 mx-0.5">|</span>
-                <span className="text-flame-400">libertarians</span>.
-                Each community governs itself independently within its
-                category&apos;s guardrails.
-              </p>
-            </div>
-
-            <div className="border-l-2 border-ash-700 pl-4">
-              <p className="text-sm font-semibold text-ash-200">
-                Cohort{" "}
-                <span className="text-xs font-normal text-ash-500">
-                  (hyper-niche — {" "}
-                  <span className="text-flame-400">f</span>
-                  <span className="text-ash-500 mx-0.5">|</span>
-                  <span className="text-flame-400">politics</span>
-                  <span className="text-ash-500 mx-0.5">|</span>
-                  <span className="text-flame-400">democrats</span>
-                  <span className="text-ash-500 mx-0.5">|</span>
-                  <span className="text-flame-400">dsa illinois</span>)
-                </span>
-              </p>
-              <p className="mt-1 text-sm text-ash-400 leading-relaxed">
-                Adds niche refinements on top of the parent community&apos;s
-                rules. A DSA Illinois cohort might require posts to be relevant
-                to Illinois politics, while the parent democrats community
-                stays national. Cohorts inherit everything above them and can
-                only add restrictions, not remove them.
-              </p>
-            </div>
-          </div>
-
-          <p className="mt-6 text-ash-400 leading-relaxed">
-            That&apos;s multi-level governance: site-wide questions get decided
-            site-wide, shared standards get decided by everyone in the topic,
-            and community-specific rules stay in that community. Each tier
-            sets a floor that lower tiers build on but can&apos;t undercut.
-            You also choose which AI does the moderating — communities vote on
-            the model API, starting with Anthropic, with the architecture
-            built to support any provider. Don&apos;t trust a particular
-            model&apos;s training data? Vote it out.
+          <p className="mt-4 text-ash-400 leading-relaxed">
+            Platform-wide Principles (no CSAM, no doxxing, no violence
+            incitement) apply everywhere and can&apos;t be overridden. Beyond
+            that, each campfire is sovereign. You also choose which AI model
+            does the moderating — campfires vote on the provider, starting with
+            Anthropic.
           </p>
+          <Link
+            href="/how-it-works"
+            className="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-flame-400 transition-colors hover:text-flame-300"
+          >
+            See the full governance system
+            <span aria-hidden="true">&rarr;</span>
+          </Link>
         </section>
 
         {/* Get Involved */}

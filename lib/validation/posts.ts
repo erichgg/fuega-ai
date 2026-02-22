@@ -2,7 +2,7 @@ import { z } from "zod";
 
 export const createPostSchema = z
   .object({
-    community_id: z.string().uuid("Invalid community ID"),
+    campfire_id: z.string().uuid("Invalid campfire ID"),
     title: z
       .string()
       .min(1, "Title is required")
@@ -53,7 +53,7 @@ export const updatePostSchema = z.object({
 });
 
 export const listPostsSchema = z.object({
-  community: z.string().optional(),
+  campfire: z.string().optional(),
   sort: z
     .enum(["hot", "new", "top", "rising", "controversial"])
     .default("hot"),

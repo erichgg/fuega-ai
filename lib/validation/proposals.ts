@@ -7,7 +7,7 @@ const PROPOSAL_TYPES = [
 ] as const;
 
 export const createProposalSchema = z.object({
-  community_id: z.string().uuid("Invalid community ID"),
+  campfire_id: z.string().uuid("Invalid campfire ID"),
   proposal_type: z.enum(PROPOSAL_TYPES, {
     errorMap: () => ({
       message: `Proposal type must be one of: ${PROPOSAL_TYPES.join(", ")}`,
@@ -28,7 +28,7 @@ export const createProposalSchema = z.object({
 });
 
 export const listProposalsSchema = z.object({
-  community_id: z.string().uuid("Invalid community ID"),
+  campfire_id: z.string().uuid("Invalid campfire ID"),
   status: z
     .enum(["discussion", "voting", "passed", "failed", "implemented"])
     .optional(),

@@ -93,7 +93,7 @@ STRUCTURE (keep under 150 lines):
 
 ## Project Overview
 - AI-moderated discussion platform
-- Communities write own AI moderator prompts
+- Campfires vote on governance variables, Tender compiler generates AI prompt
 - Spark/douse voting system
 - Transparent multilevel governance
 
@@ -105,7 +105,7 @@ STRUCTURE (keep under 150 lines):
 - Claude API (Anthropic)
 
 ## Terminology (NEVER use Reddit terms)
-- Communities: f | name — display with spaced pipe (NOT f/name, NOT r/name). URL routes: /f/[community]
+- Campfires: f/name — display with spaced pipe (NOT f/name, NOT r/name). URL routes: /f/[campfire]
 - Upvote: Spark (NOT upvote)
 - Downvote: Douse (NOT downvote)
 - Karma: Spark score (NOT karma)
@@ -249,9 +249,9 @@ PLAN comprehensive PostgreSQL schema for fuega.ai:
 
 TABLES (13 total):
 1. users
-2. communities
+2. campfires
 3. categories
-4. community_memberships
+4. campfire_members
 5. posts
 6. comments
 7. votes
@@ -295,7 +295,7 @@ CREATE migrations/001_initial_schema.sql:
 CREATE migrations/002_rls_policies.sql:
 - Enable RLS on all tables
 - Policies for users (own data only)
-- Policies for communities (members can read)
+- Policies for campfires (members can read)
 - Policies for posts (public read, owner write)
 - Policies for votes (anonymize after 24hrs)
 - Admin bypass policies
@@ -303,16 +303,16 @@ CREATE migrations/002_rls_policies.sql:
 CREATE migrations/003_indexes.sql:
 - Hot posts: (sparks - douses) DESC, created_at DESC
 - User posts: user_id, created_at DESC
-- Community posts: community_id, created_at DESC
+- Campfire posts: campfire_id, created_at DESC
 - Comment threading: parent_id, created_at
 - User sparks: user_id, post_sparks DESC
-- Moderation log: community_id, created_at DESC
+- Moderation log: campfire_id, created_at DESC
 
 CREATE migrations/004_seed_data.sql:
 - 5 default categories (Technology, Science, Arts, Politics, General)
 - Each with default AI prompts
 - System user for platform actions
-- Test community for development
+- Test campfire for development
 
 CREATE migrations/run.js:
 - Read DATABASE_URL from .env
@@ -336,8 +336,8 @@ tests/unit/database/schema.test.ts:
 
 tests/unit/database/rls.test.ts:
 - Test users can only see own data
-- Test community members can see posts
-- Test non-members cannot see private communities
+- Test campfire members can see posts
+- Test non-members cannot see private campfires
 - Test vote anonymization
 - Test admin can see all
 
@@ -349,7 +349,7 @@ tests/unit/database/indexes.test.ts:
 
 tests/unit/database/relationships.test.ts:
 - Test user -> posts cascade
-- Test community -> posts cascade
+- Test campfire -> posts cascade
 - Test vote anonymization trigger
 - Test soft delete behavior
 
@@ -372,7 +372,7 @@ CREATE migrations/006_badges_and_user_badges.sql:
 - Indexes: user_badges(user_id), user_badges(badge_id)
 
 CREATE migrations/007_notifications.sql:
-- notifications table: id UUID PK, user_id FK, type ENUM(reply_post/reply_comment/spark/mention/community_update/governance/badge_earned/tip_received/referral), title TEXT, body TEXT, action_url TEXT, content JSONB, read BOOLEAN DEFAULT false, read_at TIMESTAMPTZ, push_sent BOOLEAN DEFAULT false, created_at TIMESTAMPTZ
+- notifications table: id UUID PK, user_id FK, type ENUM(reply_post/reply_comment/spark/mention/campfire_update/governance/badge_earned/tip_received/referral), title TEXT, body TEXT, action_url TEXT, content JSONB, read BOOLEAN DEFAULT false, read_at TIMESTAMPTZ, push_sent BOOLEAN DEFAULT false, created_at TIMESTAMPTZ
 - RLS: users can only see own notifications
 - Indexes: notifications(user_id, created_at DESC) WHERE read = false, notifications(user_id, type)
 - user_push_subscriptions table: id UUID PK, user_id FK, endpoint TEXT, p256dh TEXT, auth TEXT, created_at, UNIQUE(user_id, endpoint)
@@ -385,7 +385,7 @@ CREATE migrations/008_referrals.sql:
 - Indexes: referrals(referrer_id), referrals(referee_id), users(referral_code)
 
 CREATE migrations/009_cosmetics_and_user_cosmetics.sql:
-- cosmetics table: cosmetic_id (PK slug), name, description, preview_concept, category ENUM(theme/border/title/color/avatar/banner/icon), subcategory ENUM(profile/community), price_cents INTEGER, metadata JSONB, available BOOLEAN DEFAULT true, created_at
+- cosmetics table: cosmetic_id (PK slug), name, description, preview_concept, category ENUM(theme/border/title/color/avatar/banner/icon), subcategory ENUM(profile/campfire), price_cents INTEGER, metadata JSONB, available BOOLEAN DEFAULT true, created_at
 - user_cosmetics table: id UUID PK, user_id FK, cosmetic_id FK, stripe_payment_id TEXT, purchased_at TIMESTAMPTZ, refunded BOOLEAN DEFAULT false, refunded_at TIMESTAMPTZ, UNIQUE(user_id, cosmetic_id)
 - Seed all 40 cosmetics from GAMIFICATION.md Appendix B
 - RLS: cosmetics readable by all, user_cosmetics only own
@@ -394,8 +394,8 @@ CREATE migrations/009_cosmetics_and_user_cosmetics.sql:
 CREATE migrations/010_tips_and_user_updates.sql:
 - tips table: id UUID PK, user_id FK, amount_cents INTEGER, currency VARCHAR(3) DEFAULT 'usd', recurring BOOLEAN DEFAULT false, stripe_session_id TEXT, stripe_subscription_id TEXT, message TEXT(500), created_at TIMESTAMPTZ
 - ALTER users ADD: founder_number INTEGER UNIQUE CHECK(1-5000), primary_badge_id FK, notification_preferences JSONB DEFAULT '{}', active_cosmetics JSONB DEFAULT '{}'
-- ALTER communities ADD: ai_config JSONB, banner_cosmetic_id FK, icon_cosmetic_id FK, theme_cosmetic_id FK
-- ALTER community_memberships ADD: role ENUM(founder/moderator/vip/active_member/member/lurker) DEFAULT 'member', role_assigned_at TIMESTAMPTZ, role_assigned_by UUID
+- ALTER campfires ADD: ai_config JSONB, banner_cosmetic_id FK, icon_cosmetic_id FK, theme_cosmetic_id FK
+- ALTER campfire_members ADD: role ENUM(founder/moderator/vip/active_member/member/lurker) DEFAULT 'member', role_assigned_at TIMESTAMPTZ, role_assigned_by UUID
 - ALTER ai_prompt_history ADD: ai_config JSONB
 - RLS on tips: users see own only
 - Indexes: tips(user_id, created_at DESC)
@@ -518,10 +518,10 @@ FILES TO CREATE:
 
 POSTS API:
 
-GET /api/posts?community=&sort=&limit=
+GET /api/posts?campfire=&sort=&limit=
 - Sort: hot, new, top, rising, controversial
 - Limit: 25 (default), max 100
-- Include: author, community, sparks, douses
+- Include: author, campfire, sparks, douses
 - Hot algorithm: (sparks - douses) / (hours_old + 2)^1.5
 
 POST /api/posts
@@ -603,13 +603,13 @@ MODERATION FLOW:
 1. User submits content
 2. Sanitize input (injection defense)
 3. Build isolated system prompt
-4. Call Claude API with community rules
+4. Call Claude API with campfire rules
 5. Parse structured JSON response
 6. Log decision to moderation_log (public)
 7. Return approve/remove/flag
 
 THREE-TIER SYSTEM:
-1. Community AI agent (f|community prompt)
+1. Campfire Tender (f|campfire Tender)
 2. Category AI agent (category prompt)
 3. Platform AI agent (global ToS)
 
@@ -617,12 +617,12 @@ Content passes through in order, stops at first removal.
 
 PROMPT STRUCTURE:
 """
-System: You are a moderator for f | {community}.
-Evaluate ONLY if USER_CONTENT violates COMMUNITY_RULES.
+System: You are a moderator for f | {campfire}.
+Evaluate ONLY if USER_CONTENT violates CAMPFIRE_RULES.
 Respond with valid JSON only: {"decision": "approve|remove|flag", "reason": "brief explanation"}
 
-COMMUNITY_RULES:
-{sanitized_community_rules}
+CAMPFIRE_RULES:
+{sanitized_campfire_rules}
 
 USER_CONTENT:
 {sanitized_user_content}
@@ -700,7 +700,7 @@ Every moderation decision logged:
 - content_id
 - decision (approve/remove/flag)
 - reason
-- tier (community/category/platform)
+- tier (campfire/platform)
 - ai_model_version
 - timestamp
 
@@ -718,24 +718,24 @@ TEST CASES (ALL MUST PASS):
 CRITICAL: If ANY injection test fails, STOP and fix before continuing.
 ```
 
-### Prompt 2.4: Communities & Governance API
+### Prompt 2.4: Campfires & Governance API
 ```
-IMPLEMENT communities and governance:
+IMPLEMENT campfires and governance:
 
 FILES TO CREATE:
-- app/api/communities/route.ts
-- app/api/communities/[id]/route.ts
-- app/api/communities/[id]/join/route.ts
-- app/api/communities/[id]/leave/route.ts
+- app/api/campfires/route.ts
+- app/api/campfires/[id]/route.ts
+- app/api/campfires/[id]/join/route.ts
+- app/api/campfires/[id]/leave/route.ts
 - app/api/proposals/route.ts
 - app/api/proposals/[id]/route.ts
 - app/api/proposals/[id]/vote/route.ts
 - lib/services/governance.service.ts
 - tests/api/governance/*.test.ts
 
-COMMUNITIES:
+CAMPFIRES:
 
-POST /api/communities
+POST /api/campfires
 - Auth required (any user can create in v1)
 - Name: 3-21 chars, alphanumeric + underscore
 - Display name: 1-100 chars
@@ -744,30 +744,30 @@ POST /api/communities
 - AI prompt: default from category
 - Governance config: voting rules, quorum, etc.
 
-GET /api/communities
-- List all public communities
+GET /api/campfires
+- List all public campfires
 - Filter by category
 - Sort by members, activity, created_at
 - Pagination
 
-GET /api/communities/:id
-- Full community details
+GET /api/campfires/:id
+- Full campfire details
 - Member count, post count
 - Current AI prompt
 - Governance rules
 - Recent proposals
 
-PATCH /api/communities/:id
+PATCH /api/campfires/:id
 - Admins only
 - Update description, rules
 - Cannot directly update AI prompt (must use proposal)
 
-POST /api/communities/:id/join
+POST /api/campfires/:id/join
 - Auth required
-- Add to community_memberships
+- Add to campfire_members
 - Update member count
 
-POST /api/communities/:id/leave
+POST /api/campfires/:id/leave
 - Auth required
 - Remove from memberships
 
@@ -782,7 +782,7 @@ POST /api/proposals
 - New prompt or settings (depending on type)
 
 GET /api/proposals
-- List proposals for community
+- List proposals for campfire
 - Filter by status: pending, active, passed, failed
 - Include vote counts
 
@@ -806,7 +806,7 @@ PROPOSAL LIFECYCLE:
    - Quorum met (30% of members voted)
    - For modify_prompt: replace entire prompt
    - For addendum_prompt: append to existing prompt
-4. Log result, notify community
+4. Log result, notify campfire
 
 GOVERNANCE EXECUTION:
 ```typescript
@@ -815,7 +815,7 @@ async function executeProposal(proposalId: string) {
   const votes = await getProposalVotes(proposalId);
   
   const totalVotes = votes.for + votes.against;
-  const memberCount = await getCommunityMemberCount(proposal.community_id);
+  const memberCount = await getCampfireMemberCount(proposal.campfire_id);
   
   // Check quorum
   const quorum = totalVotes / memberCount;
@@ -831,26 +831,26 @@ async function executeProposal(proposalId: string) {
   
   // Execute based on type
   if (proposal.type === 'modify_prompt') {
-    await updateCommunityPrompt(
-      proposal.community_id,
+    await updateCampfireTender(
+      proposal.campfire_id,
       proposal.new_prompt,
       proposalId
     );
   } else if (proposal.type === 'addendum_prompt') {
-    await appendCommunityPrompt(
-      proposal.community_id,
+    await appendCampfireTender(
+      proposal.campfire_id,
       proposal.addendum_text,
       proposalId
     );
   }
   
   await markProposalPassed(proposalId);
-  await notifyCommunity(proposal.community_id, proposalId);
+  await notifyCampfire(proposal.campfire_id, proposalId);
 }
 ```
 
 TEST:
-- Create community
+- Create campfire
 - Join/leave
 - Create proposal (types: modify, addendum)
 - Vote on proposal
@@ -904,8 +904,8 @@ PUT /api/users/:id/primary-badge
 BADGE ELIGIBILITY SERVICE (lib/services/badge-eligibility.ts):
 - checkAllBadges(userId): checks user against all 40 badge criteria
 - checkThresholdBadge(userId, metric, threshold): generic threshold check
-- Metrics to check: total_posts, total_approved_posts, total_comments, total_approved_comments, communities_joined, total_sparks_received, max_post_sparks, consecutive_active_days, account_age_days, total_proposal_votes, total_proposals_created, total_proposals_passed, referral_count, communities_created, max_community_members_created, nighttime_activity_count
-- Event-triggered checks: after post/comment creation, after spark, after community join, after proposal vote
+- Metrics to check: total_posts, total_approved_posts, total_comments, total_approved_comments, campfires_joined, total_sparks_received, max_post_sparks, consecutive_active_days, account_age_days, total_proposal_votes, total_proposals_created, total_proposals_passed, referral_count, campfires_created, max_campfire_members_created, nighttime_activity_count
+- Event-triggered checks: after post/comment creation, after spark, after campfire join, after proposal vote
 - Hourly cron fallback for time-based badges (streaks, account age)
 
 BADGE AWARD PIPELINE:
@@ -1007,8 +1007,8 @@ NOTIFICATION TRIGGERS (integrate into existing services):
 - Reply to comment -> notify parent comment author (reply_comment)
 - Spark post/comment -> notify author (spark, batchable)
 - @mention in post/comment -> notify mentioned user (mention)
-- Community AI config changed -> notify all members (community_update)
-- New governance proposal -> notify community members (governance)
+- Campfire governance variable changed -> notify all members (campfire_update)
+- New governance proposal -> notify campfire members (governance)
 - Badge earned -> notify user (badge_earned)
 - Referral signup -> notify referrer (referral)
 
@@ -1265,9 +1265,9 @@ FILES TO CREATE:
 - lib/ai/structured-config.ts (config schema, validation, prompt generation)
 - lib/feature-flags.ts (if not already created in 2.5)
 - app/api/features/route.ts (public feature flag endpoint)
-- app/api/communities/[id]/ai-config/route.ts (get/propose config changes)
-- app/api/communities/[id]/config-proposals/route.ts (list/create config proposals)
-- app/api/communities/[id]/config-proposals/[proposalId]/vote/route.ts
+- app/api/campfires/[id]/ai-config/route.ts (get/propose config changes)
+- app/api/campfires/[id]/config-proposals/route.ts (list/create config proposals)
+- app/api/campfires/[id]/config-proposals/[proposalId]/vote/route.ts
 - tests/api/ai-config/structured-config.test.ts
 
 STRUCTURED AI CONFIG SCHEMA (from GAMIFICATION.md):
@@ -1288,7 +1288,7 @@ STRUCTURED AI CONFIG SCHEMA (from GAMIFICATION.md):
 - config_change_voting_days: 1-30
 
 AUTO-GENERATE AI PROMPT from config (lib/ai/structured-config.ts):
-- buildPromptFromConfig(communityName, config): string
+- buildPromptFromConfig(campfireName, config): string
 - Template transforms structured settings into natural language prompt
 - Platform rules ALWAYS appended (no CSAM, no doxxing, no violence, no spam, no impersonation)
 - Output format instruction: JSON { decision, confidence, reasoning }
@@ -1301,12 +1301,12 @@ GUARDRAILS (server-side enforced):
 - platform rules cannot be overridden
 
 CONFIG CHANGE PROPOSALS:
-- POST /api/communities/:id/config-proposals
+- POST /api/campfires/:id/config-proposals
   - Auth required, member for 7+ days
   - Body: { changes: { toxicity_threshold: 70 }, rationale: "..." }
   - Validate all values within guardrail limits
 - Follows same lifecycle as existing proposals: discussion -> voting -> auto-execute
-- On pass: update community.ai_config, regenerate prompt, log to ai_prompt_history
+- On pass: update campfire.ai_config, regenerate prompt, log to ai_prompt_history
 
 FEATURE FLAGS ENDPOINT:
 GET /api/features
@@ -1340,7 +1340,7 @@ cat >> PROGRESS.md << EOF
 - Authentication system ✓
 - Posts & Comments API ✓
 - AI Moderation Service ✓
-- Communities & Governance API ✓
+- Campfires & Governance API ✓
 
 ### Security
 - Input sanitization: ACTIVE
@@ -1575,20 +1575,20 @@ app/signup/page.tsx:
 AUTHENTICATED PAGES:
 
 app/home/page.tsx (Feed):
-- Posts from joined communities
+- Posts from joined campfires
 - Sort: hot, new, top, rising
 - Infinite scroll
 - Create post button
-- Sidebar: joined communities
+- Sidebar: joined campfires
 
-app/f/[community]/page.tsx:
-- Community header (name, description, members)
+app/f/[campfire]/page.tsx:
+- Campfire header (name, description, members)
 - Join/leave button
 - Create post button
-- Posts feed (filtered to community)
-- Sidebar: community info, rules, AI prompt (public)
+- Posts feed (filtered to campfire)
+- Sidebar: campfire info, rules, AI prompt (public)
 
-app/f/[community]/[postId]/page.tsx:
+app/f/[campfire]/[postId]/page.tsx:
 - Full post content
 - Vote buttons (spark/douse)
 - Comment form
@@ -1606,7 +1606,7 @@ app/u/[username]/page.tsx:
 
 app/governance/page.tsx:
 - List of all active proposals
-- Filter by community
+- Filter by campfire
 - Create proposal button
 - Proposal cards (title, description, votes, time remaining)
 
@@ -1620,12 +1620,12 @@ app/governance/[proposalId]/page.tsx:
 
 app/mod-log/page.tsx:
 - Public moderation log
-- Filter by community, decision type
+- Filter by campfire, decision type
 - Each entry shows:
   - Content (snippet)
   - Decision (approve/remove/flag)
   - Reason
-  - Tier (community/category/platform)
+  - Tier (campfire/platform)
   - Timestamp
 - Search by content
 - Transparency is key
@@ -1656,7 +1656,7 @@ FILES TO CREATE:
 - lib/hooks/useAuth.ts
 - lib/hooks/usePosts.ts
 - lib/hooks/useComments.ts
-- lib/hooks/useCommunities.ts
+- lib/hooks/useCampfires.ts
 - lib/hooks/useVoting.ts
 - lib/hooks/useProposals.ts
 - lib/hooks/useBadges.ts (badge fetching, primary badge)
@@ -1708,7 +1708,7 @@ export const api = {
   deletePost: (id) => apiFetch(`/api/posts/${id}`, { method: 'DELETE' }),
   votePost: (id, value) => apiFetch(`/api/posts/${id}/vote`, { method: 'POST', body: JSON.stringify({ value }) }),
   
-  // Add comments, communities, proposals, etc.
+  // Add comments, campfires, proposals, etc.
 };
 ```
 
@@ -1742,14 +1742,14 @@ export function useAuth() {
 }
 
 // lib/hooks/usePosts.ts
-export function usePosts(community?: string, sort = 'hot') {
+export function usePosts(campfire?: string, sort = 'hot') {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [hasMore, setHasMore] = useState(true);
   
   const loadMore = async () => {
     const newPosts = await api.getPosts({ 
-      community, 
+      campfire,
       sort, 
       offset: posts.length 
     });
@@ -1758,15 +1758,15 @@ export function usePosts(community?: string, sort = 'hot') {
   };
   
   useEffect(() => {
-    api.getPosts({ community, sort })
+    api.getPosts({ campfire, sort })
       .then(setPosts)
       .finally(() => setLoading(false));
-  }, [community, sort]);
+  }, [campfire, sort]);
   
   return { posts, loading, loadMore, hasMore };
 }
 
-// Similar for comments, communities, voting, proposals
+// Similar for comments, campfires, voting, proposals
 ```
 
 CONTEXTS:
@@ -1844,17 +1844,17 @@ NAVBAR: Follow the nav pattern from UI_DESIGN.md:
 - Include NotificationBell component (from GAMIFICATION.md)
 - Search bar (desktop), user menu
 
-SIDEBAR (Communities List):
+SIDEBAR (Campfires List):
 - w-64, border-r border-lava-hot/10
 - bg-coal for sidebar background
-- Joined communities section + Popular section
-- Create community button (terminal variant)
+- Joined campfires section + Popular section
+- Create campfire button (terminal variant)
 
 FOOTER: Minimal terminal aesthetic
 - border-t border-lava-hot/10
 - bg-void background
 - text-ash for secondary text
-- Grid layout: About, Product, Legal, Community columns
+- Grid layout: About, Product, Legal, Campfire columns
 
 ROOT LAYOUT:
 - html className="dark" with JetBrains Mono font (--font-jetbrains)
@@ -2030,7 +2030,7 @@ FEATURE FLAG: Check /api/features. If cosmetics_shop=false, redirect shop to 404
 SHOP CATALOG (/shop):
 - Header with "Cosmetics Shop" title
 - Category tabs: Themes, Borders, Titles, Colors, Avatars, Banners, Icons
-- Subcategory filter: Profile vs Community
+- Subcategory filter: Profile vs Campfire
 - Grid of cosmetic cards
 - Each card: name, preview, price, "Purchase" button
 - Already owned items show "Owned" badge instead of purchase button
@@ -2115,7 +2115,7 @@ REFERRAL LINK COMPONENT:
 - QR code option (nice to have)
 
 SHARE BUTTONS:
-- Twitter/X: pre-filled tweet "Join me on fuega.ai - community-governed discussions with transparent AI moderation [link]"
+- Twitter/X: pre-filled tweet "Join me on fuega.ai - campfire-governed discussions with transparent AI moderation [link]"
 - Reddit: share link
 - Discord: copy formatted message
 - Generic: Web Share API if available, fallback to copy link
@@ -2168,7 +2168,7 @@ cat >> PROGRESS.md << EOF
 
 ### Pages
 - Landing, Login, Signup
-- Home feed, Community pages
+- Home feed, Campfire pages
 - Post detail (threaded comments)
 - User profiles
 - Governance hub
@@ -2218,7 +2218,7 @@ USE: Playwright for E2E tests
 
 TEST FLOW 1: New User Journey
 ```typescript
-test('new user can sign up, join community, create post, get sparks', async ({ page }) => {
+test('new user can sign up, join campfire, create post, get sparks', async ({ page }) => {
   // 1. Visit landing page
   await page.goto('/');
   await expect(page.locator('h1')).toContainText('fuega');
@@ -2232,11 +2232,11 @@ test('new user can sign up, join community, create post, get sparks', async ({ p
   // 3. Verify founder badge (if under 5000 users)
   await page.waitForSelector('text=Founder');
   
-  // 4. Browse communities
+  // 4. Browse campfires
   await page.goto('/home');
   await page.click('text=f | technology');
   
-  // 5. Join community
+  // 5. Join campfire
   await page.click('button:has-text("Join")');
   await expect(page.locator('button')).toContainText('Leave');
   
@@ -2263,11 +2263,11 @@ test('new user can sign up, join community, create post, get sparks', async ({ p
 
 TEST FLOW 2: Governance
 ```typescript
-test('community member can propose AI prompt change and vote', async ({ page }) => {
+test('campfire member can propose AI prompt change and vote', async ({ page }) => {
   // 1. Login as 7+ day member
   await login(page, 'oldmember', 'password');
   
-  // 2. Go to community
+  // 2. Go to campfire
   await page.goto('/f/technology');
   
   // 3. View current AI prompt
@@ -2467,11 +2467,11 @@ export default function () {
     'home feed < 500ms': (r) => r.timings.duration < 500,
   });
   
-  // Test community page
-  const communityRes = http.get('http://localhost:3000/api/communities/1/posts');
-  check(communityRes, {
-    'community status 200': (r) => r.status === 200,
-    'community < 500ms': (r) => r.timings.duration < 500,
+  // Test campfire page
+  const campfireRes = http.get('http://localhost:3000/api/campfires/1/posts');
+  check(campfireRes, {
+    'campfire status 200': (r) => r.status === 200,
+    'campfire < 500ms': (r) => r.timings.duration < 500,
   });
   
   sleep(1);
@@ -2490,7 +2490,7 @@ LIMIT 20;
 -- Verify indexes are used
 EXPLAIN ANALYZE
 SELECT * FROM posts
-WHERE community_id = 1
+WHERE campfire_id = 1
 ORDER BY (sparks - douses) DESC, created_at DESC
 LIMIT 25;
 -- Should show "Index Scan" not "Seq Scan"
@@ -2504,7 +2504,7 @@ test('AI moderation completes in under 5 seconds', async () => {
   
   const result = await moderateContent({
     content: 'Test post content',
-    communityRules: 'Be respectful',
+    campfireRules: 'Be respectful',
   });
   
   const duration = Date.now() - start;
@@ -3035,7 +3035,7 @@ CONTENT:
 ✓ Privacy Policy
 ✓ Content Policy
 ✓ 5 seed categories created
-✓ At least 1 test community
+✓ At least 1 test campfire
 
 DOCUMENTATION:
 ✓ README.md (project overview)
@@ -3054,8 +3054,8 @@ LEGAL:
 ✓ No personal info in code/commits
 
 LAUNCH:
-1. Create announcement post on f | fuega (meta community)
-2. Post on HN: "Show HN: fuega.ai - Community-governed discussions with transparent AI moderation"
+1. Create announcement post on f | fuega (meta campfire)
+2. Post on HN: "Show HN: fuega.ai - Campfire-governed discussions with transparent AI moderation"
 3. Share on relevant subreddits (if allowed)
 4. Tweet from @fuega_ai (if created)
 5. Add to directory: https://github.com/awesome-selfhosted/awesome-selfhosted
@@ -3106,7 +3106,7 @@ cat >> PROGRESS.md << EOF
 
 ### Launch Stats
 - Day 1 signups: [to be filled]
-- First communities created: [to be filled]
+- First campfires created: [to be filled]
 - First posts: [to be filled]
 - Moderation decisions: [to be filled]
 

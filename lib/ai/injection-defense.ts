@@ -23,7 +23,7 @@ export interface SanitizationResult {
 /** Maximum content length sent to AI (prevents context stuffing) */
 const MAX_AI_CONTENT_LENGTH = 50_000;
 
-/** Maximum length for community rules sent to AI */
+/** Maximum length for campfire rules sent to AI */
 const MAX_RULES_LENGTH = 10_000;
 
 /**
@@ -181,10 +181,10 @@ export function sanitizeForAI(
 }
 
 /**
- * Sanitize community rules before embedding in AI prompt.
+ * Sanitize campfire rules before embedding in AI prompt.
  * Community rules are user-written and could contain injection attacks.
  */
-export function sanitizeCommunityRules(rules: string): SanitizationResult {
+export function sanitizeCampfireRules(rules: string): SanitizationResult {
   return sanitizeForAI(rules, MAX_RULES_LENGTH);
 }
 

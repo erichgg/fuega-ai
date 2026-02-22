@@ -3,7 +3,7 @@ export { SparkButton } from "./spark-button";
 export { UserAvatar } from "./user-avatar";
 export { ModBadge } from "./mod-badge";
 export { PostCard } from "./post-card";
-export { CommunityCard } from "./community-card";
+export { CampfireCard } from "./campfire-card";
 export { CommentCard } from "./comment-card";
 export { Header } from "./header";
 export { Sidebar } from "./sidebar";
@@ -12,7 +12,7 @@ export { ErrorBoundary } from "./error-boundary";
 export {
   FeedSkeleton,
   PostDetailSkeleton,
-  CommunitySkeleton,
+  CampfireSkeleton,
   ProfileSkeleton,
   GovernanceSkeleton,
   ModLogSkeleton,

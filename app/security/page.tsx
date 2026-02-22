@@ -286,7 +286,7 @@ export default function SecurityPage() {
           </h2>
           <p className="mt-4 text-ash-300 leading-relaxed">
             Every AI moderation decision is logged publicly in your
-            community&apos;s{" "}
+            campfire&apos;s{" "}
             <Link
               href="/mod-log"
               className="text-flame-400 hover:underline"

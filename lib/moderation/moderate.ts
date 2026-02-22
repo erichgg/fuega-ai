@@ -9,7 +9,7 @@
 
 import {
   moderateContentWithAI,
-  type CommunityContext,
+  type CampfireContext,
   type ModerationPipelineResult,
 } from "@/lib/ai/moderation.service";
 
@@ -29,14 +29,14 @@ export interface ModerationInput {
   content_type: "post" | "comment";
   title?: string;
   body: string;
-  community_id: string;
+  campfire_id: string;
   author_id: string;
   author_username?: string;
-  community_name?: string;
-  community_ai_prompt?: string;
-  community_ai_prompt_version?: number;
-  category_rules?: string;
-  category_prompt_version?: number;
+  campfire_name?: string;
+  campfire_ai_prompt?: string;
+  campfire_ai_prompt_version?: number;
+  platform_rules?: string;
+  platform_prompt_version?: number;
 }
 
 /**
@@ -48,13 +48,13 @@ export interface ModerationInput {
 export async function moderateContent(
   input: ModerationInput
 ): Promise<ModerationDecision> {
-  const communityContext: CommunityContext = {
-    id: input.community_id,
-    name: input.community_name ?? "unknown",
-    ai_prompt: input.community_ai_prompt ?? "Be respectful and follow common sense.",
-    ai_prompt_version: input.community_ai_prompt_version ?? 1,
-    category_rules: input.category_rules,
-    category_prompt_version: input.category_prompt_version,
+  const campfireContext: CampfireContext = {
+    id: input.campfire_id,
+    name: input.campfire_name ?? "unknown",
+    ai_prompt: input.campfire_ai_prompt ?? "Be respectful and follow common sense.",
+    ai_prompt_version: input.campfire_ai_prompt_version ?? 1,
+    platform_rules: input.platform_rules,
+    platform_prompt_version: input.platform_prompt_version,
   };
 
   const result = await moderateContentWithAI(
@@ -64,7 +64,7 @@ export async function moderateContent(
       body: input.body,
       author_username: input.author_username ?? "anonymous",
     },
-    communityContext
+    campfireContext
   );
 
   // Map pipeline result to the legacy ModerationDecision interface
@@ -89,20 +89,20 @@ export async function moderateContent(
 export async function logModerationDecision(
   contentType: "post" | "comment",
   contentId: string,
-  communityId: string,
+  campfireId: string,
   authorId: string,
   decision: ModerationDecision,
   db: { query: (text: string, params?: unknown[]) => Promise<{ rows: Record<string, unknown>[] }> }
 ): Promise<string> {
   const result = await db.query(
-    `INSERT INTO moderation_log
-     (content_type, content_id, community_id, author_id, agent_level, decision, reason, ai_model, prompt_version)
+    `INSERT INTO campfire_mod_logs
+     (content_type, content_id, campfire_id, author_id, agent_level, decision, reason, ai_model, prompt_version)
      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
      RETURNING id`,
     [
       contentType,
       contentId,
-      communityId,
+      campfireId,
       authorId,
       decision.agent_level,
       decision.decision,

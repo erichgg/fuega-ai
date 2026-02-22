@@ -12,7 +12,7 @@ interface RouteParams {
 
 /**
  * POST /api/proposals/:id/vote
- * Vote on a proposal. Auth required. Must be a community member.
+ * Vote on a proposal. Auth required. Must be a campfire member.
  * value: 1 (for) or -1 (against)
  * Cannot change vote once cast.
  */

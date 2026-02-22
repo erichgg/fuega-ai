@@ -29,11 +29,11 @@ export async function voteOnPost(
   value: 1 | -1
 ): Promise<VoteResult> {
   // Verify post exists
-  const post = await queryOne<{ id: string; sparks: number; douses: number; author_id: string; title: string; community_name: string }>(
+  const post = await queryOne<{ id: string; sparks: number; douses: number; author_id: string; title: string; campfire_name: string }>(
     `SELECT p.id, p.sparks, p.douses, p.author_id, p.title,
-            c.name AS community_name
+            c.name AS campfire_name
      FROM posts p
-     JOIN communities c ON c.id = p.community_id
+     JOIN campfires c ON c.id = p.campfire_id
      WHERE p.id = $1 AND p.deleted_at IS NULL`,
     [postId]
   );
@@ -50,7 +50,7 @@ export async function voteOnPost(
 
   // Send spark notification (only for sparks, not douses; only for new/switched votes)
   if (value === 1 && result.action !== "removed") {
-    sendSparkNotification(post.author_id, userId, "post", postId, post.title, `/f/${post.community_name}/posts/${postId}`);
+    sendSparkNotification(post.author_id, userId, "post", postId, post.title, `/f/${post.campfire_name}/posts/${postId}`);
   }
 
   return result;
@@ -81,10 +81,10 @@ export async function voteOnComment(
 
   // Send spark notification (only for sparks, not douses; only for new/switched votes)
   if (value === 1 && result.action !== "removed") {
-    const postInfo = await queryOne<{ title: string; community_name: string }>(
-      `SELECT p.title, c.name AS community_name
+    const postInfo = await queryOne<{ title: string; campfire_name: string }>(
+      `SELECT p.title, c.name AS campfire_name
        FROM posts p
-       JOIN communities c ON c.id = p.community_id
+       JOIN campfires c ON c.id = p.campfire_id
        WHERE p.id = $1`,
       [comment.post_id]
     );
@@ -92,7 +92,7 @@ export async function voteOnComment(
       sendSparkNotification(
         comment.author_id, userId, "comment", commentId,
         postInfo.title,
-        `/f/${postInfo.community_name}/posts/${comment.post_id}#comment-${commentId}`
+        `/f/${postInfo.campfire_name}/posts/${comment.post_id}#comment-${commentId}`
       );
     }
   }

@@ -4,14 +4,14 @@ import { createPostSchema, listPostsSchema } from "@/lib/validation/posts";
 import { createPost, listPosts, ServiceError } from "@/lib/services/posts.service";
 
 /**
- * GET /api/posts?community=&sort=&limit=&offset=
+ * GET /api/posts?campfire=&sort=&limit=&offset=
  * List posts with sorting and pagination.
  */
 export async function GET(req: Request) {
   try {
     const url = new URL(req.url);
     const parsed = listPostsSchema.safeParse({
-      community: url.searchParams.get("community") ?? undefined,
+      campfire: url.searchParams.get("campfire") ?? undefined,
       sort: url.searchParams.get("sort") ?? "hot",
       limit: url.searchParams.get("limit") ?? "25",
       offset: url.searchParams.get("offset") ?? "0",

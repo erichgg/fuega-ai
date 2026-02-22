@@ -16,7 +16,7 @@ interface Post {
   title: string;
   body?: string;
   author: string;
-  community: string;
+  campfire: string;
   sparkCount: number;
   commentCount: number;
   createdAt: string;
@@ -30,10 +30,10 @@ interface Post {
 const MOCK_POSTS: Post[] = [
   {
     id: "1",
-    title: "Welcome to fuega.ai — the future of community discussion",
-    body: "We're building something different here. A platform where AI moderation is transparent, communities govern themselves, and privacy is a right. Join the conversation.",
+    title: "Welcome to fuega.ai — the future of campfire discussion",
+    body: "We're building something different here. A platform where AI moderation is transparent, campfires govern themselves, and privacy is a right. Join the conversation.",
     author: "fuega_team",
-    community: "meta",
+    campfire: "meta",
     sparkCount: 247,
     commentCount: 89,
     createdAt: new Date(Date.now() - 3600000).toISOString(),
@@ -44,7 +44,7 @@ const MOCK_POSTS: Post[] = [
     title: "How AI moderation actually works on fuega — a deep dive",
     body: "Every post goes through Claude-based AI moderation in real-time. Here's exactly how it works, what prompts are used, and how you can change them through governance.",
     author: "transparency_fan",
-    community: "tech",
+    campfire: "tech",
     sparkCount: 182,
     commentCount: 45,
     createdAt: new Date(Date.now() - 7200000).toISOString(),
@@ -55,7 +55,7 @@ const MOCK_POSTS: Post[] = [
     title: "Proposal: Update f | science moderation prompt to allow more speculative discussion",
     body: "The current prompt is too strict on speculative content. I think we should allow more hypothesis-driven posts as long as they're clearly labeled.",
     author: "science_nerd_42",
-    community: "science",
+    campfire: "science",
     sparkCount: 94,
     commentCount: 67,
     createdAt: new Date(Date.now() - 14400000).toISOString(),
@@ -65,7 +65,7 @@ const MOCK_POSTS: Post[] = [
     title: "Why spark/douse voting is better than upvote/downvote",
     body: "The spark/douse system isn't just a rename — it fundamentally changes the incentive structure. Here's my analysis of why it leads to better discussions.",
     author: "game_theory_nerd",
-    community: "meta",
+    campfire: "meta",
     sparkCount: 156,
     commentCount: 34,
     createdAt: new Date(Date.now() - 21600000).toISOString(),
@@ -73,10 +73,10 @@ const MOCK_POSTS: Post[] = [
   },
   {
     id: "5",
-    title: "First governance vote results are in! f | tech community prompt updated",
-    body: "The community voted 78% in favor of adding more nuance to the tech community's moderation prompt. The new prompt takes effect immediately.",
+    title: "First governance vote results are in! f | tech campfire prompt updated",
+    body: "The campfire voted 78% in favor of adding more nuance to the tech campfire's moderation prompt. The new prompt takes effect immediately.",
     author: "governance_watch",
-    community: "tech",
+    campfire: "tech",
     sparkCount: 210,
     commentCount: 23,
     createdAt: new Date(Date.now() - 43200000).toISOString(),
@@ -154,7 +154,7 @@ export default function HomeFeedPage() {
           </div>
         ) : (
           posts.map((post) => (
-            <Link key={post.id} href={`/f/${post.community}/${post.id}`}>
+            <Link key={post.id} href={`/f/${post.campfire}/${post.id}`}>
               <PostCard
                 post={post}
                 userVote={votes[post.id] ?? null}

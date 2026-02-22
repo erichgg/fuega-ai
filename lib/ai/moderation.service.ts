@@ -14,7 +14,7 @@
 
 import Anthropic from "@anthropic-ai/sdk";
 import {
-  buildCommunityPrompt,
+  buildCampfirePrompt,
   buildCategoryPrompt,
   buildPlatformPrompt,
   type ModerationContent,
@@ -44,7 +44,7 @@ export interface ModerationPipelineResult {
 }
 
 /** Community context needed for moderation */
-export interface CommunityContext {
+export interface CampfireContext {
   id: string;
   name: string;
   ai_prompt: string;
@@ -198,13 +198,13 @@ async function runTier(
 export async function runModerationPipeline(
   client: Anthropic,
   content: ModerationContent,
-  community: CommunityContext
+  campfire: CampfireContext
 ): Promise<ModerationPipelineResult> {
   const pipelineStart = Date.now();
   const tierDecisions: ModerationDecision[] = [];
 
   // Tier 1: Platform agent (global ToS)
-  const platformPrompt = buildPlatformPrompt(community.name, content);
+  const platformPrompt = buildPlatformPrompt(campfire.name, content);
   const platformDecision = await runTier(client, platformPrompt, 1);
   tierDecisions.push(platformDecision);
 
@@ -218,16 +218,16 @@ export async function runModerationPipeline(
   }
 
   // Tier 2: Category agent (if category rules exist)
-  if (community.category_rules) {
+  if (campfire.category_rules) {
     const categoryPrompt = buildCategoryPrompt(
-      community.name,
-      community.category_rules,
+      campfire.name,
+      campfire.category_rules,
       content
     );
     const categoryDecision = await runTier(
       client,
       categoryPrompt,
-      community.category_prompt_version ?? 1
+      campfire.category_prompt_version ?? 1
     );
     tierDecisions.push(categoryDecision);
 
@@ -242,19 +242,19 @@ export async function runModerationPipeline(
   }
 
   // Tier 3: Community agent (community-specific rules)
-  const communityPrompt = buildCommunityPrompt(
-    community.name,
-    community.ai_prompt,
+  const campfirePrompt = buildCampfirePrompt(
+    campfire.name,
+    campfire.ai_prompt,
     content
   );
-  const communityDecision = await runTier(
+  const campfireDecision = await runTier(
     client,
-    communityPrompt,
-    community.ai_prompt_version
+    campfirePrompt,
+    campfire.ai_prompt_version
   );
-  tierDecisions.push(communityDecision);
+  tierDecisions.push(campfireDecision);
 
-  if (communityDecision.decision === "removed") {
+  if (campfireDecision.decision === "removed") {
     return {
       final_decision: "removed",
       tier_decisions: tierDecisions,
@@ -281,20 +281,20 @@ export async function logModerationDecision(
   db: ModerationDB,
   contentType: "post" | "comment",
   contentId: string,
-  communityId: string,
+  campfireId: string,
   authorId: string,
   decision: ModerationDecision
 ): Promise<string> {
   const result = await db.query(
-    `INSERT INTO moderation_log
-     (content_type, content_id, community_id, author_id, agent_level,
+    `INSERT INTO campfire_mod_logs
+     (content_type, content_id, campfire_id, author_id, agent_level,
       decision, reason, ai_model, prompt_version, injection_detected)
      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
      RETURNING id`,
     [
       contentType,
       contentId,
-      communityId,
+      campfireId,
       authorId,
       decision.agent_level,
       decision.decision,
@@ -315,7 +315,7 @@ export async function logModerationDecision(
  */
 export async function moderateContentWithAI(
   content: ModerationContent,
-  community: CommunityContext,
+  campfire: CampfireContext,
   apiKey?: string
 ): Promise<ModerationPipelineResult> {
   const key = apiKey ?? process.env.ANTHROPIC_API_KEY;
@@ -369,7 +369,7 @@ export async function moderateContentWithAI(
  */
 function runBasicSafetyFilter(
   content: ModerationContent,
-  community: CommunityContext
+  campfire: CampfireContext
 ): ModerationPipelineResult {
   const start = Date.now();
   const text = `${content.title ?? ""} ${content.body}`.toLowerCase();

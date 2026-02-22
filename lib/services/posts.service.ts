@@ -6,7 +6,7 @@ import { moderateContent, logModerationDecision, type ModerationDecision } from 
 
 export interface Post {
   id: string;
-  community_id: string;
+  campfire_id: string;
   author_id: string;
   title: string;
   body: string | null;
@@ -24,7 +24,7 @@ export interface Post {
   removal_reason: string | null;
   deleted_at: string | null;
   author_username?: string;
-  community_name?: string;
+  campfire_name?: string;
 }
 
 export interface PostWithModeration extends Post {
@@ -43,14 +43,14 @@ export async function createPost(
   input: CreatePostInput,
   authorId: string
 ): Promise<PostWithModeration> {
-  // Verify community exists and is not banned/deleted
-  const community = await queryOne<{ id: string; name: string }>(
-    `SELECT id, name FROM communities
+  // Verify campfire exists and is not banned/deleted
+  const campfire = await queryOne<{ id: string; name: string }>(
+    `SELECT id, name FROM campfires
      WHERE id = $1 AND deleted_at IS NULL AND is_banned = FALSE`,
-    [input.community_id]
+    [input.campfire_id]
   );
-  if (!community) {
-    throw new ServiceError("Community not found", "COMMUNITY_NOT_FOUND", 404);
+  if (!campfire) {
+    throw new ServiceError("Campfire not found", "CAMPFIRE_NOT_FOUND", 404);
   }
 
   // Verify user is not banned
@@ -70,7 +70,7 @@ export async function createPost(
     content_type: "post",
     title: input.title,
     body: input.body ?? "",
-    community_id: input.community_id,
+    campfire_id: input.campfire_id,
     author_id: authorId,
   });
 
@@ -80,12 +80,12 @@ export async function createPost(
   // Insert the post
   const post = await queryOne<Post>(
     `INSERT INTO posts
-     (community_id, author_id, title, body, post_type, url, image_url,
+     (campfire_id, author_id, title, body, post_type, url, image_url,
       is_approved, is_removed, removal_reason, moderated_at, moderated_by_agent)
      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, NOW(), $11)
      RETURNING *`,
     [
-      input.community_id,
+      input.campfire_id,
       authorId,
       input.title,
       input.body ?? null,
@@ -107,16 +107,16 @@ export async function createPost(
   await logModerationDecision(
     "post",
     post.id,
-    input.community_id,
+    input.campfire_id,
     authorId,
     moderation,
     { query: async (text: string, params?: unknown[]) => query(text, params) }
   );
 
-  // Increment community post count
+  // Increment campfire post count
   await query(
-    `UPDATE communities SET post_count = post_count + 1 WHERE id = $1`,
-    [input.community_id]
+    `UPDATE campfires SET post_count = post_count + 1 WHERE id = $1`,
+    [input.campfire_id]
   );
 
   return { ...post, moderation };
@@ -128,10 +128,10 @@ export async function getPostById(postId: string): Promise<Post | null> {
   return queryOne<Post>(
     `SELECT p.*,
             u.username AS author_username,
-            c.name AS community_name
+            c.name AS campfire_name
      FROM posts p
      JOIN users u ON u.id = p.author_id
-     JOIN communities c ON c.id = p.community_id
+     JOIN campfires c ON c.id = p.campfire_id
      WHERE p.id = $1 AND p.deleted_at IS NULL`,
     [postId]
   );
@@ -142,9 +142,9 @@ export async function listPosts(input: ListPostsInput): Promise<Post[]> {
   const params: unknown[] = [];
   let paramIdx = 1;
 
-  if (input.community) {
+  if (input.campfire) {
     conditions.push(`c.name = $${paramIdx}`);
-    params.push(input.community);
+    params.push(input.campfire);
     paramIdx++;
   }
 
@@ -181,10 +181,10 @@ export async function listPosts(input: ListPostsInput): Promise<Post[]> {
   const sql = `
     SELECT p.*,
            u.username AS author_username,
-           c.name AS community_name
+           c.name AS campfire_name
     FROM posts p
     JOIN users u ON u.id = p.author_id
-    JOIN communities c ON c.id = p.community_id
+    JOIN campfires c ON c.id = p.campfire_id
     WHERE ${whereClause}
     ORDER BY ${orderBy}
     LIMIT $${paramIdx} OFFSET $${paramIdx + 1}
@@ -248,7 +248,7 @@ export async function updatePost(
     content_type: "post",
     title: newTitle,
     body: newBody,
-    community_id: existing.community_id,
+    campfire_id: existing.campfire_id,
     author_id: authorId,
   });
 
@@ -286,7 +286,7 @@ export async function updatePost(
   await logModerationDecision(
     "post",
     postId,
-    existing.community_id,
+    existing.campfire_id,
     authorId,
     moderation,
     { query: async (text: string, p?: unknown[]) => query(text, p) }
@@ -318,10 +318,10 @@ export async function deletePost(
     [postId]
   );
 
-  // Decrement community post count
+  // Decrement campfire post count
   await query(
-    `UPDATE communities SET post_count = GREATEST(post_count - 1, 0) WHERE id = $1`,
-    [existing.community_id]
+    `UPDATE campfires SET post_count = GREATEST(post_count - 1, 0) WHERE id = $1`,
+    [existing.campfire_id]
   );
 }
 

@@ -5,7 +5,7 @@ import { listNotifications, type NotificationType } from "@/lib/services/notific
 
 const VALID_TYPES: NotificationType[] = [
   "reply_post", "reply_comment", "spark", "mention",
-  "community_update", "governance", "badge_earned",
+  "campfire_update", "governance", "badge_earned",
   "tip_received", "referral",
 ];
 

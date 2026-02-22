@@ -12,7 +12,7 @@
 
 import {
   sanitizeForAI,
-  sanitizeCommunityRules,
+  sanitizeCampfireRules,
   type SanitizationResult,
 } from "./injection-defense";
 
@@ -50,16 +50,16 @@ const PLATFORM_TOS = `
  * This is the same structure for all tiers — only the rules change.
  */
 function buildSystemPrompt(
-  communityName: string,
+  campfireName: string,
   tier: "community" | "cohort" | "category" | "platform"
 ): string {
   const tierLabel =
     tier === "community"
-      ? `community f/${communityName}`
+      ? `campfire f/${campfireName}`
       : tier === "cohort"
-        ? `cohort containing f/${communityName}`
+        ? `cohort containing f/${campfireName}`
         : tier === "category"
-          ? `category containing f/${communityName}`
+          ? `category containing f/${campfireName}`
           : "fuega.ai platform";
 
   return [
@@ -116,12 +116,12 @@ function buildUserMessage(
  * Build a community-tier moderation prompt.
  * Uses the community's custom AI prompt (written by members, voted on).
  */
-export function buildCommunityPrompt(
-  communityName: string,
-  communityRules: string,
+export function buildCampfirePrompt(
+  campfireName: string,
+  campfireRules: string,
   content: ModerationContent
 ): BuiltPrompt {
-  const rulesSanitization = sanitizeCommunityRules(communityRules);
+  const rulesSanitization = sanitizeCampfireRules(campfireRules);
   const contentText = content.title
     ? `${content.title}\n${content.body}`
     : content.body;
@@ -133,7 +133,7 @@ export function buildCommunityPrompt(
     : undefined;
 
   return {
-    system: buildSystemPrompt(communityName, "community"),
+    system: buildSystemPrompt(campfireName, "community"),
     user: buildUserMessage(
       rulesSanitization.sanitized,
       contentSanitization.sanitized,
@@ -151,11 +151,11 @@ export function buildCommunityPrompt(
  * Uses category-level rules set by the rotating council.
  */
 export function buildCategoryPrompt(
-  communityName: string,
+  campfireName: string,
   categoryRules: string,
   content: ModerationContent
 ): BuiltPrompt {
-  const rulesSanitization = sanitizeCommunityRules(categoryRules);
+  const rulesSanitization = sanitizeCampfireRules(categoryRules);
   const contentText = content.title
     ? `${content.title}\n${content.body}`
     : content.body;
@@ -166,7 +166,7 @@ export function buildCategoryPrompt(
     : undefined;
 
   return {
-    system: buildSystemPrompt(communityName, "category"),
+    system: buildSystemPrompt(campfireName, "category"),
     user: buildUserMessage(
       rulesSanitization.sanitized,
       contentSanitization.sanitized,
@@ -184,7 +184,7 @@ export function buildCategoryPrompt(
  * Uses hardcoded platform Terms of Service (non-negotiable).
  */
 export function buildPlatformPrompt(
-  communityName: string,
+  campfireName: string,
   content: ModerationContent
 ): BuiltPrompt {
   const contentText = content.title
@@ -197,7 +197,7 @@ export function buildPlatformPrompt(
     : undefined;
 
   return {
-    system: buildSystemPrompt(communityName, "platform"),
+    system: buildSystemPrompt(campfireName, "platform"),
     user: buildUserMessage(
       PLATFORM_TOS,
       contentSanitization.sanitized,

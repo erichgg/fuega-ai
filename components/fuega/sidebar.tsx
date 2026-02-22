@@ -23,13 +23,13 @@ interface SidebarLink {
   active?: boolean;
 }
 
-interface SidebarCommunity {
+interface SidebarCampfire {
   name: string;
   memberCount: number;
 }
 
 interface SidebarProps {
-  communities?: SidebarCommunity[];
+  campfires?: SidebarCampfire[];
   activePath?: string;
   open?: boolean;
   onClose?: () => void;
@@ -43,19 +43,19 @@ const mainLinks: SidebarLink[] = [
 ];
 
 const discoverLinks: SidebarLink[] = [
-  { icon: Users, label: "Communities", href: "/communities" },
+  { icon: Users, label: "Campfires", href: "/campfires" },
   { icon: Bot, label: "Mod Log", href: "/mod-log" },
   { icon: Vote, label: "Governance", href: "/governance" },
 ];
 
 export function Sidebar({
-  communities = [],
+  campfires = [],
   activePath = "/",
   open = true,
   onClose,
   className,
 }: SidebarProps) {
-  const [communitiesExpanded, setCommunitiesExpanded] = React.useState(true);
+  const [campfiresExpanded, setCommunitiesExpanded] = React.useState(true);
 
   return (
     <>
@@ -98,25 +98,25 @@ export function Sidebar({
             ))}
           </div>
 
-          {communities.length > 0 && (
+          {campfires.length > 0 && (
             <>
               <Separator className="my-3 bg-ash-800" />
               <button
-                onClick={() => setCommunitiesExpanded(!communitiesExpanded)}
+                onClick={() => setCommunitiesExpanded(!campfiresExpanded)}
                 className="flex w-full items-center justify-between px-3 py-1"
               >
                 <span className="text-[10px] font-semibold uppercase tracking-wider text-ash-600">
-                  My Communities
+                  My Campfires
                 </span>
-                {communitiesExpanded ? (
+                {campfiresExpanded ? (
                   <ChevronDown className="h-3 w-3 text-ash-600" />
                 ) : (
                   <ChevronRight className="h-3 w-3 text-ash-600" />
                 )}
               </button>
-              {communitiesExpanded && (
+              {campfiresExpanded && (
                 <div className="mt-1 space-y-0.5">
-                  {communities.map((c) => (
+                  {campfires.map((c) => (
                     <a
                       key={c.name}
                       href={`/f/${c.name}`}
@@ -138,7 +138,7 @@ export function Sidebar({
         <div className="border-t border-ash-800 p-3">
           <Button variant="spark" className="w-full gap-2" size="sm">
             <Flame className="h-4 w-4" />
-            Create Community
+            Create Campfire
           </Button>
         </div>
       </aside>

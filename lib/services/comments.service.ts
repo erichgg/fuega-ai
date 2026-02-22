@@ -41,13 +41,13 @@ export async function createComment(
 ): Promise<CommentWithModeration> {
   // Verify post exists and is not deleted
   const post = await queryOne<{
-    id: string; community_id: string; is_removed: boolean;
-    author_id: string; title: string; community_name: string;
+    id: string; campfire_id: string; is_removed: boolean;
+    author_id: string; title: string; campfire_name: string;
   }>(
-    `SELECT p.id, p.community_id, p.is_removed, p.author_id, p.title,
-            c.name AS community_name
+    `SELECT p.id, p.campfire_id, p.is_removed, p.author_id, p.title,
+            c.name AS campfire_name
      FROM posts p
-     JOIN communities c ON c.id = p.community_id
+     JOIN campfires c ON c.id = p.campfire_id
      WHERE p.id = $1 AND p.deleted_at IS NULL`,
     [postId]
   );
@@ -97,7 +97,7 @@ export async function createComment(
   const moderation = await moderateContent({
     content_type: "comment",
     body: input.body,
-    community_id: post.community_id,
+    campfire_id: post.campfire_id,
     author_id: authorId,
   });
 
@@ -137,7 +137,7 @@ export async function createComment(
   await logModerationDecision(
     "comment",
     comment.id,
-    post.community_id,
+    post.campfire_id,
     authorId,
     moderation,
     { query: async (text: string, params?: unknown[]) => query(text, params) }
@@ -146,7 +146,7 @@ export async function createComment(
   // ─── Notification triggers (fire-and-forget, don't block response) ───
   if (isApproved) {
     const commentPreview = input.body.slice(0, 100);
-    const actionUrl = `/f/${post.community_name}/posts/${postId}#comment-${comment.id}`;
+    const actionUrl = `/f/${post.campfire_name}/posts/${postId}#comment-${comment.id}`;
 
     if (input.parent_id) {
       // Reply to comment → notify parent comment author
@@ -264,8 +264,8 @@ export async function updateComment(
   input: UpdateCommentInput,
   isAdmin: boolean = false
 ): Promise<Comment> {
-  const existing = await queryOne<Comment & { community_id: string }>(
-    `SELECT c.*, p.community_id
+  const existing = await queryOne<Comment & { campfire_id: string }>(
+    `SELECT c.*, p.campfire_id
      FROM comments c
      JOIN posts p ON p.id = c.post_id
      WHERE c.id = $1 AND c.deleted_at IS NULL`,
@@ -282,7 +282,7 @@ export async function updateComment(
   const moderation = await moderateContent({
     content_type: "comment",
     body: input.body,
-    community_id: existing.community_id,
+    campfire_id: existing.campfire_id,
     author_id: authorId,
   });
 
@@ -315,7 +315,7 @@ export async function updateComment(
   await logModerationDecision(
     "comment",
     commentId,
-    existing.community_id,
+    existing.campfire_id,
     authorId,
     moderation,
     { query: async (text: string, params?: unknown[]) => query(text, params) }

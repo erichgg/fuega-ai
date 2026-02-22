@@ -10,7 +10,7 @@ export type NotificationType =
   | "reply_comment"
   | "spark"
   | "mention"
-  | "community_update"
+  | "campfire_update"
   | "governance"
   | "badge_earned"
   | "tip_received"
@@ -35,7 +35,7 @@ export interface NotificationPreferences {
   reply_comment: boolean;
   spark: boolean;
   mention: boolean;
-  community_update: boolean;
+  campfire_update: boolean;
   governance: boolean;
   badge_earned: boolean;
   tip_received: boolean;
@@ -55,7 +55,7 @@ const DEFAULT_PREFERENCES: NotificationPreferences = {
   reply_comment: true,
   spark: true,
   mention: true,
-  community_update: true,
+  campfire_update: true,
   governance: true,
   badge_earned: true,
   tip_received: true,

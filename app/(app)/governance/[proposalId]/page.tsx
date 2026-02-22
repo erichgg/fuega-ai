@@ -32,7 +32,7 @@ function getMockProposal(id: string) {
     title: "Update f | tech moderation to allow more technical debates",
     description:
       "The current AI moderation prompt for f | tech is too aggressive when it comes to flagging technical disagreements and debates. Technical discussions often involve strong opinions and pointed critiques — this is healthy and should be encouraged.\n\nProposed changes:\n1. Recognize technical debates as constructive discourse\n2. Only flag personal attacks, not technical criticism\n3. Allow stronger language when discussing technical trade-offs\n4. Keep existing protections against harassment\n\nThis change would make f | tech a better place for genuine technical discussion while maintaining our standards against personal attacks.",
-    community: "tech",
+    campfire: "tech",
     proposalType: "modify_prompt" as const,
     status: "voting" as ProposalStatus,
     votesFor: 156,
@@ -149,10 +149,10 @@ export default function ProposalDetailPage() {
       <div className="mt-4 rounded-lg border border-ash-800 bg-ash-900/50 p-5">
         <div className="flex items-center gap-2 text-xs text-ash-500">
           <Link
-            href={`/f/${proposal.community}`}
+            href={`/f/${proposal.campfire}`}
             className="font-medium text-flame-400 hover:underline"
           >
-            <span className="text-lava-hot">f</span><span className="text-smoke mx-1">|</span><span>{proposal.community}</span>
+            <span className="text-lava-hot">f</span><span className="text-smoke mx-1">|</span><span>{proposal.campfire}</span>
           </Link>
           <span>·</span>
           <span>by {proposal.author}</span>

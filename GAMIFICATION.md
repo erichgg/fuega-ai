@@ -1,6 +1,6 @@
-# FUEGA.AI - V2 GAMIFICATION SYSTEM
+# FUEGA.AI - V1 GAMIFICATION SYSTEM
 
-**Last Updated:** February 21, 2026
+**Last Updated:** February 22, 2026
 **Version:** 2.0
 **Status:** Planning (Pre-Implementation)
 **Dependencies:** DATA_SCHEMA.md (tables), SECURITY.md (fraud prevention), DEPLOYMENT.md (feature flags)
@@ -15,7 +15,7 @@
 4. [Referral System](#referral-system)
 5. [Tip Jar](#tip-jar)
 6. [Structured AI Config](#structured-ai-config)
-7. [Community Roles](#community-roles)
+7. [Campfire Roles](#campfire-roles)
 8. [Feature Flags](#feature-flags)
 9. [Implementation Notes](#implementation-notes)
 
@@ -25,7 +25,7 @@
 
 ### Overview
 
-Badges are non-transferable, permanently earned achievements displayed on user profiles. They represent milestones, contributions, and community engagement. Every badge has a rarity level that reflects how difficult it is to earn. Badges are awarded server-side only -- the client never triggers badge awards directly.
+Badges are non-transferable, permanently earned achievements displayed on user profiles. They represent milestones, contributions, and campfire engagement. Every badge has a rarity level that reflects how difficult it is to earn. Badges are awarded server-side only -- the client never triggers badge awards directly.
 
 ### Badge Categories
 
@@ -34,7 +34,7 @@ Badges are non-transferable, permanently earned achievements displayed on user p
 | `founder`      | Early adopter and platform genesis badges        |
 | `engagement`   | Activity-based milestones (posting, commenting)  |
 | `contribution` | Quality-based achievements (sparks received)     |
-| `governance`   | Participation in community governance            |
+| `governance`   | Participation in campfire governance            |
 | `referral`     | Growing the platform through referrals           |
 | `special`      | Time-limited, event-driven, or unique badges     |
 
@@ -170,7 +170,7 @@ earn_criteria:
 ```yaml
 badge_id: "prolific_poster"
 name: "Prolific Poster"
-description: "Published 50 approved posts across any communities."
+description: "Published 50 approved posts across any campfires."
 icon_concept: "Stack of flames rising upward. Warm orange tones."
 category: engagement
 rarity: uncommon
@@ -188,7 +188,7 @@ earn_criteria:
 ```yaml
 badge_id: "posting_machine"
 name: "Posting Machine"
-description: "Published 500 approved posts across any communities."
+description: "Published 500 approved posts across any campfires."
 icon_concept: "Mechanical gear with flames shooting from the teeth."
 category: engagement
 rarity: rare
@@ -255,37 +255,37 @@ earn_criteria:
     - Only approved, non-deleted comments count
 ```
 
-##### 10. community_explorer
+##### 10. campfire_explorer
 
 ```yaml
-badge_id: "community_explorer"
-name: "Community Explorer"
-description: "Joined 10 different communities."
+badge_id: "campfire_explorer"
+name: "Campfire Explorer"
+description: "Joined 10 different campfires."
 icon_concept: "Compass with flame at the needle point."
 category: engagement
 rarity: common
 version: "v1"
 earn_criteria:
   type: "threshold"
-  metric: "communities_joined"
+  metric: "campfires_joined"
   threshold: 10
   conditions:
     - Must be current active member (not left)
 ```
 
-##### 11. community_nomad
+##### 11. campfire_nomad
 
 ```yaml
-badge_id: "community_nomad"
-name: "Community Nomad"
-description: "Joined 50 different communities."
+badge_id: "campfire_nomad"
+name: "Campfire Nomad"
+description: "Joined 50 different campfires."
 icon_concept: "Globe with flame trails connecting points."
 category: engagement
 rarity: uncommon
 version: "v1"
 earn_criteria:
   type: "threshold"
-  metric: "communities_joined"
+  metric: "campfires_joined"
   threshold: 50
   conditions:
     - Must be current active member (not left)
@@ -512,44 +512,44 @@ earn_criteria:
     - Any single post by the user has >= 1000 sparks
 ```
 
-##### 24. community_builder
+##### 24. campfire_builder
 
 ```yaml
-badge_id: "community_builder"
-name: "Community Builder"
-description: "Created a community that reached 100 members."
+badge_id: "campfire_builder"
+name: "Campfire Builder"
+description: "Created a campfire that reached 100 members."
 icon_concept: "Blueprint/floor plan outline with flames at each corner."
 category: contribution
 rarity: rare
 version: "v1"
 earn_criteria:
   type: "threshold"
-  metric: "max_community_members_created"
+  metric: "max_campfire_members_created"
   threshold: 100
   conditions:
-    - User must be the creator (created_by) of the community
-    - Community must have >= 100 active members
-    - Community must not be banned
+    - User must be the creator (created_by) of the campfire
+    - Campfire must have >= 100 active members
+    - Campfire must not be banned
 ```
 
-##### 25. community_architect
+##### 25. campfire_architect
 
 ```yaml
-badge_id: "community_architect"
-name: "Community Architect"
-description: "Created a community that reached 1,000 members."
+badge_id: "campfire_architect"
+name: "Campfire Architect"
+description: "Created a campfire that reached 1,000 members."
 icon_concept: "Full building structure made of flame, with an architect's compass."
 category: contribution
 rarity: epic
 version: "v1"
 earn_criteria:
   type: "threshold"
-  metric: "max_community_members_created"
+  metric: "max_campfire_members_created"
   threshold: 1000
   conditions:
-    - User must be the creator (created_by) of the community
-    - Community must have >= 1000 active members
-    - Community must not be banned
+    - User must be the creator (created_by) of the campfire
+    - Campfire must have >= 1000 active members
+    - Campfire must not be banned
 ```
 
 ---
@@ -615,7 +615,7 @@ earn_criteria:
 ```yaml
 badge_id: "successful_proposer"
 name: "Successful Proposer"
-description: "Authored a governance proposal that passed community vote."
+description: "Authored a governance proposal that passed campfire vote."
 icon_concept: "Gavel with a flame head striking a podium."
 category: governance
 rarity: rare
@@ -633,7 +633,7 @@ earn_criteria:
 ```yaml
 badge_id: "governance_champion"
 name: "Governance Champion"
-description: "Authored 10 governance proposals that passed community vote."
+description: "Authored 10 governance proposals that passed campfire vote."
 icon_concept: "Crown made of gavels, wreathed in flames."
 category: governance
 rarity: epic
@@ -661,7 +661,7 @@ earn_criteria:
   metric: "council_membership"
   threshold: 1
   conditions:
-    - Must have been elected via community nomination
+    - Must have been elected via campfire nomination
     - Active council_members record exists
 ```
 
@@ -806,23 +806,23 @@ earn_criteria:
     - Requires verified, actionable bug report
 ```
 
-##### 39. community_creator
+##### 39. campfire_creator
 
 ```yaml
-badge_id: "community_creator"
-name: "Community Creator"
-description: "Created your first community on fuega.ai."
+badge_id: "campfire_creator"
+name: "Campfire Creator"
+description: "Created your first campfire on fuega.ai."
 icon_concept: "Flame emerging from a seedling, representing growth."
 category: special
 rarity: uncommon
 version: "v1"
 earn_criteria:
   type: "threshold"
-  metric: "communities_created"
+  metric: "campfires_created"
   threshold: 1
   conditions:
-    - Community must be approved by platform agent
-    - Community must not be banned
+    - Campfire must be approved by platform agent
+    - Campfire must not be banned
 ```
 
 ##### 40. verified_human
@@ -893,14 +893,14 @@ The cosmetics shop allows users to purchase visual customizations using real mon
 | Category   | Subcategory | Description                                      |
 |------------|-------------|--------------------------------------------------|
 | `theme`    | `profile`   | Color themes applied to the user's profile page  |
-| `theme`    | `community` | Color themes applied to a community page         |
+| `theme`    | `campfire` | Color themes applied to a campfire page         |
 | `border`   | `profile`   | Decorative borders around the user's avatar       |
 | `title`    | `profile`   | Custom display title shown below username          |
 | `color`    | `profile`   | Username color override in posts and comments      |
 | `avatar`   | `profile`   | Animated or special avatar frames                  |
 | `banner`   | `profile`   | Custom banner background for the user's profile   |
-| `banner`   | `community` | Custom banner background for a community page     |
-| `icon`     | `community` | Custom icon for a community                        |
+| `banner`   | `campfire` | Custom banner background for a campfire page     |
+| `icon`     | `campfire` | Custom icon for a campfire                        |
 
 ### Cosmetic Schema
 
@@ -1046,64 +1046,64 @@ available: true
 
 ---
 
-#### COMMUNITY THEMES
+#### CAMPFIRE THEMES
 
-##### theme_community_inferno
+##### theme_campfire_inferno
 
 ```yaml
-cosmetic_id: "theme_community_inferno"
-name: "Community Inferno"
-description: "Intense red and orange theme for your community page. Flames on every surface."
-preview_concept: "Community page bathed in red-orange tones with fire border effects."
+cosmetic_id: "theme_campfire_inferno"
+name: "Campfire Inferno"
+description: "Intense red and orange theme for your campfire page. Flames on every surface."
+preview_concept: "Campfire page bathed in red-orange tones with fire border effects."
 category: theme
-subcategory: community
+subcategory: campfire
 price_cents: 999
 metadata:
   css_vars:
-    --community-bg-primary: "#1a0500"
-    --community-bg-secondary: "#2a0a00"
-    --community-accent: "#FF4500"
-    --community-text: "#FFE0C0"
+    --campfire-bg-primary: "#1a0500"
+    --campfire-bg-secondary: "#2a0a00"
+    --campfire-accent: "#FF4500"
+    --campfire-text: "#FFE0C0"
   animation: "fire_border"
 available: true
 ```
 
-##### theme_community_ocean
+##### theme_campfire_ocean
 
 ```yaml
-cosmetic_id: "theme_community_ocean"
-name: "Community Ocean"
-description: "Deep blue aquatic theme with wave animations for your community page."
-preview_concept: "Community page with deep blue gradient and wave motion at the top."
+cosmetic_id: "theme_campfire_ocean"
+name: "Campfire Ocean"
+description: "Deep blue aquatic theme with wave animations for your campfire page."
+preview_concept: "Campfire page with deep blue gradient and wave motion at the top."
 category: theme
-subcategory: community
+subcategory: campfire
 price_cents: 999
 metadata:
   css_vars:
-    --community-bg-primary: "#001020"
-    --community-bg-secondary: "#002040"
-    --community-accent: "#0EA5E9"
-    --community-text: "#C0E0FF"
+    --campfire-bg-primary: "#001020"
+    --campfire-bg-secondary: "#002040"
+    --campfire-accent: "#0EA5E9"
+    --campfire-text: "#C0E0FF"
   animation: "wave_motion"
 available: true
 ```
 
-##### theme_community_terminal
+##### theme_campfire_terminal
 
 ```yaml
-cosmetic_id: "theme_community_terminal"
-name: "Community Terminal"
-description: "Classic green-on-black terminal aesthetic for your community page."
-preview_concept: "Community page styled like an old CRT terminal with green text."
+cosmetic_id: "theme_campfire_terminal"
+name: "Campfire Terminal"
+description: "Classic green-on-black terminal aesthetic for your campfire page."
+preview_concept: "Campfire page styled like an old CRT terminal with green text."
 category: theme
-subcategory: community
+subcategory: campfire
 price_cents: 799
 metadata:
   css_vars:
-    --community-bg-primary: "#000000"
-    --community-bg-secondary: "#001100"
-    --community-accent: "#00FF00"
-    --community-text: "#00CC00"
+    --campfire-bg-primary: "#000000"
+    --campfire-bg-secondary: "#001100"
+    --campfire-accent: "#00FF00"
+    --campfire-text: "#00CC00"
   animation: "scanlines"
 available: true
 ```
@@ -1550,53 +1550,53 @@ available: true
 
 ---
 
-#### COMMUNITY BANNERS
+#### CAMPFIRE BANNERS
 
-##### banner_community_flames
+##### banner_campfire_flames
 
 ```yaml
-cosmetic_id: "banner_community_flames"
-name: "Community Flames"
-description: "Dramatic wall of flames banner for your community page."
+cosmetic_id: "banner_campfire_flames"
+name: "Campfire Flames"
+description: "Dramatic wall of flames banner for your campfire page."
 preview_concept: "Wide banner of rising flames against a dark background."
 category: banner
-subcategory: community
+subcategory: campfire
 price_cents: 799
 metadata:
-  banner_url: "/cosmetics/banners/community_flames.webp"
+  banner_url: "/cosmetics/banners/campfire_flames.webp"
   banner_height: 250
 available: true
 ```
 
-##### banner_community_mountains
+##### banner_campfire_mountains
 
 ```yaml
-cosmetic_id: "banner_community_mountains"
-name: "Community Mountains"
-description: "Mountain range silhouette at sunset for your community page."
+cosmetic_id: "banner_campfire_mountains"
+name: "Campfire Mountains"
+description: "Mountain range silhouette at sunset for your campfire page."
 preview_concept: "Dark mountain silhouettes against an orange-red sunset sky."
 category: banner
-subcategory: community
+subcategory: campfire
 price_cents: 799
 metadata:
-  banner_url: "/cosmetics/banners/community_mountains.webp"
+  banner_url: "/cosmetics/banners/campfire_mountains.webp"
   banner_height: 250
 available: true
 ```
 
 ---
 
-#### COMMUNITY ICONS
+#### CAMPFIRE ICONS
 
 ##### icon_flame_circle
 
 ```yaml
 cosmetic_id: "icon_flame_circle"
 name: "Flame Circle Icon"
-description: "Stylized flame inside a circle for your community icon."
+description: "Stylized flame inside a circle for your campfire icon."
 preview_concept: "Orange flame icon centered in a dark circle with orange border."
 category: icon
-subcategory: community
+subcategory: campfire
 price_cents: 499
 metadata:
   icon_url: "/cosmetics/icons/flame_circle.svg"
@@ -1609,10 +1609,10 @@ available: true
 ```yaml
 cosmetic_id: "icon_shield"
 name: "Shield Icon"
-description: "Shield emblem with customizable inner color for your community."
+description: "Shield emblem with customizable inner color for your campfire."
 preview_concept: "Traditional shield shape with inner flame emblem."
 category: icon
-subcategory: community
+subcategory: campfire
 price_cents: 499
 metadata:
   icon_url: "/cosmetics/icons/shield.svg"
@@ -1628,7 +1628,7 @@ name: "Diamond Icon"
 description: "Faceted diamond icon with fire refraction effects."
 preview_concept: "Diamond shape with internal orange/red light refractions."
 category: icon
-subcategory: community
+subcategory: campfire
 price_cents: 599
 metadata:
   icon_url: "/cosmetics/icons/diamond.svg"
@@ -1701,7 +1701,7 @@ Notifications keep users informed about activity relevant to them. Notifications
 | `reply_comment`    | Someone replied to your comment                        | on      | no        |
 | `spark`            | Someone sparked your post or comment                   | on      | yes       |
 | `mention`          | Someone mentioned your username in a post or comment   | on      | no        |
-| `community_update` | A community you belong to has news or changes          | on      | no        |
+| `campfire_update` | A campfire you belong to has news or changes          | on      | no        |
 | `governance`       | A governance proposal you can vote on, or vote results | on      | no        |
 | `badge_earned`     | You earned a new badge                                 | on      | no        |
 | `tip_received`     | (Future) Someone tipped you directly                   | on      | no        |
@@ -1773,21 +1773,21 @@ interface Notification {
 }
 ```
 
-#### community_update
+#### campfire_update
 ```json
 {
-  "community_id": "uuid",
-  "community_name": "technology",
+  "campfire_id": "uuid",
+  "campfire_name": "technology",
   "update_type": "ai_config_changed",
-  "summary": "The AI moderation settings were updated by community vote."
+  "summary": "The AI moderation settings were updated by campfire vote."
 }
 ```
 
 #### governance
 ```json
 {
-  "community_id": "uuid",
-  "community_name": "technology",
+  "campfire_id": "uuid",
+  "campfire_name": "technology",
   "proposal_id": "uuid",
   "proposal_title": "Update toxicity threshold",
   "governance_event": "new_proposal",
@@ -1905,7 +1905,7 @@ interface NotificationPreferences {
   reply_comment: boolean;     // default: true
   spark: boolean;             // default: true
   mention: boolean;           // default: true
-  community_update: boolean;  // default: true
+  campfire_update: boolean;  // default: true
   governance: boolean;        // default: true
   badge_earned: boolean;      // default: true
   tip_received: boolean;      // default: true
@@ -2113,9 +2113,9 @@ An optional public page at `/supporters` showing:
 
 ### Overview
 
-Communities configure their AI moderation agent through structured settings rather than free-form text prompts. This approach prevents prompt injection attacks and ensures all communities have functional, safe moderation. The AI prompt is auto-generated from the structured configuration, meaning users never write raw prompts.
+Campfires configure their AI moderation agent through structured settings rather than free-form text prompts. This approach prevents prompt injection attacks and ensures all campfires have functional, safe moderation. The AI prompt is auto-generated from the structured configuration, meaning users never write raw prompts.
 
-**This replaces the original "community writes their own prompt" design from V1.**
+**This replaces the original "campfire writes their own prompt" design from V1.**
 
 ### Why Structured Config?
 
@@ -2131,7 +2131,7 @@ Communities configure their AI moderation agent through structured settings rath
 ### Configuration Schema
 
 ```typescript
-interface CommunityAIConfig {
+interface CampfireAIConfig {
   // Content Filtering
   toxicity_threshold: number;          // 0-90 (percentage, max 90%)
   spam_sensitivity: 'low' | 'medium' | 'high';
@@ -2210,12 +2210,12 @@ Given this config:
 
 Auto-generated prompt (example, actual template is in codebase):
 ```
-You are the AI moderation agent for the f/{community_name} community on fuega.ai.
+You are the AI moderation agent for the f/{campfire_name} campfire on fuega.ai.
 
 CONTENT POLICY:
 - Toxicity: Remove content that is more than 60% toxic (hateful, threatening, or severely disrespectful)
 - Spam: HIGH sensitivity. Aggressively filter repetitive, low-effort, or promotional content.
-- Self-promotion: FLAG self-promotional content for community review. Do not auto-remove.
+- Self-promotion: FLAG self-promotional content for campfire review. Do not auto-remove.
 - Links: ALLOW external links.
 - NSFW: NOT ALLOWED. Remove any NSFW content.
 - Language: Only ENGLISH content is allowed. Remove content in other languages.
@@ -2245,14 +2245,14 @@ Respond with a JSON decision: {"decision": "approve" | "remove" | "flag", "confi
 ### Config Change Process
 
 ```
-1. Community member proposes config change
+1. Campfire member proposes config change
      |
-     POST /api/communities/{id}/config-proposals
+     POST /api/campfires/{id}/config-proposals
      Body: { changes: { toxicity_threshold: 70, spam_sensitivity: "low" } }
      |
 2. Server validates:
-     a. Proposer is a member of the community
-     b. Proposer account age >= 7 days in community
+     a. Proposer is a member of the campfire
+     b. Proposer account age >= 7 days in campfire
      c. Proposed values are within guardrail limits
      d. No other active proposal for the same settings
      |
@@ -2260,7 +2260,7 @@ Respond with a JSON decision: {"decision": "approve" | "remove" | "flag", "confi
      |
 4. Proposal enters voting period (configurable, default 7 days)
      |
-5. Community members vote (for / against / abstain)
+5. Campfire members vote (for / against / abstain)
      |
 6. When voting ends:
      a. Check quorum met (>= config_change_quorum % of active members voted)
@@ -2269,16 +2269,16 @@ Respond with a JSON decision: {"decision": "approve" | "remove" | "flag", "confi
      ├── Quorum NOT met → Proposal fails (status: "failed", reason: "quorum_not_met")
      ├── Threshold NOT met → Proposal fails (status: "failed", reason: "threshold_not_met")
      └── Both met → Proposal passes:
-         - Update community ai_config column
+         - Update campfire ai_config column
          - Auto-regenerate AI prompt from new config
          - Log change in ai_prompt_history
-         - Send community_update notification to all members
+         - Send campfire_update notification to all members
          - Status: "implemented"
 ```
 
 ### Config Display
 
-Each community page prominently displays the current AI config in a human-readable format:
+Each campfire page prominently displays the current AI config in a human-readable format:
 
 ```
 AI MODERATION SETTINGS for f/technology
@@ -2300,35 +2300,35 @@ Last changed: Feb 15, 2026 (Proposal #42)
 
 ---
 
-## COMMUNITY ROLES
+## CAMPFIRE ROLES
 
 ### Overview
 
-Community members are assigned roles that reflect their standing and activity within a specific community. Roles determine display badges within the community context and may unlock additional privileges in future versions.
+Campfire members are assigned roles that reflect their standing and activity within a specific campfire. Roles determine display badges within the campfire context and may unlock additional privileges in future versions.
 
 ### Role Definitions
 
 | Role            | Slug            | Assignment Method        | Description                                    |
 |-----------------|-----------------|--------------------------|------------------------------------------------|
-| Founder         | `founder`       | Automatic (creator)      | The user who created the community             |
+| Founder         | `founder`       | Automatic (creator)      | The user who created the campfire             |
 | Moderator       | `moderator`     | Manual (by founder)      | Human facilitator, can review flagged content   |
 | VIP             | `vip`           | Manual (by founder)      | Recognized contributor, cosmetic distinction    |
-| Active Member   | `active_member` | Automatic (activity)     | User with significant activity in community    |
-| Member          | `member`        | Automatic (join)         | Standard member who has joined the community   |
+| Active Member   | `active_member` | Automatic (activity)     | User with significant activity in campfire    |
+| Member          | `member`        | Automatic (join)         | Standard member who has joined the campfire   |
 | Lurker          | `lurker`        | Automatic (inactivity)   | Member with no activity in the last 30 days    |
 
 ### Auto-Assignment Criteria
 
 #### Active Member
-A member is automatically promoted to `active_member` when they meet ALL of these criteria within the community:
-- Posted at least 5 approved posts in the community
-- Left at least 10 approved comments in the community
-- Earned at least 25 sparks on content within the community
+A member is automatically promoted to `active_member` when they meet ALL of these criteria within the campfire:
+- Posted at least 5 approved posts in the campfire
+- Left at least 10 approved comments in the campfire
+- Earned at least 25 sparks on content within the campfire
 - Has been a member for at least 14 days
 
 #### Lurker
 A member is automatically demoted to `lurker` when:
-- No posts or comments in the community for 30+ consecutive days
+- No posts or comments in the campfire for 30+ consecutive days
 - They return to `member` status upon their next post or comment
 
 ### Role Hierarchy
@@ -2344,8 +2344,8 @@ founder (highest)
 
 ### Role Display
 
-- Roles are shown as small colored labels next to the username WITHIN the community context
-- Outside the community (e.g., on the user's profile), community roles are listed in the "Communities" section
+- Roles are shown as small colored labels next to the username WITHIN the campfire context
+- Outside the campfire (e.g., on the user's profile), campfire roles are listed in the "Campfires" section
 - Role colors:
   - Founder: Gold (#FFD700)
   - Moderator: Green (#4ADE80)
@@ -2356,9 +2356,9 @@ founder (highest)
 
 ### Manual Role Assignment
 
-- Only the community `founder` can manually assign `moderator` and `vip` roles
-- Role changes are logged in the community audit log
-- A community can have a maximum of 10 moderators
+- Only the campfire `founder` can manually assign `moderator` and `vip` roles
+- Role changes are logged in the campfire audit log
+- A campfire can have a maximum of 10 moderators
 - VIP count is unlimited
 - Founder role cannot be transferred in V2 (future feature)
 
@@ -2366,7 +2366,7 @@ founder (highest)
 
 | Permission               | Founder | Moderator | VIP | Active Member | Member | Lurker |
 |--------------------------|---------|-----------|-----|---------------|--------|--------|
-| Edit community settings  | Yes     | No        | No  | No            | No     | No     |
+| Edit campfire settings  | Yes     | No        | No  | No            | No     | No     |
 | Assign moderator/VIP     | Yes     | No        | No  | No            | No     | No     |
 | Review flagged content   | Yes     | Yes       | No  | No            | No     | No     |
 | Create proposals         | Yes     | Yes       | Yes | Yes           | Yes    | No     |
@@ -2560,8 +2560,8 @@ The gamification system requires 7 new tables and modifications to 4 existing ta
 
 **Modified Tables:**
 1. `users` - Add: founder_number, primary_badge, cosmetics, referred_by, referral_count
-2. `community_memberships` - Add: role, role_assigned_at, role_assigned_by, activity counters
-3. `communities` - Add: banner_url, icon_url, theme, ai_config
+2. `campfire_members` - Add: role, role_assigned_at, role_assigned_by, activity counters
+3. `campfires` - Add: banner_url, icon_url, theme, ai_config
 4. `ai_prompt_history` - Add: ai_config (JSONB for structured config)
 
 ### Migration Files
@@ -2616,17 +2616,17 @@ GET    /api/supporters                      # Public list of supporters
 POST   /api/webhooks/stripe                 # Stripe webhook handler
 
 # AI Config
-GET    /api/communities/:id/ai-config       # Get current AI config
-POST   /api/communities/:id/config-proposals # Propose config change
-GET    /api/communities/:id/config-proposals # List config proposals
-POST   /api/communities/:id/config-proposals/:id/vote # Vote on proposal
+GET    /api/campfires/:id/ai-config       # Get current AI config
+POST   /api/campfires/:id/config-proposals # Propose config change
+GET    /api/campfires/:id/config-proposals # List config proposals
+POST   /api/campfires/:id/config-proposals/:id/vote # Vote on proposal
 
 # Features
 GET    /api/features                        # Get enabled feature flags
 
-# Community Roles
-GET    /api/communities/:id/members         # List members with roles
-PUT    /api/communities/:id/members/:uid/role # Assign role (founder only)
+# Campfire Roles
+GET    /api/campfires/:id/members         # List members with roles
+PUT    /api/campfires/:id/members/:uid/role # Assign role (founder only)
 ```
 
 ### Stripe Integration Points
@@ -2649,7 +2649,7 @@ PUT    /api/communities/:id/members/:uid/role # Assign role (founder only)
 |------------------------------|----------------|-----------------------------------------------------|
 | Badge eligibility check      | Hourly         | Check all users against all badge criteria           |
 | Notification cleanup         | Weekly (Sun 3AM)| Delete read notifications older than 30 days        |
-| Community role recalculation | Daily (2AM)    | Update active_member and lurker roles               |
+| Campfire role recalculation | Daily (2AM)    | Update active_member and lurker roles               |
 | IP hash cleanup              | Daily (1AM)    | Delete IP hashes older than 30 days                 |
 | Referral reversion check     | Daily (4AM)    | Check if referred accounts were banned within 7 days|
 
@@ -2686,8 +2686,8 @@ All security requirements for the gamification system are documented in SECURITY
 | 7  | first_comment         | Sparked a Conversation| engagement    | common    | 1 approved comment                  |
 | 8  | conversationalist     | Conversationalist     | engagement    | uncommon  | 100 approved comments               |
 | 9  | discussion_veteran    | Discussion Veteran    | engagement    | rare      | 1,000 approved comments             |
-| 10 | community_explorer    | Community Explorer    | engagement    | common    | 10 communities joined               |
-| 11 | community_nomad       | Community Nomad       | engagement    | uncommon  | 50 communities joined               |
+| 10 | campfire_explorer    | Campfire Explorer    | engagement    | common    | 10 campfires joined               |
+| 11 | campfire_nomad       | Campfire Nomad       | engagement    | uncommon  | 50 campfires joined               |
 | 12 | night_owl             | Night Owl             | engagement    | uncommon  | 25 posts/comments 00:00-05:00 UTC   |
 | 13 | streak_7              | Weekly Streak         | engagement    | common    | 7 consecutive active days           |
 | 14 | streak_30             | Monthly Streak        | engagement    | rare      | 30 consecutive active days          |
@@ -2700,8 +2700,8 @@ All security requirements for the gamification system are documented in SECURITY
 | 21 | legendary_contributor | Legendary Contributor | contribution  | legendary | 100,000 sparks received             |
 | 22 | hot_post              | Hot Post              | contribution  | rare      | Single post with 100+ sparks        |
 | 23 | viral_post            | Viral Post            | contribution  | epic      | Single post with 1,000+ sparks      |
-| 24 | community_builder     | Community Builder     | contribution  | rare      | Created community with 100 members  |
-| 25 | community_architect   | Community Architect   | contribution  | epic      | Created community with 1,000 members|
+| 24 | campfire_builder     | Campfire Builder     | contribution  | rare      | Created campfire with 100 members  |
+| 25 | campfire_architect   | Campfire Architect   | contribution  | epic      | Created campfire with 1,000 members|
 | 26 | first_vote            | Civic Duty            | governance    | common    | 1 governance vote                   |
 | 27 | active_voter          | Active Voter          | governance    | uncommon  | 25 governance votes                 |
 | 28 | proposal_author       | Proposal Author       | governance    | uncommon  | 1 proposal created                  |
@@ -2715,7 +2715,7 @@ All security requirements for the gamification system are documented in SECURITY
 | 36 | supporter             | Supporter             | special       | rare      | Any tip jar donation                |
 | 37 | recurring_supporter   | Recurring Supporter   | special       | epic      | Active recurring tip subscription   |
 | 38 | bug_hunter            | Bug Hunter            | special       | rare      | Verified bug report (manual award)  |
-| 39 | community_creator     | Community Creator     | special       | uncommon  | Created 1 approved community        |
+| 39 | campfire_creator     | Campfire Creator     | special       | uncommon  | Created 1 approved campfire        |
 | 40 | verified_human        | Verified Human        | special       | uncommon  | Manual verification (admin award)   |
 
 ---
@@ -2730,9 +2730,9 @@ All security requirements for the gamification system are documented in SECURITY
 | 4  | theme_neon_grid             | Neon Grid           | theme    | profile     | $5.99  |
 | 5  | theme_forest_canopy         | Forest Canopy       | theme    | profile     | $4.99  |
 | 6  | theme_void                  | The Void            | theme    | profile     | $3.99  |
-| 7  | theme_community_inferno     | Community Inferno   | theme    | community   | $9.99  |
-| 8  | theme_community_ocean       | Community Ocean     | theme    | community   | $9.99  |
-| 9  | theme_community_terminal    | Community Terminal   | theme    | community   | $7.99  |
+| 7  | theme_campfire_inferno     | Campfire Inferno   | theme    | campfire   | $9.99  |
+| 8  | theme_campfire_ocean       | Campfire Ocean     | theme    | campfire   | $9.99  |
+| 9  | theme_campfire_terminal    | Campfire Terminal   | theme    | campfire   | $7.99  |
 | 10 | border_flame_ring           | Flame Ring          | border   | profile     | $2.99  |
 | 11 | border_ice_crystal          | Ice Crystal         | border   | profile     | $2.99  |
 | 12 | border_gold_ornate          | Gold Ornate         | border   | profile     | $3.99  |
@@ -2759,11 +2759,11 @@ All security requirements for the gamification system are documented in SECURITY
 | 33 | banner_starfield            | Starfield           | banner   | profile     | $4.99  |
 | 34 | banner_circuit_board        | Circuit Board       | banner   | profile     | $3.99  |
 | 35 | banner_abstract_waves       | Abstract Waves      | banner   | profile     | $3.99  |
-| 36 | banner_community_flames     | Community Flames    | banner   | community   | $7.99  |
-| 37 | banner_community_mountains  | Community Mountains | banner   | community   | $7.99  |
-| 38 | icon_flame_circle           | Flame Circle Icon   | icon     | community   | $4.99  |
-| 39 | icon_shield                 | Shield Icon         | icon     | community   | $4.99  |
-| 40 | icon_diamond                | Diamond Icon        | icon     | community   | $5.99  |
+| 36 | banner_campfire_flames     | Campfire Flames    | banner   | campfire   | $7.99  |
+| 37 | banner_campfire_mountains  | Campfire Mountains | banner   | campfire   | $7.99  |
+| 38 | icon_flame_circle           | Flame Circle Icon   | icon     | campfire   | $4.99  |
+| 39 | icon_shield                 | Shield Icon         | icon     | campfire   | $4.99  |
+| 40 | icon_diamond                | Diamond Icon        | icon     | campfire   | $5.99  |
 
 ---
 
@@ -2775,7 +2775,7 @@ All security requirements for the gamification system are documented in SECURITY
 | reply_comment      | Reply to user's comment                | on           | no        |
 | spark              | Spark on user's post or comment        | off          | yes       |
 | mention            | @username in post or comment           | on           | no        |
-| community_update   | AI config change, community news       | off          | no        |
+| campfire_update   | AI config change, campfire news       | off          | no        |
 | governance         | New proposal, vote reminder, results   | off          | no        |
 | badge_earned       | User earns a new badge                 | on           | no        |
 | tip_received       | (Future) Direct user-to-user tip       | on           | no        |

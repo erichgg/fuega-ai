@@ -13,7 +13,7 @@ import {
   Scale,
 } from "lucide-react";
 import { FlameLogo } from "@/components/fuega/flame-logo";
-import { CommunityPrefix } from "@/components/fuega/community-prefix";
+import { CampfirePrefix } from "@/components/fuega/campfire-prefix";
 
 const principles = [
   {
@@ -30,15 +30,15 @@ const principles = [
   },
   {
     icon: Vote,
-    title: "Four tiers, all democratic",
+    title: "Flat governance, fully democratic",
     description:
-      "Platform → category → community → cohort. Each tier governs its own scope through votes — from site-wide API decisions down to hyper-niche cohort rules.",
+      "Platform Principles are immutable. Beyond that, each community — we call them campfires — governs itself through structured variables and votes. No hierarchy, no gatekeepers — just your campfire, your rules.",
   },
   {
     icon: FileCode2,
     title: "You choose the AI",
     description:
-      "Communities vote on which AI model drives their moderation. Don't trust a provider's training data? Vote it out. The community controls the knowledge behind every decision.",
+      "Campfires vote on which AI model drives their moderation. Don't trust a provider's training data? Vote it out. Your campfire controls the knowledge behind every decision.",
   },
   {
     icon: Scale,
@@ -63,14 +63,14 @@ const howItWorks = [
   },
   {
     step: "02",
-    title: "Find or build your community",
-    description: "COMMUNITY_LINKS",
+    title: "Find or build your campfire",
+    description: "CAMPFIRE_LINKS",
   },
   {
     step: "03",
     title: "Speak freely, governed fairly",
     description:
-      "Post and discuss. AI moderation runs in real-time using rules your community wrote and voted on.",
+      "Post and discuss. AI moderation runs in real-time using rules your campfire wrote and voted on.",
   },
   {
     step: "04",
@@ -88,6 +88,12 @@ export default function LandingPage() {
         <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4 2xl:px-8">
           <FlameLogo size="sm" />
           <div className="flex items-center gap-6">
+            <Link
+              href="/how-it-works"
+              className="hidden text-sm text-ash-400 transition-colors hover:text-ash-200 sm:block"
+            >
+              How It Works
+            </Link>
             <Link
               href="/about"
               className="hidden text-sm text-ash-400 transition-colors hover:text-ash-200 sm:block"
@@ -139,7 +145,7 @@ export default function LandingPage() {
               <span className="text-ash-700">:</span>
               <span className="text-flame-500/70">~</span>
               <span className="text-ash-600">$</span>
-              <span className="text-ash-400 ml-1">init --governance community</span>
+              <span className="text-ash-400 ml-1">init --governance campfire</span>
             </div>
 
             <h1 className="text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl 2xl:text-7xl">
@@ -179,7 +185,7 @@ export default function LandingPage() {
                 <ArrowRight className="h-4 w-4" />
               </Link>
               <Link
-                href="/about"
+                href="/how-it-works"
                 className="inline-flex items-center gap-2 border border-ash-700 px-8 py-3 text-base font-medium text-ash-300 transition-colors hover:border-ash-600 hover:text-ash-100"
               >
                 Read the architecture
@@ -292,12 +298,12 @@ export default function LandingPage() {
                 <h3 className="mt-2 text-sm font-semibold text-ash-100">
                   {item.title}
                 </h3>
-                {item.description === "COMMUNITY_LINKS" ? (
+                {item.description === "CAMPFIRE_LINKS" ? (
                   <p className="mt-1 text-xs text-ash-400">
                     Join{" "}
-                    <CommunityPrefix name="tech" linked />,{" "}
-                    <CommunityPrefix name="privacy" linked />,{" "}
-                    <CommunityPrefix name="gaming" linked />{" "}
+                    <CampfirePrefix name="tech" linked />,{" "}
+                    <CampfirePrefix name="privacy" linked />,{" "}
+                    <CampfirePrefix name="gaming" linked />{" "}
                     — or create your own space with your own rules.
                   </p>
                 ) : (
@@ -319,7 +325,7 @@ export default function LandingPage() {
             Find your people. Set your standards.
           </h2>
           <p className="mt-3 text-sm text-ash-400">
-            Communities that write their own rules, vote on their AI, and hold every decision accountable.
+            Campfires that write their own rules, vote on their AI, and hold every decision accountable.
             No black boxes. No corporate overlords. Just people who share your standards.
           </p>
           <Link
@@ -366,6 +372,11 @@ export default function LandingPage() {
               <h4 className="text-xs font-semibold text-ash-300 uppercase tracking-wider">Company</h4>
               <ul className="mt-2 space-y-1">
                 <li>
+                  <Link href="/how-it-works" className="text-xs text-ash-500 hover:text-ash-300">
+                    How It Works
+                  </Link>
+                </li>
+                <li>
                   <Link href="/about" className="text-xs text-ash-500 hover:text-ash-300">
                     About
                   </Link>
@@ -394,7 +405,7 @@ export default function LandingPage() {
             </div>
           </div>
           <div className="mt-6 border-t border-ash-800 pt-4 text-center text-xs text-ash-600">
-            &copy; {new Date().getFullYear()} fuega.ai — Built for the community, by the community.
+            &copy; {new Date().getFullYear()} fuega.ai — Built for the campfire, by the campfire.
           </div>
         </div>
       </footer>

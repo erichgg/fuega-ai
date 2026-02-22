@@ -24,7 +24,7 @@ interface Proposal {
   id: string;
   title: string;
   description: string;
-  community: string;
+  campfire: string;
   proposalType: "modify_prompt" | "addendum_prompt" | "change_settings";
   status: ProposalStatus;
   votesFor: number;
@@ -79,7 +79,7 @@ const MOCK_PROPOSALS: Proposal[] = [
     title: "Update f | tech moderation to allow more technical debates",
     description:
       "Current prompt is too aggressive in flagging technical disagreements. Proposed change would recognize technical debates as healthy discourse.",
-    community: "tech",
+    campfire: "tech",
     proposalType: "modify_prompt",
     status: "voting",
     votesFor: 156,
@@ -94,7 +94,7 @@ const MOCK_PROPOSALS: Proposal[] = [
     title: "Add misinformation detection addendum to f | science prompt",
     description:
       "Propose adding an addendum specifically targeting scientific misinformation while still allowing speculative discussion.",
-    community: "science",
+    campfire: "science",
     proposalType: "addendum_prompt",
     status: "discussion",
     votesFor: 0,
@@ -108,8 +108,8 @@ const MOCK_PROPOSALS: Proposal[] = [
     id: "prop_3",
     title: "Reduce voting period from 7 days to 5 days for f | gaming",
     description:
-      "The gaming community moves fast. 7 days is too long for governance decisions. Proposing 5-day voting period.",
-    community: "gaming",
+      "The gaming campfire moves fast. 7 days is too long for governance decisions. Proposing 5-day voting period.",
+    campfire: "gaming",
     proposalType: "change_settings",
     status: "passed",
     votesFor: 89,
@@ -124,7 +124,7 @@ const MOCK_PROPOSALS: Proposal[] = [
     title: "Stricter hate speech detection in f | politics",
     description:
       "Proposing updated moderation prompt with better hate speech detection while preserving political debate.",
-    community: "politics",
+    campfire: "politics",
     proposalType: "modify_prompt",
     status: "rejected",
     votesFor: 45,
@@ -148,7 +148,7 @@ function timeRemaining(dateStr: string): string {
 export default function GovernancePage() {
   const { user } = useAuth();
   const searchParams = useSearchParams();
-  const communityFilter = searchParams.get("community");
+  const campfireFilter = searchParams.get("campfire");
 
   const [proposals, setProposals] = React.useState<Proposal[]>([]);
   const [loading, setLoading] = React.useState(true);
@@ -159,14 +159,14 @@ export default function GovernancePage() {
   React.useEffect(() => {
     const timer = setTimeout(() => {
       let filtered = [...MOCK_PROPOSALS];
-      if (communityFilter) {
-        filtered = filtered.filter((p) => p.community === communityFilter);
+      if (campfireFilter) {
+        filtered = filtered.filter((p) => p.campfire === campfireFilter);
       }
       setProposals(filtered);
       setLoading(false);
     }, 300);
     return () => clearTimeout(timer);
-  }, [communityFilter]);
+  }, [campfireFilter]);
 
   const filteredProposals =
     statusFilter === "all"
@@ -179,9 +179,9 @@ export default function GovernancePage() {
         <div>
           <h1 className="text-2xl font-bold text-ash-100">Governance</h1>
           <p className="mt-1 text-sm text-ash-400">
-            {communityFilter
-              ? `Proposals for f | ${communityFilter}`
-              : "Active proposals across all communities"}
+            {campfireFilter
+              ? `Proposals for f | ${campfireFilter}`
+              : "Active proposals across all campfires"}
           </p>
         </div>
         {user && (
@@ -242,7 +242,7 @@ export default function GovernancePage() {
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2 text-xs text-ash-500">
                       <span className="font-medium text-flame-400">
-                        <span className="text-lava-hot">f</span><span className="text-smoke mx-1">|</span><span>{proposal.community}</span>
+                        <span className="text-lava-hot">f</span><span className="text-smoke mx-1">|</span><span>{proposal.campfire}</span>
                       </span>
                       <span>·</span>
                       <span>{proposal.author}</span>

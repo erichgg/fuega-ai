@@ -1,11 +1,11 @@
 import Link from "next/link";
 
 /**
- * Displays community name in the correct format: f | name
- * URL routes still use /f/[community] (slash in URL path is fine)
+ * Displays campfire name in the correct format: f | name
+ * URL routes use /f/[campfire-name]
  * When linked=true, renders as a clickable link to /f/[name]
  */
-export function CommunityPrefix({
+export function CampfirePrefix({
   name,
   className,
   linked = false,
@@ -37,9 +37,9 @@ export function CommunityPrefix({
 }
 
 /**
- * Normalizes community query input to handle all formats:
- * "f | name", "f|name", "f/name", "f/ name", just "name"
+ * Normalizes campfire query input to handle all formats:
+ * "f/name", "f / name", "f| name", just "name"
  */
-export function normalizeCommunityQuery(input: string): string {
+export function normalizeCampfireQuery(input: string): string {
   return input.replace(/^f\s*[|/]\s*/i, "").trim();
 }

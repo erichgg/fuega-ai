@@ -18,7 +18,7 @@ export const metadata: Metadata = {
     "Community-driven discussions with transparent AI moderation. Communities write and vote on their own AI moderator prompts.",
   keywords: [
     "discussion",
-    "community",
+    "campfire",
     "AI moderation",
     "governance",
     "anonymous",

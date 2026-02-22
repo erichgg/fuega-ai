@@ -3,14 +3,14 @@ import type {
   CreateProposalInput,
   ListProposalsInput,
 } from "@/lib/validation/proposals";
-import { getMembership } from "@/lib/services/communities.service";
+import { getMembership } from "@/lib/services/campfires.service";
 import { createNotification } from "@/lib/services/notifications.service";
 
 // ─── Types ───────────────────────────────────────────────────
 
 export interface Proposal {
   id: string;
-  community_id: string;
+  campfire_id: string;
   proposal_type: string;
   title: string;
   description: string;
@@ -26,7 +26,7 @@ export interface Proposal {
   votes_abstain: number;
   implemented_at: string | null;
   creator_username?: string;
-  community_name?: string;
+  campfire_name?: string;
 }
 
 export interface ProposalVote {
@@ -50,8 +50,8 @@ export async function createProposal(
   input: CreateProposalInput,
   userId: string
 ): Promise<Proposal> {
-  // Verify community exists
-  const community = await queryOne<{
+  // Verify campfire exists
+  const campfire = await queryOne<{
     id: string;
     name: string;
     governance_config: Record<string, unknown>;
@@ -59,26 +59,26 @@ export async function createProposal(
     deleted_at: string | null;
   }>(
     `SELECT id, name, governance_config, is_banned, deleted_at
-     FROM communities WHERE id = $1`,
-    [input.community_id]
+     FROM campfires WHERE id = $1`,
+    [input.campfire_id]
   );
 
-  if (!community || community.deleted_at) {
+  if (!campfire || campfire.deleted_at) {
     throw new GovernanceError(
-      "Community not found",
-      "COMMUNITY_NOT_FOUND",
+      "Campfire not found",
+      "CAMPFIRE_NOT_FOUND",
       404
     );
   }
-  if (community.is_banned) {
-    throw new GovernanceError("Community is banned", "COMMUNITY_BANNED", 403);
+  if (campfire.is_banned) {
+    throw new GovernanceError("Campfire is banned", "CAMPFIRE_BANNED", 403);
   }
 
   // Verify membership and tenure
-  const membership = await getMembership(userId, input.community_id);
+  const membership = await getMembership(userId, input.campfire_id);
   if (!membership) {
     throw new GovernanceError(
-      "Must be a community member to create proposals",
+      "Must be a campfire member to create proposals",
       "NOT_MEMBER",
       403
     );
@@ -99,7 +99,7 @@ export async function createProposal(
   }
 
   // Calculate discussion and voting end times from governance config
-  const govConfig = community.governance_config;
+  const govConfig = campfire.governance_config;
   const discussionHours =
     typeof govConfig.proposal_discussion_hours === "number"
       ? govConfig.proposal_discussion_hours
@@ -118,12 +118,12 @@ export async function createProposal(
 
   const proposal = await queryOne<Proposal>(
     `INSERT INTO proposals
-     (community_id, proposal_type, title, description, proposed_changes,
+     (campfire_id, proposal_type, title, description, proposed_changes,
       created_by, discussion_ends_at, voting_ends_at, status)
      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 'discussion')
      RETURNING *`,
     [
-      input.community_id,
+      input.campfire_id,
       input.proposal_type,
       input.title,
       input.description,
@@ -142,18 +142,18 @@ export async function createProposal(
     );
   }
 
-  // Notify community members about new governance proposal (non-blocking)
-  notifyCommunityMembers(
-    input.community_id,
-    community.name,
+  // Notify campfire members about new governance proposal (non-blocking)
+  notifyCampfireMembers(
+    input.campfire_id,
+    campfire.name,
     userId,
     "governance",
     `New proposal: ${input.title}`,
-    `A new governance proposal has been created in f | ${community.name}`,
-    `/f/${community.name}/proposals/${proposal.id}`,
+    `A new governance proposal has been created in f | ${campfire.name}`,
+    `/f/${campfire.name}/proposals/${proposal.id}`,
     {
-      community_id: input.community_id,
-      community_name: community.name,
+      campfire_id: input.campfire_id,
+      campfire_name: campfire.name,
       proposal_id: proposal.id,
       proposal_title: input.title,
       governance_event: "new_proposal",
@@ -172,10 +172,10 @@ export async function getProposalById(
   return queryOne<Proposal>(
     `SELECT p.*,
             u.username AS creator_username,
-            c.name AS community_name
+            c.name AS campfire_name
      FROM proposals p
      JOIN users u ON u.id = p.created_by
-     JOIN communities c ON c.id = p.community_id
+     JOIN campfires c ON c.id = p.campfire_id
      WHERE p.id = $1`,
     [proposalId]
   );
@@ -184,8 +184,8 @@ export async function getProposalById(
 export async function listProposals(
   input: ListProposalsInput
 ): Promise<Proposal[]> {
-  const conditions: string[] = ["p.community_id = $1"];
-  const params: unknown[] = [input.community_id];
+  const conditions: string[] = ["p.campfire_id = $1"];
+  const params: unknown[] = [input.campfire_id];
   let paramIdx = 2;
 
   if (input.status) {
@@ -199,10 +199,10 @@ export async function listProposals(
   const sql = `
     SELECT p.*,
            u.username AS creator_username,
-           c.name AS community_name
+           c.name AS campfire_name
     FROM proposals p
     JOIN users u ON u.id = p.created_by
-    JOIN communities c ON c.id = p.community_id
+    JOIN campfires c ON c.id = p.campfire_id
     WHERE ${whereClause}
     ORDER BY p.created_at DESC
     LIMIT $${paramIdx} OFFSET $${paramIdx + 1}
@@ -265,10 +265,10 @@ export async function voteOnProposal(
   }
 
   // Verify user is a member
-  const membership = await getMembership(userId, proposal.community_id);
+  const membership = await getMembership(userId, proposal.campfire_id);
   if (!membership) {
     throw new GovernanceError(
-      "Must be a community member to vote on proposals",
+      "Must be a campfire member to vote on proposals",
       "NOT_MEMBER",
       403
     );
@@ -347,32 +347,32 @@ export async function checkAndExecuteProposal(
     return proposal;
   }
 
-  // Get community for quorum calculation
-  const community = await queryOne<{
+  // Get campfire for quorum calculation
+  const campfire = await queryOne<{
     member_count: number;
     governance_config: Record<string, unknown>;
   }>(
-    `SELECT member_count, governance_config FROM communities WHERE id = $1`,
-    [proposal.community_id]
+    `SELECT member_count, governance_config FROM campfires WHERE id = $1`,
+    [proposal.campfire_id]
   );
 
-  if (!community) {
+  if (!campfire) {
     throw new GovernanceError(
-      "Community not found",
-      "COMMUNITY_NOT_FOUND",
+      "Campfire not found",
+      "CAMPFIRE_NOT_FOUND",
       404
     );
   }
 
   const quorumPct =
-    typeof community.governance_config.quorum_percentage === "number"
-      ? community.governance_config.quorum_percentage
+    typeof campfire.governance_config.quorum_percentage === "number"
+      ? campfire.governance_config.quorum_percentage
       : DEFAULT_QUORUM_PERCENTAGE;
 
   const totalVotes =
     proposal.votes_for + proposal.votes_against + proposal.votes_abstain;
   const quorumRequired = Math.ceil(
-    (community.member_count * quorumPct) / 100
+    (campfire.member_count * quorumPct) / 100
   );
   const quorumMet = totalVotes >= quorumRequired;
   const majorityFor =
@@ -416,28 +416,28 @@ async function executeProposal(proposal: Proposal): Promise<void> {
       if (typeof newPrompt !== "string") break;
 
       // Get current version
-      const community = await queryOne<{
+      const campfire = await queryOne<{
         ai_prompt_version: number;
       }>(
-        `SELECT ai_prompt_version FROM communities WHERE id = $1`,
-        [proposal.community_id]
+        `SELECT ai_prompt_version FROM campfires WHERE id = $1`,
+        [proposal.campfire_id]
       );
-      const newVersion = (community?.ai_prompt_version ?? 0) + 1;
+      const newVersion = (campfire?.ai_prompt_version ?? 0) + 1;
 
-      // Update community prompt
+      // Update campfire prompt
       await query(
-        `UPDATE communities SET ai_prompt = $1, ai_prompt_version = $2
+        `UPDATE campfires SET ai_prompt = $1, ai_prompt_version = $2
          WHERE id = $3`,
-        [newPrompt, newVersion, proposal.community_id]
+        [newPrompt, newVersion, proposal.campfire_id]
       );
 
       // Log in prompt history
       await query(
         `INSERT INTO ai_prompt_history
          (entity_type, entity_id, prompt_text, version, created_by, proposal_id)
-         VALUES ('community', $1, $2, $3, $4, $5)`,
+         VALUES ('campfire', $1, $2, $3, $4, $5)`,
         [
-          proposal.community_id,
+          proposal.campfire_id,
           newPrompt,
           newVersion,
           proposal.created_by,
@@ -452,30 +452,30 @@ async function executeProposal(proposal: Proposal): Promise<void> {
       if (typeof addendum !== "string") break;
 
       // Get current prompt
-      const community = await queryOne<{
+      const campfire = await queryOne<{
         ai_prompt: string;
         ai_prompt_version: number;
       }>(
-        `SELECT ai_prompt, ai_prompt_version FROM communities WHERE id = $1`,
-        [proposal.community_id]
+        `SELECT ai_prompt, ai_prompt_version FROM campfires WHERE id = $1`,
+        [proposal.campfire_id]
       );
-      if (!community) break;
+      if (!campfire) break;
 
-      const newPrompt = `${community.ai_prompt}\n\n${addendum}`;
-      const newVersion = community.ai_prompt_version + 1;
+      const newPrompt = `${campfire.ai_prompt}\n\n${addendum}`;
+      const newVersion = campfire.ai_prompt_version + 1;
 
       await query(
-        `UPDATE communities SET ai_prompt = $1, ai_prompt_version = $2
+        `UPDATE campfires SET ai_prompt = $1, ai_prompt_version = $2
          WHERE id = $3`,
-        [newPrompt, newVersion, proposal.community_id]
+        [newPrompt, newVersion, proposal.campfire_id]
       );
 
       await query(
         `INSERT INTO ai_prompt_history
          (entity_type, entity_id, prompt_text, version, created_by, proposal_id)
-         VALUES ('community', $1, $2, $3, $4, $5)`,
+         VALUES ('campfire', $1, $2, $3, $4, $5)`,
         [
-          proposal.community_id,
+          proposal.campfire_id,
           newPrompt,
           newVersion,
           proposal.created_by,
@@ -490,19 +490,19 @@ async function executeProposal(proposal: Proposal): Promise<void> {
       if (typeof settings !== "object" || settings === null) break;
 
       // Merge new settings into existing governance_config
-      const community = await queryOne<{
+      const campfire = await queryOne<{
         governance_config: Record<string, unknown>;
       }>(
-        `SELECT governance_config FROM communities WHERE id = $1`,
-        [proposal.community_id]
+        `SELECT governance_config FROM campfires WHERE id = $1`,
+        [proposal.campfire_id]
       );
-      if (!community) break;
+      if (!campfire) break;
 
-      const merged = { ...community.governance_config, ...settings };
+      const merged = { ...campfire.governance_config, ...settings };
 
       await query(
-        `UPDATE communities SET governance_config = $1 WHERE id = $2`,
-        [JSON.stringify(merged), proposal.community_id]
+        `UPDATE campfires SET governance_config = $1 WHERE id = $2`,
+        [JSON.stringify(merged), proposal.campfire_id]
       );
       break;
     }
@@ -515,23 +515,23 @@ async function executeProposal(proposal: Proposal): Promise<void> {
     [proposal.id]
   );
 
-  // Notify community members about the implemented change (non-blocking)
-  const communityInfo = await queryOne<{ name: string }>(
-    `SELECT name FROM communities WHERE id = $1`,
-    [proposal.community_id]
+  // Notify campfire members about the implemented change (non-blocking)
+  const campfireInfo = await queryOne<{ name: string }>(
+    `SELECT name FROM campfires WHERE id = $1`,
+    [proposal.campfire_id]
   );
-  if (communityInfo) {
-    notifyCommunityMembers(
-      proposal.community_id,
-      communityInfo.name,
+  if (campfireInfo) {
+    notifyCampfireMembers(
+      proposal.campfire_id,
+      campfireInfo.name,
       proposal.created_by,
-      "community_update",
+      "campfire_update",
       `Proposal implemented: ${proposal.title}`,
-      `The governance proposal '${proposal.title}' has been implemented in f | ${communityInfo.name}`,
-      `/f/${communityInfo.name}/proposals/${proposal.id}`,
+      `The governance proposal '${proposal.title}' has been implemented in f | ${campfireInfo.name}`,
+      `/f/${campfireInfo.name}/proposals/${proposal.id}`,
       {
-        community_id: proposal.community_id,
-        community_name: communityInfo.name,
+        campfire_id: proposal.campfire_id,
+        campfire_name: campfireInfo.name,
         update_type: "proposal_implemented",
         summary: `The governance proposal '${proposal.title}' was approved and implemented.`,
       }
@@ -539,22 +539,22 @@ async function executeProposal(proposal: Proposal): Promise<void> {
   }
 }
 
-// ─── Community Notification Helper ────────────────────────────
+// ─── Campfire Notification Helper ────────────────────────────
 
-function notifyCommunityMembers(
-  communityId: string,
-  communityName: string,
+function notifyCampfireMembers(
+  campfireId: string,
+  campfireName: string,
   excludeUserId: string,
-  type: "governance" | "community_update",
+  type: "governance" | "campfire_update",
   title: string,
   body: string,
   actionUrl: string,
   content: Record<string, unknown>
 ): void {
-  // Fetch all community member IDs and send notifications (non-blocking)
+  // Fetch all campfire member IDs and send notifications (non-blocking)
   queryAll<{ user_id: string }>(
-    `SELECT user_id FROM community_members WHERE community_id = $1 AND user_id != $2`,
-    [communityId, excludeUserId]
+    `SELECT user_id FROM campfire_members WHERE campfire_id = $1 AND user_id != $2`,
+    [campfireId, excludeUserId]
   ).then((members) => {
     for (const member of members) {
       createNotification({

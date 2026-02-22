@@ -1,24 +1,23 @@
 import { NextResponse } from "next/server";
 import { authenticate } from "@/lib/auth/jwt";
 import {
-  createCommunitySchema,
-  listCommunitiesSchema,
-} from "@/lib/validation/communities";
+  createCampfireSchema,
+  listCampfiresSchema,
+} from "@/lib/validation/campfires";
 import {
-  createCommunity,
-  listCommunities,
+  createCampfire,
+  listCampfires,
   ServiceError,
-} from "@/lib/services/communities.service";
+} from "@/lib/services/campfires.service";
 
 /**
- * GET /api/communities?category=&sort=&limit=&offset=
- * List all public communities with filtering and pagination.
+ * GET /api/campfires?sort=&limit=&offset=
+ * List all public campfires with filtering and pagination.
  */
 export async function GET(req: Request) {
   try {
     const url = new URL(req.url);
-    const parsed = listCommunitiesSchema.safeParse({
-      category: url.searchParams.get("category") ?? undefined,
+    const parsed = listCampfiresSchema.safeParse({
       sort: url.searchParams.get("sort") ?? "members",
       limit: url.searchParams.get("limit") ?? "25",
       offset: url.searchParams.get("offset") ?? "0",
@@ -31,17 +30,17 @@ export async function GET(req: Request) {
       );
     }
 
-    const communities = await listCommunities(parsed.data);
+    const campfires = await listCampfires(parsed.data);
 
     return NextResponse.json({
-      communities,
-      count: communities.length,
+      campfires,
+      count: campfires.length,
       sort: parsed.data.sort,
       limit: parsed.data.limit,
       offset: parsed.data.offset,
     });
   } catch (err) {
-    console.error("List communities error:", err);
+    console.error("List campfires error:", err);
     return NextResponse.json(
       { error: "Internal server error", code: "INTERNAL_ERROR" },
       { status: 500 }
@@ -50,8 +49,8 @@ export async function GET(req: Request) {
 }
 
 /**
- * POST /api/communities
- * Create a new community. Auth required.
+ * POST /api/campfires
+ * Create a new campfire. Auth required.
  */
 export async function POST(req: Request) {
   try {
@@ -64,7 +63,7 @@ export async function POST(req: Request) {
     }
 
     const body = await req.json();
-    const parsed = createCommunitySchema.safeParse(body);
+    const parsed = createCampfireSchema.safeParse(body);
     if (!parsed.success) {
       return NextResponse.json(
         {
@@ -75,9 +74,9 @@ export async function POST(req: Request) {
       );
     }
 
-    const community = await createCommunity(parsed.data, user.userId);
+    const campfire = await createCampfire(parsed.data, user.userId);
 
-    return NextResponse.json({ community }, { status: 201 });
+    return NextResponse.json({ campfire }, { status: 201 });
   } catch (err) {
     if (err instanceof ServiceError) {
       return NextResponse.json(
@@ -85,7 +84,7 @@ export async function POST(req: Request) {
         { status: err.status }
       );
     }
-    console.error("Create community error:", err);
+    console.error("Create campfire error:", err);
     return NextResponse.json(
       { error: "Internal server error", code: "INTERNAL_ERROR" },
       { status: 500 }

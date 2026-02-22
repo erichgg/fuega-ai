@@ -1,10 +1,9 @@
 /**
  * POST /api/moderate — AI content moderation endpoint
  *
- * Runs content through the three-tier AI moderation pipeline:
+ * Runs content through the AI moderation pipeline:
  * 1. Platform agent (global ToS)
- * 2. Category agent (category rules, if applicable)
- * 3. Community agent (community-specific rules)
+ * 2. Campfire agent (campfire-specific rules)
  *
  * Returns structured decision with reasoning for public audit log.
  *
@@ -16,14 +15,14 @@ import { z } from "zod";
 import {
   moderateContentWithAI,
   logModerationDecision,
-  type CommunityContext,
+  type CampfireContext,
 } from "@/lib/ai/moderation.service";
 import { query, queryOne } from "@/lib/db";
 
 const moderateRequestSchema = z.object({
   content_type: z.enum(["post", "comment"]),
   content_id: z.string().uuid("Invalid content ID"),
-  community_id: z.string().uuid("Invalid community ID"),
+  campfire_id: z.string().uuid("Invalid campfire ID"),
   title: z.string().max(300).optional(),
   body: z.string().min(1, "Content body is required").max(40000),
   author_id: z.string().uuid("Invalid author ID"),
@@ -35,48 +34,34 @@ export async function POST(req: Request) {
     const body = await req.json();
     const validated = moderateRequestSchema.parse(body);
 
-    // Fetch community context (rules, category, prompt version)
-    const community = await queryOne<{
+    // Fetch campfire context (rules, prompt version)
+    const campfire = await queryOne<{
       id: string;
       name: string;
       ai_prompt: string;
       ai_prompt_version: number;
     }>(
       `SELECT id, name, ai_prompt, ai_prompt_version
-       FROM communities
+       FROM campfires
        WHERE id = $1 AND deleted_at IS NULL AND is_banned = false`,
-      [validated.community_id]
+      [validated.campfire_id]
     );
 
-    if (!community) {
+    if (!campfire) {
       return NextResponse.json(
-        { error: "Community not found", code: "COMMUNITY_NOT_FOUND" },
+        { error: "Campfire not found", code: "CAMPFIRE_NOT_FOUND" },
         { status: 404 }
       );
     }
 
-    // Fetch category rules if community belongs to a category
-    const categoryRules = await queryOne<{
-      ai_prompt: string;
-      ai_prompt_version: number;
-    }>(
-      `SELECT c.ai_prompt, c.ai_prompt_version
-       FROM categories cat
-       JOIN communities c ON c.category_id = cat.id
-       WHERE c.id = $1 AND cat.ai_prompt IS NOT NULL`,
-      [validated.community_id]
-    );
-
-    const communityContext: CommunityContext = {
-      id: community.id,
-      name: community.name,
-      ai_prompt: community.ai_prompt,
-      ai_prompt_version: community.ai_prompt_version,
-      category_rules: categoryRules?.ai_prompt,
-      category_prompt_version: categoryRules?.ai_prompt_version,
+    const campfireContext: CampfireContext = {
+      id: campfire.id,
+      name: campfire.name,
+      ai_prompt: campfire.ai_prompt,
+      ai_prompt_version: campfire.ai_prompt_version,
     };
 
-    // Run the three-tier moderation pipeline
+    // Run the moderation pipeline
     const result = await moderateContentWithAI(
       {
         content_type: validated.content_type,
@@ -84,7 +69,7 @@ export async function POST(req: Request) {
         body: validated.body,
         author_username: validated.author_username,
       },
-      communityContext
+      campfireContext
     );
 
     // Log each tier's decision to the public moderation log
@@ -94,7 +79,7 @@ export async function POST(req: Request) {
         { query },
         validated.content_type,
         validated.content_id,
-        validated.community_id,
+        validated.campfire_id,
         validated.author_id,
         tierDecision
       );
