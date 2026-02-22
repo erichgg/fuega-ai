@@ -198,7 +198,7 @@ export default function AboutPage() {
         </Link>
 
         {/* Mission */}
-        <section className="mt-8 max-w-3xl">
+        <section className="mt-8">
           <h1 className="text-3xl font-bold text-ash-100 sm:text-4xl">
             Why <F /> exists
           </h1>
@@ -207,13 +207,13 @@ export default function AboutPage() {
             platforms profit from outrage, sell your data, and hide how they
             moderate. <F /> is different. Communities write their own rules, vote
             on them, and AI enforces exactly what was decided — nothing more.
-            Every decision is public. Every prompt is auditable. No corporate
-            overlords. No hidden algorithms.
+            Every decision is public, every prompt is auditable, and the
+            governance belongs to the people who actually use the space.
           </p>
           <p className="mt-4 text-base leading-relaxed text-ash-400">
-            No ads. No influence. No data harvesting. <F /> is
-            tip-supported — if you want to help keep the lights on, you get a
-            badge and some cosmetics. That&apos;s the entire business model.
+            The whole thing is tip-supported — if you want to help keep the
+            lights on, you get a badge and some cosmetics. That&apos;s the entire
+            business model. No ads, no data harvesting, no influence for sale.
           </p>
         </section>
 
@@ -282,23 +282,23 @@ export default function AboutPage() {
         </section>
 
         {/* Open Source Social Media */}
-        <section className="mt-12 max-w-3xl">
+        <section className="mt-12">
           <h2 className="text-2xl font-bold text-ash-100 sm:text-3xl">
             Open source social media
           </h2>
           <p className="mt-4 text-ash-300 leading-relaxed">
-            <F /> isn&apos;t a product — it&apos;s a project. The code is open.
-            The moderation prompts are public. The governance is democratic. If
-            you don&apos;t like how something works, you can propose a change,
-            rally votes, and actually fix it. No support tickets. No &quot;we
-            hear you.&quot; Real power, in your hands.
+            <F /> isn&apos;t a product — it&apos;s a project. The code is open,
+            the moderation prompts are public, and the governance is democratic.
+            If you don&apos;t like how something works, you can propose a change,
+            rally votes, and actually fix it. That&apos;s not a support ticket —
+            that&apos;s real power, in your hands.
           </p>
           <p className="mt-4 text-ash-400 leading-relaxed">
             We believe social media lost its way when platforms started
-            optimizing for engagement instead of community. When algorithms
-            learned that outrage keeps people scrolling. When &quot;moderation&quot;
-            became a black box that nobody could audit. <F /> is an attempt to
-            course-correct — to prove that communities can govern themselves
+            optimizing for engagement instead of community — when algorithms
+            learned that outrage keeps people scrolling and &quot;moderation&quot;
+            became a black box nobody could audit. <F /> is an attempt to
+            course-correct, to prove that communities can govern themselves
             when you give them the right tools and full transparency.
           </p>
 
@@ -318,8 +318,8 @@ export default function AboutPage() {
                 Tip-supported
               </p>
               <p className="mt-1 text-xs text-ash-500">
-                No ads. No data sales. Tips get you a badge and cosmetics.
-                Everyone uses the same platform.
+                Tips get you a badge and cosmetics. Everyone uses the same
+                platform — nobody pays to shape what you see.
               </p>
             </div>
             <div className="border border-ash-800 bg-ash-900/30 p-4">
@@ -336,23 +336,23 @@ export default function AboutPage() {
         </section>
 
         {/* The Bigger Picture */}
-        <section className="mt-12 max-w-3xl">
+        <section className="mt-12">
           <h2 className="text-2xl font-bold text-ash-100 sm:text-3xl">
             Bringing accountability back
           </h2>
           <p className="mt-4 text-ash-300 leading-relaxed">
             Somewhere along the way, the internet forgot that communities work
             best when people set their own standards. <F /> brings that back.
-            Find people who share your values. Set the rules together. Hold each
-            other — and the AI — accountable. Every moderation decision is
+            Find people who share your values, set the rules together, and hold
+            each other — and the AI — accountable. Every moderation decision is
             logged, reasoned, and challengeable.
           </p>
           <p className="mt-4 text-ash-400 leading-relaxed">
             This isn&apos;t about being a &quot;free speech platform&quot; or a
-            &quot;safe space.&quot; It&apos;s about self-determination. Your
-            community decides what&apos;s acceptable. Not a corporation. Not an
-            algorithm. Not some trust &amp; safety team you&apos;ll never meet.
-            You. The people who actually use the space.
+            &quot;safe space.&quot; It&apos;s about self-determination — your
+            community decides what&apos;s acceptable, not a corporation or an
+            algorithm or some trust &amp; safety team you&apos;ll never meet.
+            The people who actually use the space are the ones in charge.
           </p>
           <p className="mt-4 text-ash-400 leading-relaxed">
             You even choose the AI. Communities vote on which model API drives
@@ -365,7 +365,7 @@ export default function AboutPage() {
         </section>
 
         {/* Get Involved */}
-        <section className="mt-12 max-w-3xl pb-12">
+        <section className="mt-12 pb-12">
           <h2 className="text-2xl font-bold text-ash-100 sm:text-3xl">
             Get involved
           </h2>
