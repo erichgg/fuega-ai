@@ -181,13 +181,7 @@ export default function LandingPage() {
               </Link>
             </div>
 
-          </div>
-        </div>
-
-        {/* Trust tags pinned to bottom of viewport */}
-        <div className="mx-auto w-full max-w-7xl pb-6 pt-8">
-          <div className="mx-auto max-w-4xl lg:max-w-5xl">
-            <div className="flex flex-wrap items-center gap-4 text-xs text-ash-600 sm:gap-6">
+            <div className="mt-6 flex flex-wrap items-center gap-4 text-xs text-ash-600 sm:gap-6">
               <span className="font-mono">
                 <span className="text-flame-500/50">[</span>
                 no email
@@ -209,6 +203,7 @@ export default function LandingPage() {
                 <span className="text-flame-500/50">]</span>
               </span>
             </div>
+
           </div>
         </div>
       </section>
@@ -311,7 +306,6 @@ export default function LandingPage() {
           <p className="mt-3 text-sm text-ash-400">
             Communities that govern themselves. Rules you actually voted for.
             People who share your standards, not some algorithm&apos;s idea of engagement.
-            First 5,000 users get a permanent Founder badge.
           </p>
           <Link
             href="/signup"
