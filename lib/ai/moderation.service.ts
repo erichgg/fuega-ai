@@ -49,8 +49,8 @@ export interface CampfireContext {
   name: string;
   ai_prompt: string;
   ai_prompt_version: number;
-  category_rules?: string;
-  category_prompt_version?: number;
+  platform_rules?: string;
+  platform_prompt_version?: number;
 }
 
 /** Database interface for logging */
@@ -217,26 +217,26 @@ export async function runModerationPipeline(
     };
   }
 
-  // Tier 2: Category agent (if category rules exist)
-  if (campfire.category_rules) {
-    const categoryPrompt = buildCategoryPrompt(
+  // Tier 2: Platform rules (if platform rules exist)
+  if (campfire.platform_rules) {
+    const platformRulesPrompt = buildCategoryPrompt(
       campfire.name,
-      campfire.category_rules,
+      campfire.platform_rules,
       content
     );
-    const categoryDecision = await runTier(
+    const platformRulesDecision = await runTier(
       client,
-      categoryPrompt,
-      campfire.category_prompt_version ?? 1
+      platformRulesPrompt,
+      campfire.platform_prompt_version ?? 1
     );
-    tierDecisions.push(categoryDecision);
+    tierDecisions.push(platformRulesDecision);
 
-    if (categoryDecision.decision === "removed") {
+    if (platformRulesDecision.decision === "removed") {
       return {
         final_decision: "removed",
         tier_decisions: tierDecisions,
         total_time_ms: Date.now() - pipelineStart,
-        stopped_at_tier: "category",
+        stopped_at_tier: "platform",
       };
     }
   }
@@ -322,7 +322,7 @@ export async function moderateContentWithAI(
 
   if (!key) {
     // No API key — fall back to basic safety filter
-    return runBasicSafetyFilter(content, community);
+    return runBasicSafetyFilter(content, campfire);
   }
 
   const client = createAnthropicClient(key);
@@ -337,7 +337,7 @@ export async function moderateContentWithAI(
 
   try {
     return await Promise.race([
-      runModerationPipeline(client, content, community),
+      runModerationPipeline(client, content, campfire),
       timeoutPromise,
     ]);
   } catch (error) {
