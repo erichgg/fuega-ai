@@ -123,13 +123,13 @@ export default function LandingPage() {
       </nav>
 
       {/* Hero */}
-      <section className="relative flex min-h-[calc(100vh-3.5rem)] items-center overflow-hidden px-4 2xl:px-8">
+      <section className="relative flex min-h-[calc(100vh-3.5rem)] flex-col overflow-hidden px-4 2xl:px-8">
         <div className="absolute inset-0 -z-10">
           <div className="absolute left-1/2 top-0 h-[400px] w-[900px] -translate-x-1/2 rounded-full bg-flame-500/5 blur-3xl" />
           <div className="absolute left-1/3 top-10 h-[250px] w-[600px] -translate-x-1/2 rounded-full bg-ember-500/5 blur-3xl" />
         </div>
 
-        <div className="mx-auto w-full max-w-7xl">
+        <div className="mx-auto flex w-full max-w-7xl flex-1 flex-col justify-center">
           <div className="mx-auto max-w-4xl lg:max-w-5xl">
             {/* Terminal-style manifesto */}
             <div className="mb-6 inline-flex items-center gap-2 border border-ash-800 bg-ash-900/60 px-3 py-1.5 text-xs text-ash-500">
@@ -181,7 +181,13 @@ export default function LandingPage() {
               </Link>
             </div>
 
-            <div className="mt-6 flex flex-wrap items-center gap-4 text-xs text-ash-600 sm:gap-6">
+          </div>
+        </div>
+
+        {/* Trust tags pinned to bottom of viewport */}
+        <div className="mx-auto w-full max-w-7xl pb-6 pt-8">
+          <div className="mx-auto max-w-4xl lg:max-w-5xl">
+            <div className="flex flex-wrap items-center gap-4 text-xs text-ash-600 sm:gap-6">
               <span className="font-mono">
                 <span className="text-flame-500/50">[</span>
                 no email
