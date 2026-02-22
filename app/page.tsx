@@ -17,40 +17,40 @@ import { CommunityPrefix } from "@/components/fuega/community-prefix";
 
 const principles = [
   {
-    icon: Scale,
-    title: "You write the rules. AI enforces.",
+    icon: Shield,
+    title: "No ID. No phone. No photo. Ever.",
     description:
-      "Every community writes and votes on its own moderation rules. AI enforces exactly what was decided — nothing more. Every prompt is public. Every decision is auditable.",
+      "Other platforms demand your identity, then sell it. We don't collect it in the first place. IPs are SHA-256 hashed with rotating salts and deleted after 30 days. We couldn't identify you even if we tried.",
   },
   {
     icon: Eye,
-    title: "Every decision is public",
+    title: "Challenge any decision",
     description:
-      "Every moderation action is logged with full reasoning. See exactly why something was approved, flagged, or removed. Disagree? Challenge it. The log doesn't lie.",
-  },
-  {
-    icon: Shield,
-    title: "Real anonymity, not theatre",
-    description:
-      "No email. No phone. No ID verification. No photo uploads. No tracking pixels. IPs are SHA-256 hashed with rotating salts and deleted after 30 days. We can't identify you even if we wanted to.",
+      "Disagree with a moderation call? The full reasoning is public — read it, challenge it, propose a better rule. No black boxes. No \"trust us.\" The log is right there.",
   },
   {
     icon: Vote,
-    title: "Democratic governance",
+    title: "Three tiers, all democratic",
     description:
-      "Three-tier governance: community → category → platform. Power flows upward from the people, not down from admins. Propose changes, vote, reshape the rules.",
+      "Community → category → platform. Power flows upward from the people, not down from admins. Every tier is governed by votes, not appointments. Propose changes at any level.",
   },
   {
     icon: FileCode2,
     title: "You choose the AI",
     description:
-      "Communities vote on which AI model drives their moderation. Don't trust a provider's training data? Vote it out. Starting with Anthropic — built to support any model from day one.",
+      "Communities vote on which AI model drives their moderation. Don't trust a provider's training data? Vote it out. The community controls the knowledge behind every decision.",
+  },
+  {
+    icon: Scale,
+    title: "Open source. Fully auditable.",
+    description:
+      "The code is public. The moderation prompts are public. The governance is public. Fork it, audit it, contribute. We have nothing to hide because that's the whole point.",
   },
   {
     icon: Heart,
-    title: "No ads. No influence. Tip-supported.",
+    title: "Tip-supported. Same platform for everyone.",
     description:
-      "No paywalls, no sponsored content, no one paying to shape what you see. Everyone gets the same platform. Want to support us? Tip — you get a badge and some cosmetics. That's it.",
+      "No one pays to shape what you see. No sponsored content, no premium feeds, no pay-to-win. Tips get you a badge and cosmetics — the platform stays equal for everyone.",
   },
 ];
 
@@ -194,12 +194,12 @@ export default function LandingPage() {
               </span>
               <span className="font-mono">
                 <span className="text-flame-500/50">[</span>
-                no ads
+                no phone
                 <span className="text-flame-500/50">]</span>
               </span>
               <span className="font-mono">
                 <span className="text-flame-500/50">[</span>
-                no influence
+                no ID verification
                 <span className="text-flame-500/50">]</span>
               </span>
               <span className="font-mono">
@@ -209,12 +209,12 @@ export default function LandingPage() {
               </span>
               <span className="font-mono">
                 <span className="text-flame-500/50">[</span>
-                public mod logs
+                open source
                 <span className="text-flame-500/50">]</span>
               </span>
               <span className="font-mono">
                 <span className="text-flame-500/50">[</span>
-                open governance
+                you choose the AI
                 <span className="text-flame-500/50">]</span>
               </span>
             </div>
@@ -319,8 +319,8 @@ export default function LandingPage() {
             Find your people. Set your standards.
           </h2>
           <p className="mt-3 text-sm text-ash-400">
-            No algorithms deciding what you see. No ads. No influence.
-            Just communities that govern themselves and people who share your standards.
+            Communities that write their own rules, vote on their AI, and hold every decision accountable.
+            No black boxes. No corporate overlords. Just people who share your standards.
           </p>
           <Link
             href="/signup"
