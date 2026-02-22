@@ -65,6 +65,6 @@ describe("moderateContent", () => {
     expect(["approved", "removed", "flagged", "warned"]).toContain(decision.decision);
     expect(typeof decision.confidence).toBe("number");
     expect(typeof decision.reasoning).toBe("string");
-    expect(["community", "category", "platform"]).toContain(decision.agent_level);
+    expect(["community", "cohort", "category", "platform"]).toContain(decision.agent_level);
   });
 });

@@ -3,7 +3,7 @@
 **Last Updated:** February 21, 2026
 **Database:** PostgreSQL 15+
 **Strategy:** Single-schema multi-tenant with Row-Level Security (RLS)
-**Schema Version:** 2.0 (V2 - Gamification, Badges, Cosmetics, Notifications)
+**Schema Version:** 2.1 (V2 - Gamification, Badges, Cosmetics, Notifications + 4-Tier Governance)
 
 ---
 
@@ -25,31 +25,32 @@
 
 ---
 
-## TABLE OVERVIEW (20 Total)
+## TABLE OVERVIEW (21 Total)
 
-### Original Tables (13)
+### Original Tables (14)
 1. users
 2. communities
 3. categories
-4. community_memberships
-5. posts
-6. comments
-7. votes
-8. ai_prompt_history
-9. moderation_log
-10. moderation_appeals
-11. proposals
-12. proposal_votes
-13. council_members
+4. cohorts
+5. community_memberships
+6. posts
+7. comments
+8. votes
+9. ai_prompt_history
+10. moderation_log
+11. moderation_appeals
+12. proposals
+13. proposal_votes
+14. council_members
 
 ### New V2 Tables (7)
-14. badges
-15. user_badges
-16. notifications
-17. referrals
-18. cosmetics
-19. user_cosmetics
-20. tips
+15. badges
+16. user_badges
+17. notifications
+18. referrals
+19. cosmetics
+20. user_cosmetics
+21. tips
 
 ---
 
@@ -196,7 +197,36 @@ CREATE TABLE categories (
 CREATE INDEX idx_categories_name ON categories(name);
 ```
 
-### 4. Community Memberships Table
+### 4. Cohorts Table
+```sql
+CREATE TABLE cohorts (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    community_id UUID NOT NULL REFERENCES communities(id),
+    name VARCHAR(50) NOT NULL,
+    slug VARCHAR(50) NOT NULL,
+    description TEXT,
+
+    -- AI Model Selection (inherits from community by default, overridable via governance)
+    ai_provider VARCHAR(50), -- NULL = inherit from community
+    ai_model VARCHAR(100),   -- NULL = inherit from community
+
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    created_by UUID NOT NULL REFERENCES users(id),
+
+    -- Soft delete
+    deleted_at TIMESTAMP WITH TIME ZONE,
+
+    UNIQUE(community_id, slug),
+    CONSTRAINT slug_format CHECK (slug ~ '^[a-z0-9_-]+$'),
+    CONSTRAINT slug_length CHECK (char_length(slug) >= 2 AND char_length(slug) <= 50)
+);
+
+CREATE INDEX idx_cohorts_community ON cohorts(community_id) WHERE deleted_at IS NULL;
+CREATE INDEX idx_cohorts_slug ON cohorts(community_id, slug) WHERE deleted_at IS NULL;
+CREATE INDEX idx_cohorts_created ON cohorts(created_at);
+```
+
+### 5. Community Memberships Table
 ```sql
 CREATE TABLE community_memberships (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -224,7 +254,7 @@ CREATE INDEX idx_memberships_role ON community_memberships(community_id, role);
 CREATE INDEX idx_memberships_activity ON community_memberships(community_id, sparks_earned_in_community DESC);
 ```
 
-### 5. Posts Table
+### 6. Posts Table
 ```sql
 CREATE TABLE posts (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -270,7 +300,7 @@ CREATE INDEX idx_posts_hot ON posts((sparks - douses), created_at DESC) WHERE is
 CREATE INDEX idx_posts_moderation ON posts(is_approved, moderated_at) WHERE is_approved = FALSE;
 ```
 
-### 6. Comments Table
+### 7. Comments Table
 ```sql
 CREATE TABLE comments (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -311,7 +341,7 @@ CREATE INDEX idx_comments_parent ON comments(parent_id);
 CREATE INDEX idx_comments_created ON comments(created_at DESC);
 ```
 
-### 7. Votes Table
+### 8. Votes Table
 ```sql
 CREATE TABLE votes (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -334,7 +364,7 @@ CREATE INDEX idx_votes_votable ON votes(votable_type, votable_id);
 CREATE INDEX idx_votes_created ON votes(created_at);
 ```
 
-### 8. AI Prompt History Table
+### 9. AI Prompt History Table
 ```sql
 CREATE TABLE ai_prompt_history (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -353,13 +383,13 @@ CREATE TABLE ai_prompt_history (
     -- For governance
     proposal_id UUID REFERENCES proposals(id),
 
-    CONSTRAINT entity_type_valid CHECK (entity_type IN ('community', 'category', 'platform'))
+    CONSTRAINT entity_type_valid CHECK (entity_type IN ('cohort', 'community', 'category', 'platform'))
 );
 
 CREATE INDEX idx_prompt_history_entity ON ai_prompt_history(entity_type, entity_id, version DESC);
 ```
 
-### 9. Moderation Log Table
+### 10. Moderation Log Table
 ```sql
 CREATE TABLE moderation_log (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -387,7 +417,7 @@ CREATE TABLE moderation_log (
     appeal_id UUID REFERENCES moderation_appeals(id),
 
     CONSTRAINT content_type_valid CHECK (content_type IN ('post', 'comment')),
-    CONSTRAINT agent_level_valid CHECK (agent_level IN ('community', 'category', 'platform')),
+    CONSTRAINT agent_level_valid CHECK (agent_level IN ('cohort', 'community', 'category', 'platform')),
     CONSTRAINT decision_valid CHECK (decision IN ('approved', 'removed', 'flagged', 'warned'))
 );
 
@@ -396,7 +426,7 @@ CREATE INDEX idx_moderation_community ON moderation_log(community_id, created_at
 CREATE INDEX idx_moderation_decision ON moderation_log(decision, created_at DESC);
 ```
 
-### 10. Moderation Appeals Table
+### 11. Moderation Appeals Table
 ```sql
 CREATE TABLE moderation_appeals (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -421,7 +451,7 @@ CREATE INDEX idx_appeals_status ON moderation_appeals(status, created_at);
 CREATE INDEX idx_appeals_modlog ON moderation_appeals(moderation_log_id);
 ```
 
-### 11. Proposals Table
+### 12. Proposals Table
 ```sql
 CREATE TABLE proposals (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -464,7 +494,7 @@ CREATE INDEX idx_proposals_community ON proposals(community_id, status, voting_e
 CREATE INDEX idx_proposals_status ON proposals(status, voting_ends_at);
 ```
 
-### 12. Proposal Votes Table
+### 13. Proposal Votes Table
 ```sql
 CREATE TABLE proposal_votes (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -481,7 +511,7 @@ CREATE TABLE proposal_votes (
 CREATE INDEX idx_proposal_votes_proposal ON proposal_votes(proposal_id);
 ```
 
-### 13. Council Members Table
+### 14. Council Members Table
 ```sql
 CREATE TABLE council_members (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -504,7 +534,7 @@ CREATE UNIQUE INDEX idx_council_unique_active ON council_members(category_id, co
 
 ## V2 NEW TABLES
 
-### 14. Badges Table
+### 15. Badges Table
 ```sql
 -- Badge definitions catalog (system-managed, not user-created)
 CREATE TABLE badges (
@@ -550,7 +580,7 @@ CREATE INDEX idx_badges_rarity ON badges(rarity);
 CREATE INDEX idx_badges_active ON badges(is_active) WHERE is_active = TRUE;
 ```
 
-### 15. User Badges Table
+### 16. User Badges Table
 ```sql
 -- Which badges each user has earned
 CREATE TABLE user_badges (
@@ -579,7 +609,7 @@ CREATE INDEX idx_user_badges_badge ON user_badges(badge_id);
 CREATE INDEX idx_user_badges_unnotified ON user_badges(user_id) WHERE notified = FALSE;
 ```
 
-### 16. Notifications Table
+### 17. Notifications Table
 ```sql
 -- In-app and push notifications
 CREATE TABLE notifications (
@@ -631,7 +661,7 @@ CREATE INDEX idx_notifications_push_pending ON notifications(created_at) WHERE p
 CREATE INDEX idx_notifications_cleanup ON notifications(read_at) WHERE read = TRUE;
 ```
 
-### 17. Referrals Table
+### 18. Referrals Table
 ```sql
 -- Track user referrals
 CREATE TABLE referrals (
@@ -657,7 +687,7 @@ CREATE INDEX idx_referrals_link ON referrals(referral_link);
 CREATE INDEX idx_referrals_ip ON referrals(ip_hash) WHERE ip_hash IS NOT NULL;
 ```
 
-### 18. Cosmetics Table
+### 19. Cosmetics Table
 ```sql
 -- Purchasable cosmetics catalog (system-managed)
 CREATE TABLE cosmetics (
@@ -701,7 +731,7 @@ CREATE INDEX idx_cosmetics_available ON cosmetics(available, category) WHERE ava
 CREATE INDEX idx_cosmetics_price ON cosmetics(price_cents);
 ```
 
-### 19. User Cosmetics Table
+### 20. User Cosmetics Table
 ```sql
 -- Which cosmetics each user owns (purchase history)
 CREATE TABLE user_cosmetics (
@@ -728,7 +758,7 @@ CREATE INDEX idx_user_cosmetics_refundable ON user_cosmetics(user_id, purchased_
     WHERE refunded = FALSE AND purchased_at > NOW() - INTERVAL '7 days';
 ```
 
-### 20. Tips Table
+### 21. Tips Table
 ```sql
 -- Platform tip jar donations
 CREATE TABLE tips (
@@ -1106,10 +1136,10 @@ CREATE INDEX idx_cosmetics_shop ON cosmetics (category, subcategory, sort_order)
 
 ## MIGRATION FILES
 
-### Migration 001: Initial Schema (13 tables)
+### Migration 001: Initial Schema (14 tables)
 ```
 migrations/001_initial_schema.sql
-- users, communities, categories, community_memberships
+- users, communities, categories, cohorts, community_memberships
 - posts, comments, votes
 - ai_prompt_history, moderation_log, moderation_appeals
 - proposals, proposal_votes, council_members
@@ -1512,8 +1542,8 @@ LIMIT 10;
 
 ---
 
-**Schema Version:** 2.0
-**Total Tables:** 20 (13 original + 7 new)
+**Schema Version:** 2.1
+**Total Tables:** 21 (14 original + 7 new)
 **Total Indexes:** 50+
 **Total Triggers:** 6
 **Total RLS Policies:** 20+

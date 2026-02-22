@@ -2697,6 +2697,23 @@ async function handleTipWebhook(session: Stripe.Checkout.Session): Promise<void>
 
 ---
 
+## LAYER 9: ANTI-BOT PROTECTION
+
+Bots can destroy the democratic voting framework. Every defense below protects governance integrity.
+
+| Defense | Scope | Implementation |
+|---------|-------|----------------|
+| **Rate limiting** | All voting endpoints | 100 votes/hr per IP hash, 30 governance votes/day per user |
+| **Behavioral analysis** | Voting patterns | Flag accounts voting >95% identical to another account, or casting >50 votes in <5 minutes |
+| **Community reporting** | All content + votes | Users can flag suspected bot accounts; 3+ flags triggers automated review |
+| **Progressive trust scoring** | New accounts | Accounts <7 days old: vote weight = 0.5x. Accounts with <10 posts/comments: excluded from governance votes. Full weight after 30 days + 25 spark score |
+| **CAPTCHA on governance** | Proposal creation + governance votes | CAPTCHA challenge required before submitting any governance vote or creating a proposal |
+| **IP hash pattern detection** | Account creation + voting | Flag when >3 accounts vote identically from the same IP hash within 24 hours. Auto-suspend voting privileges pending review |
+
+**Escalation path:** Flag triggers → automated review → platform agent review → account suspension (logged publicly in mod log).
+
+---
+
 ## SECURITY CHECKLIST
 
 ### Pre-Launch

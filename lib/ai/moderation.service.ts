@@ -27,7 +27,7 @@ export interface ModerationDecision {
   decision: "approved" | "removed" | "flagged";
   confidence: number;
   reasoning: string;
-  agent_level: "community" | "category" | "platform";
+  agent_level: "community" | "cohort" | "category" | "platform";
   ai_model: string;
   prompt_version: number;
   injection_detected: boolean;
@@ -40,7 +40,7 @@ export interface ModerationPipelineResult {
   final_decision: "approved" | "removed" | "flagged";
   tier_decisions: ModerationDecision[];
   total_time_ms: number;
-  stopped_at_tier: "community" | "category" | "platform" | null;
+  stopped_at_tier: "community" | "cohort" | "category" | "platform" | null;
 }
 
 /** Community context needed for moderation */

@@ -17,7 +17,7 @@ export interface ModerationDecision {
   decision: "approved" | "removed" | "flagged" | "warned";
   confidence: number;
   reasoning: string;
-  agent_level: "community" | "category" | "platform";
+  agent_level: "community" | "cohort" | "category" | "platform";
   ai_model: string | null;
   prompt_version: number;
   injection_detected?: boolean;

@@ -340,30 +340,111 @@ export default function AboutPage() {
           </div>
         </section>
 
-        {/* The Bigger Picture */}
+        {/* Governance */}
         <section className="mt-12">
           <h2 className="text-2xl font-bold text-ash-100 sm:text-3xl">
             How governance actually works
           </h2>
           <p className="mt-4 text-ash-300 leading-relaxed">
-            Every community on <F /> has three layers of governance: community,
-            category, and platform. Rules flow upward from the people, not down
-            from admins. If your community wants strict sourcing requirements
-            on claims, you vote that in. If another community wants loose,
-            anything-goes discussion, that&apos;s their call. Neither group
-            gets to impose on the other.
+            <F /> uses four tiers of governance. Each tier has a specific job,
+            and rules only apply within that tier&apos;s scope. Higher tiers
+            set floors, not ceilings — they define minimums that lower tiers
+            can build on but can&apos;t undercut.
           </p>
-          <p className="mt-4 text-ash-400 leading-relaxed">
-            This isn&apos;t &quot;free speech absolutism&quot; and it&apos;s
-            not a &quot;safe space.&quot; It&apos;s self-determination.
-            When Reddit banned r/TheDonald, millions of people had zero say.
-            When X algorithmically amplifies certain political content into
-            everyone&apos;s feed, there&apos;s no opt-out. On <F />, your
-            community&apos;s rules are yours to write, change, or scrap entirely
-            through a vote.
-          </p>
-          <p className="mt-4 text-ash-400 leading-relaxed">
-            You even choose which AI does the moderating. Communities vote on
+
+          <div className="mt-6 space-y-4">
+            <div className="border-l-2 border-flame-500/60 pl-4">
+              <p className="text-sm font-semibold text-ash-200">
+                Platform{" "}
+                <span className="text-xs font-normal text-ash-500">
+                  (site-wide)
+                </span>
+              </p>
+              <p className="mt-1 text-sm text-ash-400 leading-relaxed">
+                Controls which AI APIs are available, sets legal baselines
+                (no CSAM, no doxxing), and manages infrastructure decisions.
+                Platform rules apply everywhere and can&apos;t be overridden
+                by any lower tier.
+              </p>
+            </div>
+
+            <div className="border-l-2 border-flame-500/40 pl-4">
+              <p className="text-sm font-semibold text-ash-200">
+                Category{" "}
+                <span className="text-xs font-normal text-ash-500">
+                  (broad topic — Politics, Food, Gaming, Tech, Sports)
+                </span>
+              </p>
+              <p className="mt-1 text-sm text-ash-400 leading-relaxed">
+                Sets shared standards across all communities in that category.
+                For example, the Politics category might require &quot;no
+                doxxing elected officials&quot; across every political
+                community. The Food category might ban health misinformation.
+                These rules apply to all communities and cohorts underneath.
+              </p>
+            </div>
+
+            <div className="border-l-2 border-flame-500/25 pl-4">
+              <p className="text-sm font-semibold text-ash-200">
+                Community{" "}
+                <span className="text-xs font-normal text-ash-500">
+                  (specific group — {" "}
+                  <span className="text-flame-400">f</span>
+                  <span className="text-ash-500 mx-0.5">|</span>
+                  <span className="text-flame-400">politics</span>
+                  <span className="text-ash-500 mx-0.5">|</span>
+                  <span className="text-flame-400">democrats</span>,{" "}
+                  <span className="text-flame-400">f</span>
+                  <span className="text-ash-500 mx-0.5">|</span>
+                  <span className="text-flame-400">food</span>
+                  <span className="text-ash-500 mx-0.5">|</span>
+                  <span className="text-flame-400">cooking</span>)
+                </span>
+              </p>
+              <p className="mt-1 text-sm text-ash-400 leading-relaxed">
+                Writes its own specific rules through governance votes. If{" "}
+                <span className="text-flame-400">f</span>
+                <span className="text-ash-500 mx-0.5">|</span>
+                <span className="text-flame-400">politics</span>
+                <span className="text-ash-500 mx-0.5">|</span>
+                <span className="text-flame-400">democrats</span>{" "}
+                has a rule about sourcing claims, that doesn&apos;t affect{" "}
+                <span className="text-flame-400">f</span>
+                <span className="text-ash-500 mx-0.5">|</span>
+                <span className="text-flame-400">politics</span>
+                <span className="text-ash-500 mx-0.5">|</span>
+                <span className="text-flame-400">libertarians</span>.
+                Each community governs itself independently within its
+                category&apos;s guardrails.
+              </p>
+            </div>
+
+            <div className="border-l-2 border-ash-700 pl-4">
+              <p className="text-sm font-semibold text-ash-200">
+                Cohort{" "}
+                <span className="text-xs font-normal text-ash-500">
+                  (hyper-niche — {" "}
+                  <span className="text-flame-400">f</span>
+                  <span className="text-ash-500 mx-0.5">|</span>
+                  <span className="text-flame-400">politics</span>
+                  <span className="text-ash-500 mx-0.5">|</span>
+                  <span className="text-flame-400">democrats</span>
+                  <span className="text-ash-500 mx-0.5">|</span>
+                  <span className="text-flame-400">dsa illinois</span>)
+                </span>
+              </p>
+              <p className="mt-1 text-sm text-ash-400 leading-relaxed">
+                Adds niche refinements on top of the parent community&apos;s
+                rules. A DSA Illinois cohort might require posts to be relevant
+                to Illinois politics, while the parent democrats community
+                stays national. Cohorts inherit everything above them and can
+                only add restrictions, not remove them.
+              </p>
+            </div>
+          </div>
+
+          <p className="mt-6 text-ash-400 leading-relaxed">
+            You also choose which AI does the moderating. Communities vote on
             the model API — starting with Anthropic, with the architecture
             built to support any provider. Don&apos;t trust a particular
             model&apos;s training data? Vote it out. The community controls

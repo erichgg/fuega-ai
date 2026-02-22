@@ -3,7 +3,7 @@
 ## Project Overview
 AI-moderated discussion platform with transparent community governance.
 Communities write and vote on their own AI moderator prompts.
-Spark/douse voting. Three-tier governance (community → category → platform).
+Spark/douse voting. Four-tier governance (platform → category → community → cohort).
 
 ## Tech Stack
 - **Framework:** Next.js 14 (App Router), TypeScript strict mode
@@ -17,14 +17,15 @@ Spark/douse voting. Three-tier governance (community → category → platform).
 | Platform Term | fuega.ai Term        | NEVER Say |
 |---------------|----------------------|-----------|
 | Subreddit     | Community            | subreddit |
-| r/name        | f \| name (display)  | r/name    |
+| Sub-subreddit | Cohort               | sub-subreddit |
+| r/name        | f \| cat \| comm \| cohort | r/name |
 | Upvote        | Spark                | upvote    |
 | Downvote      | Douse                | downvote  |
 | Karma         | Spark score          | karma     |
 | Moderator     | AI agent             | mod/moderator |
 
-**Community prefix display:** Always `f | name` (with spaces around pipe).
-URL routes still use `/f/[community]`. Search must handle: `f|name`, `f/name`, `f | name`.
+**Hierarchy display:** `f | category | community | cohort` (spaces around pipes).
+URL routes use `/f/[category]/[community]/[cohort]`. Search must handle pipes, slashes, and spaces.
 
 ## File Structure
 ```

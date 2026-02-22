@@ -22,7 +22,7 @@ Fuega.ai is an AI-moderated, community-governed discussion platform that solves 
 
 ### Our Solution
 - **AI-moderated communities** with publicly visible prompts
-- **Multi-level governance** (community → category → platform)
+- **Multi-level governance** (cohort → community → category → platform)
 - **Radical transparency** + uncompromising security
 - **True community self-determination** based on multilevel governance theory (Hooghe & Marks, UNC)
 
@@ -54,7 +54,7 @@ To avoid losing essential functionality, v1 MUST support:
   - Vote weight = 1 per user per item
 
 #### Community Features
-- **Browse Communities** (displayed as `f | name`, NOT r/name)
+- **Browse Communities** (displayed as `f | category | community`, optionally `f | category | community | cohort`)
   - Search by name
   - Browse by category
   - Sort: Hot, New, Top (hour/day/week/month/all time), Rising
@@ -104,14 +104,26 @@ To avoid losing essential functionality, v1 MUST support:
 
 ### 2. AI MODERATION SYSTEM
 
-#### Three-Tier Architecture
+#### Four-Tier Architecture
 ```
 Platform Agent (Admin)
     ↓
 Category Agents (Rotating Council)
     ↓
 Community Agents (Community-Configured)
+    ↓
+Cohort Agents (Hyper-Niche, Community-Configured)
 ```
+
+Display: `f | category | community | cohort`
+URL: `/f/category/community/cohort`
+
+#### Cohort-Level Agent
+- **Purpose:** Hyper-niche subgroups within a community (e.g., `f | politics | democrats | dsa-illinois`)
+- **Configuration:** Inherits community AI config as baseline, can tighten (never loosen) rules
+- **AI Model:** Inherits from parent community by default, can override via governance vote
+- **Moderation:** Same action types as community agent (approve, remove, flag, warn)
+- **Governance:** Same proposal/voting system as communities, scoped to cohort members
 
 #### Community-Level Agent
 - **Configuration**
@@ -215,7 +227,7 @@ Community Agents (Community-Configured)
 ### IN SCOPE (V1)
 ✅ Core posting/commenting  
 ✅ Community creation and management  
-✅ AI moderation (3-tier system)  
+✅ AI moderation (4-tier system)
 ✅ Governance (proposals and voting)  
 ✅ User profiles with karma  
 ✅ Founder badges (first 5000)  

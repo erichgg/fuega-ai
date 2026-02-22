@@ -30,7 +30,7 @@ export interface BuiltPrompt {
   user: string;
   content_sanitization: SanitizationResult;
   rules_sanitization: SanitizationResult | null;
-  tier: "community" | "category" | "platform";
+  tier: "community" | "cohort" | "category" | "platform";
 }
 
 /**
@@ -51,14 +51,16 @@ const PLATFORM_TOS = `
  */
 function buildSystemPrompt(
   communityName: string,
-  tier: "community" | "category" | "platform"
+  tier: "community" | "cohort" | "category" | "platform"
 ): string {
   const tierLabel =
     tier === "community"
       ? `community f/${communityName}`
-      : tier === "category"
-        ? `category containing f/${communityName}`
-        : "fuega.ai platform";
+      : tier === "cohort"
+        ? `cohort containing f/${communityName}`
+        : tier === "category"
+          ? `category containing f/${communityName}`
+          : "fuega.ai platform";
 
   return [
     `You are a content moderator for the ${tierLabel}.`,

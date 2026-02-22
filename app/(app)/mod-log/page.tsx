@@ -17,7 +17,7 @@ import { ModLogSkeleton } from "@/components/fuega/page-skeleton";
 import { cn } from "@/lib/utils";
 
 type Decision = "approved" | "flagged" | "removed";
-type Tier = "community" | "category" | "platform";
+type Tier = "community" | "cohort" | "category" | "platform";
 
 interface ModLogEntry {
   id: string;
@@ -54,6 +54,7 @@ const decisionConfig: Record<
 
 const tierLabels: Record<Tier, string> = {
   community: "Community",
+  cohort: "Cohort",
   category: "Category",
   platform: "Platform",
 };

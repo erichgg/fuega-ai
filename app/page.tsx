@@ -30,9 +30,9 @@ const principles = [
   },
   {
     icon: Vote,
-    title: "Three tiers, all democratic",
+    title: "Four tiers, all democratic",
     description:
-      "Community → category → platform. Power flows upward from the people, not down from admins. Every tier is governed by votes, not appointments. Propose changes at any level.",
+      "Platform → category → community → cohort. Each tier governs its own scope through votes — from site-wide API decisions down to hyper-niche cohort rules.",
   },
   {
     icon: FileCode2,

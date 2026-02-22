@@ -314,7 +314,7 @@ CREATE TABLE moderation_log (
     author_id UUID NOT NULL REFERENCES users(id),
 
     -- Decision
-    agent_level VARCHAR(20) NOT NULL,   -- community, category, platform
+    agent_level VARCHAR(20) NOT NULL,   -- community, cohort, category, platform
     decision VARCHAR(20) NOT NULL,      -- approved, removed, flagged, warned
     reason TEXT NOT NULL,               -- AI-generated explanation
 
@@ -328,7 +328,7 @@ CREATE TABLE moderation_log (
     appeal_id UUID,
 
     CONSTRAINT modlog_content_type_valid CHECK (content_type IN ('post', 'comment')),
-    CONSTRAINT agent_level_valid CHECK (agent_level IN ('community', 'category', 'platform')),
+    CONSTRAINT agent_level_valid CHECK (agent_level IN ('community', 'cohort', 'category', 'platform')),
     CONSTRAINT decision_valid CHECK (decision IN ('approved', 'removed', 'flagged', 'warned'))
 );
 
@@ -364,7 +364,7 @@ ALTER TABLE moderation_log
 -- ============================================
 CREATE TABLE ai_prompt_history (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    entity_type VARCHAR(20) NOT NULL,  -- community, category, platform
+    entity_type VARCHAR(20) NOT NULL,  -- community, cohort, category, platform
     entity_id UUID,                    -- community_id or category_id (NULL for platform)
 
     prompt_text TEXT NOT NULL,
@@ -376,7 +376,7 @@ CREATE TABLE ai_prompt_history (
     -- For governance
     proposal_id UUID REFERENCES proposals(id),
 
-    CONSTRAINT entity_type_valid CHECK (entity_type IN ('community', 'category', 'platform'))
+    CONSTRAINT entity_type_valid CHECK (entity_type IN ('community', 'cohort', 'category', 'platform'))
 );
 
 -- ============================================

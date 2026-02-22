@@ -466,7 +466,9 @@ ANIMATIONS & STYLING:
 - Use .text-gradient-fire for gradient text
 - Use .terminal-card for card styling
 - Community references: ALWAYS use <CommunityPrefix name="x" linked /> component from @/components/fuega/community-prefix
-- Community prefix display: f | name (orange colored, linked to /f/name)
+- Community prefix display: f | category | community (orange colored, linked to /f/category/community)
+- Cohort prefix display: f | category | community | cohort (linked to /f/category/community/cohort)
+- Four tiers, all democratic: cohort → community → category → platform
 
 BRANDING — CRITICAL:
 - The word "fuega" in body text MUST always be orange: <span className="text-flame-400 font-semibold">fuega</span>
@@ -490,11 +492,12 @@ VISUAL VERIFICATION — IMPORTANT:
 - Use max-w-7xl consistently — the (app) layout already uses it, static pages should too
 
 MOD LOG SCOPING:
-- Moderation logs belong to the community where moderation happened
+- Moderation logs belong to the community (or cohort) where moderation happened
 - The mod log page should default to showing logs from communities the user belongs to
 - Global /mod-log is an aggregate view with community filter, not the primary experience
-- Each community page (f/name) should have its own mod log tab/section
-- agent_level field (community/category/platform) determines which tier made the decision
+- Each community page (f/category/community) should have its own mod log tab/section
+- Each cohort page (f/category/community/cohort) should have its own mod log tab/section
+- agent_level field (cohort/community/category/platform) determines which tier made the decision
 
 VOICE & PHILOSOPHY:
 - fuega is "open source social media" — use that framing, not "platform" or "product"
@@ -816,10 +819,11 @@ TASK — DESIGN SYSTEM AUDIT & FIX:
    - Ensure ThemeContext toggles dark/light class on documentElement
 
 6. FIX community prefix display:
-   - Community names must display as "f | name" (spaced pipe), NOT "f/name"
-   - HTML: <span class="text-lava-hot">f</span><span class="text-smoke mx-1">|</span><span>name</span>
-   - URL routes stay as /f/[community] (slash in URL path is fine)
-   - Search should normalize: handle "f|name", "f/name", "f | name" inputs
+   - Community names must display as "f | category | community" (spaced pipe), NOT "f/name"
+   - Cohort display: "f | category | community | cohort"
+   - HTML: <span class="text-lava-hot">f</span><span class="text-smoke mx-1">|</span><span>category</span><span class="text-smoke mx-1">|</span><span>community</span>
+   - URL routes: /f/[category]/[community] and /f/[category]/[community]/[cohort]
+   - Search should normalize: handle "f|cat|name", "f/cat/name", "f | cat | name" inputs
 
 7. FIX any build errors found (TypeScript, missing imports, etc.) — fix ALL errors regardless of which phase they came from.
 
