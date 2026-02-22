@@ -4,6 +4,7 @@ import type {
   ListProposalsInput,
 } from "@/lib/validation/proposals";
 import { getMembership } from "@/lib/services/communities.service";
+import { createNotification } from "@/lib/services/notifications.service";
 
 // ─── Types ───────────────────────────────────────────────────
 
@@ -52,11 +53,12 @@ export async function createProposal(
   // Verify community exists
   const community = await queryOne<{
     id: string;
+    name: string;
     governance_config: Record<string, unknown>;
     is_banned: boolean;
     deleted_at: string | null;
   }>(
-    `SELECT id, governance_config, is_banned, deleted_at
+    `SELECT id, name, governance_config, is_banned, deleted_at
      FROM communities WHERE id = $1`,
     [input.community_id]
   );
@@ -139,6 +141,25 @@ export async function createProposal(
       500
     );
   }
+
+  // Notify community members about new governance proposal (non-blocking)
+  notifyCommunityMembers(
+    input.community_id,
+    community.name,
+    userId,
+    "governance",
+    `New proposal: ${input.title}`,
+    `A new governance proposal has been created in f | ${community.name}`,
+    `/f/${community.name}/proposals/${proposal.id}`,
+    {
+      community_id: input.community_id,
+      community_name: community.name,
+      proposal_id: proposal.id,
+      proposal_title: input.title,
+      governance_event: "new_proposal",
+      voting_ends_at: votingEndsAt.toISOString(),
+    }
+  );
 
   return proposal;
 }
@@ -493,6 +514,59 @@ async function executeProposal(proposal: Proposal): Promise<void> {
      WHERE id = $1`,
     [proposal.id]
   );
+
+  // Notify community members about the implemented change (non-blocking)
+  const communityInfo = await queryOne<{ name: string }>(
+    `SELECT name FROM communities WHERE id = $1`,
+    [proposal.community_id]
+  );
+  if (communityInfo) {
+    notifyCommunityMembers(
+      proposal.community_id,
+      communityInfo.name,
+      proposal.created_by,
+      "community_update",
+      `Proposal implemented: ${proposal.title}`,
+      `The governance proposal '${proposal.title}' has been implemented in f | ${communityInfo.name}`,
+      `/f/${communityInfo.name}/proposals/${proposal.id}`,
+      {
+        community_id: proposal.community_id,
+        community_name: communityInfo.name,
+        update_type: "proposal_implemented",
+        summary: `The governance proposal '${proposal.title}' was approved and implemented.`,
+      }
+    );
+  }
+}
+
+// ─── Community Notification Helper ────────────────────────────
+
+function notifyCommunityMembers(
+  communityId: string,
+  communityName: string,
+  excludeUserId: string,
+  type: "governance" | "community_update",
+  title: string,
+  body: string,
+  actionUrl: string,
+  content: Record<string, unknown>
+): void {
+  // Fetch all community member IDs and send notifications (non-blocking)
+  queryAll<{ user_id: string }>(
+    `SELECT user_id FROM community_members WHERE community_id = $1 AND user_id != $2`,
+    [communityId, excludeUserId]
+  ).then((members) => {
+    for (const member of members) {
+      createNotification({
+        userId: member.user_id,
+        type,
+        title,
+        body,
+        actionUrl,
+        content,
+      }).catch(() => {}); // Non-blocking per member
+    }
+  }).catch(() => {}); // Non-blocking
 }
 
 // ─── Governance Error ────────────────────────────────────────

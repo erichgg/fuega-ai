@@ -1,5 +1,6 @@
 import { query, queryOne } from "@/lib/db";
 import { ServiceError } from "@/lib/services/posts.service";
+import { createNotification } from "@/lib/services/notifications.service";
 
 // ─── Types ───────────────────────────────────────────────────
 
@@ -28,8 +29,12 @@ export async function voteOnPost(
   value: 1 | -1
 ): Promise<VoteResult> {
   // Verify post exists
-  const post = await queryOne<{ id: string; sparks: number; douses: number; author_id: string }>(
-    `SELECT id, sparks, douses, author_id FROM posts WHERE id = $1 AND deleted_at IS NULL`,
+  const post = await queryOne<{ id: string; sparks: number; douses: number; author_id: string; title: string; community_name: string }>(
+    `SELECT p.id, p.sparks, p.douses, p.author_id, p.title,
+            c.name AS community_name
+     FROM posts p
+     JOIN communities c ON c.id = p.community_id
+     WHERE p.id = $1 AND p.deleted_at IS NULL`,
     [postId]
   );
   if (!post) {
@@ -41,7 +46,14 @@ export async function voteOnPost(
     throw new ServiceError("Cannot vote on your own post", "SELF_VOTE", 400);
   }
 
-  return castVote("post", postId, userId, value);
+  const result = await castVote("post", postId, userId, value);
+
+  // Send spark notification (only for sparks, not douses; only for new/switched votes)
+  if (value === 1 && result.action !== "removed") {
+    sendSparkNotification(post.author_id, userId, "post", postId, post.title, `/f/${post.community_name}/posts/${postId}`);
+  }
+
+  return result;
 }
 
 // ─── Vote on Comment ─────────────────────────────────────────
@@ -52,8 +64,8 @@ export async function voteOnComment(
   value: 1 | -1
 ): Promise<VoteResult> {
   // Verify comment exists
-  const comment = await queryOne<{ id: string; sparks: number; douses: number; author_id: string }>(
-    `SELECT id, sparks, douses, author_id FROM comments WHERE id = $1 AND deleted_at IS NULL`,
+  const comment = await queryOne<{ id: string; sparks: number; douses: number; author_id: string; post_id: string }>(
+    `SELECT id, sparks, douses, author_id, post_id FROM comments WHERE id = $1 AND deleted_at IS NULL`,
     [commentId]
   );
   if (!comment) {
@@ -65,7 +77,27 @@ export async function voteOnComment(
     throw new ServiceError("Cannot vote on your own comment", "SELF_VOTE", 400);
   }
 
-  return castVote("comment", commentId, userId, value);
+  const result = await castVote("comment", commentId, userId, value);
+
+  // Send spark notification (only for sparks, not douses; only for new/switched votes)
+  if (value === 1 && result.action !== "removed") {
+    const postInfo = await queryOne<{ title: string; community_name: string }>(
+      `SELECT p.title, c.name AS community_name
+       FROM posts p
+       JOIN communities c ON c.id = p.community_id
+       WHERE p.id = $1`,
+      [comment.post_id]
+    );
+    if (postInfo) {
+      sendSparkNotification(
+        comment.author_id, userId, "comment", commentId,
+        postInfo.title,
+        `/f/${postInfo.community_name}/posts/${comment.post_id}#comment-${commentId}`
+      );
+    }
+  }
+
+  return result;
 }
 
 // ─── Core Vote Logic ─────────────────────────────────────────
@@ -208,6 +240,39 @@ async function updateAuthorSparks(
     `UPDATE users SET ${sparkColumn} = GREATEST(${sparkColumn} + $1, 0) WHERE id = $2`,
     [delta, content.author_id]
   );
+}
+
+// ─── Spark Notification Helper ────────────────────────────────
+
+function sendSparkNotification(
+  authorId: string,
+  sparkerId: string,
+  contentType: "post" | "comment",
+  contentId: string,
+  contentTitle: string,
+  actionUrl: string
+): void {
+  // Look up sparker username, then fire notification (non-blocking)
+  queryOne<{ username: string }>(
+    `SELECT username FROM users WHERE id = $1`,
+    [sparkerId]
+  ).then((sparker) => {
+    const sparkerName = sparker?.username ?? "Someone";
+    return createNotification({
+      userId: authorId,
+      type: "spark",
+      title: `${sparkerName} sparked your ${contentType} '${contentTitle}'`,
+      body: `${sparkerName} sparked your ${contentType}`,
+      actionUrl,
+      content: {
+        content_type: contentType,
+        content_id: contentId,
+        content_title: contentTitle,
+        spark_count: 1,
+        latest_sparker: sparkerName,
+      },
+    });
+  }).catch(() => {}); // Non-blocking
 }
 
 // ─── Get User's Vote ─────────────────────────────────────────

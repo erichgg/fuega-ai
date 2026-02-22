@@ -62,7 +62,8 @@ FILE_CHECK_INTERVAL = 10      # Check for file changes every 10 seconds
 # Auto-fix
 MAX_RETRIES_PER_PROMPT = 3    # Max retries before marking as fatal
 RETRY_BACKOFF_BASE = 30       # Base seconds between retries (doubles each time)
-RATE_LIMIT_BUFFER = 120       # Extra seconds to wait after rate limit resets
+RATE_LIMIT_BUFFER = 30        # Extra seconds to wait after rate limit resets
+MAX_RATE_LIMIT_WAIT = 300     # 5 minutes max wait for any rate limit (cap)
 
 TOKEN_LIMIT_PATTERNS = [
     "context window",
@@ -327,8 +328,8 @@ class FuegaBuilder:
                     reset_time += timedelta(days=1)
 
                 wait = (reset_time - now).total_seconds() + RATE_LIMIT_BUFFER
-                # Cap at 24 hours
-                return min(wait, 86400)
+                # Cap at MAX_RATE_LIMIT_WAIT
+                return min(wait, MAX_RATE_LIMIT_WAIT)
             except (ValueError, IndexError):
                 pass
 
@@ -338,14 +339,15 @@ class FuegaBuilder:
             amount = int(in_match.group(1))
             unit = in_match.group(2).lower()
             if 'hour' in unit:
-                return amount * 3600 + RATE_LIMIT_BUFFER
+                wait = amount * 3600 + RATE_LIMIT_BUFFER
             elif 'min' in unit:
-                return amount * 60 + RATE_LIMIT_BUFFER
+                wait = amount * 60 + RATE_LIMIT_BUFFER
             else:
-                return amount + RATE_LIMIT_BUFFER
+                wait = amount + RATE_LIMIT_BUFFER
+            return min(wait, MAX_RATE_LIMIT_WAIT)
 
-        # Default: wait 2 hours (safe fallback for rate limits)
-        return 7200 + RATE_LIMIT_BUFFER
+        # Default: wait 5 minutes (safe fallback for rate limits)
+        return 300 + RATE_LIMIT_BUFFER
 
     def wait_with_countdown(self, seconds, reason):
         """Wait for a specified time, showing countdown every 60 seconds."""
@@ -449,6 +451,22 @@ ERROR HANDLING — CRITICAL:
 - Fix errors regardless of which phase or prompt they came from
 - Run `npm run build` or `npx tsc --noEmit` to verify no errors before finishing
 - Do NOT leave broken code — every prompt must leave the project in a buildable state
+
+DESKTOP LAYOUT — CRITICAL:
+- Use max-w-7xl (not max-w-6xl) for all page containers
+- Reduce vertical padding on desktop: py-12 lg:py-10, pt-16 lg:pt-12
+- Use 2xl:px-8 for extra side padding on ultrawide
+- Feature grids: gap-4 lg:gap-5 (not gap-8)
+- Text sizes: text-xs/text-sm for body, text-2xl/text-3xl for headings
+- No wasted whitespace — content should fill the viewport on 27" monitors
+
+ANIMATIONS & STYLING:
+- Use existing CSS animations: animate-flame-flicker, animate-spark-rise, animate-douse-fall
+- Use .glow-text, .glow-text-subtle, .glow-text-intense for fire glow effects
+- Use .text-gradient-fire for gradient text
+- Use .terminal-card for card styling
+- Community references: ALWAYS use <CommunityPrefix name="x" linked /> component from @/components/fuega/community-prefix
+- Community prefix display: f | name (orange colored, linked to /f/name)
 
 COMPLETION SIGNAL: PROMPT_COMPLETE
 

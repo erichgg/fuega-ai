@@ -1,6 +1,7 @@
 import { queryOne, queryAll } from "@/lib/db";
 import { isFeatureEnabled } from "@/lib/feature-flags";
 import { ServiceError } from "@/lib/services/posts.service";
+import { createNotification } from "@/lib/services/notifications.service";
 
 // ─── Types ───────────────────────────────────────────────────
 
@@ -203,20 +204,19 @@ export async function awardBadge(
     [userId, badgeId, JSON.stringify(metadata)]
   );
 
-  // 5. Send notification if enabled
-  if (isFeatureEnabled("ENABLE_NOTIFICATIONS")) {
-    await queryOne(
-      `INSERT INTO notifications (user_id, type, title, body, content)
-       VALUES ($1, 'badge_earned', $2, $3, $4)
-       RETURNING id`,
-      [
-        userId,
-        `Badge Earned: ${badge.name}`,
-        badge.description,
-        JSON.stringify({ badge_id: badgeId, rarity: badge.rarity }),
-      ]
-    );
-  }
+  // 5. Send notification (uses createNotification which checks feature flag + preferences)
+  createNotification({
+    userId,
+    type: "badge_earned",
+    title: `Badge Earned: ${badge.name}`,
+    body: badge.description,
+    content: {
+      badge_id: badgeId,
+      badge_name: badge.name,
+      badge_rarity: badge.rarity,
+      badge_description: badge.description,
+    },
+  }).catch(() => {}); // Non-blocking
 
   console.log(`[badge-award] Awarded "${badgeId}" to user ${userId}`);
 

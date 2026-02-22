@@ -2,6 +2,7 @@ import { query, queryOne, queryAll } from "@/lib/db";
 import type { CreateCommentInput, UpdateCommentInput } from "@/lib/validation/comments";
 import { moderateContent, logModerationDecision, type ModerationDecision } from "@/lib/moderation/moderate";
 import { ServiceError } from "@/lib/services/posts.service";
+import { createNotification } from "@/lib/services/notifications.service";
 
 // ─── Types ───────────────────────────────────────────────────
 
@@ -39,9 +40,15 @@ export async function createComment(
   authorId: string
 ): Promise<CommentWithModeration> {
   // Verify post exists and is not deleted
-  const post = await queryOne<{ id: string; community_id: string; is_removed: boolean }>(
-    `SELECT id, community_id, is_removed FROM posts
-     WHERE id = $1 AND deleted_at IS NULL`,
+  const post = await queryOne<{
+    id: string; community_id: string; is_removed: boolean;
+    author_id: string; title: string; community_name: string;
+  }>(
+    `SELECT p.id, p.community_id, p.is_removed, p.author_id, p.title,
+            c.name AS community_name
+     FROM posts p
+     JOIN communities c ON c.id = p.community_id
+     WHERE p.id = $1 AND p.deleted_at IS NULL`,
     [postId]
   );
   if (!post) {
@@ -52,8 +59,8 @@ export async function createComment(
   }
 
   // Verify user is not banned
-  const user = await queryOne<{ id: string; is_banned: boolean }>(
-    `SELECT id, is_banned FROM users WHERE id = $1 AND deleted_at IS NULL`,
+  const user = await queryOne<{ id: string; is_banned: boolean; username: string }>(
+    `SELECT id, is_banned, username FROM users WHERE id = $1 AND deleted_at IS NULL`,
     [authorId]
   );
   if (!user) {
@@ -135,6 +142,55 @@ export async function createComment(
     moderation,
     { query: async (text: string, params?: unknown[]) => query(text, params) }
   );
+
+  // ─── Notification triggers (fire-and-forget, don't block response) ───
+  if (isApproved) {
+    const commentPreview = input.body.slice(0, 100);
+    const actionUrl = `/f/${post.community_name}/posts/${postId}#comment-${comment.id}`;
+
+    if (input.parent_id) {
+      // Reply to comment → notify parent comment author
+      const parentComment = await queryOne<{ author_id: string }>(
+        `SELECT author_id FROM comments WHERE id = $1`,
+        [input.parent_id]
+      );
+      if (parentComment && parentComment.author_id !== authorId) {
+        createNotification({
+          userId: parentComment.author_id,
+          type: "reply_comment",
+          title: `${user.username} replied to your comment`,
+          body: `${user.username} replied to your comment on '${post.title}'`,
+          actionUrl,
+          content: {
+            post_id: postId,
+            post_title: post.title,
+            parent_comment_id: input.parent_id,
+            reply_comment_id: comment.id,
+            replier_username: user.username,
+            reply_preview: commentPreview,
+          },
+        }).catch(() => {}); // Non-blocking
+      }
+    }
+
+    // Comment on post → notify post author (unless self-comment)
+    if (post.author_id !== authorId) {
+      createNotification({
+        userId: post.author_id,
+        type: "reply_post",
+        title: `${user.username} commented on your post`,
+        body: `${user.username} commented on '${post.title}'`,
+        actionUrl,
+        content: {
+          post_id: postId,
+          post_title: post.title,
+          comment_id: comment.id,
+          commenter_username: user.username,
+          comment_preview: commentPreview,
+        },
+      }).catch(() => {}); // Non-blocking
+    }
+  }
 
   return { ...comment, moderation };
 }

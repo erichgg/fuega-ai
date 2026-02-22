@@ -32,10 +32,10 @@ export async function GET(req: Request) {
     return NextResponse.json({ preferences });
   } catch (err) {
     if (err instanceof Error && "code" in err) {
-      const serviceErr = err as Error & { code: string; statusCode: number };
+      const serviceErr = err as Error & { code: string; status: number };
       return NextResponse.json(
         { error: serviceErr.message, code: serviceErr.code },
-        { status: serviceErr.statusCode }
+        { status: serviceErr.status }
       );
     }
     console.error("Get notification preferences error:", err);
@@ -84,10 +84,10 @@ export async function PUT(req: Request) {
     return NextResponse.json({ preferences });
   } catch (err) {
     if (err instanceof Error && "code" in err) {
-      const serviceErr = err as Error & { code: string; statusCode: number };
+      const serviceErr = err as Error & { code: string; status: number };
       return NextResponse.json(
         { error: serviceErr.message, code: serviceErr.code },
-        { status: serviceErr.statusCode }
+        { status: serviceErr.status }
       );
     }
     console.error("Update notification preferences error:", err);

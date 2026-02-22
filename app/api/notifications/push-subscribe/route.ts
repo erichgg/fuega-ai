@@ -41,10 +41,10 @@ export async function POST(req: Request) {
     return NextResponse.json({ subscription: { id: result.id, endpoint: result.endpoint } }, { status: 201 });
   } catch (err) {
     if (err instanceof Error && "code" in err) {
-      const serviceErr = err as Error & { code: string; statusCode: number };
+      const serviceErr = err as Error & { code: string; status: number };
       return NextResponse.json(
         { error: serviceErr.message, code: serviceErr.code },
-        { status: serviceErr.statusCode }
+        { status: serviceErr.status }
       );
     }
     console.error("Push subscribe error:", err);
@@ -89,10 +89,10 @@ export async function DELETE(req: Request) {
     return NextResponse.json({ success: true });
   } catch (err) {
     if (err instanceof Error && "code" in err) {
-      const serviceErr = err as Error & { code: string; statusCode: number };
+      const serviceErr = err as Error & { code: string; status: number };
       return NextResponse.json(
         { error: serviceErr.message, code: serviceErr.code },
-        { status: serviceErr.statusCode }
+        { status: serviceErr.status }
       );
     }
     console.error("Push unsubscribe error:", err);
