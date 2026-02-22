@@ -16,9 +16,9 @@ export function CampfirePrefix({
 }) {
   const content = (
     <span className={`inline-flex items-baseline font-semibold ${className ?? ""}`}>
-      <span className="text-flame-500">f</span>
-      <span className="text-ash-500 mx-0.5">|</span>
-      <span className="text-flame-400">{name}</span>
+      <span className="text-lava-hot">f</span>
+      <span className="text-smoke mx-1">|</span>
+      <span className="text-foreground">{name}</span>
     </span>
   );
 

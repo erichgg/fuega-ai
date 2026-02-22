@@ -49,10 +49,8 @@ export const TEST_IDS = {
   testUser1: "20000000-0000-0000-0000-000000000001",
   testUser2: "20000000-0000-0000-0000-000000000002",
   demoAdmin: "20000000-0000-0000-0000-000000000003",
-  categoryTech: "10000000-0000-0000-0000-000000000001",
-  categoryScience: "10000000-0000-0000-0000-000000000002",
-  communityTestTech: "30000000-0000-0000-0000-000000000001",
-  communityDemoScience: "30000000-0000-0000-0000-000000000002",
+  campfireTestTech: "30000000-0000-0000-0000-000000000001",
+  campfireDemoScience: "30000000-0000-0000-0000-000000000002",
   post1: "40000000-0000-0000-0000-000000000001",
   post2: "40000000-0000-0000-0000-000000000002",
   post3: "40000000-0000-0000-0000-000000000003",
@@ -61,19 +59,17 @@ export const TEST_IDS = {
   comment3: "50000000-0000-0000-0000-000000000003",
 } as const;
 
-// All 13 expected tables
+// All expected tables
 export const ALL_TABLES = [
-  "categories",
   "users",
-  "communities",
-  "community_memberships",
+  "campfires",
+  "campfire_members",
   "posts",
   "comments",
   "votes",
   "proposals",
   "proposal_votes",
-  "moderation_log",
+  "campfire_mod_logs",
   "moderation_appeals",
   "ai_prompt_history",
-  "council_members",
 ] as const;
