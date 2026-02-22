@@ -25,15 +25,26 @@ data/*.db
 build_log.txt
 build_log_detail.txt
 
-# Builder state
+# Builder (dev automation, not app code)
+fuega_builder.py
 .builder_state.json
 .temp_prompt_*.txt
 .design_fixup_done
 outputs/
 
-# BFG / scrubbing
+# Sensitive / scrubbing
 passwords.txt
 preserved_keys.txt
+
+# Planning docs (local only)
+PLAN_phase1_database.md
+docs/plans/
+
+# Browser automation artifacts
+.playwright-mcp/
+
+# QA sweep reports
+QA.md
 
 # Keys and certs
 *.pem

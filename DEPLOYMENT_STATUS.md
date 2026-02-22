@@ -75,7 +75,7 @@ https://fuega.ai ✅ LIVE (200 OK)
 - PEXELS_API_KEY ✅
 - GOOGLE_MAPS_API_KEY ✅
 - JWT_SECRET ✅ (weak — "change-this-to-a-random-secret-in-production")
-- ADMIN_PASSWORD ⚠️ (set to "changeme")
+- ADMIN_PASSWORD ⚠️ (MUST be rotated before production)
 
 ### fuega/.env
 - ANTHROPIC_API_KEY ✅
