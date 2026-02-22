@@ -130,24 +130,42 @@ export default function LandingPage() {
         </div>
 
         <div className="mx-auto w-full max-w-7xl">
-          <div className="mx-auto max-w-4xl text-center lg:max-w-5xl">
+          <div className="mx-auto max-w-4xl lg:max-w-5xl">
+            {/* Terminal-style manifesto */}
+            <div className="mb-6 inline-flex items-center gap-2 border border-ash-800 bg-ash-900/60 px-3 py-1.5 text-xs text-ash-500">
+              <span className="h-2 w-2 rounded-full bg-flame-500 animate-flame-flicker" />
+              <span className="text-ash-600">root@fuega</span>
+              <span className="text-ash-700">:</span>
+              <span className="text-flame-500/70">~</span>
+              <span className="text-ash-600">$</span>
+              <span className="text-ash-400 ml-1">init --governance community</span>
+            </div>
+
             <h1 className="text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl 2xl:text-7xl">
-              <span className="text-gradient-fire">Your platform.</span>
+              <span className="text-ash-200">Your community.</span>
               <br />
-              <span className="text-ash-200">Your rules.</span>
+              <span className="text-ash-200">Your standards.</span>
               <br />
-              <span className="text-ash-200">AI enforces. </span>
               <span className="text-gradient-fire">You govern.</span>
+              <span className="text-flame-500 cursor-blink ml-1">_</span>
             </h1>
 
-            <p className="mx-auto mt-5 max-w-3xl text-base text-ash-400 sm:text-lg lg:mt-6 lg:text-xl">
-              No corporate moderators. No shadow bans. No hidden algorithms.
-              Communities write their own AI moderation prompts, vote on the
-              rules, and audit every decision. Full transparency.
-              Full anonymity. Full control.
-            </p>
+            <div className="mt-6 space-y-1 text-sm text-ash-500 sm:text-base lg:text-lg">
+              <p>
+                <span className="text-flame-500/70 mr-2">&gt;</span>
+                <span className="text-ash-300">Communities write their own rules and vote on them.</span>
+              </p>
+              <p>
+                <span className="text-flame-500/70 mr-2">&gt;</span>
+                <span className="text-ash-400">AI enforces what you decided. Nothing more.</span>
+              </p>
+              <p>
+                <span className="text-flame-500/70 mr-2">&gt;</span>
+                <span className="text-ash-500">Every moderation decision is public and auditable.</span>
+              </p>
+            </div>
 
-            <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center lg:mt-8">
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row lg:mt-8">
               <Link
                 href="/signup"
                 className="inline-flex items-center gap-2 bg-flame-500 px-8 py-3 text-base font-semibold text-white shadow-lg shadow-flame-500/25 transition-all hover:bg-flame-600 hover:shadow-flame-500/40"
@@ -163,22 +181,26 @@ export default function LandingPage() {
               </Link>
             </div>
 
-            <div className="mt-6 flex flex-wrap items-center justify-center gap-6 text-sm text-ash-500 lg:gap-8">
-              <span className="flex items-center gap-1.5">
-                <Lock className="h-3.5 w-3.5 text-flame-500/60" />
-                No email required
+            <div className="mt-6 flex flex-wrap items-center gap-4 text-xs text-ash-600 sm:gap-6">
+              <span className="font-mono">
+                <span className="text-flame-500/50">[</span>
+                no email
+                <span className="text-flame-500/50">]</span>
               </span>
-              <span className="flex items-center gap-1.5">
-                <Shield className="h-3.5 w-3.5 text-flame-500/60" />
-                Zero tracking
+              <span className="font-mono">
+                <span className="text-flame-500/50">[</span>
+                zero tracking
+                <span className="text-flame-500/50">]</span>
               </span>
-              <span className="flex items-center gap-1.5">
-                <Eye className="h-3.5 w-3.5 text-flame-500/60" />
-                Public mod logs
+              <span className="font-mono">
+                <span className="text-flame-500/50">[</span>
+                public mod logs
+                <span className="text-flame-500/50">]</span>
               </span>
-              <span className="flex items-center gap-1.5">
-                <FileCode2 className="h-3.5 w-3.5 text-flame-500/60" />
-                Open governance
+              <span className="font-mono">
+                <span className="text-flame-500/50">[</span>
+                open governance
+                <span className="text-flame-500/50">]</span>
               </span>
             </div>
           </div>
