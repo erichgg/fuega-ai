@@ -1,27 +1,34 @@
 #!/usr/bin/env python
 """
-fuega_builder.py - FINAL Automated Builder for fuega.ai
+fuega_builder.py - Automated Builder for fuega.ai
 
-This script:
-- Cleans the project folder (preserves only planning docs)
-- Runs Claude Code with full automation
-- Makes ALL decisions automatically
-- Shows colored, verbose real-time output
-- Reviews context before each prompt
-- Handles restarts and token limits
-- Logs everything to files
+WHAT THIS DOES:
+1. On FIRST RUN: Executes BOOTSTRAP.md (Claude Code updates all docs)
+2. ALWAYS: Resumes from checkpoint (no cleanup, no restart)
+3. Shows colored, verbose real-time output with heartbeat
+4. Handles restarts, token limits, and stuck sessions automatically
+5. AUTO-FIX: Detects rate limits, parses reset times, waits and retries
+6. AUTO-FIX: Classifies failures as retriable vs fatal
+7. AUTO-FIX: Max 3 retries per prompt with exponential backoff
+
+USAGE:
+  python fuega_builder.py
+  python fuega_builder.py --skip-bootstrap
 """
 
+import argparse
 import subprocess
 import sys
 import time
 import json
 import re
 import os
-from datetime import datetime
+import threading
+import queue
+from datetime import datetime, timedelta
 from pathlib import Path
 
-# ANSI Color codes for beautiful console output
+# ANSI Color codes
 class Colors:
     HEADER = '\033[95m'
     BLUE = '\033[94m'
@@ -30,7 +37,7 @@ class Colors:
     YELLOW = '\033[93m'
     RED = '\033[91m'
     BOLD = '\033[1m'
-    UNDERLINE = '\033[4m'
+    DIM = '\033[2m'
     END = '\033[0m'
 
 def colored(text, color):
@@ -40,31 +47,22 @@ def colored(text, color):
 # Configuration
 PROJECT_DIR = Path(__file__).parent
 PROMPT_FILE = PROJECT_DIR / "PROMPT.md"
+BOOTSTRAP_FILE = PROJECT_DIR / "BOOTSTRAP.md"
 LOG_FILE = PROJECT_DIR / "build_log.txt"
 DETAIL_LOG_FILE = PROJECT_DIR / "build_log_detail.txt"
 STATE_FILE = PROJECT_DIR / ".builder_state.json"
-INJECTION_FILE = PROJECT_DIR / "INJECTION.md"
-
-# Files to KEEP during cleanup
-KEEP_FILES = {
-    'SCOPE_AND_REQUIREMENTS.md',
-    'DATA_SCHEMA.md',
-    'SECURITY.md',
-    'DEPLOYMENT.md',
-    'SCRUB.md',
-    'PROMPT.md',
-    'fuega_builder.py',
-    'run_builder.bat',
-    'run_builder.ps1',
-    'INJECTION.md',
-    'README.md',
-    '.env',  # Keep if exists
-    '.gitignore',  # Keep if exists
-}
 
 # Timing
-MAX_SESSION_TIME = 3600  # 1 hour
-TOKEN_LIMIT_RETURN_CODES = [2]
+MAX_SESSION_TIME = 3600       # 1 hour max per prompt
+INACTIVITY_TIMEOUT = 600      # 10 minutes with no output AND no file changes = stuck
+HEARTBEAT_INTERVAL = 15       # Print heartbeat every 15 seconds of silence
+FILE_CHECK_INTERVAL = 10      # Check for file changes every 10 seconds
+
+# Auto-fix
+MAX_RETRIES_PER_PROMPT = 3    # Max retries before marking as fatal
+RETRY_BACKOFF_BASE = 30       # Base seconds between retries (doubles each time)
+RATE_LIMIT_BUFFER = 120       # Extra seconds to wait after rate limit resets
+
 TOKEN_LIMIT_PATTERNS = [
     "context window",
     "conversation is too long",
@@ -73,48 +71,83 @@ TOKEN_LIMIT_PATTERNS = [
     "maximum context length",
 ]
 
+RATE_LIMIT_PATTERNS = [
+    "hit your limit",
+    "rate limit",
+    "too many requests",
+    "resets ",
+    "try again later",
+    "429",
+]
+
+
+def _reader_thread(pipe, q):
+    """Background thread to read lines from a pipe into a queue."""
+    try:
+        for line in pipe:
+            q.put(line)
+    except Exception:
+        pass
+    finally:
+        q.put(None)  # Sentinel: stream closed
+
+
+class FailureAnalysis:
+    """Result of analyzing a prompt failure."""
+    def __init__(self, category, retriable, wait_seconds=0, message=""):
+        self.category = category      # "rate_limit", "token_limit", "timeout", "crash", "unknown"
+        self.retriable = retriable    # Can we retry this prompt?
+        self.wait_seconds = wait_seconds  # How long to wait before retry
+        self.message = message        # Human-readable explanation
+
+
 class FuegaBuilder:
-    def __init__(self):
+    def __init__(self, skip_bootstrap=False):
         self.state = self.load_state()
-        self.is_restart = self.state.get("total_runs", 0) > 0
-        self.state["total_runs"] = self.state.get("total_runs", 0) + 1
         self.start_time = datetime.now()
         self.current_phase = self.state.get("current_phase", 0)
         self.current_prompt = self.state.get("current_prompt", 0)
+        self.bootstrap_complete = self.state.get("bootstrap_complete", False)
+        self.skip_bootstrap_flag = skip_bootstrap
         self.prompts = self.load_prompts()
-        
+
     def load_state(self):
         """Load build state from file"""
         if STATE_FILE.exists():
-            with open(STATE_FILE, 'r') as f:
-                return json.load(f)
+            try:
+                with open(STATE_FILE, 'r') as f:
+                    return json.load(f)
+            except (json.JSONDecodeError, IOError):
+                self.log("State file corrupted, starting fresh", Colors.YELLOW, "WARN")
         return {
             "current_phase": 0,
             "current_prompt": 0,
             "completed_prompts": [],
+            "bootstrap_complete": False,
             "last_run": None,
-            "total_runs": 0
+            "retry_counts": {},  # prompt_id -> retry count
         }
-    
+
     def save_state(self):
         """Save current build state"""
         self.state["last_run"] = datetime.now().isoformat()
+        self.state["bootstrap_complete"] = self.bootstrap_complete
         with open(STATE_FILE, 'w') as f:
             json.dump(self.state, f, indent=2)
-    
+
     def load_prompts(self):
         """Extract all prompts from PROMPT.md"""
         if not PROMPT_FILE.exists():
             self.log_error("PROMPT.md not found!")
             return []
-        
+
         with open(PROMPT_FILE, 'r', encoding='utf-8') as f:
             content = f.read()
-        
+
         # Extract prompts by looking for code blocks after ### Prompt X.Y:
         prompt_pattern = r'### Prompt (\d+\.\d+):[^\n]*\n```\n(.*?)\n```'
         matches = re.findall(prompt_pattern, content, re.DOTALL)
-        
+
         prompts = []
         for prompt_id, prompt_text in matches:
             phase = int(prompt_id.split('.')[0])
@@ -123,205 +156,314 @@ class FuegaBuilder:
                 "phase": phase,
                 "text": prompt_text.strip()
             })
-        
+
         self.log(f"Loaded {len(prompts)} prompts from PROMPT.md", Colors.CYAN)
         return prompts
-    
+
     def log(self, message, color=Colors.END, level="INFO"):
         """Log message to both console (colored) and file"""
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         log_line = f"[{timestamp}] [{level}] {message}"
-        
+
         # Console (colored)
-        print(colored(log_line, color))
-        
+        print(colored(log_line, color), flush=True)
+
         # File (no color)
         with open(LOG_FILE, 'a', encoding='utf-8') as f:
             f.write(log_line + "\n")
-    
+
     def log_error(self, message):
         """Log error message"""
         self.log(message, Colors.RED, "ERROR")
-    
+
     def log_success(self, message):
         """Log success message"""
         self.log(message, Colors.GREEN, "SUCCESS")
-    
+
     def log_detail(self, message):
         """Write to the detailed log file only (not console)"""
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         with open(DETAIL_LOG_FILE, 'a', encoding='utf-8') as f:
             f.write(f"[{timestamp}] {message}\n")
-    
-    def cleanup_project(self):
-        """Clean project folder, keeping only planning docs"""
-        self.log("=" * 60, Colors.YELLOW)
-        self.log("🧹 CLEANING PROJECT FOLDER", Colors.YELLOW)
-        self.log("=" * 60, Colors.YELLOW)
-        
-        if not PROJECT_DIR.exists():
-            self.log("Project directory doesn't exist, skipping cleanup", Colors.YELLOW)
-            return
-        
-        removed_count = 0
-        kept_count = 0
-        
-        for item in PROJECT_DIR.iterdir():
-            # Skip the builder script itself
-            if item.name == Path(__file__).name:
-                continue
-                
-            # Keep planning docs and essential files
-            if item.name in KEEP_FILES:
-                kept_count += 1
-                self.log(f"  ✓ Keeping: {item.name}", Colors.GREEN)
-                continue
-            
-            # Remove everything else
+
+    def get_latest_file_mtime(self):
+        """Get the most recent modification time of any project file (excluding .git, node_modules, .next)."""
+        latest = 0
+        skip_dirs = {'.git', 'node_modules', '.next', '.playwright-mcp', 'outputs', '.claude'}
+        try:
+            for entry in os.scandir(PROJECT_DIR):
+                if entry.name in skip_dirs:
+                    continue
+                if entry.is_file(follow_symlinks=False):
+                    try:
+                        mt = entry.stat().st_mtime
+                        if mt > latest:
+                            latest = mt
+                    except OSError:
+                        pass
+                elif entry.is_dir(follow_symlinks=False):
+                    # One level deep scan for common working dirs
+                    try:
+                        for sub in os.scandir(entry.path):
+                            if sub.is_file(follow_symlinks=False):
+                                try:
+                                    mt = sub.stat().st_mtime
+                                    if mt > latest:
+                                        latest = mt
+                                except OSError:
+                                    pass
+                    except OSError:
+                        pass
+        except OSError:
+            pass
+        return latest
+
+    # =========================================================================
+    # AUTO-FIX: Failure analysis and recovery
+    # =========================================================================
+
+    def analyze_failure(self, output, returncode, elapsed):
+        """Analyze a failed prompt run and determine recovery strategy."""
+        output_lower = output.lower()
+
+        # 1. Rate limit detection
+        for pattern in RATE_LIMIT_PATTERNS:
+            if pattern.lower() in output_lower:
+                wait_time = self._parse_rate_limit_reset(output)
+                return FailureAnalysis(
+                    category="rate_limit",
+                    retriable=True,
+                    wait_seconds=wait_time,
+                    message=f"Rate limited. Waiting {wait_time}s until reset."
+                )
+
+        # 2. Token/context limit
+        for pattern in TOKEN_LIMIT_PATTERNS:
+            if pattern.lower() in output_lower:
+                return FailureAnalysis(
+                    category="token_limit",
+                    retriable=True,
+                    wait_seconds=5,
+                    message="Token limit hit. Restarting with fresh context."
+                )
+
+        # 3. Inactivity timeout (already handled in run_claude_code, but just in case)
+        if "inactivity timeout" in output_lower:
+            return FailureAnalysis(
+                category="timeout",
+                retriable=True,
+                wait_seconds=10,
+                message="Inactivity timeout. Retrying prompt."
+            )
+
+        # 4. Non-zero return code with no recognized pattern
+        if returncode != 0:
+            # Check for common transient errors
+            if any(x in output_lower for x in ["econnreset", "network", "socket", "dns", "enotfound"]):
+                return FailureAnalysis(
+                    category="network",
+                    retriable=True,
+                    wait_seconds=30,
+                    message="Network error. Retrying after brief wait."
+                )
+            # Unknown error — still retry once
+            return FailureAnalysis(
+                category="unknown_error",
+                retriable=True,
+                wait_seconds=15,
+                message=f"Unknown error (return code {returncode}). Retrying."
+            )
+
+        # 5. Process completed but no PROMPT_COMPLETE signal and very little output
+        if len(output.strip()) < 50:
+            return FailureAnalysis(
+                category="empty_output",
+                retriable=True,
+                wait_seconds=10,
+                message="Very little output. May have failed silently. Retrying."
+            )
+
+        # Default: assume success was handled elsewhere
+        return FailureAnalysis(
+            category="ok",
+            retriable=False,
+            wait_seconds=0,
+            message="No failure detected."
+        )
+
+    def _parse_rate_limit_reset(self, output):
+        """Parse rate limit reset time from Claude output. Returns seconds to wait."""
+        # Pattern: "resets Feb 22, 4pm (America/Chicago)"
+        # Pattern: "resets in 2 hours"
+        # Pattern: "try again in 30 minutes"
+
+        # Try to find "resets <date>, <time>"
+        reset_match = re.search(
+            r'resets?\s+(\w+\s+\d+),?\s+(\d+(?::\d+)?)\s*(am|pm)',
+            output, re.IGNORECASE
+        )
+        if reset_match:
             try:
-                if item.is_file():
-                    item.unlink()
-                    removed_count += 1
-                    self.log(f"  ✗ Removed: {item.name}", Colors.RED)
-                elif item.is_dir() and item.name != '__pycache__':
-                    import shutil
-                    shutil.rmtree(item)
-                    removed_count += 1
-                    self.log(f"  ✗ Removed: {item.name}/ (directory)", Colors.RED)
-            except Exception as e:
-                self.log_error(f"Failed to remove {item.name}: {e}")
-        
-        self.log("", Colors.END)
-        self.log(f"✅ Cleanup complete: Kept {kept_count} files, Removed {removed_count} items", Colors.GREEN)
-        self.log("", Colors.END)
-    
+                month_str = reset_match.group(1)
+                time_str = reset_match.group(2)
+                ampm = reset_match.group(3).lower()
+
+                # Parse hour
+                if ':' in time_str:
+                    hour = int(time_str.split(':')[0])
+                else:
+                    hour = int(time_str)
+                if ampm == 'pm' and hour != 12:
+                    hour += 12
+                if ampm == 'am' and hour == 12:
+                    hour = 0
+
+                # Calculate wait time assuming today or tomorrow
+                now = datetime.now()
+                # Try today first
+                reset_time = now.replace(hour=hour, minute=0, second=0, microsecond=0)
+                if reset_time <= now:
+                    reset_time += timedelta(days=1)
+
+                wait = (reset_time - now).total_seconds() + RATE_LIMIT_BUFFER
+                # Cap at 24 hours
+                return min(wait, 86400)
+            except (ValueError, IndexError):
+                pass
+
+        # Try "in X hours/minutes"
+        in_match = re.search(r'in\s+(\d+)\s+(hour|minute|min|sec)', output, re.IGNORECASE)
+        if in_match:
+            amount = int(in_match.group(1))
+            unit = in_match.group(2).lower()
+            if 'hour' in unit:
+                return amount * 3600 + RATE_LIMIT_BUFFER
+            elif 'min' in unit:
+                return amount * 60 + RATE_LIMIT_BUFFER
+            else:
+                return amount + RATE_LIMIT_BUFFER
+
+        # Default: wait 2 hours (safe fallback for rate limits)
+        return 7200 + RATE_LIMIT_BUFFER
+
+    def wait_with_countdown(self, seconds, reason):
+        """Wait for a specified time, showing countdown every 60 seconds."""
+        self.log(f"AUTO-FIX: {reason}", Colors.YELLOW + Colors.BOLD, "AUTOFIX")
+        self.log(f"Waiting {int(seconds)}s ({int(seconds/60)}m)...", Colors.YELLOW)
+
+        end_time = time.time() + seconds
+        while time.time() < end_time:
+            remaining = end_time - time.time()
+            if remaining <= 0:
+                break
+            # Print countdown every 60 seconds
+            mins_left = int(remaining / 60)
+            if mins_left > 0 and int(remaining) % 60 == 0:
+                self.log(
+                    f"  ... {mins_left}m remaining until retry",
+                    Colors.YELLOW + Colors.DIM
+                )
+            time.sleep(min(60, remaining))
+
+        self.log("Wait complete. Resuming.", Colors.GREEN)
+
+    def get_retry_count(self, prompt_id):
+        """Get current retry count for a prompt."""
+        retry_counts = self.state.get("retry_counts", {})
+        return retry_counts.get(prompt_id, 0)
+
+    def increment_retry(self, prompt_id):
+        """Increment and persist retry count for a prompt."""
+        if "retry_counts" not in self.state:
+            self.state["retry_counts"] = {}
+        current = self.state["retry_counts"].get(prompt_id, 0)
+        self.state["retry_counts"][prompt_id] = current + 1
+        self.save_state()
+        return current + 1
+
+    def reset_retry(self, prompt_id):
+        """Reset retry count on success."""
+        if "retry_counts" in self.state and prompt_id in self.state["retry_counts"]:
+            del self.state["retry_counts"][prompt_id]
+            self.save_state()
+
+    # =========================================================================
+
+    def git_push(self, prompt_id):
+        """Git add, commit, and push after each successful prompt"""
+        try:
+            self.log(f"Git push: committing prompt {prompt_id}...", Colors.CYAN)
+            subprocess.run(
+                ["git", "add", "-A"],
+                cwd=PROJECT_DIR, capture_output=True, text=True, timeout=30
+            )
+            subprocess.run(
+                ["git", "commit", "-m", f"builder: complete prompt {prompt_id}"],
+                cwd=PROJECT_DIR, capture_output=True, text=True, timeout=30
+            )
+            push_result = subprocess.run(
+                ["git", "push", "origin", "main"],
+                cwd=PROJECT_DIR, capture_output=True, text=True, timeout=60
+            )
+            if push_result.returncode == 0:
+                self.log_success(f"Git push successful after prompt {prompt_id}")
+            else:
+                self.log(f"Git push warning: {push_result.stderr[:200]}", Colors.YELLOW)
+        except Exception as e:
+            self.log(f"Git push failed (non-fatal): {e}", Colors.YELLOW)
+
     def run_claude_code(self, prompt_text, prompt_id):
         """Run Claude Code with a specific prompt, streaming output in real-time"""
         self.log("=" * 60, Colors.BLUE)
-        self.log(f"🚀 STARTING PROMPT {prompt_id}", Colors.BLUE + Colors.BOLD)
+        self.log(f"STARTING PROMPT {prompt_id}", Colors.BLUE + Colors.BOLD)
         self.log("=" * 60, Colors.BLUE)
-        print(colored(f"  Task: {prompt_text[:100]}...\n", Colors.CYAN))
+        # Show first 200 chars of the task
+        preview = prompt_text[:200].replace('\n', ' ')
+        print(colored(f"  Task: {preview}...\n", Colors.CYAN), flush=True)
 
-        # Add SUPER AGGRESSIVE automation instructions
+        # Add automation instructions
         auto_instructions = """
-═══════════════════════════════════════════════════════════════
-⚠️  EXTREME AUTOMATION MODE - ABSOLUTE ZERO QUESTIONS  ⚠️
-═══════════════════════════════════════════════════════════════
+===================================================================
+  EXTREME AUTOMATION MODE - ZERO QUESTIONS ALLOWED
+===================================================================
 
-🚨 YOU ARE IN FULLY AUTOMATED BUILD MODE 🚨
+ABSOLUTE RULES:
+- NEVER ASK QUESTIONS - Make decisions and execute
+- NEVER WAIT FOR APPROVAL - Everything is pre-approved
+- NEVER PAUSE - Execute immediately
+- ALWAYS OUTPUT AS YOU WORK - Show progress every 10-15 seconds
+- ALWAYS COMPLETE TASKS - No partial work
+- ALWAYS BUILD ON EXISTING - Review context first
 
-MANDATORY FIRST - REVIEW CONTEXT:
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-BEFORE executing your task:
+AUTOMATIC DECISIONS:
+- DATABASE_URL missing? -> Use env var or skip gracefully
+- Sync vs Async? -> SYNCHRONOUS (spec requirement)
+- Which approach? -> Most production-ready
+- Plan approval? -> AUTO-APPROVED
+- Mock vs Real data? -> Mock, clearly marked
+- Missing info? -> Make reasonable assumption
 
-1. READ to understand current state:
-   - CLAUDE.md (if exists - project context)
-   - build_log_detail.txt (recent work - last 50 lines)
-   - List files: ls -la app/ components/ lib/ migrations/
-   - Check: package.json, .env, existing code
+COMPLETION SIGNAL: PROMPT_COMPLETE
 
-2. OUTPUT your context review:
-   "📋 CONTEXT REVIEW:
-   - Existing files: [list what you found]
-   - Last work done: [what previous prompt did]
-   - Current state: [brief summary]
-   - My task now: [what you're about to do]
-   
-   ✅ Context reviewed, beginning execution..."
-
-3. THEN execute building on what exists
-
-ABSOLUTE IRON-CLAD RULES:
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-❌ NEVER EVER ASK QUESTIONS - Decide and execute
-❌ NEVER WAIT FOR APPROVAL - Everything is pre-approved
-❌ NEVER REQUEST CONFIRMATION - Just execute
-❌ NEVER SAY "What would you like" - Execute the task
-❌ NEVER SAY "Should I proceed" - YES, always proceed
-❌ NEVER SAY "Which approach" - Pick best and execute
-❌ NEVER SAY "Ready to implement when you approve" - NO, implement NOW
-❌ NEVER PAUSE OR WAIT - Immediate execution only
-
-✅ ALWAYS review context first (see above)
-✅ ALWAYS output as you work (every 10-15 seconds)
-✅ ALWAYS show file names as you create them
-✅ ALWAYS complete tasks fully
-✅ ALWAYS build on existing work (don't replace)
-
-IF YOU CATCH YOURSELF:
-- Asking any question → STOP. Make the decision. Execute.
-- Waiting for input → STOP. Assume YES. Execute.
-- Planning silently → STOP. Output your plan. Execute immediately.
-- Hesitating → STOP. Pick the best option. Execute.
-
-REQUIRED OUTPUT (narrate as you work):
-- "Creating file: app/api/auth/route.ts..."
-- "Writing authentication logic..."
-- "Adding error handling..."
-- "Testing auth endpoint..."
-- "✅ Auth complete"
-
-AUTOMATIC DECISIONS (NEVER ASK):
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-✓ DATABASE_URL missing? → Use process.env or create in-memory mock
-✓ Sync vs Async? → SYNCHRONOUS (spec says real-time <3sec)
-✓ Which approach? → Most production-ready, follows SCOPE.md
-✓ Plan approval? → AUTO-APPROVED, execute immediately
-✓ Mock vs Real data? → Mock data, clearly marked for deletion
-✓ Technology? → Use package.json dependencies
-✓ Architecture? → Follow SCOPE_AND_REQUIREMENTS.md
-✓ Files exist? → Review and enhance, don't replace
-✓ Missing info? → Reasonable assumption, continue
-✓ Execution method? → Subagent-driven, fast iteration
-✓ Test coverage? → Comprehensive (80%+), production-ready
-✓ Error handling? → Complete with logging
-✓ Security? → Maximum, follow SECURITY.md
-
-PRODUCTION STANDARDS:
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-✓ COMPLETE production code (ZERO TODOs/stubs)
-✓ Comprehensive error handling
-✓ Detailed logging for debugging
-✓ Thorough automated tests
-✓ Security best practices
-✓ Clean, maintainable code
-✓ TypeScript strict mode
-✓ Build on existing work
-
-TEST DATA MARKING:
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-✓ Mark: "// TEST_DATA - DELETE BEFORE PRODUCTION"
-✓ Mark: "-- SEED DATA - DELETE BEFORE PRODUCTION"
-✓ Test users: test_user_1, test_user_2, demo_admin
-✓ Test communities: f/test-tech, f/demo-science
-✓ Easy cleanup: DELETE FROM users WHERE username LIKE 'test_%';
-
-COMPLETION SIGNAL (REQUIRED):
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-When finished, output: ✅ PROMPT_COMPLETE
-
-═══════════════════════════════════════════════════════════════
-🔥 FIRST: Review context. THEN: Execute task below 🔥
-═══════════════════════════════════════════════════════════════
+===================================================================
 
 """
 
         full_prompt = auto_instructions + prompt_text
-        
-        # Save full prompt
+
+        # Save full prompt for debugging
         temp_prompt_file = PROJECT_DIR / f".temp_prompt_{prompt_id.replace('.', '_')}.txt"
         with open(temp_prompt_file, 'w', encoding='utf-8') as f:
             f.write(full_prompt)
 
-        cmd = [
-            "claude",
-            "-p", full_prompt,
-            "--dangerously-skip-permissions"
-        ]
-
+        cmd = ["claude", "-p", full_prompt, "--dangerously-skip-permissions"]
         output_lines = []
-        last_status_time = time.time()
         start_time = time.time()
+        last_output_time = time.time()
+        last_heartbeat_time = time.time()
+        last_activity_time = time.time()   # Tracks stdout OR file changes
+        last_file_check_time = time.time()
+        baseline_mtime = self.get_latest_file_mtime()
 
         try:
             process = subprocess.Popen(
@@ -335,61 +477,146 @@ When finished, output: ✅ PROMPT_COMPLETE
                 bufsize=1
             )
 
-            for line in process.stdout:
-                line = line.rstrip('\n')
-                output_lines.append(line)
-                self.log_detail(f"[{prompt_id}] {line}")
+            # Use a background thread to read stdout so we can timeout
+            line_queue = queue.Queue()
+            reader = threading.Thread(
+                target=_reader_thread,
+                args=(process.stdout, line_queue),
+                daemon=True
+            )
+            reader.start()
 
-                # Show ALL output in real-time (colored)
-                if line.strip():
-                    # Color code based on content
-                    if 'error' in line.lower() or 'fail' in line.lower():
-                        print(colored(f"  >> {line[:150]}", Colors.RED), flush=True)
-                    elif 'success' in line.lower() or '✅' in line or 'complete' in line.lower():
-                        print(colored(f"  >> {line[:150]}", Colors.GREEN), flush=True)
-                    elif 'creating' in line.lower() or 'writing' in line.lower():
-                        print(colored(f"  >> {line[:150]}", Colors.CYAN), flush=True)
-                    else:
-                        print(f"  >> {line[:150]}", flush=True)
+            stream_ended = False
+            while not stream_ended:
+                # Try to get a line with a short timeout
+                try:
+                    line = line_queue.get(timeout=0.5)
+                except queue.Empty:
+                    line = None
 
-                # Status update every 3 seconds
                 now = time.time()
-                if now - last_status_time >= 3:
-                    elapsed = now - start_time
-                    mins = int(elapsed // 60)
-                    secs = int(elapsed % 60)
-                    print(colored(f"  [{mins:02d}:{secs:02d}] Prompt {prompt_id} | {len(output_lines)} lines", Colors.YELLOW), flush=True)
-                    last_status_time = now
+                elapsed = now - start_time
+                mins = int(elapsed // 60)
+                secs = int(elapsed % 60)
 
-            process.wait(timeout=3600)
+                if line is not None:
+                    # Check for sentinel (stream closed)
+                    if line is None:
+                        stream_ended = True
+                        continue
+
+                    line = line.rstrip('\n')
+                    output_lines.append(line)
+                    last_output_time = now
+                    last_activity_time = now
+                    last_heartbeat_time = now
+                    self.log_detail(f"[{prompt_id}] {line}")
+
+                    # Print ALL non-empty lines with color coding
+                    if line.strip():
+                        if 'error' in line.lower() or 'fail' in line.lower():
+                            print(colored(f"  >> {line[:200]}", Colors.RED), flush=True)
+                        elif 'success' in line.lower() or 'PROMPT_COMPLETE' in line or 'complete' in line.lower():
+                            print(colored(f"  >> {line[:200]}", Colors.GREEN), flush=True)
+                        elif any(kw in line.lower() for kw in ['creating', 'writing', 'reading', 'built', 'added', 'updated']):
+                            print(colored(f"  >> {line[:200]}", Colors.CYAN), flush=True)
+                        else:
+                            print(f"  >> {line[:200]}", flush=True)
+                    continue
+
+                # line is None from queue.Empty — no data yet
+                # Check if process has ended
+                if process.poll() is not None:
+                    # Drain remaining lines
+                    while True:
+                        try:
+                            remaining = line_queue.get_nowait()
+                            if remaining is None:
+                                stream_ended = True
+                                break
+                            remaining = remaining.rstrip('\n')
+                            output_lines.append(remaining)
+                            self.log_detail(f"[{prompt_id}] {remaining}")
+                            if remaining.strip():
+                                print(f"  >> {remaining[:200]}", flush=True)
+                        except queue.Empty:
+                            stream_ended = True
+                            break
+                    continue
+
+                # === No output right now — check file changes, heartbeat, inactivity ===
+                silence_duration = now - last_output_time
+
+                # Periodically check if files have been modified (Claude is working)
+                if now - last_file_check_time >= FILE_CHECK_INTERVAL:
+                    last_file_check_time = now
+                    current_mtime = self.get_latest_file_mtime()
+                    if current_mtime > baseline_mtime:
+                        baseline_mtime = current_mtime
+                        last_activity_time = now  # File changed — Claude is working
+
+                inactive_duration = now - last_activity_time
+
+                # Heartbeat every HEARTBEAT_INTERVAL seconds of silence
+                if now - last_heartbeat_time >= HEARTBEAT_INTERVAL:
+                    last_activity = datetime.fromtimestamp(last_activity_time).strftime("%H:%M:%S")
+                    file_note = " (files changing)" if last_activity_time > last_output_time else ""
+                    print(colored(
+                        f"  [{mins:02d}:{secs:02d}] Prompt {prompt_id} still running... "
+                        f"| {len(output_lines)} lines | last activity: {last_activity}{file_note} "
+                        f"| silent {int(silence_duration)}s",
+                        Colors.YELLOW + Colors.DIM
+                    ), flush=True)
+                    last_heartbeat_time = now
+
+                # Inactivity timeout — no stdout AND no file changes
+                if inactive_duration >= INACTIVITY_TIMEOUT:
+                    self.log(
+                        f"INACTIVITY TIMEOUT: No output or file changes for {int(inactive_duration)}s — killing stuck session",
+                        Colors.RED, "WARN"
+                    )
+                    process.kill()
+                    process.wait(timeout=10)
+                    return "timeout", '\n'.join(output_lines), time.time() - start_time
+
+                # Overall session timeout
+                if elapsed >= MAX_SESSION_TIME:
+                    self.log(f"SESSION TIMEOUT: {mins}m exceeded max session time", Colors.RED, "WARN")
+                    process.kill()
+                    process.wait(timeout=10)
+                    return "timeout", '\n'.join(output_lines), time.time() - start_time
+
+            # Stream ended normally
+            process.wait(timeout=30)
             returncode = process.returncode
             output = '\n'.join(output_lines)
 
             elapsed = time.time() - start_time
             mins = int(elapsed // 60)
             secs = int(elapsed % 60)
-            
+
             self.log("=" * 60, Colors.GREEN)
-            self.log(f"✅ COMPLETED PROMPT {prompt_id} in {mins}m {secs}s", Colors.GREEN + Colors.BOLD)
+            self.log(f"COMPLETED PROMPT {prompt_id} in {mins}m {secs}s", Colors.GREEN + Colors.BOLD)
             self.log(f"   Return code: {returncode} | Output lines: {len(output_lines)}", Colors.GREEN)
             self.log("=" * 60, Colors.GREEN)
-            print("")
+            print("", flush=True)
 
             # Check for token limit
-            if returncode in TOKEN_LIMIT_RETURN_CODES:
-                self.log("Token limit detected (return code), will restart", Colors.YELLOW)
-                return "token_limit"
-
             for pattern in TOKEN_LIMIT_PATTERNS:
                 if pattern.lower() in output.lower():
-                    self.log("Token limit detected (output pattern), will restart", Colors.YELLOW)
-                    return "token_limit"
+                    self.log("Token limit detected, will restart", Colors.YELLOW)
+                    return "token_limit", output, elapsed
+
+            # Check for rate limit
+            for pattern in RATE_LIMIT_PATTERNS:
+                if pattern.lower() in output.lower():
+                    self.log("Rate limit detected", Colors.YELLOW)
+                    return "rate_limit", output, elapsed
 
             # Check for errors
             if returncode != 0:
                 self.log_error(f"Claude Code failed with return code {returncode}")
-                self.log_error(f"Output (last 500 chars): {output[-500:]}")
-                return "error"
+                return "error", output, elapsed
 
             # Save full output
             output_file = PROJECT_DIR / f"outputs/prompt_{prompt_id.replace('.', '_')}.txt"
@@ -397,169 +624,234 @@ When finished, output: ✅ PROMPT_COMPLETE
             with open(output_file, 'w', encoding='utf-8') as f:
                 f.write(output)
 
-            return "success"
+            return "success", output, elapsed
 
         except subprocess.TimeoutExpired:
             process.kill()
             self.log_error(f"Prompt {prompt_id} timed out after 1 hour")
-            return "timeout"
+            return "timeout", '\n'.join(output_lines), MAX_SESSION_TIME
 
         except Exception as e:
             self.log_error(f"Exception running Prompt {prompt_id}: {e}")
-            return "error"
+            return "error", '\n'.join(output_lines), 0
 
         finally:
             if temp_prompt_file.exists():
                 temp_prompt_file.unlink()
-    
-    def check_injection(self):
-        """Check INJECTION.md for hot-injected tasks"""
-        if not INJECTION_FILE.exists():
-            return True
-            
-        with open(INJECTION_FILE, 'r', encoding='utf-8') as f:
-            content = f.read().strip()
-            
-        # Check if file is empty or just template
-        if not content or 'Hot Task Injection' in content or len(content) < 50:
+
+    def run_bootstrap(self):
+        """Run bootstrap task to update all documentation"""
+        # Skip if flag set
+        if self.skip_bootstrap_flag:
+            self.log("--skip-bootstrap flag set, skipping bootstrap", Colors.YELLOW)
+            self.bootstrap_complete = True
+            self.save_state()
             return True
 
-        self.log("INJECTION.md has content - executing injected task first...", Colors.YELLOW)
-        self.log(f"Injection: {content[:100]}...", Colors.YELLOW)
-
-        result = self.run_claude_code(content, "INJECT")
-
-        # Clear the file
-        with open(INJECTION_FILE, 'w', encoding='utf-8') as f:
-            f.write("")
-
-        if result == "success":
-            self.log_success("Injection completed successfully, resuming normal build")
+        # Skip if BOOTSTRAP.md doesn't exist (already done)
+        if not BOOTSTRAP_FILE.exists():
+            self.log("BOOTSTRAP.md not found — bootstrap already complete, skipping", Colors.YELLOW)
+            self.bootstrap_complete = True
+            self.save_state()
             return True
-        elif result == "token_limit":
-            self.log("Token limit hit during injection, will restart", Colors.YELLOW)
-            return False
-        else:
-            self.log_error(f"Injection failed with result: {result}")
-            self.log("Continuing normal build despite injection failure...", Colors.YELLOW)
-            return True
-    
+
+        self.log("=" * 60, Colors.HEADER)
+        self.log("BOOTSTRAP TASK: Updating all documentation", Colors.HEADER + Colors.BOLD)
+        self.log("=" * 60, Colors.HEADER)
+
+        # Read bootstrap instructions
+        with open(BOOTSTRAP_FILE, 'r', encoding='utf-8') as f:
+            bootstrap_content = f.read()
+
+        # Run bootstrap with retry logic
+        for attempt in range(MAX_RETRIES_PER_PROMPT):
+            result, output, elapsed = self.run_claude_code(bootstrap_content, "BOOTSTRAP")
+
+            if result == "success":
+                self.log_success("Bootstrap complete - docs updated")
+                self.bootstrap_complete = True
+                self.save_state()
+
+                # Verify BOOTSTRAP.md was deleted by Claude Code
+                if BOOTSTRAP_FILE.exists():
+                    self.log("BOOTSTRAP.md still exists, deleting manually", Colors.YELLOW)
+                    BOOTSTRAP_FILE.unlink()
+
+                return True
+
+            elif result == "rate_limit":
+                analysis = self.analyze_failure(output, 1, elapsed)
+                self.wait_with_countdown(analysis.wait_seconds, analysis.message)
+                continue
+
+            elif result == "token_limit" or result == "timeout":
+                self.log(f"Bootstrap attempt {attempt+1} returned {result}, retrying...", Colors.YELLOW)
+                time.sleep(RETRY_BACKOFF_BASE * (2 ** attempt))
+                continue
+
+            else:
+                self.log_error(f"Bootstrap failed with result: {result}")
+                if attempt < MAX_RETRIES_PER_PROMPT - 1:
+                    wait = RETRY_BACKOFF_BASE * (2 ** attempt)
+                    self.log(f"Retrying in {wait}s (attempt {attempt+2}/{MAX_RETRIES_PER_PROMPT})...", Colors.YELLOW)
+                    time.sleep(wait)
+                    continue
+                return False
+
+        self.log_error(f"Bootstrap failed after {MAX_RETRIES_PER_PROMPT} attempts")
+        return False
+
     def run_build(self):
         """Main build loop"""
         self.log("=" * 60, Colors.BOLD)
-        self.log("🔥 FUEGA.AI AUTOMATED BUILDER STARTED 🔥", Colors.BOLD)
+        self.log("FUEGA.AI AUTOMATED BUILDER", Colors.BOLD)
         self.log("=" * 60, Colors.BOLD)
-        self.log(f"Total prompts to execute: {len(self.prompts)}", Colors.CYAN)
-        self.log(f"Starting from prompt {self.current_prompt}", Colors.CYAN)
+        self.log(f"Total prompts: {len(self.prompts)}", Colors.CYAN)
+        self.log(f"Resuming from prompt index: {self.current_prompt}", Colors.CYAN)
         self.log(f"Current phase: {self.current_phase}", Colors.CYAN)
-        print("")
+        completed = self.state.get("completed_prompts", [])
+        if completed:
+            self.log(f"Already completed: {', '.join(completed)}", Colors.GREEN)
+        print("", flush=True)
+
+        # Run bootstrap if not already complete
+        if not self.bootstrap_complete:
+            if not self.run_bootstrap():
+                return "failed"
+            print("", flush=True)
 
         if not self.prompts:
-            self.log_error("No prompts found in PROMPT.md! Nothing to do.")
+            self.log_error("No prompts found in PROMPT.md!")
             return "failed"
-        
+
         # Process each prompt
         for i in range(self.current_prompt, len(self.prompts)):
             prompt = self.prompts[i]
             prompt_id = prompt["id"]
             prompt_text = prompt["text"]
-            
+
             # Skip if already completed
             if prompt_id in self.state.get("completed_prompts", []):
                 self.log(f"Skipping {prompt_id} (already completed)", Colors.YELLOW)
                 continue
 
-            # Check for hot-injected tasks
-            if not self.check_injection():
-                self.current_prompt = i
-                self.save_state()
-                return "restart"
+            # Run prompt with auto-fix retry loop
+            success = False
+            for attempt in range(MAX_RETRIES_PER_PROMPT):
+                retry_num = self.get_retry_count(prompt_id)
+                if retry_num > 0:
+                    self.log(
+                        f"Retry {retry_num}/{MAX_RETRIES_PER_PROMPT} for prompt {prompt_id}",
+                        Colors.YELLOW + Colors.BOLD
+                    )
 
-            # Run prompt
-            result = self.run_claude_code(prompt_text, prompt_id)
-            
-            # Handle result
-            if result == "success":
-                if "completed_prompts" not in self.state:
-                    self.state["completed_prompts"] = []
-                self.state["completed_prompts"].append(prompt_id)
-                self.current_prompt = i + 1
-                self.current_phase = prompt["phase"]
-                self.save_state()
-                
-                # Show progress
-                completed = len(self.state["completed_prompts"])
-                total = len(self.prompts)
-                remaining = total - completed
-                percent = int((completed / total) * 100)
-                self.log(f"📊 PROGRESS: {completed}/{total} ({percent}%) | {remaining} remaining", Colors.CYAN + Colors.BOLD)
-                print("")
-                
-            elif result == "token_limit":
-                self.log("Restarting due to token limit...", Colors.YELLOW)
-                self.current_prompt = i
-                self.save_state()
-                return "restart"
-                
-            elif result == "error" or result == "timeout":
-                self.log_error(f"Build stopped at Prompt {prompt_id}")
-                self.log_error("Manual intervention required")
-                self.log_error(f"Check outputs/prompt_{prompt_id.replace('.', '_')}.txt for details")
+                result, output, elapsed = self.run_claude_code(prompt_text, prompt_id)
+
+                if result == "success":
+                    success = True
+                    self.reset_retry(prompt_id)
+                    break
+
+                # Analyze the failure
+                analysis = self.analyze_failure(output, 1 if result != "success" else 0, elapsed)
+                self.log(
+                    f"AUTO-FIX: {analysis.category} — {analysis.message}",
+                    Colors.YELLOW, "AUTOFIX"
+                )
+
+                if result == "rate_limit" or analysis.category == "rate_limit":
+                    # Rate limit: wait for reset, don't count as retry
+                    self.wait_with_countdown(analysis.wait_seconds, analysis.message)
+                    continue
+
+                if not analysis.retriable:
+                    self.log_error(f"Non-retriable failure for {prompt_id}: {analysis.category}")
+                    break
+
+                # Increment retry counter
+                count = self.increment_retry(prompt_id)
+                if count >= MAX_RETRIES_PER_PROMPT:
+                    self.log_error(f"Max retries ({MAX_RETRIES_PER_PROMPT}) exhausted for {prompt_id}")
+                    break
+
+                # Wait with backoff before retry
+                wait = RETRY_BACKOFF_BASE * (2 ** attempt)
+                self.log(f"Waiting {wait}s before retry {count+1}...", Colors.YELLOW)
+                time.sleep(wait)
+
+            if not success:
+                self.log_error(f"Build stopped at Prompt {prompt_id} after all retries")
                 self.save_state()
                 return "failed"
-        
+
+            # === Prompt succeeded ===
+            if "completed_prompts" not in self.state:
+                self.state["completed_prompts"] = []
+            self.state["completed_prompts"].append(prompt_id)
+            self.current_prompt = i + 1
+            self.current_phase = prompt["phase"]
+            self.save_state()
+
+            # Git commit and push so changes are visible on the web
+            self.git_push(prompt_id)
+
+            # Show progress
+            completed_count = len(self.state["completed_prompts"])
+            total = len(self.prompts)
+            remaining = total - completed_count
+            percent = int((completed_count / total) * 100)
+            self.log(
+                f"PROGRESS: {completed_count}/{total} ({percent}%) | {remaining} remaining",
+                Colors.CYAN + Colors.BOLD
+            )
+            print("", flush=True)
+
         # All prompts completed!
         self.log("=" * 60, Colors.GREEN + Colors.BOLD)
-        self.log_success("🎉 ALL PROMPTS COMPLETED! 🎉")
+        self.log_success("ALL PROMPTS COMPLETED!")
         self.log("=" * 60, Colors.GREEN + Colors.BOLD)
-        self.log("fuega.ai v1 build complete!", Colors.GREEN)
-        elapsed_hours = (datetime.now() - self.start_time).total_seconds() / 3600
-        self.log(f"Total time: {elapsed_hours:.1f} hours", Colors.GREEN)
+        self.log("fuega.ai build complete!", Colors.GREEN)
         return "done"
+
 
 def main():
     """Entry point"""
-    print(colored("=" * 60, Colors.BOLD))
-    print(colored("🔥 FUEGA.AI FINAL BUILDER 🔥", Colors.BOLD))
-    print(colored("=" * 60, Colors.BOLD))
-    print("")
-    
-    # Ask for confirmation before cleanup
-    print(colored("⚠️  WARNING: This will DELETE all files except planning docs!", Colors.RED + Colors.BOLD))
-    print(colored("   Files that will be KEPT:", Colors.YELLOW))
-    for filename in sorted(KEEP_FILES):
-        print(colored(f"     ✓ {filename}", Colors.GREEN))
-    print("")
-    print(colored("   Everything else will be DELETED!", Colors.RED))
-    print("")
-    
-    response = input(colored("Continue? (yes/no): ", Colors.YELLOW))
-    if response.lower() not in ['yes', 'y']:
-        print(colored("Cancelled by user", Colors.RED))
-        return
-    
-    print("")
-    
-    # Run builder in a loop
-    while True:
-        builder = FuegaBuilder()
-        
-        # Clean project on first run
-        if builder.state.get("total_runs") == 1:
-            builder.cleanup_project()
-        
-        result = builder.run_build()
+    parser = argparse.ArgumentParser(description="fuega.ai Automated Builder")
+    parser.add_argument(
+        '--skip-bootstrap', action='store_true',
+        help='Skip the bootstrap step (useful if docs are already updated)'
+    )
+    args = parser.parse_args()
 
-        if result == "restart":
-            print(colored("\n--- Restarting builder (new session) ---\n", Colors.YELLOW))
-            time.sleep(2)
-            continue
-        elif result == "done":
-            print(colored("\n🔥 fuega.ai is ready to launch! 🔥\n", Colors.GREEN + Colors.BOLD))
-            break
-        else:  # "failed"
-            print(colored("\n⚠️ Build paused - check logs for details\n", Colors.RED))
-            break
+    print(colored("=" * 60, Colors.BOLD))
+    print(colored("  FUEGA.AI BUILDER", Colors.BOLD))
+    print(colored("=" * 60, Colors.BOLD))
+    print("")
+    print(colored("This builder will:", Colors.CYAN))
+    print(colored("  1. Run BOOTSTRAP (if needed) - update all docs", Colors.CYAN))
+    print(colored("  2. Resume from checkpoint - no cleanup", Colors.CYAN))
+    print(colored("  3. Build fuega.ai with full features", Colors.CYAN))
+    print(colored(f"  4. Inactivity timeout: {INACTIVITY_TIMEOUT}s (stdout+files) | Heartbeat: every {HEARTBEAT_INTERVAL}s", Colors.CYAN))
+    print(colored(f"  5. Auto-fix: rate limits (wait+retry), crashes ({MAX_RETRIES_PER_PROMPT} retries/prompt)", Colors.CYAN))
+    if args.skip_bootstrap:
+        print(colored("  ** --skip-bootstrap flag set **", Colors.YELLOW))
+    print("")
+
+    # Single run — no outer restart loop needed, auto-fix handles retries internally
+    builder = FuegaBuilder(skip_bootstrap=args.skip_bootstrap)
+    result = builder.run_build()
+
+    if result == "done":
+        print(colored("\n  fuega.ai is ready!\n", Colors.GREEN + Colors.BOLD))
+        print(colored("Next steps:", Colors.CYAN))
+        print(colored("  1. Review build logs", Colors.CYAN))
+        print(colored("  2. Test locally: npm run dev", Colors.CYAN))
+        print(colored("  3. Deploy: git push origin main", Colors.CYAN))
+    else:  # "failed"
+        print(colored("\n  Build paused - check logs\n", Colors.RED))
+        print(colored("The auto-fix system exhausted all retries.", Colors.YELLOW))
+        print(colored("Check build_log.txt and build_log_detail.txt for details.", Colors.YELLOW))
+
 
 if __name__ == "__main__":
     main()

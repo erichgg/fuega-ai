@@ -358,6 +358,56 @@ RUN: npm test tests/unit/database/
 ALL TESTS MUST PASS before Phase 2.
 ```
 
+### Prompt 1.4: V2 Database Migrations (Gamification Tables)
+```
+CONTEXT: Adding 7 new tables and modifying 4 existing tables for V2 gamification features.
+
+READ: GAMIFICATION.md (complete spec), DATA_SCHEMA.md (existing schema)
+
+CREATE migrations/006_badges_and_user_badges.sql:
+- badges table: badge_id (PK slug), name, description, icon_concept, category ENUM(founder/engagement/contribution/governance/referral/special), rarity ENUM(common/uncommon/rare/epic/legendary), version, earn_criteria JSONB, created_at
+- user_badges table: id UUID PK, user_id FK, badge_id FK, earned_at TIMESTAMPTZ, metadata JSONB (e.g. founder_number), UNIQUE(user_id, badge_id)
+- Seed all 40 badge definitions from GAMIFICATION.md Appendix A
+- RLS: users can read all badges, can only see own user_badges
+- Indexes: user_badges(user_id), user_badges(badge_id)
+
+CREATE migrations/007_notifications.sql:
+- notifications table: id UUID PK, user_id FK, type ENUM(reply_post/reply_comment/spark/mention/community_update/governance/badge_earned/tip_received/referral), title TEXT, body TEXT, action_url TEXT, content JSONB, read BOOLEAN DEFAULT false, read_at TIMESTAMPTZ, push_sent BOOLEAN DEFAULT false, created_at TIMESTAMPTZ
+- RLS: users can only see own notifications
+- Indexes: notifications(user_id, created_at DESC) WHERE read = false, notifications(user_id, type)
+- user_push_subscriptions table: id UUID PK, user_id FK, endpoint TEXT, p256dh TEXT, auth TEXT, created_at, UNIQUE(user_id, endpoint)
+
+CREATE migrations/008_referrals.sql:
+- referrals table: id UUID PK, referrer_id FK, referee_id FK UNIQUE, ip_hash TEXT, reverted BOOLEAN DEFAULT false, created_at TIMESTAMPTZ
+- CHECK(referrer_id != referee_id) -- prevent self-referral
+- Add to users table: referral_code VARCHAR(8) UNIQUE, referral_count INTEGER DEFAULT 0, referred_by UUID FK
+- RLS: users can see own referrals only
+- Indexes: referrals(referrer_id), referrals(referee_id), users(referral_code)
+
+CREATE migrations/009_cosmetics_and_user_cosmetics.sql:
+- cosmetics table: cosmetic_id (PK slug), name, description, preview_concept, category ENUM(theme/border/title/color/avatar/banner/icon), subcategory ENUM(profile/community), price_cents INTEGER, metadata JSONB, available BOOLEAN DEFAULT true, created_at
+- user_cosmetics table: id UUID PK, user_id FK, cosmetic_id FK, stripe_payment_id TEXT, purchased_at TIMESTAMPTZ, refunded BOOLEAN DEFAULT false, refunded_at TIMESTAMPTZ, UNIQUE(user_id, cosmetic_id)
+- Seed all 40 cosmetics from GAMIFICATION.md Appendix B
+- RLS: cosmetics readable by all, user_cosmetics only own
+- Indexes: user_cosmetics(user_id)
+
+CREATE migrations/010_tips_and_user_updates.sql:
+- tips table: id UUID PK, user_id FK, amount_cents INTEGER, currency VARCHAR(3) DEFAULT 'usd', recurring BOOLEAN DEFAULT false, stripe_session_id TEXT, stripe_subscription_id TEXT, message TEXT(500), created_at TIMESTAMPTZ
+- ALTER users ADD: founder_number INTEGER UNIQUE CHECK(1-5000), primary_badge_id FK, notification_preferences JSONB DEFAULT '{}', active_cosmetics JSONB DEFAULT '{}'
+- ALTER communities ADD: ai_config JSONB, banner_cosmetic_id FK, icon_cosmetic_id FK, theme_cosmetic_id FK
+- ALTER community_memberships ADD: role ENUM(founder/moderator/vip/active_member/member/lurker) DEFAULT 'member', role_assigned_at TIMESTAMPTZ, role_assigned_by UUID
+- ALTER ai_prompt_history ADD: ai_config JSONB
+- RLS on tips: users see own only
+- Indexes: tips(user_id, created_at DESC)
+
+RUN all new migrations against Railway PostgreSQL.
+Verify with \dt that all new tables exist.
+
+CRITICAL: Do NOT drop or modify existing data. These are additive migrations only.
+
+OUTPUT: All 5 migration files created and executed successfully.
+```
+
 ### Phase 1 Summary
 ```bash
 cat >> PROGRESS.md << EOF
@@ -809,6 +859,477 @@ TEST:
 - AI prompt updates
 ```
 
+### Prompt 2.5: Badge System API
+```
+CONTEXT: Implementing badge system from GAMIFICATION.md. 40 badges across 6 categories.
+
+READ: GAMIFICATION.md (Badges section, Badge Award Pipeline, Appendix A)
+
+FILES TO CREATE:
+- app/api/badges/route.ts (list all badge definitions)
+- app/api/badges/[badgeId]/route.ts (get single badge)
+- app/api/users/[id]/badges/route.ts (get user's earned badges)
+- app/api/users/[id]/primary-badge/route.ts (set primary badge)
+- lib/services/badges.service.ts
+- lib/services/badge-eligibility.ts (eligibility checking logic)
+- lib/feature-flags.ts (shared feature flag checker)
+- tests/api/badges/badges.test.ts
+
+FEATURE FLAG: Check ENABLE_BADGE_DISTRIBUTION before awarding.
+When false: log eligibility but do NOT insert into user_badges.
+When true: award badges and send notifications.
+
+ENDPOINTS:
+
+GET /api/badges
+- Public, no auth required
+- Returns all 40 badge definitions with category, rarity, earn_criteria
+- Cached response (badges rarely change)
+
+GET /api/badges/:badgeId
+- Public
+- Returns single badge definition + percentage of users who have it
+
+GET /api/users/:id/badges
+- Public (badges are visible on profiles)
+- Returns all badges earned by user, sorted by rarity (legendary first)
+- Include: earned_at, metadata (e.g. founder_number)
+
+PUT /api/users/:id/primary-badge
+- Auth required (own user only)
+- Body: { badge_id: "v1_founder" }
+- Validate user actually owns the badge
+- Update users.primary_badge_id
+
+BADGE ELIGIBILITY SERVICE (lib/services/badge-eligibility.ts):
+- checkAllBadges(userId): checks user against all 40 badge criteria
+- checkThresholdBadge(userId, metric, threshold): generic threshold check
+- Metrics to check: total_posts, total_approved_posts, total_comments, total_approved_comments, communities_joined, total_sparks_received, max_post_sparks, consecutive_active_days, account_age_days, total_proposal_votes, total_proposals_created, total_proposals_passed, referral_count, communities_created, max_community_members_created, nighttime_activity_count
+- Event-triggered checks: after post/comment creation, after spark, after community join, after proposal vote
+- Hourly cron fallback for time-based badges (streaks, account age)
+
+BADGE AWARD PIPELINE:
+1. Check eligibility
+2. Check ENABLE_BADGE_DISTRIBUTION flag
+3. If false -> log to console, skip award
+4. If true -> check idempotency (user doesn't already have badge)
+5. INSERT into user_badges
+6. Send badge_earned notification (if ENABLE_NOTIFICATIONS is true)
+
+SECURITY:
+- Badges awarded SERVER-SIDE ONLY
+- No API endpoint to directly award badges (except admin manual award for bug_hunter, verified_human)
+- Founder badge: enforce CHECK constraint (1-5000), assign sequentially
+- All badge awards logged
+
+TEST:
+- List all badges (40 returned)
+- Get single badge with user percentage
+- Award first_post badge after creating a post
+- Award founder badge to early user
+- Set primary badge
+- Fail to set unowned badge as primary
+- ENABLE_BADGE_DISTRIBUTION=false skips award
+- Idempotency (awarding same badge twice = no error, no duplicate)
+```
+
+### Prompt 2.6: Notification System API
+```
+CONTEXT: Implementing notification system from GAMIFICATION.md.
+
+READ: GAMIFICATION.md (Notifications section, Notification Types, Batching Rules, Desktop Push)
+
+FILES TO CREATE:
+- app/api/notifications/route.ts (list user notifications)
+- app/api/notifications/[id]/read/route.ts (mark as read)
+- app/api/notifications/read-all/route.ts (mark all as read)
+- app/api/notifications/preferences/route.ts (get/update preferences)
+- app/api/notifications/push-subscribe/route.ts (register/unregister push)
+- lib/services/notifications.service.ts
+- lib/services/push-notifications.ts (Web Push API)
+- tests/api/notifications/notifications.test.ts
+
+FEATURE FLAG: Check ENABLE_NOTIFICATIONS. When false, all endpoints return empty/403.
+
+ENDPOINTS:
+
+GET /api/notifications?page=1&limit=20&type=
+- Auth required
+- Returns paginated notifications, newest first
+- Filter by type (optional)
+- Include unread_count in response header or meta
+
+PUT /api/notifications/:id/read
+- Auth required (own notifications only)
+- Set read=true, read_at=NOW()
+
+PUT /api/notifications/read-all
+- Auth required
+- Mark all unread notifications as read
+
+GET /api/notifications/preferences
+- Auth required
+- Returns notification preferences (per-type toggles + push toggles)
+- Defaults from GAMIFICATION.md NotificationPreferences interface
+
+PUT /api/notifications/preferences
+- Auth required
+- Update preferences
+- Body: { reply_post: true, push_spark: false, ... }
+
+POST /api/notifications/push-subscribe
+- Auth required
+- Body: { subscription: PushSubscription } (from browser Push API)
+- Store in user_push_subscriptions table
+
+DELETE /api/notifications/push-subscribe
+- Auth required
+- Remove push subscription
+
+NOTIFICATION CREATION SERVICE (lib/services/notifications.service.ts):
+- createNotification(userId, type, title, body, actionUrl, content)
+- Check user preferences before creating
+- Handle spark batching:
+  - If unread spark notification exists for same content_id within 1 hour:
+    - Update existing: increment spark_count, update latest_sparker, update title
+    - Do NOT send push for batched sparks
+  - Otherwise: create new notification, send push if enabled
+
+PUSH SERVICE (lib/services/push-notifications.ts):
+- Use web-push npm package
+- Generate VAPID keys (store in env: VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY)
+- sendPush(userId, payload): look up subscriptions, send to all
+- Rate limit: max 1 push per minute per user
+- Handle 410 Gone (expired subscription) by deleting from DB
+
+NOTIFICATION TRIGGERS (integrate into existing services):
+- Post comment -> notify post author (reply_post)
+- Reply to comment -> notify parent comment author (reply_comment)
+- Spark post/comment -> notify author (spark, batchable)
+- @mention in post/comment -> notify mentioned user (mention)
+- Community AI config changed -> notify all members (community_update)
+- New governance proposal -> notify community members (governance)
+- Badge earned -> notify user (badge_earned)
+- Referral signup -> notify referrer (referral)
+
+TEST:
+- Create notification on comment reply
+- Spark batching (5 sparks = 1 notification, not 5)
+- Mark as read / mark all as read
+- Preferences respected (disabled type = no notification)
+- Push subscription register/unregister
+- Feature flag off = empty responses
+```
+
+### Prompt 2.7: Referral System API
+```
+CONTEXT: Implementing referral system from GAMIFICATION.md.
+
+READ: GAMIFICATION.md (Referral System section, Referral Fraud Prevention)
+
+FILES TO CREATE:
+- app/api/referrals/link/route.ts (get/generate referral link)
+- app/api/referrals/stats/route.ts (get referral count)
+- app/api/referrals/history/route.ts (list referred users)
+- lib/services/referrals.service.ts
+- lib/middleware/referral-tracking.ts (cookie middleware)
+- tests/api/referrals/referrals.test.ts
+
+ENDPOINTS:
+
+GET /api/referrals/link
+- Auth required
+- Returns user's referral link: https://fuega.ai/join?ref={code}
+- Lazy-generates referral_code if not exists (8 char alphanumeric)
+
+GET /api/referrals/stats
+- Auth required
+- Returns: { referral_count, next_badge_at, next_badge_name, current_badge }
+- next_badge_at: 1, 5, 25, or 100 depending on current count
+
+GET /api/referrals/history
+- Auth required
+- Returns list of referred users (username, join date, status: active/reverted)
+
+REFERRAL TRACKING MIDDLEWARE:
+- On GET /join?ref={code}: set cookie fuega_ref={code}, HttpOnly, Secure, SameSite=Lax, Max-Age=2592000 (30 days)
+- On POST /api/auth/signup: check fuega_ref cookie
+  1. Look up referrer by referral_code
+  2. Validate: referrer != new user, different IP hashes, referrer account >= 24hrs old
+  3. If valid: INSERT referral, INCREMENT referrer.referral_count, check badge eligibility
+  4. If invalid: silently ignore (user still signs up)
+  5. Clear fuega_ref cookie
+
+FRAUD PREVENTION (from GAMIFICATION.md):
+- Self-referral: DB constraint CHECK(referrer_id != referee_id)
+- Same IP: compare ip_hash of referrer and referee
+- Duplicate referee: DB constraint UNIQUE(referee_id)
+- Bot signup: account must survive 7 days without ban (daily cron reverts if banned)
+- Rapid signups: max 10 referral signups per hour per referrer IP
+- Account age: referrer must have account >= 24 hours old
+- ALL failures are SILENT (user still registers, referral just not counted)
+
+REFERRAL REVERSION (daily cron):
+- Check if any referred accounts were banned within 7 days
+- If so: decrement referrer.referral_count, mark referral as reverted=true
+- Re-check badge eligibility (may lose badge if count drops below threshold)
+
+BADGE PROGRESSION:
+- 1 referral -> first_referral (Spark Spreader)
+- 5 referrals -> v1_ambassador
+- 25 referrals -> v1_influencer
+- 100 referrals -> v1_legend
+- All badges in chain are earned and kept
+
+TEST:
+- Generate referral link
+- Track referral via cookie on signup
+- Self-referral silently ignored
+- Same IP silently ignored
+- Referral count increments
+- Badge awarded at threshold
+- Reversion on banned referee
+```
+
+### Prompt 2.8: Cosmetics Shop API
+```
+CONTEXT: Implementing cosmetics shop from GAMIFICATION.md. 40 cosmetic items, Stripe payments.
+
+READ: GAMIFICATION.md (Cosmetics Shop section, Purchase Flow, Refund Policy, Appendix B)
+
+FILES TO CREATE:
+- app/api/cosmetics/route.ts (list catalog)
+- app/api/cosmetics/[cosmeticId]/route.ts (get single)
+- app/api/cosmetics/checkout/route.ts (create Stripe checkout)
+- app/api/cosmetics/[id]/refund/route.ts (request refund)
+- app/api/users/[id]/cosmetics/route.ts (get owned cosmetics)
+- app/api/users/[id]/cosmetics/active/route.ts (set active cosmetics)
+- app/api/webhooks/stripe/route.ts (Stripe webhook handler)
+- lib/services/cosmetics.service.ts
+- lib/services/stripe.service.ts (shared Stripe utilities)
+- tests/api/cosmetics/cosmetics.test.ts
+
+FEATURE FLAG: Check ENABLE_COSMETICS_SHOP. When false: shop returns 404, checkout returns 403.
+
+DEPENDENCIES: npm install stripe
+
+ENV VARS NEEDED:
+- STRIPE_SECRET_KEY
+- STRIPE_PUBLISHABLE_KEY (NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY)
+- STRIPE_WEBHOOK_SECRET
+
+ENDPOINTS:
+
+GET /api/cosmetics
+- Public
+- Returns all available cosmetics grouped by category
+- Include: cosmetic_id, name, description, category, subcategory, price_cents
+
+GET /api/cosmetics/:cosmeticId
+- Public
+- Returns single cosmetic with full metadata
+
+POST /api/cosmetics/checkout
+- Auth required
+- Feature flag check
+- Body: { cosmetic_id: "theme_lava_flow" }
+- Server-side validation:
+  a. Cosmetic exists and is available
+  b. User doesn't already own it
+  c. Price from SERVER catalog (NEVER trust client)
+- Create Stripe Checkout Session with metadata: { user_id, cosmetic_id }
+- Return: { checkout_url: "https://checkout.stripe.com/..." }
+
+POST /api/cosmetics/:id/refund
+- Auth required
+- Validate: user owns cosmetic, purchased less than 7 days ago
+- Abuse check: max 5 refunds in 30 days
+- Initiate Stripe refund via payment_intent
+- Mark user_cosmetics: refunded=true, refunded_at=NOW()
+- Remove cosmetic from active cosmetics if applied
+
+GET /api/users/:id/cosmetics
+- Public (cosmetics are visible on profiles)
+- Returns owned cosmetics list
+
+PUT /api/users/:id/cosmetics/active
+- Auth required (own user only)
+- Body: { theme: "theme_lava_flow", border: "border_flame_ring", title: "title_phoenix", ... }
+- Validate user owns each cosmetic
+- Update users.active_cosmetics JSONB
+
+STRIPE WEBHOOK HANDLER (app/api/webhooks/stripe/route.ts):
+- Verify webhook signature with STRIPE_WEBHOOK_SECRET
+- Handle checkout.session.completed:
+  - Extract user_id, cosmetic_id from metadata
+  - INSERT into user_cosmetics (stripe_payment_id, purchased_at)
+  - Send notification if enabled
+- Handle charge.refunded:
+  - Mark cosmetic as refunded
+- Return 200 OK always (after processing)
+
+SECURITY:
+- NEVER trust client-side prices
+- Verify webhook signatures
+- Validate ownership before refund
+- Rate limit checkout creation (5 per minute per user)
+
+TEST:
+- List cosmetics catalog
+- Create checkout session (mock Stripe)
+- Webhook processes purchase
+- Refund within 7 days succeeds
+- Refund after 7 days fails
+- Can't buy cosmetic already owned
+- Active cosmetics applied to profile
+- Feature flag off = 403/404
+```
+
+### Prompt 2.9: Tip Jar API
+```
+CONTEXT: Implementing tip jar from GAMIFICATION.md. One-time and recurring tips via Stripe.
+
+READ: GAMIFICATION.md (Tip Jar section, Tip Options, Tip Flow)
+
+FILES TO CREATE:
+- app/api/tips/checkout/route.ts (create tip checkout/subscription)
+- app/api/tips/subscriptions/route.ts (list active subscriptions)
+- app/api/tips/subscriptions/[id]/route.ts (cancel subscription)
+- app/api/supporters/route.ts (public supporters list)
+- lib/services/tips.service.ts
+- tests/api/tips/tips.test.ts
+
+FEATURE FLAG: Check ENABLE_TIP_JAR. When false: endpoints return 403, UI hidden.
+
+ENDPOINTS:
+
+POST /api/tips/checkout
+- Auth required
+- Feature flag check
+- Body: { amount_cents: 500, recurring: false, message: "Keep it going!" }
+- Validate: amount >= 100, amount <= 100000
+- If recurring=false: create Stripe Checkout Session (payment mode)
+- If recurring=true: create Stripe Checkout Session (subscription mode, monthly interval)
+- Metadata: { user_id, recurring, message }
+- Return: { checkout_url }
+
+GET /api/tips/subscriptions
+- Auth required
+- Returns user's active recurring tip subscriptions
+- Include: amount, status, next_billing_date
+
+DELETE /api/tips/subscriptions/:id
+- Auth required
+- Cancel Stripe subscription (at period end)
+- Revoke "Recurring Supporter" badge (this badge is revocable)
+
+GET /api/supporters
+- Public
+- Returns recent tips (username, amount, message, date)
+- Users can opt out (check notification_preferences)
+- Include: total lifetime tips, current monthly recurring total
+
+STRIPE WEBHOOK ADDITIONS (add to existing handler):
+- checkout.session.completed (for one-time tips):
+  - INSERT into tips table
+  - Award "supporter" badge if first tip
+- invoice.paid (for recurring tips):
+  - INSERT into tips table
+  - Award "recurring_supporter" badge if first recurring payment
+- customer.subscription.deleted:
+  - Revoke "recurring_supporter" badge
+- invoice.payment_failed:
+  - Log warning, Stripe handles retry
+
+BADGE AWARDS:
+- Any tip >= $1.00 -> "supporter" badge (permanent, never revoked)
+- Active recurring subscription -> "recurring_supporter" badge (revoked on cancel)
+
+TEST:
+- One-time tip checkout creation
+- Recurring tip subscription creation
+- Cancel subscription
+- Supporter badge awarded after first tip
+- Recurring supporter badge awarded then revoked on cancel
+- Supporters page shows recent tips
+- Feature flag off = 403
+```
+
+### Prompt 2.10: Structured AI Config & Feature Flags
+```
+CONTEXT: Replacing free-form AI prompts with structured config. Adding feature flag system.
+
+READ: GAMIFICATION.md (Structured AI Config section, Feature Flags section)
+
+FILES TO CREATE:
+- lib/ai/structured-config.ts (config schema, validation, prompt generation)
+- lib/feature-flags.ts (if not already created in 2.5)
+- app/api/features/route.ts (public feature flag endpoint)
+- app/api/communities/[id]/ai-config/route.ts (get/propose config changes)
+- app/api/communities/[id]/config-proposals/route.ts (list/create config proposals)
+- app/api/communities/[id]/config-proposals/[proposalId]/vote/route.ts
+- tests/api/ai-config/structured-config.test.ts
+
+STRUCTURED AI CONFIG SCHEMA (from GAMIFICATION.md):
+- toxicity_threshold: 0-90 (max 90, never fully disable moderation)
+- spam_sensitivity: low | medium | high
+- self_promotion_policy: block | flag | allow
+- link_sharing_policy: block | flag | allow
+- allowed_post_types: text | link | image (at least one required)
+- allow_nsfw: boolean (default false)
+- language_requirements: ISO 639-1 codes
+- require_english: boolean
+- minimum_account_age_days: 0-365
+- minimum_spark_score: 0-10000
+- blocked_keywords: string[] (max 100)
+- flagged_keywords: string[] (max 100)
+- config_change_quorum: 5-100 (percentage)
+- config_change_threshold: 51-100 (percentage)
+- config_change_voting_days: 1-30
+
+AUTO-GENERATE AI PROMPT from config (lib/ai/structured-config.ts):
+- buildPromptFromConfig(communityName, config): string
+- Template transforms structured settings into natural language prompt
+- Platform rules ALWAYS appended (no CSAM, no doxxing, no violence, no spam, no impersonation)
+- Output format instruction: JSON { decision, confidence, reasoning }
+
+GUARDRAILS (server-side enforced):
+- toxicity_threshold max 90
+- quorum min 5%
+- threshold min 51%
+- at least one post type allowed
+- platform rules cannot be overridden
+
+CONFIG CHANGE PROPOSALS:
+- POST /api/communities/:id/config-proposals
+  - Auth required, member for 7+ days
+  - Body: { changes: { toxicity_threshold: 70 }, rationale: "..." }
+  - Validate all values within guardrail limits
+- Follows same lifecycle as existing proposals: discussion -> voting -> auto-execute
+- On pass: update community.ai_config, regenerate prompt, log to ai_prompt_history
+
+FEATURE FLAGS ENDPOINT:
+GET /api/features
+- Public
+- Returns: { badges: true/false, cosmetics_shop: true/false, tip_jar: true/false, notifications: true/false }
+- Read from environment variables
+
+UPDATE existing moderation service (lib/ai/moderation.service.ts):
+- Use structured config instead of raw prompts
+- Call buildPromptFromConfig() to generate the prompt
+- Keep injection defense (still sanitize user content)
+
+TEST:
+- Valid config validates
+- Invalid config rejected (toxicity > 90, quorum < 5)
+- Prompt generation from config
+- Config proposal creation
+- Config proposal voting
+- Config auto-applied on pass
+- Feature flags endpoint returns correct values
+- Platform rules always in generated prompt
+```
+
 ### Phase 2 Summary
 ```bash
 cat >> PROGRESS.md << EOF
@@ -1141,7 +1662,9 @@ SEO:
 
 ### Prompt 3.3: State Management & API Integration
 ```
-IMPLEMENT client-side state:
+IMPLEMENT client-side state including V2 gamification features:
+
+READ: GAMIFICATION.md (Feature Flags section for client-side feature checking)
 
 FILES TO CREATE:
 - lib/api/client.ts (API wrapper)
@@ -1151,8 +1674,14 @@ FILES TO CREATE:
 - lib/hooks/useCommunities.ts
 - lib/hooks/useVoting.ts
 - lib/hooks/useProposals.ts
+- lib/hooks/useBadges.ts (badge fetching, primary badge)
+- lib/hooks/useNotifications.ts (notification inbox, unread count, polling)
+- lib/hooks/useCosmetics.ts (catalog, owned, active)
+- lib/hooks/useReferrals.ts (link, stats, history)
+- lib/hooks/useFeatureFlags.ts (check enabled features from /api/features)
 - lib/contexts/AuthContext.tsx
 - lib/contexts/ThemeContext.tsx
+- lib/contexts/NotificationContext.tsx (unread count, polling)
 
 API CLIENT:
 ```typescript
@@ -1508,6 +2037,274 @@ ACCESSIBILITY:
 - Focus indicators
 - Keyboard navigation
 - Screen reader friendly
+```
+
+### Prompt 3.5: Badge UI Components
+```
+CONTEXT: Building badge UI from GAMIFICATION.md badge display rules.
+
+READ: GAMIFICATION.md (Badge Display Rules, Badge Categories, Rarity Levels, Appendix A)
+READ: UI_DESIGN.md (visual design guidance)
+
+FILES TO CREATE:
+- components/fuega/badge-card.tsx (profile badge display)
+- components/fuega/badge-progress.tsx (progress bar toward next badge)
+- components/fuega/badge-tooltip.tsx (hover tooltip: name, rarity, date, % of users)
+- components/fuega/badge-gallery.tsx (all earned badges grid)
+- components/fuega/primary-badge-selector.tsx (choose primary badge)
+- components/fuega/badge-notification.tsx (badge earned animation)
+- app/(app)/badges/page.tsx (badge gallery page - all 40 badges)
+- app/(app)/u/[username]/badges/page.tsx (user's earned badges)
+- lib/hooks/useBadges.ts
+
+BADGE CARD:
+- Display badge icon area, name, rarity color
+- Rarity glow effects: common=none, uncommon=green pulse, rare=blue shimmer, epic=purple radiance, legendary=fire/lava glow
+- Earned vs unearned states (greyed out if not earned)
+- Click to see full details
+
+BADGE TOOLTIP (on hover):
+- Badge name and description
+- Rarity level with color
+- Date earned (if owned)
+- "X% of users have this badge"
+- For founder badges: show founder number
+
+BADGE GALLERY PAGE (/badges):
+- Grid of all 40 badges organized by category
+- Filter by category tabs
+- Sort by rarity
+- Show which ones user has earned vs locked
+- Progress indicators for threshold badges
+
+PRIMARY BADGE SELECTOR:
+- Modal showing earned badges
+- Click to set as primary
+- Primary badge shown next to username everywhere
+
+BADGE NOTIFICATION:
+- Animated popup when badge is earned
+- Rarity-appropriate animation (legendary = dramatic fire effect)
+- Link to view badge details
+
+RESPONSIVE: Mobile grid 2 columns, desktop 4-5 columns
+ANIMATIONS: Framer Motion for badge earn animation, glow effects via CSS
+
+TEST:
+- Badge card renders with correct rarity color
+- Tooltip shows correct data
+- Gallery filters by category
+- Primary badge selection works
+- Unearned badges show as locked
+```
+
+### Prompt 3.6: Notification UI Components
+```
+CONTEXT: Building notification UI from GAMIFICATION.md notification spec.
+
+READ: GAMIFICATION.md (Notifications section, Notification UI Components, Notification Preferences)
+READ: UI_DESIGN.md
+
+FILES TO CREATE:
+- components/fuega/notification-bell.tsx (header bell icon with unread count)
+- components/fuega/notification-dropdown.tsx (dropdown showing recent notifications)
+- components/fuega/notification-item.tsx (single notification display)
+- components/fuega/notification-inbox.tsx (full page inbox)
+- components/fuega/notification-settings.tsx (preference toggles)
+- app/(app)/notifications/page.tsx (full notification inbox page)
+- app/(app)/settings/notifications/page.tsx (notification preferences)
+- lib/hooks/useNotifications.ts
+- lib/services/push-client.ts (client-side Web Push registration)
+
+NOTIFICATION BELL:
+- Bell icon in header/navbar
+- Red badge with unread count (hide if 0)
+- Click opens dropdown
+- Polling every 30 seconds for new notifications (or WebSocket future)
+- Feature flag: hide bell if ENABLE_NOTIFICATIONS=false
+
+NOTIFICATION DROPDOWN:
+- Last 20 notifications, scrollable
+- "Mark all as read" button
+- "View all" link to full inbox
+- Each item: icon (type-specific), title, body preview, relative timestamp, read/unread dot
+- Click notification -> navigate to action_url + mark as read
+
+NOTIFICATION ITEM:
+- Type-specific icon (reply=speech bubble, spark=flame, badge=star, etc.)
+- Title (bold if unread)
+- Body preview (first 100 chars)
+- Relative timestamp ("2m ago", "1h ago", "3d ago")
+- Unread indicator (blue dot)
+
+FULL INBOX (/notifications):
+- All notifications with pagination
+- Filter by type
+- Mark individual as read
+- Mark all as read
+- Delete/dismiss
+
+NOTIFICATION SETTINGS (/settings/notifications):
+- Toggle switches for each notification type
+- Separate section for push notifications
+- "Enable desktop notifications" button (triggers browser permission)
+- Per-type push toggles
+
+PUSH CLIENT (lib/services/push-client.ts):
+- requestPushPermission(): prompt browser
+- subscribeToPush(): get PushSubscription, send to server
+- unsubscribeFromPush(): remove subscription
+
+INTEGRATION: Update header/navbar to include NotificationBell component.
+
+TEST:
+- Bell shows correct unread count
+- Dropdown renders notifications
+- Click marks as read
+- Settings toggles save correctly
+- Push permission flow works
+- Feature flag hides bell when off
+```
+
+### Prompt 3.7: Cosmetic Shop UI
+```
+CONTEXT: Building cosmetics shop UI from GAMIFICATION.md.
+
+READ: GAMIFICATION.md (Cosmetics Shop section, Complete Catalog, Purchase Flow, Refund Policy)
+READ: UI_DESIGN.md
+
+FILES TO CREATE:
+- app/(app)/shop/page.tsx (shop catalog page)
+- app/(app)/shop/success/page.tsx (post-purchase success)
+- components/fuega/shop-catalog.tsx (grid of cosmetics)
+- components/fuega/cosmetic-card.tsx (single cosmetic item card)
+- components/fuega/cosmetic-preview.tsx (live preview on profile)
+- components/fuega/purchase-modal.tsx (confirm purchase -> redirect to Stripe)
+- components/fuega/inventory.tsx (user's owned cosmetics)
+- components/fuega/refund-button.tsx (refund within 7 days)
+- app/(app)/settings/cosmetics/page.tsx (manage active cosmetics)
+- lib/hooks/useCosmetics.ts
+- lib/hooks/useStripeCheckout.ts
+
+FEATURE FLAG: Check /api/features. If cosmetics_shop=false, redirect shop to 404.
+
+SHOP CATALOG (/shop):
+- Header with "Cosmetics Shop" title
+- Category tabs: Themes, Borders, Titles, Colors, Avatars, Banners, Icons
+- Subcategory filter: Profile vs Community
+- Grid of cosmetic cards
+- Each card: name, preview, price, "Purchase" button
+- Already owned items show "Owned" badge instead of purchase button
+
+COSMETIC CARD:
+- Preview area (CSS-rendered for themes/borders/colors, image for banners/icons)
+- Name and description
+- Price ($X.XX format from cents)
+- Category badge
+- Purchase button or Owned indicator
+
+COSMETIC PREVIEW:
+- Live preview showing how cosmetic looks applied to user's profile
+- For themes: show profile page snippet with theme applied
+- For borders: show avatar with border
+- For titles: show username with title below
+- For colors: show username in selected color
+
+PURCHASE MODAL:
+- Cosmetic name, price, preview
+- "Pay with Stripe" button
+- Redirects to Stripe Checkout hosted page
+- Return URL: /shop/success?session_id={CHECKOUT_SESSION_ID}
+
+SUCCESS PAGE:
+- "Purchase complete!" message
+- Link to apply cosmetic
+- Link back to shop
+
+INVENTORY (/settings/cosmetics):
+- Grid of owned cosmetics
+- Toggle active/inactive for each slot (theme, border, title, color, avatar, banner)
+- Refund button (only if purchased < 7 days ago)
+- Shows active cosmetics applied to profile preview
+
+REFUND BUTTON:
+- Only visible if purchase < 7 days
+- Shows "X days left to refund"
+- Confirm dialog before refunding
+- Calls POST /api/cosmetics/:id/refund
+
+RESPONSIVE: Mobile 1-2 columns, desktop 3-4 columns
+
+TEST:
+- Shop page renders catalog
+- Category filtering works
+- Purchase modal opens
+- Stripe checkout redirect works
+- Owned items show correctly
+- Refund button visible/hidden based on 7-day window
+- Active cosmetics apply to profile
+- Feature flag hides shop
+```
+
+### Prompt 3.8: Referral UI
+```
+CONTEXT: Building referral UI from GAMIFICATION.md referral section.
+
+READ: GAMIFICATION.md (Referral System section, Referral Dashboard UI, Badge Progression)
+READ: UI_DESIGN.md
+
+FILES TO CREATE:
+- app/(app)/settings/referrals/page.tsx (referral dashboard)
+- components/fuega/referral-link.tsx (link display with copy button)
+- components/fuega/referral-share.tsx (share buttons)
+- components/fuega/referral-progress.tsx (progress toward next badge)
+- components/fuega/referral-history.tsx (table of referred users)
+- app/join/page.tsx (referral landing page - sets cookie, redirects to signup)
+- lib/hooks/useReferrals.ts
+
+REFERRAL DASHBOARD (/settings/referrals):
+- Referral link with prominent copy-to-clipboard button
+- Share buttons: Twitter/X, Reddit, Discord, generic share (Web Share API)
+- Referral count (big number display)
+- Progress bar toward next referral badge
+- Next badge info: name, requirement, how many more needed
+- Referral history table: username, join date, status (active/reverted)
+
+REFERRAL LINK COMPONENT:
+- Display: https://fuega.ai/join?ref=XXXXXXXX
+- Copy button with "Copied!" feedback
+- QR code option (nice to have)
+
+SHARE BUTTONS:
+- Twitter/X: pre-filled tweet "Join me on fuega.ai - community-governed discussions with transparent AI moderation [link]"
+- Reddit: share link
+- Discord: copy formatted message
+- Generic: Web Share API if available, fallback to copy link
+
+PROGRESS BAR:
+- Visual bar showing progress to next badge
+- Labels: current count / next threshold
+- Badge icons at milestones (1, 5, 25, 100)
+- Already earned milestones highlighted
+
+REFERRAL HISTORY:
+- Table with columns: Username, Joined, Status
+- Status: green "Active" or red "Reverted"
+- Paginated if many referrals
+
+REFERRAL LANDING PAGE (/join?ref=code):
+- Sets fuega_ref cookie via middleware
+- Shows "You've been invited to fuega.ai!" message
+- "Create Account" button -> /signup
+- If already logged in: show "You already have an account" message
+
+TEST:
+- Referral link displays correctly
+- Copy to clipboard works
+- Share buttons have correct URLs
+- Progress bar reflects actual count
+- History table shows referred users
+- /join page sets cookie and redirects
 ```
 
 ### Phase 3 Summary
