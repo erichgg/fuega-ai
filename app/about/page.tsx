@@ -84,7 +84,7 @@ const comparisonRows: {
     fuega: "yes",
   },
   {
-    feature: "No influence / premium tiers",
+    feature: "No influence for sale",
     reddit: "no",
     discord: "no",
     x: "no",
@@ -151,7 +151,7 @@ const comparisonRows: {
 function CellIcon({ value }: { value: CellValue }) {
   switch (value) {
     case "yes":
-      return <Check className="mx-auto h-4 w-4 text-flame-400" />;
+      return <Check className="mx-auto h-4 w-4 text-green-400" />;
     case "no":
       return <X className="mx-auto h-4 w-4 text-ember-500" />;
     case "partial":
@@ -277,7 +277,7 @@ export default function AboutPage() {
           </div>
 
           <p className="mt-4 text-xs text-ash-600">
-            <Check className="mr-1 inline h-3 w-3 text-flame-400" /> = yes
+            <Check className="mr-1 inline h-3 w-3 text-green-400" /> = yes
             <span className="mx-2 text-ash-700">·</span>
             <Minus className="mr-1 inline h-3 w-3 text-ash-400" /> = partial / inconsistent
             <span className="mx-2 text-ash-700">·</span>

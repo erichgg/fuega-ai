@@ -477,11 +477,17 @@ BRANDING — CRITICAL:
 CONTENT STYLE — CRITICAL:
 - When comparing fuega to other platforms, use TABLES not lists (see about page for pattern)
 - Compare against Reddit, Discord, X specifically with check/x/partial icons
-- Use CellIcon pattern: yes=flame check, no=ash X, partial=ash minus
+- TABLE ICON CONSISTENCY: yes=green-400 Check, no=ember-500 X, partial=ash-400 Minus — ALWAYS these colors
 - No generic "traditional platforms" — name the competitors directly
-- Advertise: no ads, no premium tiers, no tracking, tip-supported — weave naturally, not cringe
+- Advertise: no ads, no influence, no tracking, tip-supported — weave naturally, not cringe
 - Mod logs are PER-COMMUNITY (scoped to the level the AI agent moderates), not a single global feed
 - The /mod-log route should show community-scoped logs with community filter, not a flat global list
+
+VISUAL VERIFICATION — IMPORTANT:
+- After building/modifying any page, take a screenshot using the preview tools to verify layout
+- Check for: content filling width properly, no excessive whitespace, proper spacing
+- Delete screenshots after verification — don't leave them in the repo
+- Use max-w-7xl consistently — the (app) layout already uses it, static pages should too
 
 MOD LOG SCOPING:
 - Moderation logs belong to the community where moderation happened
@@ -497,7 +503,7 @@ VOICE & PHILOSOPHY:
 - Not a "free speech platform" or a "safe space" — it's about self-governance
 - No team section — we're anonymous like our users. What matters is the code and community.
 - Welcome feedback, contributions, audits — we build what the community votes for
-- Tip-supported: no ads, no premium tiers, no data selling. Tips = badge + cosmetics. Same platform for everyone.
+- Tip-supported: no ads, no influence for sale, no data selling. Tips = badge + cosmetics. Same platform for everyone.
 - Don't be cringe about any of this — state facts, let the values speak for themselves
 
 AI MODEL GOVERNANCE (FUTURE — DESIGN FOR THIS NOW):

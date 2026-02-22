@@ -187,7 +187,9 @@ export default function SecurityPage() {
             What <F /> knows about you
           </h2>
           <p className="mt-2 text-sm text-ash-500">
-            Green means we store it. Red means we don&apos;t — and never will.
+            <Check className="mr-1 inline h-3 w-3 text-green-400" /> = we store this
+            <span className="mx-2 text-ash-700">·</span>
+            <X className="mr-1 inline h-3 w-3 text-ember-500" /> = we don&apos;t and never will
           </p>
 
           <div className="mt-6 overflow-x-auto">
@@ -216,7 +218,7 @@ export default function SecurityPage() {
                     </td>
                     <td className="px-4 py-3 text-center">
                       {row.collected ? (
-                        <Check className="mx-auto h-4 w-4 text-flame-400" />
+                        <Check className="mx-auto h-4 w-4 text-green-400" />
                       ) : (
                         <X className="mx-auto h-4 w-4 text-ember-500" />
                       )}

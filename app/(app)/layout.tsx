@@ -30,8 +30,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           open={sidebarOpen}
           onClose={() => setSidebarOpen(false)}
         />
-        <main className="flex-1 px-4 py-4 lg:px-6">
-          <div className="mx-auto max-w-3xl">
+        <main className="flex-1 px-4 py-4 lg:px-6 2xl:px-8">
+          <div className="mx-auto max-w-7xl">
             <ErrorBoundary>{children}</ErrorBoundary>
           </div>
         </main>
