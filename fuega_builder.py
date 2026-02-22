@@ -490,6 +490,16 @@ MOD LOG SCOPING:
 - Each community page (f/name) should have its own mod log tab/section
 - agent_level field (community/category/platform) determines which tier made the decision
 
+VOICE & PHILOSOPHY:
+- fuega is "open source social media" — use that framing, not "platform" or "product"
+- Emphasize: self-determination, community ownership, democratic governance, accountability
+- We bring common sense back — communities set their own standards, not corporations
+- Not a "free speech platform" or a "safe space" — it's about self-governance
+- No team section — we're anonymous like our users. What matters is the code and community.
+- Welcome feedback, contributions, audits — we build what the community votes for
+- Tip-supported: no ads, no premium tiers, no data selling. Tips = badge + cosmetics. Same platform for everyone.
+- Don't be cringe about any of this — state facts, let the values speak for themselves
+
 COMPLETION SIGNAL: PROMPT_COMPLETE
 
 ===================================================================

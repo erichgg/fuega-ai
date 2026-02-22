@@ -6,6 +6,9 @@ import {
   Check,
   X,
   Minus,
+  GitFork,
+  MessageSquare,
+  Heart,
 } from "lucide-react";
 import { FlameLogo } from "@/components/fuega/flame-logo";
 
@@ -257,49 +260,105 @@ export default function AboutPage() {
           </p>
         </section>
 
-        {/* Team */}
+        {/* Open Source Social Media */}
         <section className="mt-12 max-w-3xl">
           <h2 className="text-2xl font-bold text-ash-100 sm:text-3xl">
-            The team
+            Open source social media
           </h2>
           <p className="mt-4 text-ash-300 leading-relaxed">
-            <F /> is built by a small team that practices what we preach. We
-            operate anonymously — just like our users. We don&apos;t believe
-            knowing our names makes the platform better. What matters is the
-            code, the transparency, and the community.
+            <F /> isn&apos;t a product — it&apos;s a project. The code is open.
+            The moderation prompts are public. The governance is democratic. If
+            you don&apos;t like how something works, you can propose a change,
+            rally votes, and actually fix it. No support tickets. No &quot;we
+            hear you.&quot; Real power, in your hands.
           </p>
-          <div className="mt-6 border border-ash-800 bg-ash-900/30 p-5">
-            <div className="flex items-center gap-3">
-              <Flame className="h-5 w-5 text-flame-400" />
-              <div>
-                <p className="text-sm font-medium text-ash-200">
-                  Open source contributors welcome
-                </p>
-                <p className="text-xs text-ash-400">
-                  The platform is built in the open. Contributions, audits, and
-                  feedback are always welcome.
-                </p>
-              </div>
+          <p className="mt-4 text-ash-400 leading-relaxed">
+            We believe social media lost its way when platforms started
+            optimizing for engagement instead of community. When algorithms
+            learned that outrage keeps people scrolling. When &quot;moderation&quot;
+            became a black box that nobody could audit. <F /> is an attempt to
+            course-correct — to prove that communities can govern themselves
+            when you give them the right tools and full transparency.
+          </p>
+
+          <div className="mt-6 grid gap-4 sm:grid-cols-3">
+            <div className="border border-ash-800 bg-ash-900/30 p-4">
+              <GitFork className="h-5 w-5 text-flame-400" />
+              <p className="mt-2 text-sm font-medium text-ash-200">
+                Fully open source
+              </p>
+              <p className="mt-1 text-xs text-ash-500">
+                Audit the code. Fork it. Contribute. We have nothing to hide.
+              </p>
+            </div>
+            <div className="border border-ash-800 bg-ash-900/30 p-4">
+              <Heart className="h-5 w-5 text-flame-400" />
+              <p className="mt-2 text-sm font-medium text-ash-200">
+                Tip-supported
+              </p>
+              <p className="mt-1 text-xs text-ash-500">
+                No ads. No data sales. Tips get you a badge and cosmetics.
+                Everyone uses the same platform.
+              </p>
+            </div>
+            <div className="border border-ash-800 bg-ash-900/30 p-4">
+              <MessageSquare className="h-5 w-5 text-flame-400" />
+              <p className="mt-2 text-sm font-medium text-ash-200">
+                Built on feedback
+              </p>
+              <p className="mt-1 text-xs text-ash-500">
+                Every feature started as a community proposal. We build what
+                you vote for, not what investors want.
+              </p>
             </div>
           </div>
         </section>
 
-        {/* Contact */}
+        {/* The Bigger Picture */}
+        <section className="mt-12 max-w-3xl">
+          <h2 className="text-2xl font-bold text-ash-100 sm:text-3xl">
+            Bringing accountability back
+          </h2>
+          <p className="mt-4 text-ash-300 leading-relaxed">
+            Somewhere along the way, the internet forgot that communities work
+            best when people set their own standards. <F /> brings that back.
+            Find people who share your values. Set the rules together. Hold each
+            other — and the AI — accountable. Every moderation decision is
+            logged, reasoned, and challengeable.
+          </p>
+          <p className="mt-4 text-ash-400 leading-relaxed">
+            This isn&apos;t about being a &quot;free speech platform&quot; or a
+            &quot;safe space.&quot; It&apos;s about self-determination. Your
+            community decides what&apos;s acceptable. Not a corporation. Not an
+            algorithm. Not some trust &amp; safety team you&apos;ll never meet.
+            You. The people who actually use the space.
+          </p>
+        </section>
+
+        {/* Get Involved */}
         <section className="mt-12 max-w-3xl pb-12">
           <h2 className="text-2xl font-bold text-ash-100 sm:text-3xl">
-            Contact
+            Get involved
           </h2>
-          <p className="mt-4 text-ash-300">
-            The best way to reach us is through the platform itself. Have a
-            suggestion? Create a governance proposal. Found a bug? Post in{" "}
+          <p className="mt-4 text-ash-300 leading-relaxed">
+            <F /> is built in the open and shaped by the people who use it.
+            Have a suggestion? Create a governance proposal. Found a bug?
+            Post in{" "}
             <span className="text-flame-400 font-semibold">f</span>
             <span className="text-ash-500 mx-0.5">|</span>
             <span className="text-flame-400 font-semibold">meta</span>.
-            Security concern? See our{" "}
+            Want to contribute code? The repo is public. Security concern?
+            See our{" "}
             <Link href="/security" className="text-flame-400 hover:underline">
               security page
             </Link>{" "}
             for responsible disclosure.
+          </p>
+          <p className="mt-4 text-ash-500 leading-relaxed">
+            We don&apos;t have a marketing team, a sales team, or a PR
+            department. We have a community, a codebase, and a belief that
+            common sense still works when you put the right people in charge of
+            their own spaces.
           </p>
         </section>
       </main>
