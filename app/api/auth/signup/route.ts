@@ -5,6 +5,7 @@ import { signToken, setAuthCookie } from "@/lib/auth/jwt";
 import { hashIp, getClientIp } from "@/lib/auth/ip-hash";
 import { checkSignupRateLimit } from "@/lib/auth/rate-limit";
 import { queryOne } from "@/lib/db";
+import { handleReferralOnSignup } from "@/lib/middleware/referral-tracking";
 
 const FOUNDER_BADGE_LIMIT = 5000;
 
@@ -84,6 +85,11 @@ export async function POST(req: Request) {
         { status: 500 }
       );
     }
+
+    // Process referral (non-blocking — failures are silent, user still signs up)
+    handleReferralOnSignup(user.id, ipHash).catch((err) => {
+      console.error("[signup] Referral processing error (non-blocking):", err);
+    });
 
     // Generate JWT and set cookie
     const token = signToken({ userId: user.id, username: user.username });
