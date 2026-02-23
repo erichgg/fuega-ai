@@ -58,6 +58,7 @@ QA.md
 .DS_Store
 Thumbs.db
 Desktop.ini
+nul
 
 # IDE
 .vscode/

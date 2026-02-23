@@ -1,0 +1,11 @@
+nul
+.git
+.next
+node_modules
+_stashed
+outputs
+coverage
+.playwright-mcp
+*.md
+!README.md
+tests
