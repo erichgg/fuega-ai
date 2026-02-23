@@ -18,9 +18,12 @@ interface ProfileRow {
   created_at: string;
 }
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 /**
  * GET /api/users/:id/profile
- * Public profile view. Accepts UUID or username. Returns profile data if profile_visible = true.
+ * Public profile view. Accepts UUID or username.
+ * Returns profile data if profile_visible = true; otherwise limited info.
  */
 export async function GET(
   _req: Request,
@@ -29,19 +32,20 @@ export async function GET(
   try {
     const { id } = await params;
 
-    // Accept either UUID or username
-    const isUuid =
-      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+    const isUuid = UUID_RE.test(id);
+    const whereClause = isUuid
+      ? "id = $1"
+      : "LOWER(username) = LOWER($1)";
+
     const user = await queryOne<ProfileRow>(
-      isUuid
-        ? `SELECT id, username, display_name, bio, location, website,
-                  social_links, profile_visible, brand_text, brand_style,
-                  post_glow, comment_glow, founder_number, created_at
-           FROM users WHERE id = $1 AND deleted_at IS NULL AND is_banned = false`
-        : `SELECT id, username, display_name, bio, location, website,
-                  social_links, profile_visible, brand_text, brand_style,
-                  post_glow, comment_glow, founder_number, created_at
-           FROM users WHERE LOWER(username) = LOWER($1) AND deleted_at IS NULL AND is_banned = false`,
+      `SELECT id, username, display_name, bio, location, website,
+              social_links, profile_visible, brand_text, brand_style,
+              COALESCE(post_glow, post_sparks, 0) as post_glow,
+              COALESCE(comment_glow, comment_sparks, 0) as comment_glow,
+              COALESCE(founder_number, founder_badge_number) as founder_number,
+              created_at
+       FROM users
+       WHERE ${whereClause} AND deleted_at IS NULL AND is_banned = false`,
       [id]
     );
 

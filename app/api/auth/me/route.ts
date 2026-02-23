@@ -12,15 +12,21 @@ export async function GET(req: Request) {
       );
     }
 
+    // Migration 009 renames post_sparks→post_glow, comment_sparks→comment_glow.
+    // Use COALESCE to handle both pre- and post-migration column names gracefully.
     const user = await queryOne<{
       id: string;
       username: string;
-      founder_badge_number: number | null;
-      post_sparks: number;
-      comment_sparks: number;
+      founder_number: number | null;
+      post_glow: number;
+      comment_glow: number;
       created_at: string;
     }>(
-      `SELECT id, username, founder_badge_number, post_sparks, comment_sparks, created_at
+      `SELECT id, username,
+              COALESCE(founder_number, founder_badge_number) as founder_number,
+              COALESCE(post_glow, post_sparks) as post_glow,
+              COALESCE(comment_glow, comment_sparks) as comment_glow,
+              created_at
        FROM users
        WHERE id = $1 AND deleted_at IS NULL AND is_banned = false`,
       [auth.userId]
@@ -33,12 +39,14 @@ export async function GET(req: Request) {
       );
     }
 
+    const glow = user.post_glow + user.comment_glow;
     return NextResponse.json({
       user: {
         id: user.id,
         username: user.username,
-        founderBadgeNumber: user.founder_badge_number,
-        sparkScore: user.post_sparks + user.comment_sparks,
+        founderBadgeNumber: user.founder_number,
+        glow,
+        sparkScore: glow, // backward compat during redesign
         createdAt: user.created_at,
       },
     });

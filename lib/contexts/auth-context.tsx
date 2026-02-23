@@ -5,6 +5,8 @@ import * as React from "react";
 export interface AuthUser {
   id: string;
   username: string;
+  glow: number;
+  /** @deprecated Use `glow` instead. Kept for backward compat during redesign. */
   sparkScore: number;
   founderBadge: boolean;
   createdAt: string;
