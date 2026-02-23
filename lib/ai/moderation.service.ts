@@ -21,6 +21,10 @@ import {
   type BuiltPrompt,
 } from "./prompt-builder";
 import { validateAIResponse } from "./injection-defense";
+import {
+  buildPromptFromConfig,
+  type CampfireAIConfig,
+} from "./structured-config";
 
 /** Full moderation decision with metadata */
 export interface ModerationDecision {
@@ -49,6 +53,7 @@ export interface CampfireContext {
   name: string;
   ai_prompt: string;
   ai_prompt_version: number;
+  ai_config?: CampfireAIConfig | null;
   platform_rules?: string;
   platform_prompt_version?: number;
 }
@@ -242,9 +247,13 @@ export async function runModerationPipeline(
   }
 
   // Tier 3: Community agent (community-specific rules)
+  // If structured config exists, generate prompt from it; otherwise use raw ai_prompt
+  const communityRules = campfire.ai_config
+    ? buildPromptFromConfig(campfire.name, campfire.ai_config)
+    : campfire.ai_prompt;
   const campfirePrompt = buildCampfirePrompt(
     campfire.name,
-    campfire.ai_prompt,
+    communityRules,
     content
   );
   const campfireDecision = await runTier(
