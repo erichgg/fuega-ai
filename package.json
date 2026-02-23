@@ -3,6 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "description": "AI-moderated discussion platform with transparent community governance",
+  "engines": {
+    "node": ">=22.0.0"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
