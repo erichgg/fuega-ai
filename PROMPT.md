@@ -1923,6 +1923,108 @@ TEST:
 - /join page sets cookie and redirects
 ```
 
+### Prompt 3.9: Profile Settings & Customization
+```
+CONTEXT: Building user profile customization and settings pages.
+All profile fields are OPTIONAL — anonymous by default, customizable by choice.
+fuega never asks for real name, photo, phone, or email.
+
+READ: DATA_SCHEMA.md (users table — profile fields section)
+READ: SCOPE_AND_REQUIREMENTS.md (User Features → Profiles)
+READ: UI_DESIGN.md
+
+MIGRATION TO CREATE:
+- migrations/XXX_add_profile_fields.sql
+
+```sql
+ALTER TABLE users
+  ADD COLUMN display_name VARCHAR(50),
+  ADD COLUMN bio TEXT CHECK (length(bio) <= 500),
+  ADD COLUMN location VARCHAR(100),
+  ADD COLUMN website VARCHAR(255),
+  ADD COLUMN social_links JSONB DEFAULT '{}',
+  ADD COLUMN profile_visible BOOLEAN DEFAULT TRUE;
+```
+
+FILES TO CREATE:
+- app/api/users/[username]/profile/route.ts (GET public profile, PUT own profile)
+- app/(app)/settings/profile/page.tsx (profile settings form)
+- components/fuega/profile-card.tsx (public profile display)
+- components/fuega/social-links.tsx (render social link icons)
+- lib/validations/profile.ts (zod schemas for profile fields)
+
+API ENDPOINTS:
+
+GET /api/users/:username/profile
+- Public endpoint (respects profile_visible flag)
+- Returns: username, display_name, bio, location, website, social_links,
+  account_age, glow (post + comment), badges, brand
+- If profile_visible=false AND requester is not the user: return 404
+- Never expose email, IP, or internal IDs
+
+PUT /api/users/:username/profile
+- Auth required, can only update own profile
+- Validate all fields:
+  - display_name: max 50 chars, sanitize HTML
+  - bio: max 500 chars, sanitize HTML, strip markdown (plain text only)
+  - location: max 100 chars, sanitize
+  - website: valid URL format (https:// required), max 255 chars
+  - social_links: validate JSON schema {"platform": "handle"} format
+    - Allowed platforms: twitter, github, discord, mastodon, bluesky, youtube, twitch, linkedin
+    - Handles sanitized, max 100 chars each
+  - profile_visible: boolean
+- Return updated profile
+
+SETTINGS PAGE (/settings/profile):
+- Form with all optional profile fields
+- Each field has clear "optional" label
+- Display name field with character counter (50 max)
+- Bio textarea with character counter (500 max)
+- Location text input
+- Website URL input with https:// prefix helper
+- Social links: platform dropdown + handle input, add/remove rows
+- Profile visibility toggle with explanation text:
+  "When off, your profile page shows 'This user prefers to stay anonymous'"
+- Save button (disabled until changes made)
+- Success/error toast feedback
+- "Reset to defaults" clears all optional fields
+
+PROFILE CARD COMPONENT:
+- Used on /u/[username] page
+- Shows: display_name (if set) above @username
+- Bio text (if set)
+- Location with map pin icon (if set)
+- Website link with external link icon (if set)
+- Social link icons row (if any set)
+- Account age, Glow stats, Founder badge (if applicable)
+- Brand (user flair) display
+- If profile_visible=false: "This user prefers to stay anonymous" message
+
+UPDATE EXISTING FILES:
+- app/(app)/u/[username]/page.tsx: Replace mock data with real API call,
+  integrate profile-card component
+- app/(app)/settings/page.tsx: Add link to profile settings section
+  (or create settings page if it doesn't exist)
+
+SECURITY:
+- Sanitize ALL text inputs (DOMPurify)
+- Validate URL format for website field
+- Rate limit profile updates (5/minute)
+- social_links JSONB validated against allowlist of platforms
+- No PII leakage in error messages
+
+TEST:
+- Profile settings form renders all fields
+- Character counters work correctly
+- Save updates profile via API
+- Public profile shows only set fields
+- Hidden profile returns appropriate message
+- Social links validate platform names
+- Website requires https://
+- XSS prevention on all text fields
+- Rate limiting on profile updates
+```
+
 ### Phase 3 Summary
 ```bash
 cat >> PROGRESS.md << EOF
@@ -1947,7 +2049,7 @@ cat >> PROGRESS.md << EOF
 - Landing, Login, Signup
 - Home feed, Campfire pages
 - Post detail (threaded comments)
-- User profiles
+- User profiles + profile settings
 - Governance hub
 - Public mod log
 

@@ -65,14 +65,21 @@ Fuega.ai is an AI-moderated, community-governed discussion platform. Communities
   - Sidebar with info
 
 #### User Features
-- **Profiles**
+- **Profiles** (anonymous by default, customizable by choice)
   - Username (immutable)
   - Account age
   - Glow (reputation = post glow + comment glow)
   - Post/comment history
   - Brand (user flair — customizable text)
-  - Optional: Avatar, bio
   - **Founder Badge** (first 5000 users, numbered)
+  - **Optional profile fields** — all empty by default, all user-controlled:
+    - Display name (shown alongside username)
+    - Bio (500 chars max)
+    - Location (free text)
+    - Website URL
+    - Social links (Twitter/X, GitHub, Discord, etc. — JSONB)
+    - Profile visibility toggle (hide from public view)
+  - No field is ever required. fuega never asks for real name, photo, phone, or email.
 - **Glow System**
   - Post glow = sparks received on posts
   - Comment glow = sparks received on comments
@@ -298,8 +305,8 @@ No tiers. No categories. No nesting. Each campfire is sovereign within Principle
 10. **Campfire Hearth** - Posts, rules, governance settings, Tender info
 11. **Post Detail** - Full post + threaded comments
 12. **Create Post** - Form for new post
-13. **User Profile** - Glow, badges, Brand, history
-14. **User Settings** - Change password, delete account, privacy
+13. **User Profile** - Glow, badges, Brand, bio, social links, history
+14. **User Settings** - Profile customization, change password, delete account, notifications, privacy
 15. **Campfire Settings** (for campfire founders)
     - Edit description
     - Manage governance variables

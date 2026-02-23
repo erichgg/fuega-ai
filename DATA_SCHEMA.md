@@ -85,6 +85,14 @@ CREATE TABLE users (
     primary_badge VARCHAR(50), -- active display badge (references badges.badge_id)
     cosmetics JSONB DEFAULT '{}', -- active cosmetic selections
 
+    -- Profile (all optional — anonymous by default, customizable by choice)
+    display_name VARCHAR(50),          -- optional display name (shown alongside username)
+    bio TEXT CHECK (length(bio) <= 500), -- about me (max 500 chars)
+    location VARCHAR(100),             -- free text: city, country, "the internet", etc.
+    website VARCHAR(255),              -- personal URL
+    social_links JSONB DEFAULT '{}',   -- {"twitter": "handle", "github": "user", "discord": "tag", ...}
+    profile_visible BOOLEAN DEFAULT TRUE, -- false = profile hidden from public view
+
     -- Brand (user flair)
     brand_text VARCHAR(50), -- custom flair text
     brand_style JSONB DEFAULT '{}', -- style overrides from purchased cosmetics
