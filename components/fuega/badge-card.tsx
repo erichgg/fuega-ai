@@ -1,6 +1,5 @@
 "use client";
 
-import * as React from "react";
 import { Lock } from "lucide-react";
 import {
   Tooltip,
@@ -32,12 +31,12 @@ export const RARITY_CONFIG: Record<
   }
 > = {
   common: {
-    // slate-400 → #94a3b8
-    hex: "#94a3b8",
-    borderClass: "border-slate-400/30",
-    bgClass: "bg-slate-400/10",
-    progressClass: "bg-slate-400",
-    textClass: "text-slate-400",
+    // ash-400 → #8B8B8B (theme-aware via CSS vars)
+    hex: "#8B8B8B",
+    borderClass: "border-ash-400/30",
+    bgClass: "bg-ash-400/10",
+    progressClass: "bg-ash-400",
+    textClass: "text-ash-400",
     glowClass: "",
     label: "Common",
   },

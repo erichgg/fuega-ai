@@ -106,7 +106,6 @@ export async function POST(req: Request) {
         glowScore: user.post_glow + user.comment_glow,
         createdAt: user.created_at,
       },
-      token,
     });
   } catch (err) {
     console.error("Login error:", err);

@@ -3,10 +3,8 @@ import {
   Shield,
   Vote,
   Eye,
-  Users,
   Flame,
   ArrowRight,
-  Lock,
   Heart,
   MessageSquare,
   FileCode2,
@@ -90,7 +88,7 @@ export default function LandingPage() {
       <AuthRedirect />
 
       {/* Navigation */}
-      <nav className="sticky top-0 z-50 border-b border-ash-800 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <nav aria-label="Main navigation" className="sticky top-0 z-50 border-b border-ash-800 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4 2xl:px-8">
           <FlameLogo size="sm" />
           <div className="flex items-center gap-6">
@@ -136,6 +134,7 @@ export default function LandingPage() {
         </div>
       </nav>
 
+      <main>
       {/* Hero */}
       <section className="relative flex min-h-[calc(100vh-3.5rem)] flex-col overflow-hidden px-4 2xl:px-8">
         <div className="absolute inset-0 -z-10">
@@ -345,6 +344,8 @@ export default function LandingPage() {
           </Link>
         </div>
       </section>
+
+      </main>
 
       {/* Footer */}
       <footer className="border-t border-ash-800 px-4 py-8 2xl:px-8">

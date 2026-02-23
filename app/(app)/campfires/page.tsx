@@ -3,7 +3,7 @@ import { FlameLogo } from "@/components/fuega/flame-logo";
 
 export default function CampfiresPage() {
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center px-4">
+    <div className="flex items-center justify-center px-4 py-16">
       <div className="w-full max-w-md text-center">
         <FlameLogo size="md" />
         <div className="terminal-card mt-8 p-8">

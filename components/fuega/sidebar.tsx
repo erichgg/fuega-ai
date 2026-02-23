@@ -134,6 +134,8 @@ export function Sidebar({
               <div className="lava-rule my-3" />
               <button
                 onClick={() => setMyExpanded(!myExpanded)}
+                aria-expanded={myExpanded}
+                aria-label="My Campfires"
                 className="flex w-full items-center justify-between px-3 py-1"
               >
                 <span className="text-[10px] font-semibold uppercase tracking-wider text-smoke">
@@ -164,6 +166,8 @@ export function Sidebar({
           <div className="lava-rule my-3" />
           <button
             onClick={() => setPopularExpanded(!popularExpanded)}
+            aria-expanded={popularExpanded}
+            aria-label="Popular Campfires"
             className="flex w-full items-center justify-between px-3 py-1"
           >
             <span className="text-[10px] font-semibold uppercase tracking-wider text-smoke">

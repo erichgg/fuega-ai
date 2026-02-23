@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { Users, Bot, Plus, Shield, Clock, Settings } from "lucide-react";
+import { Users, Bot, Plus, Shield, Clock, Settings, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { PostCard } from "@/components/fuega/post-card";
@@ -50,7 +50,7 @@ export default function CampfirePage() {
   );
 
   // Membership
-  const { join, leave, loading: membershipLoading } = useCampfireMembership();
+  const { join, leave, loading: membershipLoading, error: membershipError } = useCampfireMembership();
   const [joined, setJoined] = React.useState(false);
 
   const handleVote = async (postId: string, voteType: "spark" | "douse") => {
@@ -150,7 +150,7 @@ export default function CampfirePage() {
               </span>
             </div>
           </div>
-          <div className="flex gap-2">
+          <div className="flex flex-col items-end gap-2">
             {user && (
               <Button
                 variant={joined ? "outline" : "spark"}
@@ -169,6 +169,12 @@ export default function CampfirePage() {
                     ? "Joined"
                     : "Join"}
               </Button>
+            )}
+            {membershipError && (
+              <div className="flex items-center gap-1.5 text-xs text-red-400">
+                <AlertCircle className="h-3.5 w-3.5" />
+                {membershipError}
+              </div>
             )}
           </div>
         </div>

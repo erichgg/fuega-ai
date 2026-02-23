@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/lib/contexts/auth-context";
+import { api } from "@/lib/api/client";
 
 const SOCIAL_PLATFORMS = [
   { key: "twitter", label: "X / Twitter", placeholder: "@handle" },
@@ -39,28 +40,34 @@ export default function ProfileSettingsPage() {
   const [message, setMessage] = React.useState<{ type: "success" | "error"; text: string } | null>(null);
 
   React.useEffect(() => {
+    let cancelled = false;
     async function load() {
       try {
         const res = await fetch("/api/settings/profile", { credentials: "include" });
         if (res.ok) {
           const data = await res.json();
           const p = data.profile;
-          setForm({
-            displayName: p.displayName ?? "",
-            bio: p.bio ?? "",
-            location: p.location ?? "",
-            website: p.website ?? "",
-            socialLinks: p.socialLinks ?? {},
-            brandText: p.brandText ?? "",
-          });
+          if (!cancelled) {
+            setForm({
+              displayName: p.displayName ?? "",
+              bio: p.bio ?? "",
+              location: p.location ?? "",
+              website: p.website ?? "",
+              socialLinks: p.socialLinks ?? {},
+              brandText: p.brandText ?? "",
+            });
+          }
         }
       } catch {
-        // Will use empty defaults
+        if (!cancelled) {
+          setMessage({ type: "error", text: "Failed to load profile" });
+        }
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     }
     load();
+    return () => { cancelled = true; };
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -69,28 +76,19 @@ export default function ProfileSettingsPage() {
     setMessage(null);
 
     try {
-      const res = await fetch("/api/settings/profile", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({
-          displayName: form.displayName || null,
-          bio: form.bio || null,
-          location: form.location || null,
-          website: form.website || null,
-          socialLinks: form.socialLinks,
-          brandText: form.brandText || null,
-        }),
+      await api.put("/api/settings/profile", {
+        displayName: form.displayName || null,
+        bio: form.bio || null,
+        location: form.location || null,
+        website: form.website || null,
+        socialLinks: form.socialLinks,
+        brandText: form.brandText || null,
       });
-
-      if (res.ok) {
-        setMessage({ type: "success", text: "Profile updated" });
-      } else {
-        const data = await res.json();
-        setMessage({ type: "error", text: data.error ?? "Failed to update" });
-      }
-    } catch {
-      setMessage({ type: "error", text: "Network error" });
+      setMessage({ type: "success", text: "Profile updated" });
+    } catch (err: unknown) {
+      const message =
+        err instanceof Error ? err.message : "Failed to update";
+      setMessage({ type: "error", text: message });
     } finally {
       setSaving(false);
     }

@@ -1,6 +1,3 @@
-"use client";
-
-import * as React from "react";
 import { RARITY_CONFIG, CATEGORY_ICONS, type BadgeRarity } from "@/components/fuega/badge-card";
 import { cn } from "@/lib/utils";
 import type { Badge } from "@/lib/api/client";

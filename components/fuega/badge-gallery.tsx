@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { BadgeCard, RARITY_CONFIG, type BadgeRarity } from "@/components/fuega/badge-card";
+import { BadgeCard } from "@/components/fuega/badge-card";
 import { cn } from "@/lib/utils";
 import type { Badge, UserBadge } from "@/lib/api/client";
 

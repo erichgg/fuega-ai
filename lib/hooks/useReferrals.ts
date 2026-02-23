@@ -42,8 +42,16 @@ export function useReferralLink(): UseReferralLinkReturn {
   }, []);
 
   useEffect(() => {
-    refresh();
-  }, [refresh]);
+    let cancelled = false;
+    api.get<{ referral_code: string; referral_link: string }>("/api/referrals/link")
+      .then((data) => { if (!cancelled) setReferralCode(data.referral_code); })
+      .catch((err) => {
+        if (err instanceof ApiError && err.status === 401) return;
+        if (!cancelled) setError(err instanceof ApiError ? err.message : "Failed to load referral link");
+      })
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
+  }, []);
 
   const referralLink = referralCode
     ? `${typeof window !== "undefined" ? window.location.origin : ""}/join?ref=${referralCode}`
@@ -83,8 +91,16 @@ export function useReferralStats(): UseReferralStatsReturn {
   }, []);
 
   useEffect(() => {
-    refresh();
-  }, [refresh]);
+    let cancelled = false;
+    api.get<ReferralStats>("/api/referrals/stats")
+      .then((data) => { if (!cancelled) setStats(data); })
+      .catch((err) => {
+        if (err instanceof ApiError && err.status === 401) return;
+        if (!cancelled) setError(err instanceof ApiError ? err.message : "Failed to load referral stats");
+      })
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
+  }, []);
 
   return { stats, loading, error, refresh };
 }
@@ -122,8 +138,16 @@ export function useReferralHistory(): UseReferralHistoryReturn {
   }, []);
 
   useEffect(() => {
-    refresh();
-  }, [refresh]);
+    let cancelled = false;
+    api.get<{ referrals: ReferralHistoryEntry[] }>("/api/referrals/history")
+      .then((data) => { if (!cancelled) setHistory(data.referrals); })
+      .catch((err) => {
+        if (err instanceof ApiError && err.status === 401) return;
+        if (!cancelled) setError(err instanceof ApiError ? err.message : "Failed to load referral history");
+      })
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
+  }, []);
 
   return { history, loading, error, refresh };
 }

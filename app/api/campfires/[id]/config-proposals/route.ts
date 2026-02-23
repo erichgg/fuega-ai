@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { authenticate } from "@/lib/auth/jwt";
 import { checkGeneralRateLimit } from "@/lib/auth/rate-limit";
-import { query, queryOne, queryAll } from "@/lib/db";
+import { queryOne, queryAll } from "@/lib/db";
 import {
   DEFAULT_AI_CONFIG,
   validateAndMergeConfig,

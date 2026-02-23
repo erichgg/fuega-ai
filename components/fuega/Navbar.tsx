@@ -169,9 +169,9 @@ function ShortcutsHelp({
             >
               <span className="text-ash">{s.desc}</span>
               <div className="flex gap-1">
-                {s.keys.map((k) => (
+                {s.keys.map((k, i) => (
                   <kbd
-                    key={k}
+                    key={`${k}-${i}`}
                     className="border border-lava-hot/20 bg-charcoal px-2 py-0.5 text-xs text-foreground font-mono"
                   >
                     {k}
@@ -300,7 +300,7 @@ export function Navbar() {
                 {/* User dropdown */}
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <button className="flex items-center gap-2 px-2 py-1 transition-colors hover:bg-charcoal/50">
+                    <button className="flex items-center gap-2 px-2 py-1 transition-colors hover:bg-charcoal/50" aria-label="User menu">
                       <UserAvatar username={user.username} size="sm" />
                       <div className="hidden lg:block text-left">
                         <div className="text-xs font-medium text-foreground">

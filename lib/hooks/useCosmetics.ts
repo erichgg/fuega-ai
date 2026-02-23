@@ -1,5 +1,3 @@
-"use client";
-
 /**
  * Cosmetics hooks — CUT FROM V1.
  * Cosmetics require anonymous payment support which isn't available yet.

@@ -50,7 +50,7 @@ export async function voteOnPost(
 
   // Send spark notification (only for sparks, not douses; only for new/switched votes)
   if (value === 1 && result.action !== "removed") {
-    sendSparkNotification(post.author_id, userId, "post", postId, post.title, `/f/${post.campfire_name}/posts/${postId}`);
+    sendSparkNotification(post.author_id, userId, "post", postId, post.title, `/f/${post.campfire_name}/${postId}`);
   }
 
   return result;
@@ -92,7 +92,7 @@ export async function voteOnComment(
       sendSparkNotification(
         comment.author_id, userId, "comment", commentId,
         postInfo.title,
-        `/f/${postInfo.campfire_name}/posts/${comment.post_id}#comment-${commentId}`
+        `/f/${postInfo.campfire_name}/${comment.post_id}#comment-${commentId}`
       );
     }
   }

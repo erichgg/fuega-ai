@@ -1,9 +1,7 @@
 "use client";
 
-import * as React from "react";
 import { MessageSquare, Share2, Flag, Clock } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { SparkButton } from "@/components/fuega/spark-button";
 import { UserAvatar } from "@/components/fuega/user-avatar";
 import { ModBadge } from "@/components/fuega/mod-badge";

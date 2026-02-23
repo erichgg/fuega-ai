@@ -131,6 +131,7 @@ export function useProposal(proposalId: string | undefined): UseProposalReturn {
 
 interface CreateProposalInput {
   campfire_id: string;
+  proposal_type: "modify_prompt" | "addendum_prompt" | "change_settings";
   title: string;
   description: string;
   proposed_changes: Record<string, unknown>;

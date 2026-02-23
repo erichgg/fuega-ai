@@ -146,6 +146,20 @@ function timeRemaining(dateStr: string): string {
 }
 
 export default function GovernancePage() {
+  return (
+    <React.Suspense
+      fallback={
+        <div className="mx-auto max-w-2xl py-16 text-center text-ash-400">
+          Loading...
+        </div>
+      }
+    >
+      <GovernancePageInner />
+    </React.Suspense>
+  );
+}
+
+function GovernancePageInner() {
   const { user } = useAuth();
   const searchParams = useSearchParams();
   const campfireFilter = searchParams.get("campfire");

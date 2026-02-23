@@ -21,6 +21,8 @@ const options: { value: SortOption; label: string; icon: typeof Flame }[] = [
 export function FeedSort({ active, onChange, className }: FeedSortProps) {
   return (
     <div
+      role="group"
+      aria-label="Sort posts by"
       className={cn(
         "flex items-center gap-1 rounded-lg border border-ash-800 bg-ash-900/50 p-1",
         className,
@@ -32,6 +34,7 @@ export function FeedSort({ active, onChange, className }: FeedSortProps) {
           <button
             key={opt.value}
             onClick={() => onChange(opt.value)}
+            aria-pressed={active === opt.value}
             className={cn(
               "flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors",
               active === opt.value

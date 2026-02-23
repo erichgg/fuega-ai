@@ -202,6 +202,7 @@ export default function UserProfilePage() {
               {isOwnProfile && (
                 <Link
                   href="/settings/profile"
+                  aria-label="Edit profile"
                   className="ml-auto text-ash-500 hover:text-ash-300 transition-colors"
                 >
                   <Settings className="h-4 w-4" />

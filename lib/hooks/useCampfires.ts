@@ -8,7 +8,7 @@ import { api, type Campfire, ApiError } from "@/lib/api/client";
 // ---------------------------------------------------------------------------
 
 interface UseCampfiresOptions {
-  sort?: "members" | "newest" | "active";
+  sort?: "members" | "activity" | "created_at";
   limit?: number;
 }
 
@@ -118,8 +118,16 @@ export function useCampfire(campfireId: string | undefined): UseCampfireReturn {
   }, [campfireId]);
 
   useEffect(() => {
-    refresh();
-  }, [refresh]);
+    let cancelled = false;
+    if (!campfireId) return;
+    setLoading(true);
+    setError(null);
+    api.get<{ campfire: Campfire }>(`/api/campfires/${campfireId}`)
+      .then((data) => { if (!cancelled) setCampfire(data.campfire); })
+      .catch((err) => { if (!cancelled) setError(err instanceof ApiError ? err.message : "Failed to load campfire"); })
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
+  }, [campfireId]);
 
   return { campfire, loading, error, refresh };
 }

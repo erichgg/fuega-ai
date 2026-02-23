@@ -1,7 +1,8 @@
 "use client";
 
-import * as React from "react";
+import Link from "next/link";
 import { Users } from "lucide-react";
+import { useAuth } from "@/lib/contexts/auth-context";
 import { useReferralLink, useReferralStats, useReferralHistory } from "@/lib/hooks/useReferrals";
 import { ReferralLink } from "@/components/fuega/referral-link";
 import { ReferralShare } from "@/components/fuega/referral-share";
@@ -9,9 +10,22 @@ import { ReferralProgress } from "@/components/fuega/referral-progress";
 import { ReferralHistory } from "@/components/fuega/referral-history";
 
 export default function ReferralDashboardPage() {
+  const { user, loading: authLoading } = useAuth();
   const { referralLink, loading: linkLoading } = useReferralLink();
   const { stats, loading: statsLoading } = useReferralStats();
   const { history, loading: historyLoading } = useReferralHistory();
+
+  if (!authLoading && !user) {
+    return (
+      <div className="py-16 text-center">
+        <p className="text-ash-400">
+          You need to{" "}
+          <Link href="/login" className="text-flame-400 hover:underline">log in</Link>
+          {" "}to access this page.
+        </p>
+      </div>
+    );
+  }
 
   const isLoading = linkLoading || statsLoading;
 

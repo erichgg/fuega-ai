@@ -1,10 +1,25 @@
 "use client";
 
+import Link from "next/link";
 import { useFeatureFlag } from "@/lib/hooks/useFeatureFlags";
+import { useAuth } from "@/lib/contexts/auth-context";
 import { NotificationInbox } from "@/components/fuega/notification-inbox";
 
 export default function NotificationsPage() {
+  const { user, loading: authLoading } = useAuth();
   const { enabled, loading } = useFeatureFlag("notifications");
+
+  if (!authLoading && !user) {
+    return (
+      <div className="py-16 text-center">
+        <p className="text-ash-400">
+          You need to{" "}
+          <Link href="/login" className="text-flame-400 hover:underline">log in</Link>
+          {" "}to access this page.
+        </p>
+      </div>
+    );
+  }
 
   if (loading) {
     return (

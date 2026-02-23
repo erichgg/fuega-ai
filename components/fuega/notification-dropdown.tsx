@@ -5,7 +5,6 @@ import Link from "next/link";
 import { CheckCheck } from "lucide-react";
 import { useNotificationContext } from "@/lib/contexts/notification-context";
 import { NotificationItem } from "@/components/fuega/notification-item";
-import { cn } from "@/lib/utils";
 
 interface NotificationDropdownProps {
   open: boolean;

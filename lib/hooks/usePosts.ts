@@ -116,8 +116,16 @@ export function usePost(postId: string | undefined): UsePostReturn {
   }, [postId]);
 
   useEffect(() => {
-    refresh();
-  }, [refresh]);
+    let cancelled = false;
+    if (!postId) return;
+    setLoading(true);
+    setError(null);
+    api.get<{ post: Post }>(`/api/posts/${postId}`)
+      .then((data) => { if (!cancelled) setPost(data.post); })
+      .catch((err) => { if (!cancelled) setError(err instanceof ApiError ? err.message : "Failed to load post"); })
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
+  }, [postId]);
 
   return { post, loading, error, refresh };
 }
@@ -130,7 +138,7 @@ interface CreatePostInput {
   campfire_id: string;
   title: string;
   body: string;
-  post_type?: "text" | "link" | "image";
+  post_type: "text" | "link" | "image";
   url?: string;
 }
 

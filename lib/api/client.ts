@@ -168,19 +168,28 @@ export interface Comment {
   parent_id: string | null;
   author_id: string;
   body: string;
-  spark_count: number;
-  douse_count: number;
-  moderation_status: "approved" | "flagged" | "removed" | "pending";
+  sparks: number;
+  douses: number;
+  spark_count: number;  // alias for adapter compatibility
+  douse_count: number;  // alias for adapter compatibility
+  is_approved: boolean;
+  is_removed: boolean;
+  removal_reason: string | null;
+  moderation_status: "approved" | "flagged" | "removed" | "pending";  // adapter compatibility
+  depth: number;
   created_at: string;
   updated_at: string;
+  edited_at: string | null;
   deleted_at: string | null;
   author_username?: string;
   replies?: Comment[];
+  children?: Comment[];
 }
 
 export interface Campfire {
   id: string;
   name: string;
+  display_name?: string;
   description: string;
   created_by: string;
   member_count: number;
@@ -257,10 +266,10 @@ export interface NotificationPreferences {
 }
 
 export interface ReferralStats {
-  referral_code: string;
   referral_count: number;
   next_badge_at: number | null;
   next_badge_name: string | null;
+  current_badge: string | null;
 }
 
 export interface ReferralHistoryEntry {

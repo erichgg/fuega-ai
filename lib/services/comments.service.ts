@@ -146,7 +146,7 @@ export async function createComment(
   // ─── Notification triggers (fire-and-forget, don't block response) ───
   if (isApproved) {
     const commentPreview = input.body.slice(0, 100);
-    const actionUrl = `/f/${post.campfire_name}/posts/${postId}#comment-${comment.id}`;
+    const actionUrl = `/f/${post.campfire_name}/${postId}#comment-${comment.id}`;
 
     if (input.parent_id) {
       // Reply to comment → notify parent comment author

@@ -12,6 +12,7 @@ import {
   Trash2,
   MessageSquare,
   Send,
+  AlertCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -56,7 +57,7 @@ export default function PostDetailPage() {
     error: commentsError,
     refresh: refreshComments,
   } = useComments(postId);
-  const { createComment, creating } = useCreateComment();
+  const { createComment, creating, error: commentError } = useCreateComment();
   const { vote } = useVoting();
 
   // Local state
@@ -253,11 +254,18 @@ export default function PostDetailPage() {
             <div className="flex-1">
               <Textarea
                 placeholder="Join the discussion..."
+                aria-label="Write a comment"
                 value={commentText}
                 onChange={(e) => setCommentText(e.target.value)}
                 rows={3}
                 className="min-h-[80px] resize-y border-ash-800 bg-ash-950 placeholder:text-ash-600 focus-visible:ring-flame-500/50"
               />
+              {commentError && (
+                <div className="mt-2 flex items-center gap-2 text-sm text-red-400">
+                  <AlertCircle className="h-4 w-4" />
+                  {commentError}
+                </div>
+              )}
               <div className="mt-2 flex justify-end">
                 <Button
                   type="submit"

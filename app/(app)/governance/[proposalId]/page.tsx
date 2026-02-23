@@ -9,7 +9,6 @@ import {
   CheckCircle2,
   XCircle,
   Vote,
-  MessageSquare,
   ThumbsUp,
   ThumbsDown,
   Send,

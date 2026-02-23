@@ -1,7 +1,6 @@
 "use client";
 
 import * as React from "react";
-import type { Metadata } from "next";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Flame, AlertCircle, Loader2 } from "lucide-react";

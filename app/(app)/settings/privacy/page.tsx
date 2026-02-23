@@ -1,9 +1,13 @@
 "use client";
 
 import * as React from "react";
-import { Shield, Loader2, Eye, EyeOff } from "lucide-react";
+import Link from "next/link";
+import { Shield, Eye, EyeOff } from "lucide-react";
+import { useAuth } from "@/lib/contexts/auth-context";
+import { api } from "@/lib/api/client";
 
 export default function PrivacySettingsPage() {
+  const { user, loading: authLoading } = useAuth();
   const [profileVisible, setProfileVisible] = React.useState(true);
   const [loading, setLoading] = React.useState(true);
   const [saving, setSaving] = React.useState(false);
@@ -13,6 +17,8 @@ export default function PrivacySettingsPage() {
   } | null>(null);
 
   React.useEffect(() => {
+    if (!user) return;
+    let cancelled = false;
     async function load() {
       try {
         const res = await fetch("/api/settings/profile", {
@@ -20,16 +26,31 @@ export default function PrivacySettingsPage() {
         });
         if (res.ok) {
           const data = await res.json();
-          setProfileVisible(data.profile.profileVisible);
+          if (!cancelled) setProfileVisible(data.profile.profileVisible);
         }
       } catch {
-        // Use default
+        if (!cancelled) {
+          setMessage({ type: "error", text: "Failed to load privacy settings" });
+        }
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     }
     load();
-  }, []);
+    return () => { cancelled = true; };
+  }, [user]);
+
+  if (!authLoading && !user) {
+    return (
+      <div className="py-16 text-center">
+        <p className="text-ash-400">
+          You need to{" "}
+          <Link href="/login" className="text-flame-400 hover:underline">log in</Link>
+          {" "}to access this page.
+        </p>
+      </div>
+    );
+  }
 
   const handleToggle = async () => {
     const newValue = !profileVisible;
@@ -37,30 +58,18 @@ export default function PrivacySettingsPage() {
     setMessage(null);
 
     try {
-      const res = await fetch("/api/settings/privacy", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ profileVisible: newValue }),
+      await api.put("/api/settings/privacy", { profileVisible: newValue });
+      setProfileVisible(newValue);
+      setMessage({
+        type: "success",
+        text: newValue
+          ? "Profile is now visible"
+          : "Profile is now hidden",
       });
-
-      if (res.ok) {
-        setProfileVisible(newValue);
-        setMessage({
-          type: "success",
-          text: newValue
-            ? "Profile is now visible"
-            : "Profile is now hidden",
-        });
-      } else {
-        const data = await res.json();
-        setMessage({
-          type: "error",
-          text: data.error ?? "Failed to update",
-        });
-      }
-    } catch {
-      setMessage({ type: "error", text: "Network error" });
+    } catch (err: unknown) {
+      const message =
+        err instanceof Error ? err.message : "Failed to update";
+      setMessage({ type: "error", text: message });
     } finally {
       setSaving(false);
     }
@@ -101,6 +110,8 @@ export default function PrivacySettingsPage() {
 
           <button
             type="button"
+            role="switch"
+            aria-checked={profileVisible}
             onClick={handleToggle}
             disabled={saving}
             className={`relative shrink-0 w-11 h-6 rounded-full transition-colors ${

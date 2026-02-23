@@ -87,6 +87,18 @@
   /* Semantic shadow/glow tokens */
   --lava-glow: rgba(255, 69, 0, 0.5);
   --void-shadow: rgba(0, 0, 0, 0.5);
+  --douse-glow: rgba(0, 212, 170, 0.4);
+
+  /* Badge animation glow tokens */
+  --badge-shimmer: rgba(96, 165, 250, 0.4);
+  --badge-shimmer-subtle: rgba(96, 165, 250, 0.2);
+  --badge-shimmer-faint: rgba(96, 165, 250, 0.15);
+  --badge-radiance: rgba(168, 85, 247, 0.45);
+  --badge-radiance-subtle: rgba(168, 85, 247, 0.25);
+  --badge-radiance-faint: rgba(168, 85, 247, 0.15);
+  --badge-fire-glow: rgba(249, 115, 22, 0.5);
+  --badge-fire-glow-subtle: rgba(249, 115, 22, 0.3);
+  --badge-fire-glow-faint: rgba(249, 115, 22, 0.2);
 
   /* Chart colors */
   --chart-1: #FF4500;
@@ -225,8 +237,8 @@ body::before {
     0deg,
     transparent,
     transparent 2px,
-    rgba(255, 69, 0, 0.03) 2px,
-    rgba(255, 69, 0, 0.03) 4px
+    color-mix(in srgb, var(--lava-hot) 3%, transparent) 2px,
+    color-mix(in srgb, var(--lava-hot) 3%, transparent) 4px
   );
 }
 
@@ -245,19 +257,19 @@ body::before {
 
 /* Glow text */
 .glow-text {
-  text-shadow: 0 0 20px var(--lava-glow), 0 0 40px rgba(255, 69, 0, 0.15);
+  text-shadow: 0 0 20px var(--lava-glow), 0 0 40px color-mix(in srgb, var(--lava-hot) 15%, transparent);
 }
 
 .glow-text-subtle {
-  text-shadow: 0 0 10px rgba(255, 69, 0, 0.3);
+  text-shadow: 0 0 10px var(--lava-glow);
 }
 
 .glow-text-intense {
   text-shadow:
-    0 0 10px rgba(255, 69, 0, 0.8),
+    0 0 10px color-mix(in srgb, var(--lava-hot) 80%, transparent),
     0 0 30px var(--lava-glow),
-    0 0 60px rgba(255, 69, 0, 0.3),
-    0 0 100px rgba(255, 69, 0, 0.15);
+    0 0 60px color-mix(in srgb, var(--lava-hot) 30%, transparent),
+    0 0 100px color-mix(in srgb, var(--lava-hot) 15%, transparent);
 }
 
 /* Blinking cursor */
@@ -315,7 +327,7 @@ hr.lava-rule,
 }
 
 .douse-glow {
-  box-shadow: 0 0 12px rgba(0, 212, 170, 0.4);
+  box-shadow: 0 0 12px var(--douse-glow);
 }
 
 /* Spark/douse animations */
@@ -365,19 +377,19 @@ hr.lava-rule,
 
 /* Badge rarity glow effects */
 @keyframes badge-shimmer {
-  0%, 100% { box-shadow: 0 0 4px rgba(96, 165, 250, 0.2); }
-  50% { box-shadow: 0 0 10px rgba(96, 165, 250, 0.4), 0 0 20px rgba(96, 165, 250, 0.15); }
+  0%, 100% { box-shadow: 0 0 4px var(--badge-shimmer-subtle); }
+  50% { box-shadow: 0 0 10px var(--badge-shimmer), 0 0 20px var(--badge-shimmer-faint); }
 }
 
 @keyframes badge-radiance {
-  0%, 100% { box-shadow: 0 0 6px rgba(168, 85, 247, 0.25); }
-  50% { box-shadow: 0 0 14px rgba(168, 85, 247, 0.45), 0 0 28px rgba(168, 85, 247, 0.15); }
+  0%, 100% { box-shadow: 0 0 6px var(--badge-radiance-subtle); }
+  50% { box-shadow: 0 0 14px var(--badge-radiance), 0 0 28px var(--badge-radiance-faint); }
 }
 
 @keyframes badge-fire-glow {
-  0%, 100% { box-shadow: 0 0 8px rgba(249, 115, 22, 0.3); }
-  33% { box-shadow: 0 0 16px rgba(249, 115, 22, 0.5), 0 0 32px rgba(249, 115, 22, 0.2); }
-  66% { box-shadow: 0 0 12px var(--lava-glow), 0 0 24px rgba(255, 69, 0, 0.15); }
+  0%, 100% { box-shadow: 0 0 8px var(--badge-fire-glow-subtle); }
+  33% { box-shadow: 0 0 16px var(--badge-fire-glow), 0 0 32px var(--badge-fire-glow-faint); }
+  66% { box-shadow: 0 0 12px var(--lava-glow), 0 0 24px color-mix(in srgb, var(--lava-hot) 15%, transparent); }
 }
 
 .badge-shimmer {
@@ -483,6 +495,28 @@ hr.lava-rule,
 
   --lava-glow: rgba(185, 28, 28, 0.3);
   --void-shadow: rgba(0, 0, 0, 0.1);
+  --douse-glow: rgba(46, 122, 214, 0.3);
+
+  --ai-badge: #7C3AED;
+  --ai-badge-foreground: #FFFFFF;
+
+  /* Chart colors (light mode) */
+  --chart-1: #B91C1C;
+  --chart-2: #0D9488;
+  --chart-3: #A31800;
+  --chart-4: #0F766E;
+  --chart-5: #7F1D1D;
+
+  /* Badge animation glow tokens (light mode) */
+  --badge-shimmer: rgba(59, 130, 246, 0.3);
+  --badge-shimmer-subtle: rgba(59, 130, 246, 0.15);
+  --badge-shimmer-faint: rgba(59, 130, 246, 0.1);
+  --badge-radiance: rgba(139, 92, 246, 0.3);
+  --badge-radiance-subtle: rgba(139, 92, 246, 0.15);
+  --badge-radiance-faint: rgba(139, 92, 246, 0.1);
+  --badge-fire-glow: rgba(185, 28, 28, 0.35);
+  --badge-fire-glow-subtle: rgba(185, 28, 28, 0.2);
+  --badge-fire-glow-faint: rgba(185, 28, 28, 0.1);
 }
 
 /* Light mode: softer CRT scanlines */

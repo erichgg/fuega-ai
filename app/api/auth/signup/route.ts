@@ -105,7 +105,6 @@ export async function POST(req: Request) {
           founderBadgeNumber: user.founder_number,
           createdAt: user.created_at,
         },
-        token,
       },
       { status: 201 }
     );

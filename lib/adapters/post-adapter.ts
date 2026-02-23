@@ -78,8 +78,15 @@ export function toPostCardData(post: ApiPost): PostCardData {
 // ---------------------------------------------------------------------------
 
 export function toCommentCardData(comment: ApiComment): CommentCardData {
+  // Handle both DB booleans and client enum for moderation
   let moderation: CommentCardData["moderation"] = undefined;
-  if (comment.moderation_status) {
+  if (comment.is_removed) {
+    moderation = { action: "removed" };
+  } else if (comment.is_approved === false && !comment.is_removed) {
+    moderation = { action: "flagged" };
+  } else if (comment.is_approved) {
+    moderation = { action: "approved" };
+  } else if (comment.moderation_status) {
     moderation = {
       action: comment.moderation_status === "pending" ? "approved" : comment.moderation_status,
     };
@@ -91,10 +98,10 @@ export function toCommentCardData(comment: ApiComment): CommentCardData {
     parentId: comment.parent_id,
     author: comment.author_username ?? "anonymous",
     body: comment.body,
-    sparkCount: (comment.spark_count ?? 0) - (comment.douse_count ?? 0),
+    sparkCount: (comment.sparks ?? comment.spark_count ?? 0) - (comment.douses ?? comment.douse_count ?? 0),
     createdAt: comment.created_at,
     moderation,
-    replies: (comment.replies ?? []).map(toCommentCardData),
+    replies: (comment.children ?? comment.replies ?? []).map(toCommentCardData),
   };
 }
 

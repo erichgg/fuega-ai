@@ -1,6 +1,5 @@
 "use client";
 
-import * as React from "react";
 import { MessageSquare, Flag, Clock } from "lucide-react";
 import { SparkButton } from "@/components/fuega/spark-button";
 import { UserAvatar } from "@/components/fuega/user-avatar";
@@ -86,11 +85,11 @@ export function CommentCard({
           </p>
 
           <div className="mt-1.5 flex items-center gap-3 text-xs text-ash-500">
-            <button className="flex items-center gap-1 transition-colors hover:text-ash-300">
+            <button disabled className="flex items-center gap-1 opacity-50 cursor-not-allowed">
               <MessageSquare className="h-3 w-3" />
               Reply
             </button>
-            <button className="flex items-center gap-1 transition-colors hover:text-ash-300">
+            <button disabled className="flex items-center gap-1 opacity-50 cursor-not-allowed">
               <Flag className="h-3 w-3" />
               Report
             </button>

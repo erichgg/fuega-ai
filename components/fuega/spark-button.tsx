@@ -64,6 +64,8 @@ export function SparkButton({
       </button>
 
       <span
+        aria-live="polite"
+        aria-label={`${sparkCount} sparks`}
         className={cn(
           "text-xs font-semibold tabular-nums min-w-[2ch] text-center",
           userVote === "sparked" && "text-flame-400",

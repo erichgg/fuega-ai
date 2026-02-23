@@ -6,6 +6,7 @@ import { Lock, Trash2, Loader2, AlertTriangle } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/lib/contexts/auth-context";
+import { api } from "@/lib/api/client";
 
 export default function AccountSettingsPage() {
   const router = useRouter();
@@ -44,27 +45,15 @@ export default function AccountSettingsPage() {
 
     setPasswordSaving(true);
     try {
-      const res = await fetch("/api/settings/account", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ currentPassword, newPassword }),
-      });
-
-      if (res.ok) {
-        setPasswordMessage({ type: "success", text: "Password changed" });
-        setCurrentPassword("");
-        setNewPassword("");
-        setConfirmPassword("");
-      } else {
-        const data = await res.json();
-        setPasswordMessage({
-          type: "error",
-          text: data.error ?? "Failed to change password",
-        });
-      }
-    } catch {
-      setPasswordMessage({ type: "error", text: "Network error" });
+      await api.put("/api/settings/account", { currentPassword, newPassword });
+      setPasswordMessage({ type: "success", text: "Password changed" });
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+    } catch (err: unknown) {
+      const message =
+        err instanceof Error ? err.message : "Failed to change password";
+      setPasswordMessage({ type: "error", text: message });
     } finally {
       setPasswordSaving(false);
     }
@@ -75,15 +64,9 @@ export default function AccountSettingsPage() {
 
     setDeleting(true);
     try {
-      const res = await fetch("/api/settings/account", {
-        method: "DELETE",
-        credentials: "include",
-      });
-
-      if (res.ok) {
-        await logout();
-        router.push("/");
-      }
+      await api.delete("/api/settings/account");
+      await logout();
+      router.push("/");
     } catch {
       // Ignore
     } finally {

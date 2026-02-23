@@ -36,8 +36,16 @@ export function useComments(postId: string | undefined): UseCommentsReturn {
   }, [postId]);
 
   useEffect(() => {
-    refresh();
-  }, [refresh]);
+    let cancelled = false;
+    if (!postId) return;
+    setLoading(true);
+    setError(null);
+    api.get<{ comments: Comment[] }>(`/api/posts/${postId}/comments`)
+      .then((data) => { if (!cancelled) setComments(data.comments); })
+      .catch((err) => { if (!cancelled) setError(err instanceof ApiError ? err.message : "Failed to load comments"); })
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
+  }, [postId]);
 
   return { comments, loading, error, refresh };
 }
