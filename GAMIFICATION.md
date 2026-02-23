@@ -10,14 +10,13 @@
 ## TABLE OF CONTENTS
 
 1. [Badges](#badges)
-2. [Cosmetics Shop](#cosmetics-shop)
-3. [Notifications](#notifications)
-4. [Referral System](#referral-system)
-5. [Tip Jar](#tip-jar)
-6. [Structured AI Config](#structured-ai-config)
-7. [Campfire Roles](#campfire-roles)
-8. [Feature Flags](#feature-flags)
-9. [Implementation Notes](#implementation-notes)
+2. [Notifications](#notifications)
+3. [Referral System](#referral-system)
+4. [Tip Jar (Ko-fi)](#tip-jar)
+5. [Structured AI Config](#structured-ai-config)
+6. [Campfire Roles](#campfire-roles)
+7. [Feature Flags](#feature-flags)
+8. [Implementation Notes](#implementation-notes)
 
 ---
 
@@ -764,8 +763,8 @@ earn_criteria:
   metric: "tip_amount_cents"
   threshold: 1
   conditions:
-    - Any successful tip jar payment (one-time or recurring)
-    - Minimum amount: $1.00 (100 cents)
+    - Any successful Ko-fi donation verified via donation code
+    - Minimum amount: $1.00
 ```
 
 ##### 37. recurring_supporter
@@ -783,8 +782,8 @@ earn_criteria:
   metric: "recurring_tip"
   threshold: 1
   conditions:
-    - Active recurring Stripe subscription for the tip jar
-    - Badge removed if subscription is cancelled (revocable badge)
+    - Active recurring Ko-fi monthly subscription
+    - Badge removed if subscription is cancelled (Ko-fi sends cancellation webhook)
 ```
 
 ##### 38. bug_hunter
@@ -1236,77 +1235,47 @@ The referral dashboard is accessible at `/settings/referrals` and shows:
 
 ### Overview
 
-The tip jar allows users to make voluntary donations to support the fuega.ai platform. Tips are processed through Stripe and can be one-time or recurring (monthly). Tipping earns the "Supporter" badge (one-time tips) or "Recurring Supporter" badge (monthly subscriptions).
+The tip jar allows users to make voluntary donations to support the fuega.ai platform. **fuega never touches money** — all payments flow through external providers (Ko-fi, crypto, Venmo/CashApp). fuega only receives webhook confirmations with a donation code. No PII, no payment details, no identity stored.
 
-### Tip Options
+### Why Not Stripe?
 
-#### One-Time Tips
+fuega promises "No ID. No phone. No photo. Ever." Stripe requires email + payment card — a full identity. Even if fuega never stores the PII, Stripe creates a linkable identity between the user’s real name and their fuega account. Ko-fi handles all payment processing externally; fuega only receives a webhook with a donation code.
 
-| Amount   | Display       | Price (cents) |
-|----------|---------------|---------------|
-| $1.00    | "Buy a coffee" | 100          |
-| $5.00    | "Buy lunch"    | 500          |
-| $10.00   | "Fill the tank" | 1000        |
-| $25.00   | "Fan the flames"| 2500        |
-| $50.00   | "Ignite"       | 5000         |
-| Custom   | User-specified | min 100, max 100000 |
+### Payment Methods
 
-#### Recurring Tips (Monthly)
+| Method | Type | Badge-eligible | How it links |
+|--------|------|---------------|--------------|
+| Ko-fi | Primary (one-time + recurring) | ✅ via donation code | Webhook → code match |
+| Crypto (BTC, ETH) | Optional | ✅ if code in memo | Manual or on-chain check |
+| Venmo / CashApp | Optional | ❌ honor system only | No webhook available |
 
-| Amount   | Display            | Price (cents/month) |
-|----------|--------------------|---------------------|
-| $1.00    | "Ember"            | 100                 |
-| $5.00    | "Flame"            | 500                 |
-| $10.00   | "Blaze"            | 1000                |
-| $25.00   | "Inferno"          | 2500                |
-| Custom   | User-specified     | min 100, max 100000 |
+### Donation Code Flow
 
-### Tip Flow
+1. User clicks "Support fuega" → tip page shows amounts and methods
+2. User clicks a Ko-fi amount → fuega generates a one-time code (`FUEGA-a8x2k`)
+3. Code stored in DB: `donation_codes(code, user_id, created_at, used_at, expired_at)`
+4. User copy-pastes code into Ko-fi’s message field
+5. Ko-fi webhook fires to `/api/webhooks/kofi`
+6. Server: verify token → extract code from message → match to user → award badge → expire code
+7. Code expires after 24h or first use, whichever comes first
+
+### Tip Badges
+
+- **Supporter** — any successful tip (one-time). Never revoked.
+- **Recurring Supporter** — active Ko-fi monthly subscription. Revoked if cancelled.
+
+### Supporters Page (`/supporters`)
+
+- Anonymous list: username + amount + optional message
+- Users can opt out of appearing
+- Lifetime total + monthly recurring total
+
+### Environment Variables
 
 ```
-1. User clicks "Support fuega.ai" button (visible in footer/sidebar)
-     |
-2. User selects one-time or recurring, and amount
-     |
-3. Optionally adds a message (max 500 chars, displayed on a supporters page)
-     |
-4. Client creates Stripe Checkout Session or Stripe Subscription
-     |
-     POST /api/tips/checkout
-     Body: { amount_cents: 500, recurring: false, message: "Keep it going!" }
-     |
-5. Server creates Stripe session:
-     - One-time: payment mode
-     - Recurring: subscription mode with monthly interval
-     |
-6. User completes payment on Stripe-hosted page
-     |
-7. Stripe webhook received:
-     - One-time: checkout.session.completed
-     - Recurring: invoice.paid (first and subsequent months)
-     |
-8. Server handler:
-     a. INSERT into tips table
-     b. Award "Supporter" badge (if first tip)
-     c. Award "Recurring Supporter" badge (if recurring, first month)
-     d. Send notification to user (thank you)
+KOFI_VERIFICATION_TOKEN    — Ko-fi webhook verification token
+KOFI_PAGE_URL              — Ko-fi page URL for redirects
 ```
-
-### Recurring Tip Management
-
-- Users can cancel recurring tips from their settings page
-- Cancellation takes effect at end of current billing period
-- If a recurring tip is cancelled, the "Recurring Supporter" badge is revoked
-- The "Supporter" badge (one-time) is never revoked
-- Failed payment retries follow Stripe's default retry schedule (3 attempts over ~7 days)
-
-### Supporters Page
-
-An optional public page at `/supporters` showing:
-- Anonymous list of recent tips (username + amount + message)
-- Users can opt out of appearing on this page
-- Total tips received (platform lifetime)
-- Current monthly recurring total
 
 ---
 
@@ -1611,35 +1580,6 @@ affects:
 dependencies: none
 ```
 
-#### ENABLE_COSMETICS_SHOP
-
-```yaml
-name: ENABLE_COSMETICS_SHOP
-type: boolean
-default: false
-description: |
-  Controls whether the cosmetics shop is visible and functional.
-  When false:
-    - Shop page returns 404
-    - Shop link hidden from navigation
-    - Stripe checkout endpoints return 403
-    - Existing purchased cosmetics still display on profiles
-  When true:
-    - Shop page is accessible
-    - Shop link visible in navigation
-    - Stripe checkout endpoints are functional
-    - Full purchase and refund flow available
-affects:
-  - /shop page visibility
-  - /api/cosmetics/* endpoints
-  - Navigation component
-  - Stripe webhook handling
-dependencies:
-  - STRIPE_SECRET_KEY must be set
-  - STRIPE_PUBLISHABLE_KEY must be set
-  - STRIPE_WEBHOOK_SECRET must be set
-```
-
 #### ENABLE_TIP_JAR
 
 ```yaml
@@ -1647,24 +1587,25 @@ name: ENABLE_TIP_JAR
 type: boolean
 default: false
 description: |
-  Controls whether the tip jar is visible and functional.
+  Controls whether the Ko-fi tip jar is visible and functional.
   When false:
     - Tip jar button hidden from UI
     - Tip endpoints return 403
     - Supporters page returns 404
   When true:
     - Tip jar button visible in footer and sidebar
-    - Tip endpoints functional
+    - Donation code generation functional
+    - Ko-fi webhook active
     - Supporters page accessible
 affects:
   - Tip jar UI components
-  - /api/tips/* endpoints
+  - /api/tips/code endpoint
+  - /api/webhooks/kofi endpoint
+  - /api/supporters endpoint
   - /supporters page
-  - Stripe subscription management
 dependencies:
-  - STRIPE_SECRET_KEY must be set
-  - STRIPE_PUBLISHABLE_KEY must be set
-  - STRIPE_WEBHOOK_SECRET must be set
+  - KOFI_VERIFICATION_TOKEN must be set
+  - KOFI_PAGE_URL must be set
 ```
 
 #### ENABLE_NOTIFICATIONS
@@ -1706,7 +1647,7 @@ export function isFeatureEnabled(flag: string): boolean {
 
 // Usage in API routes:
 export async function POST(req: Request) {
-  if (!isFeatureEnabled('ENABLE_COSMETICS_SHOP')) {
+  if (!isFeatureEnabled('ENABLE_TIP_JAR')) {
     return Response.json(
       { error: 'Feature not available', code: 'FEATURE_DISABLED' },
       { status: 403 }
@@ -1716,11 +1657,11 @@ export async function POST(req: Request) {
 }
 
 // Usage in server components:
-export default function ShopPage() {
-  if (!isFeatureEnabled('ENABLE_COSMETICS_SHOP')) {
+export default function SupportersPage() {
+  if (!isFeatureEnabled('ENABLE_TIP_JAR')) {
     notFound();
   }
-  return <ShopContent />;
+  return <SupportersContent />;
 }
 ```
 
@@ -1736,7 +1677,6 @@ export default function ShopPage() {
 // Returns which features are currently enabled
 {
   "badges": true,
-  "cosmetics_shop": false,
   "tip_jar": false,
   "notifications": true
 }
@@ -1755,12 +1695,11 @@ The gamification system requires 7 new tables and modifications to 4 existing ta
 2. `user_badges` - Earned badges per user
 3. `notifications` - In-app notification records
 4. `referrals` - Referral tracking
-5. `cosmetics` - Cosmetic item catalog
-6. `user_cosmetics` - Purchased cosmetics per user
-7. `tips` - Tip jar donation records
+5. `donation_codes` - One-time codes for linking Ko-fi donations to users
+6. `tips` - Tip records (no PII, no Stripe IDs — Ko-fi transaction IDs only)
 
 **Modified Tables:**
-1. `users` - Add: founder_number, primary_badge, cosmetics, referred_by, referral_count
+1. `users` - Add: founder_number, primary_badge, referred_by, referral_count
 2. `campfire_members` - Add: role, role_assigned_at, role_assigned_by, activity counters
 3. `campfires` - Add: banner_url, icon_url, theme, ai_config
 4. `ai_prompt_history` - Add: ai_config (JSONB for structured config)
@@ -1771,8 +1710,7 @@ The gamification system requires 7 new tables and modifications to 4 existing ta
 migrations/006_badges_and_user_badges.sql
 migrations/007_notifications.sql
 migrations/008_referrals.sql
-migrations/009_cosmetics_and_user_cosmetics.sql
-migrations/010_tips_and_user_updates.sql
+migrations/009_donation_codes_and_tips.sql   (Ko-fi tip system — replaces Stripe)
 ```
 
 ### API Endpoints Required
@@ -1799,22 +1737,10 @@ GET    /api/referrals/link                  # Get or generate referral link
 GET    /api/referrals/stats                 # Get referral count and history
 GET    /api/referrals/history               # List referred users
 
-# Cosmetics
-GET    /api/cosmetics                       # List all available cosmetics
-GET    /api/cosmetics/:cosmetic_id          # Get single cosmetic
-POST   /api/cosmetics/checkout              # Create Stripe checkout session
-GET    /api/users/:id/cosmetics             # Get user's owned cosmetics
-PUT    /api/users/:id/cosmetics/active      # Set active cosmetics
-POST   /api/cosmetics/:id/refund            # Request refund (within 7 days)
-
-# Tips
-POST   /api/tips/checkout                   # Create tip checkout/subscription
-GET    /api/tips/subscriptions              # Get user's active tip subscriptions
-DELETE /api/tips/subscriptions/:id          # Cancel recurring tip
-GET    /api/supporters                      # Public list of supporters
-
-# Stripe Webhooks
-POST   /api/webhooks/stripe                 # Stripe webhook handler
+# Tips (Ko-fi)
+POST   /api/tips/code                       # Generate donation code (authenticated)
+POST   /api/webhooks/kofi                   # Ko-fi webhook handler (verify token)
+GET    /api/supporters                      # Public supporters list
 
 # AI Config
 GET    /api/campfires/:id/ai-config       # Get current AI config
@@ -1830,19 +1756,16 @@ GET    /api/campfires/:id/members         # List members with roles
 PUT    /api/campfires/:id/members/:uid/role # Assign role (founder only)
 ```
 
-### Stripe Integration Points
+### External Payment Integration (Ko-fi)
 
-1. **Cosmetics Shop** - Stripe Checkout (one-time payments)
-2. **Tip Jar (One-Time)** - Stripe Checkout (one-time payments)
-3. **Tip Jar (Recurring)** - Stripe Subscriptions (monthly billing)
-4. **Refunds** - Stripe Refunds API
+fuega never touches money. All payments flow through Ko-fi. See `docs/plans/2026-02-22-anonymous-tips-design.md`.
 
-**Webhook Events to Handle:**
-- `checkout.session.completed` - Cosmetic purchased or one-time tip
-- `invoice.paid` - Recurring tip payment
-- `invoice.payment_failed` - Failed recurring tip payment
-- `customer.subscription.deleted` - Recurring tip cancelled
-- `charge.refunded` - Cosmetic or tip refunded
+**Ko-fi Webhook Events to Handle:**
+- `Donation` — one-time donation with donation code in message field
+- `Subscription` — new monthly subscription
+- `Shop Order` — (future, not V1)
+
+**No Stripe. No payment PII stored. No money transmitter concerns.**
 
 ### Cron Jobs
 
@@ -1859,7 +1782,7 @@ PUT    /api/campfires/:id/members/:uid/role # Assign role (founder only)
 All security requirements for the gamification system are documented in SECURITY.md. Key concerns:
 
 1. **Badge fraud** - Server-side only awarding, audit logging, feature flag toggle
-2. **Cosmetic price manipulation** - Server-side price validation, Stripe handles payment
+2. **Donation code abuse** - Codes expire after 24h or first use, one code per request
 3. **Referral fraud** - IP hash checks, DB constraints, reversion for banned accounts
 4. **Notification spam** - Rate limiting, batching, user-controlled preferences
 5. **AI config injection** - Structured config eliminates free-form prompt attacks
@@ -1868,7 +1791,7 @@ All security requirements for the gamification system are documented in SECURITY
 
 1. **Badge eligibility** - Run as background job, not on every request. Cache results.
 2. **Notification inbox** - Index on (user_id, created_at DESC) WHERE read = FALSE. Paginate.
-3. **Cosmetic rendering** - CSS-only cosmetics (no heavy assets). Lazy-load animations.
+3. **Donation codes** - Index on (code) UNIQUE. Expire stale codes via cron.
 4. **Referral counting** - Denormalized count on users table (avoid COUNT queries).
 5. **AI config** - Cache generated prompts. Only regenerate when config changes.
 
@@ -1913,58 +1836,17 @@ All security requirements for the gamification system are documented in SECURITY
 | 33 | v1_influencer         | V1 Influencer         | referral      | rare      | 25 referrals                        |
 | 34 | v1_legend             | V1 Legend             | referral      | legendary | 100 referrals                       |
 | 35 | first_referral        | Spark Spreader        | referral      | common    | 1 referral                          |
-| 36 | supporter             | Supporter             | special       | rare      | Any tip jar donation                |
-| 37 | recurring_supporter   | Recurring Supporter   | special       | epic      | Active recurring tip subscription   |
+| 36 | supporter             | Supporter             | special       | rare      | Any Ko-fi donation (via code)       |
+| 37 | recurring_supporter   | Recurring Supporter   | special       | epic      | Active Ko-fi monthly subscription   |
 | 38 | bug_hunter            | Bug Hunter            | special       | rare      | Verified bug report (manual award)  |
 | 39 | campfire_creator     | Campfire Creator     | special       | uncommon  | Created 1 approved campfire        |
 | 40 | verified_human        | Verified Human        | special       | uncommon  | Manual verification (admin award)   |
 
 ---
 
-## APPENDIX B: COSMETICS SUMMARY TABLE
+## APPENDIX B: COSMETICS (CUT FROM V1)
 
-| #  | cosmetic_id                 | Name                | Category | Subcategory | Price  |
-|----|-----------------------------|---------------------|----------|-------------|--------|
-| 1  | theme_lava_flow             | Lava Flow           | theme    | profile     | $4.99  |
-| 2  | theme_midnight_ember        | Midnight Ember      | theme    | profile     | $4.99  |
-| 3  | theme_arctic_frost          | Arctic Frost        | theme    | profile     | $4.99  |
-| 4  | theme_neon_grid             | Neon Grid           | theme    | profile     | $5.99  |
-| 5  | theme_forest_canopy         | Forest Canopy       | theme    | profile     | $4.99  |
-| 6  | theme_void                  | The Void            | theme    | profile     | $3.99  |
-| 7  | theme_campfire_inferno     | Campfire Inferno   | theme    | campfire   | $9.99  |
-| 8  | theme_campfire_ocean       | Campfire Ocean     | theme    | campfire   | $9.99  |
-| 9  | theme_campfire_terminal    | Campfire Terminal   | theme    | campfire   | $7.99  |
-| 10 | border_flame_ring           | Flame Ring          | border   | profile     | $2.99  |
-| 11 | border_ice_crystal          | Ice Crystal         | border   | profile     | $2.99  |
-| 12 | border_gold_ornate          | Gold Ornate         | border   | profile     | $3.99  |
-| 13 | border_pixel_art            | Pixel Art           | border   | profile     | $1.99  |
-| 14 | border_lightning            | Lightning           | border   | profile     | $3.99  |
-| 15 | border_shadow               | Shadow Aura         | border   | profile     | $2.99  |
-| 16 | title_fire_starter          | Fire Starter        | title    | profile     | $1.99  |
-| 17 | title_flame_keeper          | Flame Keeper        | title    | profile     | $1.99  |
-| 18 | title_ember_walker          | Ember Walker        | title    | profile     | $1.99  |
-| 19 | title_ash_born              | Ash Born            | title    | profile     | $1.99  |
-| 20 | title_phoenix               | Phoenix             | title    | profile     | $2.99  |
-| 21 | title_wildfire              | Wildfire            | title    | profile     | $3.99  |
-| 22 | color_flame_orange          | Flame Orange        | color    | profile     | $1.49  |
-| 23 | color_royal_purple          | Royal Purple        | color    | profile     | $1.49  |
-| 24 | color_ocean_blue            | Ocean Blue          | color    | profile     | $1.49  |
-| 25 | color_emerald_green         | Emerald Green       | color    | profile     | $1.49  |
-| 26 | color_crimson_red           | Crimson Red         | color    | profile     | $1.49  |
-| 27 | color_gold                  | Gold                | color    | profile     | $1.99  |
-| 28 | color_rainbow               | Rainbow             | color    | profile     | $3.99  |
-| 29 | avatar_flame_aura           | Flame Aura          | avatar   | profile     | $3.49  |
-| 30 | avatar_hexagon              | Hexagon Frame       | avatar   | profile     | $2.49  |
-| 31 | avatar_diamond              | Diamond Frame       | avatar   | profile     | $2.49  |
-| 32 | banner_fire_landscape       | Fire Landscape      | banner   | profile     | $4.99  |
-| 33 | banner_starfield            | Starfield           | banner   | profile     | $4.99  |
-| 34 | banner_circuit_board        | Circuit Board       | banner   | profile     | $3.99  |
-| 35 | banner_abstract_waves       | Abstract Waves      | banner   | profile     | $3.99  |
-| 36 | banner_campfire_flames     | Campfire Flames    | banner   | campfire   | $7.99  |
-| 37 | banner_campfire_mountains  | Campfire Mountains | banner   | campfire   | $7.99  |
-| 38 | icon_flame_circle           | Flame Circle Icon   | icon     | campfire   | $4.99  |
-| 39 | icon_shield                 | Shield Icon         | icon     | campfire   | $4.99  |
-| 40 | icon_diamond                | Diamond Icon        | icon     | campfire   | $5.99  |
+> Cosmetics shop cut from V1. Requires anonymous payment solution. See `docs/plans/2026-02-22-anonymous-tips-design.md`.
 
 ---
 

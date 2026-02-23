@@ -1091,168 +1091,19 @@ TEST:
 - Reversion on banned referee
 ```
 
-### Prompt 2.8: Cosmetics Shop API
+### Prompt 2.8: Cosmetics Shop API — CUT FROM V1
 ```
-CONTEXT: Implementing cosmetics shop from GAMIFICATION.md. 40 cosmetic items, Stripe payments.
-
-READ: GAMIFICATION.md (Cosmetics Shop section, Purchase Flow, Refund Policy, Appendix B)
-
-FILES TO CREATE:
-- app/api/cosmetics/route.ts (list catalog)
-- app/api/cosmetics/[cosmeticId]/route.ts (get single)
-- app/api/cosmetics/checkout/route.ts (create Stripe checkout)
-- app/api/cosmetics/[id]/refund/route.ts (request refund)
-- app/api/users/[id]/cosmetics/route.ts (get owned cosmetics)
-- app/api/users/[id]/cosmetics/active/route.ts (set active cosmetics)
-- app/api/webhooks/stripe/route.ts (Stripe webhook handler)
-- lib/services/cosmetics.service.ts
-- lib/services/stripe.service.ts (shared Stripe utilities)
-- tests/api/cosmetics/cosmetics.test.ts
-
-FEATURE FLAG: Check ENABLE_COSMETICS_SHOP. When false: shop returns 404, checkout returns 403.
-
-DEPENDENCIES: npm install stripe
-
-ENV VARS NEEDED:
-- STRIPE_SECRET_KEY
-- STRIPE_PUBLISHABLE_KEY (NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY)
-- STRIPE_WEBHOOK_SECRET
-
-ENDPOINTS:
-
-GET /api/cosmetics
-- Public
-- Returns all available cosmetics grouped by category
-- Include: cosmetic_id, name, description, category, subcategory, price_cents
-
-GET /api/cosmetics/:cosmeticId
-- Public
-- Returns single cosmetic with full metadata
-
-POST /api/cosmetics/checkout
-- Auth required
-- Feature flag check
-- Body: { cosmetic_id: "theme_lava_flow" }
-- Server-side validation:
-  a. Cosmetic exists and is available
-  b. User doesn't already own it
-  c. Price from SERVER catalog (NEVER trust client)
-- Create Stripe Checkout Session with metadata: { user_id, cosmetic_id }
-- Return: { checkout_url: "https://checkout.stripe.com/..." }
-
-POST /api/cosmetics/:id/refund
-- Auth required
-- Validate: user owns cosmetic, purchased less than 7 days ago
-- Abuse check: max 5 refunds in 30 days
-- Initiate Stripe refund via payment_intent
-- Mark user_cosmetics: refunded=true, refunded_at=NOW()
-- Remove cosmetic from active cosmetics if applied
-
-GET /api/users/:id/cosmetics
-- Public (cosmetics are visible on profiles)
-- Returns owned cosmetics list
-
-PUT /api/users/:id/cosmetics/active
-- Auth required (own user only)
-- Body: { theme: "theme_lava_flow", border: "border_flame_ring", title: "title_phoenix", ... }
-- Validate user owns each cosmetic
-- Update users.active_cosmetics JSONB
-
-STRIPE WEBHOOK HANDLER (app/api/webhooks/stripe/route.ts):
-- Verify webhook signature with STRIPE_WEBHOOK_SECRET
-- Handle checkout.session.completed:
-  - Extract user_id, cosmetic_id from metadata
-  - INSERT into user_cosmetics (stripe_payment_id, purchased_at)
-  - Send notification if enabled
-- Handle charge.refunded:
-  - Mark cosmetic as refunded
-- Return 200 OK always (after processing)
-
-SECURITY:
-- NEVER trust client-side prices
-- Verify webhook signatures
-- Validate ownership before refund
-- Rate limit checkout creation (5 per minute per user)
-
-TEST:
-- List cosmetics catalog
-- Create checkout session (mock Stripe)
-- Webhook processes purchase
-- Refund within 7 days succeeds
-- Refund after 7 days fails
-- Can't buy cosmetic already owned
-- Active cosmetics applied to profile
-- Feature flag off = 403/404
+CUT FROM V1. Cosmetics shop conflicts with fuega's anonymity promise (requires payment processor with PII).
+Builder: SKIP this prompt. See SKIP_PROMPTS in fuega_builder.py.
+See docs/plans/2026-02-22-anonymous-tips-design.md for rationale.
 ```
 
-### Prompt 2.9: Tip Jar API
+### Prompt 2.9: Tip Jar API (Stripe) — CUT FROM V1
 ```
-CONTEXT: Implementing tip jar from GAMIFICATION.md. One-time and recurring tips via Stripe.
-
-READ: GAMIFICATION.md (Tip Jar section, Tip Options, Tip Flow)
-
-FILES TO CREATE:
-- app/api/tips/checkout/route.ts (create tip checkout/subscription)
-- app/api/tips/subscriptions/route.ts (list active subscriptions)
-- app/api/tips/subscriptions/[id]/route.ts (cancel subscription)
-- app/api/supporters/route.ts (public supporters list)
-- lib/services/tips.service.ts
-- tests/api/tips/tips.test.ts
-
-FEATURE FLAG: Check ENABLE_TIP_JAR. When false: endpoints return 403, UI hidden.
-
-ENDPOINTS:
-
-POST /api/tips/checkout
-- Auth required
-- Feature flag check
-- Body: { amount_cents: 500, recurring: false, message: "Keep it going!" }
-- Validate: amount >= 100, amount <= 100000
-- If recurring=false: create Stripe Checkout Session (payment mode)
-- If recurring=true: create Stripe Checkout Session (subscription mode, monthly interval)
-- Metadata: { user_id, recurring, message }
-- Return: { checkout_url }
-
-GET /api/tips/subscriptions
-- Auth required
-- Returns user's active recurring tip subscriptions
-- Include: amount, status, next_billing_date
-
-DELETE /api/tips/subscriptions/:id
-- Auth required
-- Cancel Stripe subscription (at period end)
-- Revoke "Recurring Supporter" badge (this badge is revocable)
-
-GET /api/supporters
-- Public
-- Returns recent tips (username, amount, message, date)
-- Users can opt out (check notification_preferences)
-- Include: total lifetime tips, current monthly recurring total
-
-STRIPE WEBHOOK ADDITIONS (add to existing handler):
-- checkout.session.completed (for one-time tips):
-  - INSERT into tips table
-  - Award "supporter" badge if first tip
-- invoice.paid (for recurring tips):
-  - INSERT into tips table
-  - Award "recurring_supporter" badge if first recurring payment
-- customer.subscription.deleted:
-  - Revoke "recurring_supporter" badge
-- invoice.payment_failed:
-  - Log warning, Stripe handles retry
-
-BADGE AWARDS:
-- Any tip >= $1.00 -> "supporter" badge (permanent, never revoked)
-- Active recurring subscription -> "recurring_supporter" badge (revoked on cancel)
-
-TEST:
-- One-time tip checkout creation
-- Recurring tip subscription creation
-- Cancel subscription
-- Supporter badge awarded after first tip
-- Recurring supporter badge awarded then revoked on cancel
-- Supporters page shows recent tips
-- Feature flag off = 403
+CUT FROM V1. Stripe tips replaced by Ko-fi donation code system.
+Builder: SKIP this prompt. See SKIP_PROMPTS in fuega_builder.py.
+See docs/plans/2026-02-22-anonymous-tips-design.md for the Ko-fi-based replacement design.
+New endpoints: POST /api/tips/code, POST /api/webhooks/kofi, GET /api/supporters.
 ```
 
 ### Prompt 2.10: Structured AI Config & Feature Flags
@@ -2005,84 +1856,10 @@ TEST:
 - Feature flag hides bell when off
 ```
 
-### Prompt 3.7: Cosmetic Shop UI
+### Prompt 3.7: Cosmetic Shop UI — CUT FROM V1
 ```
-CONTEXT: Building cosmetics shop UI from GAMIFICATION.md.
-
-READ: GAMIFICATION.md (Cosmetics Shop section, Complete Catalog, Purchase Flow, Refund Policy)
-READ: UI_DESIGN.md
-
-FILES TO CREATE:
-- app/(app)/shop/page.tsx (shop catalog page)
-- app/(app)/shop/success/page.tsx (post-purchase success)
-- components/fuega/shop-catalog.tsx (grid of cosmetics)
-- components/fuega/cosmetic-card.tsx (single cosmetic item card)
-- components/fuega/cosmetic-preview.tsx (live preview on profile)
-- components/fuega/purchase-modal.tsx (confirm purchase -> redirect to Stripe)
-- components/fuega/inventory.tsx (user's owned cosmetics)
-- components/fuega/refund-button.tsx (refund within 7 days)
-- app/(app)/settings/cosmetics/page.tsx (manage active cosmetics)
-- lib/hooks/useCosmetics.ts
-- lib/hooks/useStripeCheckout.ts
-
-FEATURE FLAG: Check /api/features. If cosmetics_shop=false, redirect shop to 404.
-
-SHOP CATALOG (/shop):
-- Header with "Cosmetics Shop" title
-- Category tabs: Themes, Borders, Titles, Colors, Avatars, Banners, Icons
-- Subcategory filter: Profile vs Campfire
-- Grid of cosmetic cards
-- Each card: name, preview, price, "Purchase" button
-- Already owned items show "Owned" badge instead of purchase button
-
-COSMETIC CARD:
-- Preview area (CSS-rendered for themes/borders/colors, image for banners/icons)
-- Name and description
-- Price ($X.XX format from cents)
-- Category badge
-- Purchase button or Owned indicator
-
-COSMETIC PREVIEW:
-- Live preview showing how cosmetic looks applied to user's profile
-- For themes: show profile page snippet with theme applied
-- For borders: show avatar with border
-- For titles: show username with title below
-- For colors: show username in selected color
-
-PURCHASE MODAL:
-- Cosmetic name, price, preview
-- "Pay with Stripe" button
-- Redirects to Stripe Checkout hosted page
-- Return URL: /shop/success?session_id={CHECKOUT_SESSION_ID}
-
-SUCCESS PAGE:
-- "Purchase complete!" message
-- Link to apply cosmetic
-- Link back to shop
-
-INVENTORY (/settings/cosmetics):
-- Grid of owned cosmetics
-- Toggle active/inactive for each slot (theme, border, title, color, avatar, banner)
-- Refund button (only if purchased < 7 days ago)
-- Shows active cosmetics applied to profile preview
-
-REFUND BUTTON:
-- Only visible if purchase < 7 days
-- Shows "X days left to refund"
-- Confirm dialog before refunding
-- Calls POST /api/cosmetics/:id/refund
-
-RESPONSIVE: Mobile 1-2 columns, desktop 3-4 columns
-
-TEST:
-- Shop page renders catalog
-- Category filtering works
-- Purchase modal opens
-- Stripe checkout redirect works
-- Owned items show correctly
-- Refund button visible/hidden based on 7-day window
-- Active cosmetics apply to profile
-- Feature flag hides shop
+CUT FROM V1. Cosmetics shop cut — depends on Prompt 2.8 which is also cut.
+Builder: SKIP this prompt. See SKIP_PROMPTS in fuega_builder.py.
 ```
 
 ### Prompt 3.8: Referral UI

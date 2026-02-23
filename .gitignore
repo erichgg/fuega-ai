@@ -3,6 +3,9 @@
 .env.*
 !.env.example
 
+# Stashed builder output (preserved locally, not in repo)
+_stashed/
+
 # Dependencies
 node_modules/
 

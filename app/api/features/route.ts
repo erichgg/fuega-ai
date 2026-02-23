@@ -11,7 +11,6 @@ export async function GET() {
 
   return NextResponse.json({
     badges: flags.ENABLE_BADGE_DISTRIBUTION,
-    cosmetics_shop: flags.ENABLE_COSMETICS_SHOP,
     tip_jar: flags.ENABLE_TIP_JAR,
     notifications: flags.ENABLE_NOTIFICATIONS,
   });

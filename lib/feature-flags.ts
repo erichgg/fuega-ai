@@ -6,7 +6,6 @@
 
 export type FeatureFlag =
   | "ENABLE_BADGE_DISTRIBUTION"
-  | "ENABLE_COSMETICS_SHOP"
   | "ENABLE_TIP_JAR"
   | "ENABLE_NOTIFICATIONS";
 
@@ -25,7 +24,6 @@ export function isFeatureEnabled(flag: FeatureFlag): boolean {
 export function getAllFeatureFlags(): Record<FeatureFlag, boolean> {
   const flags: FeatureFlag[] = [
     "ENABLE_BADGE_DISTRIBUTION",
-    "ENABLE_COSMETICS_SHOP",
     "ENABLE_TIP_JAR",
     "ENABLE_NOTIFICATIONS",
   ];
