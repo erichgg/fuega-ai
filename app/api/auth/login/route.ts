@@ -4,6 +4,7 @@ import { verifyPassword } from "@/lib/auth/password";
 import { signToken, setAuthCookie } from "@/lib/auth/jwt";
 import { hashIp, getClientIp } from "@/lib/auth/ip-hash";
 import { checkLoginRateLimit } from "@/lib/auth/rate-limit";
+import { ensureCsrfCookie } from "@/lib/auth/csrf";
 import { queryOne } from "@/lib/db";
 
 export async function POST(req: Request) {
@@ -92,9 +93,10 @@ export async function POST(req: Request) {
       [ipHash, user.id]
     );
 
-    // Generate JWT and set cookie
+    // Generate JWT and set cookies (auth + CSRF)
     const token = signToken({ userId: user.id, username: user.username });
     await setAuthCookie(token);
+    await ensureCsrfCookie();
 
     return NextResponse.json({
       user: {

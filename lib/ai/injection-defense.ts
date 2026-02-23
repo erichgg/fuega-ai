@@ -188,6 +188,9 @@ export function sanitizeCampfireRules(rules: string): SanitizationResult {
   return sanitizeForAI(rules, MAX_RULES_LENGTH);
 }
 
+/** Alias for backward compatibility */
+export const sanitizeCommunityRules = sanitizeCampfireRules;
+
 /**
  * Validate that an AI response is well-formed JSON with expected fields.
  * Returns the parsed decision or a safe default.

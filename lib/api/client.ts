@@ -1,8 +1,20 @@
 /**
  * Typed API client for fuega.ai frontend.
  * Wraps fetch with error handling, auth (credentials: include), and JSON parsing.
- * All state-changing requests include CSRF tokens.
+ * All state-changing requests include CSRF tokens (double-submit cookie pattern).
  */
+
+// ---------------------------------------------------------------------------
+// CSRF helper
+// ---------------------------------------------------------------------------
+
+function getCsrfToken(): string | null {
+  if (typeof document === "undefined") return null;
+  const match = document.cookie
+    .split("; ")
+    .find((c) => c.startsWith("fuega_csrf="));
+  return match ? match.split("=")[1] ?? null : null;
+}
 
 // ---------------------------------------------------------------------------
 // Error types
@@ -53,6 +65,14 @@ async function request<T>(
   const headers: Record<string, string> = {
     ...opts.headers,
   };
+
+  // Include CSRF token on state-changing requests
+  if (method !== "GET") {
+    const csrfToken = getCsrfToken();
+    if (csrfToken) {
+      headers["x-csrf-token"] = csrfToken;
+    }
+  }
 
   const init: RequestInit = {
     method,

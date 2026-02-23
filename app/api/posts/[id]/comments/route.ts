@@ -3,6 +3,7 @@ import { authenticate } from "@/lib/auth/jwt";
 import { createCommentSchema } from "@/lib/validation/comments";
 import { createComment } from "@/lib/services/comments.service";
 import { ServiceError } from "@/lib/services/posts.service";
+import { checkCommentRateLimit } from "@/lib/auth/rate-limit";
 
 interface RouteContext {
   params: Promise<{ id: string }>;
@@ -19,6 +20,14 @@ export async function POST(req: Request, context: RouteContext) {
       return NextResponse.json(
         { error: "Authentication required", code: "UNAUTHORIZED" },
         { status: 401 }
+      );
+    }
+
+    const rateLimit = await checkCommentRateLimit(user.userId);
+    if (!rateLimit.allowed) {
+      return NextResponse.json(
+        { error: "Too many comments. Try again later.", code: "RATE_LIMITED" },
+        { status: 429, headers: { "Retry-After": String(rateLimit.retryAfterSeconds) } }
       );
     }
 
