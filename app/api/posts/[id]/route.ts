@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { authenticate } from "@/lib/auth/jwt";
+import { checkGeneralRateLimit } from "@/lib/auth/rate-limit";
 import { updatePostSchema } from "@/lib/validation/posts";
 import {
   getPostById,
@@ -62,6 +63,14 @@ export async function PATCH(req: Request, context: RouteContext) {
       );
     }
 
+    const rateLimit = await checkGeneralRateLimit(user.userId);
+    if (!rateLimit.allowed) {
+      return NextResponse.json(
+        { error: "Too many requests. Try again later.", code: "RATE_LIMITED" },
+        { status: 429, headers: { "Retry-After": String(rateLimit.retryAfterSeconds) } }
+      );
+    }
+
     const { id } = await context.params;
     const body = await req.json();
     const parsed = updatePostSchema.safeParse(body);
@@ -101,6 +110,14 @@ export async function DELETE(req: Request, context: RouteContext) {
       return NextResponse.json(
         { error: "Authentication required", code: "UNAUTHORIZED" },
         { status: 401 }
+      );
+    }
+
+    const rateLimit = await checkGeneralRateLimit(user.userId);
+    if (!rateLimit.allowed) {
+      return NextResponse.json(
+        { error: "Too many requests. Try again later.", code: "RATE_LIMITED" },
+        { status: 429, headers: { "Retry-After": String(rateLimit.retryAfterSeconds) } }
       );
     }
 

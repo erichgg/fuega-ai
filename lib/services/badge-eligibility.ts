@@ -124,9 +124,9 @@ async function getUserMetrics(userId: string): Promise<UserMetrics> {
       [userId]
     ),
 
-    // Total sparks received (post_sparks + comment_sparks from users table)
-    queryOne<{ post_sparks: number; comment_sparks: number }>(
-      `SELECT post_sparks, comment_sparks
+    // Total glow received (post_glow + comment_glow from users table)
+    queryOne<{ post_glow: number; comment_glow: number }>(
+      `SELECT post_glow, comment_glow
        FROM users WHERE id = $1`,
       [userId]
     ),
@@ -242,7 +242,7 @@ async function getUserMetrics(userId: string): Promise<UserMetrics> {
     total_approved_comments: parseInt(commentCounts?.approved ?? "0", 10),
     campfires_joined: parseInt(campfiresJoined?.count ?? "0", 10),
     total_sparks_received:
-      (sparksReceived?.post_sparks ?? 0) + (sparksReceived?.comment_sparks ?? 0),
+      (sparksReceived?.post_glow ?? 0) + (sparksReceived?.comment_glow ?? 0),
     max_post_sparks: parseInt(maxPostSparks?.max_sparks ?? "0", 10),
     consecutive_active_days: parseInt(streakDays?.streak ?? "0", 10),
     account_age_days: parseInt(accountAge?.age_days ?? "0", 10),

@@ -12,6 +12,7 @@ import {
   type CampfireContext,
   type ModerationPipelineResult,
 } from "@/lib/ai/moderation.service";
+import { sanitizeText } from "@/lib/sanitize";
 
 export interface ModerationDecision {
   decision: "approved" | "removed" | "flagged" | "warned";
@@ -60,8 +61,9 @@ export async function moderateContent(
   const result = await moderateContentWithAI(
     {
       content_type: input.content_type,
-      title: input.title,
-      body: input.body,
+      // Sanitize content before passing to AI to strip any injected HTML
+      title: input.title ? sanitizeText(input.title) : undefined,
+      body: sanitizeText(input.body),
       author_username: input.author_username ?? "anonymous",
     },
     campfireContext

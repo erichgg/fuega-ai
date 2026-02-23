@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { authenticate } from "@/lib/auth/jwt";
+import { checkGeneralRateLimit } from "@/lib/auth/rate-limit";
 import { updateCommentSchema } from "@/lib/validation/comments";
 import { updateComment, deleteComment } from "@/lib/services/comments.service";
 import { ServiceError } from "@/lib/services/posts.service";
@@ -19,6 +20,14 @@ export async function PATCH(req: Request, context: RouteContext) {
       return NextResponse.json(
         { error: "Authentication required", code: "UNAUTHORIZED" },
         { status: 401 }
+      );
+    }
+
+    const rateLimit = await checkGeneralRateLimit(user.userId);
+    if (!rateLimit.allowed) {
+      return NextResponse.json(
+        { error: "Too many requests. Try again later.", code: "RATE_LIMITED" },
+        { status: 429, headers: { "Retry-After": String(rateLimit.retryAfterSeconds) } }
       );
     }
 
@@ -61,6 +70,14 @@ export async function DELETE(req: Request, context: RouteContext) {
       return NextResponse.json(
         { error: "Authentication required", code: "UNAUTHORIZED" },
         { status: 401 }
+      );
+    }
+
+    const rateLimit = await checkGeneralRateLimit(user.userId);
+    if (!rateLimit.allowed) {
+      return NextResponse.json(
+        { error: "Too many requests. Try again later.", code: "RATE_LIMITED" },
+        { status: 429, headers: { "Retry-After": String(rateLimit.retryAfterSeconds) } }
       );
     }
 

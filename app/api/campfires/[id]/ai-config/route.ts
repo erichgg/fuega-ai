@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { authenticate } from "@/lib/auth/jwt";
+import { checkGeneralRateLimit } from "@/lib/auth/rate-limit";
 import { query, queryOne } from "@/lib/db";
 import {
   DEFAULT_AI_CONFIG,
@@ -99,6 +100,14 @@ export async function PUT(req: Request, { params }: RouteParams) {
       return NextResponse.json(
         { error: "Only the campfire founder can directly update AI config", code: "FORBIDDEN" },
         { status: 403 }
+      );
+    }
+
+    const rateLimit = await checkGeneralRateLimit(user.userId);
+    if (!rateLimit.allowed) {
+      return NextResponse.json(
+        { error: "Too many requests. Try again later.", code: "RATE_LIMITED" },
+        { status: 429, headers: { "Retry-After": String(rateLimit.retryAfterSeconds) } }
       );
     }
 

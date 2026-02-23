@@ -2,6 +2,8 @@
 
 import * as React from "react";
 import { Search, Bell, Menu, Plus, LogIn } from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { FlameLogo } from "@/components/fuega/flame-logo";
@@ -26,6 +28,17 @@ interface HeaderProps {
 }
 
 export function Header({ user, onMenuToggle, className }: HeaderProps) {
+  const router = useRouter();
+
+  const handleLogout = React.useCallback(async () => {
+    try {
+      await fetch("/api/auth/logout", { method: "POST" });
+    } finally {
+      router.push("/");
+      router.refresh();
+    }
+  }, [router]);
+
   return (
     <header
       className={cn(
@@ -59,16 +72,22 @@ export function Header({ user, onMenuToggle, className }: HeaderProps) {
               size="icon"
               className="hidden text-ash-400 hover:text-flame-400 sm:flex"
               aria-label="Create post"
+              asChild
             >
-              <Plus className="h-5 w-5" />
+              <Link href="/submit">
+                <Plus className="h-5 w-5" />
+              </Link>
             </Button>
             <Button
               variant="ghost"
               size="icon"
               className="text-ash-400 hover:text-ash-200"
               aria-label="Notifications"
+              asChild
             >
-              <Bell className="h-5 w-5" />
+              <Link href="/notifications">
+                <Bell className="h-5 w-5" />
+              </Link>
             </Button>
 
             <DropdownMenu>
@@ -93,26 +112,31 @@ export function Header({ user, onMenuToggle, className }: HeaderProps) {
                   My Account
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator className="bg-ash-800" />
-                <DropdownMenuItem className="text-ash-200 focus:bg-ash-800 focus:text-ash-100">
-                  Profile
+                <DropdownMenuItem asChild className="text-ash-200 focus:bg-ash-800 focus:text-ash-100">
+                  <Link href={`/u/${user.username}`}>Profile</Link>
                 </DropdownMenuItem>
-                <DropdownMenuItem className="text-ash-200 focus:bg-ash-800 focus:text-ash-100">
-                  My Campfires
+                <DropdownMenuItem asChild className="text-ash-200 focus:bg-ash-800 focus:text-ash-100">
+                  <Link href="/campfires">My Campfires</Link>
                 </DropdownMenuItem>
-                <DropdownMenuItem className="text-ash-200 focus:bg-ash-800 focus:text-ash-100">
-                  Settings
+                <DropdownMenuItem asChild className="text-ash-200 focus:bg-ash-800 focus:text-ash-100">
+                  <Link href="/settings">Settings</Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator className="bg-ash-800" />
-                <DropdownMenuItem className="text-red-400 focus:bg-ash-800 focus:text-red-300">
+                <DropdownMenuItem
+                  className="text-red-400 focus:bg-ash-800 focus:text-red-300 cursor-pointer"
+                  onSelect={handleLogout}
+                >
                   Log out
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </>
         ) : (
-          <Button variant="spark" size="sm" className="gap-1.5">
-            <LogIn className="h-4 w-4" />
-            Log in
+          <Button variant="spark" size="sm" className="gap-1.5" asChild>
+            <Link href="/login">
+              <LogIn className="h-4 w-4" />
+              Log in
+            </Link>
           </Button>
         )}
       </div>

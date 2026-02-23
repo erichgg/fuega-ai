@@ -42,7 +42,7 @@ function JoinContent() {
             </p>
             <Link
               href="/home"
-              className="inline-flex items-center gap-2 bg-lava-hot text-black px-6 py-2 text-sm font-medium uppercase tracking-wider hover:shadow-[0_0_20px_rgba(255,69,0,0.5)] transition-all"
+              className="inline-flex items-center gap-2 bg-lava-hot text-black px-6 py-2 text-sm font-medium uppercase tracking-wider hover:shadow-[0_0_20px_var(--lava-glow)] transition-all"
             >
               Go to Hearth
               <ArrowRight className="w-4 h-4" />
@@ -65,7 +65,7 @@ function JoinContent() {
             <span className="w-3 h-3 bg-lava-mid" />
             <span className="w-3 h-3 bg-ash/40" />
             <span className="text-xs text-ash ml-2">
-              <span className="text-flame-400">fuega</span>.ai &mdash; invite
+              <span className="text-flame-400 font-semibold">fuega</span>.ai &mdash; invite
             </span>
           </div>
 
@@ -89,7 +89,7 @@ function JoinContent() {
             <div className="space-y-3">
               <Link
                 href="/signup"
-                className="flex items-center justify-center gap-2 w-full bg-lava-hot text-black px-6 py-3 text-sm font-medium uppercase tracking-wider hover:shadow-[0_0_20px_rgba(255,69,0,0.5)] transition-all"
+                className="flex items-center justify-center gap-2 w-full bg-lava-hot text-black px-6 py-3 text-sm font-medium uppercase tracking-wider hover:shadow-[0_0_20px_var(--lava-glow)] transition-all"
               >
                 <Flame className="w-4 h-4" />
                 Create Account

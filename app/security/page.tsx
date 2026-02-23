@@ -129,7 +129,7 @@ const securityRows: SecurityRow[] = [
   },
   {
     layer: "AI prompt defense",
-    what: "Preventing users from manipulating the AI moderator",
+    what: "Preventing users from manipulating the Tender (AI governance prompt)",
     how: "Multi-layer injection defense: input sanitization, output validation, sandboxed execution context",
   },
   {

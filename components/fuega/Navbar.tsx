@@ -394,7 +394,7 @@ export function Navbar() {
           className="bg-void border-lava-hot/10 w-48 sm:w-56 overflow-hidden px-6 pt-6"
         >
           <SheetTitle className="font-bold truncate">
-            <span className="text-flame-400">fuega</span>
+            <span className="text-flame-400 font-semibold">fuega</span>
             <span className="text-ash">.ai</span>
           </SheetTitle>
 

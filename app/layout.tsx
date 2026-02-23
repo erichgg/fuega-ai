@@ -16,7 +16,7 @@ export const metadata: Metadata = {
     template: "%s | fuega.ai",
   },
   description:
-    "Campfire-governed discussions with transparent AI moderation. Campfires write and vote on their own AI moderator prompts.",
+    "Campfire-governed discussions with transparent AI moderation. Campfires set governance variables and vote to shape their own Tender.",
   keywords: [
     "discussion",
     "campfire",

@@ -40,7 +40,7 @@ export interface CampfireAIConfig {
 
   // User Requirements
   minimum_account_age_days: number;
-  minimum_spark_score: number;
+  minimum_glow: number;
 
   // Custom Filters
   blocked_keywords: string[];
@@ -66,7 +66,7 @@ export const DEFAULT_AI_CONFIG: CampfireAIConfig = {
   language_requirements: [],
   require_english: false,
   minimum_account_age_days: 0,
-  minimum_spark_score: 0,
+  minimum_glow: 0,
   blocked_keywords: [],
   flagged_keywords: [],
   config_change_quorum: 10,
@@ -117,11 +117,11 @@ export const campfireAIConfigSchema = z
       .int()
       .min(0)
       .max(365, "Maximum account age requirement is 365 days"),
-    minimum_spark_score: z
+    minimum_glow: z
       .number()
       .int()
       .min(0)
-      .max(10000, "Maximum spark score requirement is 10,000"),
+      .max(10000, "Maximum glow requirement is 10,000"),
     blocked_keywords: z
       .array(keywordSchema)
       .max(100, "Maximum 100 blocked keywords"),
@@ -333,7 +333,7 @@ export function buildPromptFromConfig(
   }
 
   // User requirements
-  if (config.minimum_account_age_days > 0 || config.minimum_spark_score > 0) {
+  if (config.minimum_account_age_days > 0 || config.minimum_glow > 0) {
     sections.push("");
     sections.push("USER REQUIREMENTS:");
     if (config.minimum_account_age_days > 0) {
@@ -341,9 +341,9 @@ export function buildPromptFromConfig(
         `- Minimum account age: ${config.minimum_account_age_days} days`
       );
     }
-    if (config.minimum_spark_score > 0) {
+    if (config.minimum_glow > 0) {
       sections.push(
-        `- Minimum spark score: ${config.minimum_spark_score}`
+        `- Minimum glow: ${config.minimum_glow}`
       );
     }
   }

@@ -228,7 +228,7 @@ async function updateAuthorSparks(
   delta: number
 ): Promise<void> {
   const table = votableType === "post" ? "posts" : "comments";
-  const sparkColumn = votableType === "post" ? "post_sparks" : "comment_sparks";
+  const sparkColumn = votableType === "post" ? "post_glow" : "comment_glow";
 
   const content = await queryOne<{ author_id: string }>(
     `SELECT author_id FROM ${table} WHERE id = $1`,

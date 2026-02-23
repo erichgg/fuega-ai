@@ -262,7 +262,7 @@ export default function HowItWorksPage() {
           <p className="mt-3 text-ash-400 leading-relaxed">
             A campfire is a self-governing discussion space — like a dedicated discussion space,
             but with transparent AI moderation and democratic governance. Each
-            campfire has its own Tender (AI moderator), its own rules, and its
+            campfire has its own Tender (compiled AI governance prompt), its own rules, and its
             own public mod log.
           </p>
 

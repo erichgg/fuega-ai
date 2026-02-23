@@ -53,6 +53,9 @@ URL: `/f/[campfire-name]`. Hearth = campfire's main page.
 /lib/hooks      -> Client-side React hooks
 /lib/api        -> Typed API client for frontend
 /lib/monitoring -> Logging, metrics, alerts, cron jobs
+/lib/contexts   -> React context providers (auth, etc.)
+/lib/middleware -> Middleware utilities
+/lib/utils.ts   -> Shared utility functions (cn, etc.)
 /migrations     -> SQL migration files (numbered: 001_, 002_...)
 /tests          -> Test files mirroring source structure
 /public         -> Static assets
@@ -69,15 +72,16 @@ URL: `/f/[campfire-name]`. Hearth = campfire's main page.
 users, campfires, campfire_members, posts, comments, votes,
 campfire_mod_logs, site_mod_logs, governance_variables, campfire_settings,
 campfire_settings_history, reports, ip_hashes,
+proposals, proposal_votes, moderation_appeals,
 badges, user_badges, cosmetics, user_cosmetics, tips, notifications,
 user_push_subscriptions, referrals
 
 **Current Migrations (pre-redesign, actual DB):**
 users, communities (→ campfires), community_memberships (→ campfire_members),
 posts, comments, votes, moderation_log (→ campfire_mod_logs),
-moderation_appeals, ai_prompt_history, proposals, council_members, categories,
-badges, user_badges, notifications, user_push_subscriptions, referrals,
-badge_definitions (from gamification migrations)
+moderation_appeals, ai_prompt_history, proposals, proposal_votes, council_members, categories,
+badges, user_badges, notifications, user_push_subscriptions, referrals
+(Note: migration 005 is missing from the sequence — 004 → 006.)
 
 ## Security Rules — NON-NEGOTIABLE
 1. **NEVER** store raw IPs -> SHA-256 hash + rotating salt, delete after 30d
@@ -143,7 +147,7 @@ PUBLIC_LAUNCH_DATE           -> ISO date for Founder badge cutoff
 ```
 
 ## Key Design Decisions
-- **Sync moderation:** AI checks posts in real-time (<3s), not async queues
+- **Sync moderation:** AI checks posts in real-time (<5s per decision), not async queues
 - **Public mod logs:** Per-campfire mod log + site-level mod log for platform actions
 - **No raw prompts:** Communities set governance variables, Tender compiles the prompt
 - **Vote fuzzing:** Display counts are approximate to prevent manipulation
@@ -158,7 +162,7 @@ PUBLIC_LAUNCH_DATE           -> ISO date for Founder badge cutoff
 
 ## Critical Reading
 - `SCOPE_AND_REQUIREMENTS.md` -> V1 feature spec
-- `SECURITY.md` -> 7-layer security architecture
+- `SECURITY.md` -> 8-layer security architecture
 - `DATA_SCHEMA.md` -> All tables with columns and RLS policies
 - `DEPLOYMENT.md` -> Railway + Cloudflare infrastructure
 - `INJECTION.md` -> AI prompt injection defenses
@@ -170,6 +174,7 @@ PUBLIC_LAUNCH_DATE           -> ISO date for Founder badge cutoff
 - [x] Phase 2: Core backend (2.1-2.4)
 - [x] Phase 3: Frontend core (3.1-3.9) — includes badges, notifications, referrals, settings
 - [x] QA sweep: Security fixes, terminology, rate limiting, force-dynamic, badge colors
+- [x] QA sweep 2: UI consistency, dead links, CSP fix, HTML sanitization, column name fixes, notification enum migration
 - [ ] Redesign: Flat model + governance variables + new terminology (doc sweep)
 - [ ] Phase 1.4: Database migrations (governance + gamification tables)
 - [ ] Phase 2: Backend (2.5-2.10) — remaining badges, cosmetics, tips

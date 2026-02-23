@@ -132,8 +132,8 @@ export default function LandingPage() {
       {/* Hero */}
       <section className="relative flex min-h-[calc(100vh-3.5rem)] flex-col overflow-hidden px-4 2xl:px-8">
         <div className="absolute inset-0 -z-10">
-          <div className="absolute left-1/2 top-0 h-[400px] w-[900px] -translate-x-1/2 rounded-full bg-flame-500/5 blur-3xl" />
-          <div className="absolute left-1/3 top-10 h-[250px] w-[600px] -translate-x-1/2 rounded-full bg-ember-500/5 blur-3xl" />
+          <div className="absolute left-1/2 top-0 h-[400px] w-full max-w-[900px] -translate-x-1/2 rounded-full bg-flame-500/5 blur-3xl" />
+          <div className="absolute left-1/3 top-10 h-[250px] w-full max-w-[600px] -translate-x-1/2 rounded-full bg-ember-500/5 blur-3xl" />
         </div>
 
         <div className="mx-auto flex w-full max-w-7xl flex-1 flex-col justify-center">
@@ -384,6 +384,16 @@ export default function LandingPage() {
                 <li>
                   <Link href="/security" className="text-xs text-ash-500 hover:text-ash-300">
                     Security
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/principles" className="text-xs text-ash-500 hover:text-ash-300">
+                    Principles
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/supporters" className="text-xs text-ash-500 hover:text-ash-300">
+                    Supporters
                   </Link>
                 </li>
               </ul>

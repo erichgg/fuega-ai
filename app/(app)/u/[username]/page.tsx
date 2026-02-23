@@ -301,6 +301,12 @@ export default function UserProfilePage() {
           >
             Comments ({comments.length})
           </TabsTrigger>
+          <Link
+            href={`/u/${profile.username}/badges`}
+            className="ml-auto self-end pb-2 text-xs text-ash-500 hover:text-flame-400 transition-colors"
+          >
+            View badges →
+          </Link>
         </TabsList>
 
         <TabsContent value="posts" className="mt-4 space-y-2">

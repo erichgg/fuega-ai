@@ -26,7 +26,7 @@ export function FlameLogo({
         className,
       )}
     >
-      <span className="text-flame-400">fuega</span>
+      <span className="text-flame-400 font-semibold">fuega</span>
       <span className="text-ash-400">.ai</span>
     </span>
   );

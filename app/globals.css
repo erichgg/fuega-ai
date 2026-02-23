@@ -59,6 +59,10 @@
   --warning: #FF6B2C;
   --warning-foreground: #000000;
 
+  /* Semantic shadow/glow tokens */
+  --lava-glow: rgba(255, 69, 0, 0.5);
+  --void-shadow: rgba(0, 0, 0, 0.5);
+
   /* Chart colors */
   --chart-1: #FF4500;
   --chart-2: #00D4AA;

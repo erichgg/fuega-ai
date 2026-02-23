@@ -31,7 +31,7 @@ describe("validateConfig", () => {
       language_requirements: ["en", "es"],
       require_english: true,
       minimum_account_age_days: 30,
-      minimum_spark_score: 100,
+      minimum_glow: 100,
       blocked_keywords: ["spam_word"],
       flagged_keywords: ["borderline"],
       config_change_quorum: 15,

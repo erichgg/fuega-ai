@@ -55,7 +55,7 @@ export function ReferralLink({ referralLink, className }: ReferralLinkProps) {
             "shrink-0 px-4 py-2 text-sm font-medium uppercase tracking-wider transition-all",
             copied
               ? "bg-teal text-black"
-              : "bg-lava-hot text-black hover:shadow-[0_0_20px_rgba(255,69,0,0.5)]",
+              : "bg-lava-hot text-black hover:shadow-[0_0_20px_var(--lava-glow)]",
           )}
         >
           {copied ? (

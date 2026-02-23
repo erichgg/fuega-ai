@@ -174,7 +174,7 @@ export default function CampfirePage() {
             </Badge>
           </div>
           <p className="mt-2 text-xs text-ash-400 leading-relaxed">
-            AI moderator compiled from this campfire&apos;s governance variables.
+            Tender compiled from this campfire&apos;s governance variables.
             All decisions logged publicly.
           </p>
           <Link
