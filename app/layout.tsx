@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { JetBrains_Mono } from "next/font/google";
 import { AuthProvider } from "@/lib/contexts/auth-context";
 import { ThemeProvider } from "@/lib/contexts/theme-context";
+import { NotificationProvider } from "@/lib/contexts/notification-context";
 import "./globals.css";
 
 const jetbrainsMono = JetBrains_Mono({
@@ -57,7 +58,9 @@ export default function RootLayout({
         className={`${jetbrainsMono.variable} font-mono antialiased bg-void text-foreground`}
       >
         <ThemeProvider>
-          <AuthProvider>{children}</AuthProvider>
+          <AuthProvider>
+            <NotificationProvider>{children}</NotificationProvider>
+          </AuthProvider>
         </ThemeProvider>
       </body>
     </html>

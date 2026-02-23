@@ -1,8 +1,9 @@
 "use client";
 
 import * as React from "react";
-import { Header } from "@/components/fuega/header";
+import { Navbar } from "@/components/fuega/Navbar";
 import { Sidebar } from "@/components/fuega/sidebar";
+import { Footer } from "@/components/fuega/Footer";
 import { ErrorBoundary } from "@/components/fuega/error-boundary";
 import { useAuth } from "@/lib/contexts/auth-context";
 
@@ -19,23 +20,30 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = React.useState(false);
 
   return (
-    <div className="min-h-screen bg-background">
-      <Header
-        user={user ? { username: user.username, sparkScore: user.sparkScore } : null}
-        onMenuToggle={() => setSidebarOpen(!sidebarOpen)}
-      />
-      <div className="flex">
+    <div className="min-h-screen bg-void flex flex-col">
+      <Navbar />
+
+      {/* Spacer for fixed navbar */}
+      <div className="h-14" />
+
+      <div className="flex flex-1">
         <Sidebar
           campfires={user ? DEMO_CAMPFIRES : []}
           open={sidebarOpen}
           onClose={() => setSidebarOpen(false)}
         />
-        <main className="flex-1 px-4 py-4 lg:px-6 2xl:px-8">
+        <main
+          id="main-content"
+          className="flex-1 px-3 py-4 sm:px-6 lg:px-12 2xl:px-8"
+          role="main"
+        >
           <div className="mx-auto max-w-7xl">
             <ErrorBoundary>{children}</ErrorBoundary>
           </div>
         </main>
       </div>
+
+      <Footer />
     </div>
   );
 }
