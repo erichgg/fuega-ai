@@ -236,7 +236,7 @@ export default function SecurityPage() {
         {/* Security architecture table */}
         <section className="mt-12">
           <h2 className="text-2xl font-bold text-ash-100 sm:text-3xl">
-            7-layer security architecture
+            8-layer security architecture
           </h2>
           <p className="mt-2 text-sm text-ash-500">
             Defense in depth — every layer independently protects your data.

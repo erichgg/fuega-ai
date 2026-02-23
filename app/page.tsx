@@ -32,13 +32,13 @@ const principles = [
     icon: Vote,
     title: "Flat governance, fully democratic",
     description:
-      "Platform Principles are immutable. Beyond that, each campfire governs itself through structured variables and votes. No hierarchy, no gatekeepers — just your campfire, your rules.",
+      "Platform Principles are immutable. Beyond that, each community governs itself through structured variables and votes. No hierarchy, no gatekeepers — just your community, your rules.",
   },
   {
     icon: FileCode2,
     title: "You choose the AI",
     description:
-      "Campfires vote on which AI model drives their moderation. Don't trust a provider's training data? Vote it out. Your campfire controls the knowledge behind every decision.",
+      "Communities vote on which AI model drives their moderation. Don't trust a provider's training data? Vote it out. Your community controls the knowledge behind every decision.",
   },
   {
     icon: Scale,
@@ -63,14 +63,14 @@ const howItWorks = [
   },
   {
     step: "02",
-    title: "Find or build your campfire",
+    title: "Find or build your community",
     description: "CAMPFIRE_LINKS",
   },
   {
     step: "03",
     title: "Speak freely, governed fairly",
     description:
-      "Post and discuss. AI moderation runs in real-time using rules your campfire wrote and voted on.",
+      "Post and discuss. AI moderation runs in real-time using rules your community wrote and voted on.",
   },
   {
     step: "04",
@@ -145,11 +145,11 @@ export default function LandingPage() {
               <span className="text-ash-700">:</span>
               <span className="text-flame-500/70">~</span>
               <span className="text-ash-600">$</span>
-              <span className="text-ash-400 ml-1">init --governance campfire</span>
+              <span className="text-ash-400 ml-1">init --governance community</span>
             </div>
 
             <h1 className="text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl 2xl:text-7xl">
-              <span className="text-ash-200">Your campfire.</span>
+              <span className="text-ash-200">Your community.</span>
               <br />
               <span className="text-ash-200">Your standards.</span>
               <br />
@@ -160,7 +160,7 @@ export default function LandingPage() {
             <div className="mt-6 space-y-1 text-sm text-ash-500 sm:text-base lg:text-lg">
               <p>
                 <span className="text-flame-500/70 mr-2">&gt;</span>
-                <span className="text-ash-300">Campfires write their own rules and vote on them.</span>
+                <span className="text-ash-300">Communities write their own rules and vote on them.</span>
               </p>
               <p>
                 <span className="text-flame-500/70 mr-2">&gt;</span>
@@ -252,7 +252,7 @@ export default function LandingPage() {
               Built for people who don&apos;t trust platforms
             </h2>
             <p className="mt-2 text-sm text-ash-500">
-              Every design decision answers the same question: does the campfire control this, or does someone else?
+              Every design decision answers the same question: does the community control this, or does someone else?
             </p>
           </div>
 
@@ -325,7 +325,7 @@ export default function LandingPage() {
             Find your people. Set your standards.
           </h2>
           <p className="mt-3 text-sm text-ash-400">
-            Campfires that write their own rules, vote on their AI, and hold every decision accountable.
+            Communities that write their own rules, vote on their AI, and hold every decision accountable.
             No black boxes. No corporate overlords. Just people who share your standards.
           </p>
           <Link
@@ -345,7 +345,7 @@ export default function LandingPage() {
             <div>
               <FlameLogo size="sm" />
               <p className="mt-2 text-xs text-ash-500">
-                AI-moderated discussion with transparent campfire governance.
+                AI-moderated discussion with transparent community governance.
               </p>
             </div>
             <div>
@@ -418,7 +418,7 @@ export default function LandingPage() {
             &copy; {new Date().getFullYear()}{" "}
             <span className="text-flame-400 font-bold">fuega</span>
             <span className="text-ash-500">.ai</span>
-            {" "}— Built for the campfire, by the campfire.
+            {" "}— Built for the community, by the community.
           </div>
         </div>
       </footer>

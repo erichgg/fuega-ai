@@ -1,10 +1,9 @@
 /**
- * AI Prompt Builder — Three-Tier Moderation Prompts
+ * AI Prompt Builder — Two-Tier Moderation Prompts
  *
  * Builds isolated, structured prompts for each moderation tier:
- * 1. Community AI agent (uses community-written rules)
- * 2. Category AI agent (uses category-level rules)
- * 3. Platform AI agent (enforces global Terms of Service)
+ * 1. Platform AI agent (enforces global Principles / Terms of Service)
+ * 2. Campfire AI agent (uses campfire-specific Tender rules)
  *
  * All prompts enforce structured JSON output and prevent
  * the AI from following instructions embedded in user content.
@@ -30,7 +29,7 @@ export interface BuiltPrompt {
   user: string;
   content_sanitization: SanitizationResult;
   rules_sanitization: SanitizationResult | null;
-  tier: "community" | "cohort" | "category" | "platform";
+  tier: "campfire" | "platform";
 }
 
 /**
@@ -51,16 +50,12 @@ const PLATFORM_TOS = `
  */
 function buildSystemPrompt(
   campfireName: string,
-  tier: "community" | "cohort" | "category" | "platform"
+  tier: "campfire" | "platform"
 ): string {
   const tierLabel =
-    tier === "community"
+    tier === "campfire"
       ? `campfire f/${campfireName}`
-      : tier === "cohort"
-        ? `cohort containing f/${campfireName}`
-        : tier === "category"
-          ? `category containing f/${campfireName}`
-          : "fuega.ai platform";
+      : "fuega.ai platform";
 
   return [
     `You are a content moderator for the ${tierLabel}.`,
@@ -113,8 +108,8 @@ function buildUserMessage(
 }
 
 /**
- * Build a community-tier moderation prompt.
- * Uses the community's custom AI prompt (written by members, voted on).
+ * Build a campfire-tier moderation prompt.
+ * Uses the campfire's Tender (compiled from governance variables).
  */
 export function buildCampfirePrompt(
   campfireName: string,
@@ -133,7 +128,7 @@ export function buildCampfirePrompt(
     : undefined;
 
   return {
-    system: buildSystemPrompt(campfireName, "community"),
+    system: buildSystemPrompt(campfireName, "campfire"),
     user: buildUserMessage(
       rulesSanitization.sanitized,
       contentSanitization.sanitized,
@@ -142,40 +137,7 @@ export function buildCampfirePrompt(
     ),
     content_sanitization: contentSanitization,
     rules_sanitization: rulesSanitization,
-    tier: "community",
-  };
-}
-
-/**
- * Build a category-tier moderation prompt.
- * Uses category-level rules set by the rotating council.
- */
-export function buildCategoryPrompt(
-  campfireName: string,
-  categoryRules: string,
-  content: ModerationContent
-): BuiltPrompt {
-  const rulesSanitization = sanitizeCampfireRules(categoryRules);
-  const contentText = content.title
-    ? `${content.title}\n${content.body}`
-    : content.body;
-  const contentSanitization = sanitizeForAI(contentText);
-
-  const sanitizedTitle = content.title
-    ? sanitizeForAI(content.title, 500).sanitized
-    : undefined;
-
-  return {
-    system: buildSystemPrompt(campfireName, "category"),
-    user: buildUserMessage(
-      rulesSanitization.sanitized,
-      contentSanitization.sanitized,
-      content.content_type,
-      sanitizedTitle
-    ),
-    content_sanitization: contentSanitization,
-    rules_sanitization: rulesSanitization,
-    tier: "category",
+    tier: "campfire",
   };
 }
 

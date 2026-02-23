@@ -353,7 +353,7 @@ export default function UserProfilePage() {
                 <p className="mt-1.5 text-sm text-ash-300">{comment.body}</p>
                 <div className="mt-1.5 flex items-center gap-2 text-xs text-ash-500">
                   <Flame className="h-3 w-3 text-flame-400" />
-                  {comment.sparkCount} sparks
+                  {comment.sparkCount} glow
                 </div>
               </div>
             ))

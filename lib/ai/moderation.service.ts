@@ -1,13 +1,12 @@
 /**
- * AI Moderation Service — Three-Tier Claude API Integration
+ * AI Moderation Service — Two-Tier Claude API Integration
  *
  * Orchestrates the full moderation pipeline:
- * 1. Platform agent checks global ToS (hardcoded, non-negotiable)
- * 2. Category agent checks category-level rules (if category exists)
- * 3. Community agent checks community-specific rules (user-written)
+ * 1. Platform agent checks global Principles (hardcoded, non-negotiable)
+ * 2. Campfire agent checks campfire-specific Tender rules
  *
  * Content passes through tiers in order. First removal stops the chain.
- * All decisions are logged to moderation_log for public transparency.
+ * All decisions are logged to campfire_mod_logs for public transparency.
  *
  * Requires: ANTHROPIC_API_KEY environment variable
  */
@@ -15,7 +14,6 @@
 import Anthropic from "@anthropic-ai/sdk";
 import {
   buildCampfirePrompt,
-  buildCategoryPrompt,
   buildPlatformPrompt,
   type ModerationContent,
   type BuiltPrompt,
@@ -31,7 +29,7 @@ export interface ModerationDecision {
   decision: "approved" | "removed" | "flagged";
   confidence: number;
   reasoning: string;
-  agent_level: "community" | "cohort" | "category" | "platform";
+  agent_level: "campfire" | "platform";
   ai_model: string;
   prompt_version: number;
   injection_detected: boolean;
@@ -39,23 +37,21 @@ export interface ModerationDecision {
   processing_time_ms: number;
 }
 
-/** Result of the full three-tier moderation pipeline */
+/** Result of the two-tier moderation pipeline */
 export interface ModerationPipelineResult {
   final_decision: "approved" | "removed" | "flagged";
   tier_decisions: ModerationDecision[];
   total_time_ms: number;
-  stopped_at_tier: "community" | "cohort" | "category" | "platform" | null;
+  stopped_at_tier: "campfire" | "platform" | null;
 }
 
-/** Community context needed for moderation */
+/** Campfire context needed for moderation */
 export interface CampfireContext {
   id: string;
   name: string;
   ai_prompt: string;
   ai_prompt_version: number;
   ai_config?: CampfireAIConfig | null;
-  platform_rules?: string;
-  platform_prompt_version?: number;
 }
 
 /** Database interface for logging */
@@ -194,9 +190,9 @@ async function runTier(
 }
 
 /**
- * Run the full three-tier moderation pipeline.
+ * Run the two-tier moderation pipeline.
  *
- * Order: Platform → Category (if exists) → Community
+ * Order: Platform (Principles) → Campfire (Tender)
  * First removal stops the chain.
  * Flagged content continues through remaining tiers.
  */
@@ -208,7 +204,7 @@ export async function runModerationPipeline(
   const pipelineStart = Date.now();
   const tierDecisions: ModerationDecision[] = [];
 
-  // Tier 1: Platform agent (global ToS)
+  // Tier 1: Platform agent (global Principles)
   const platformPrompt = buildPlatformPrompt(campfire.name, content);
   const platformDecision = await runTier(client, platformPrompt, 1);
   tierDecisions.push(platformDecision);
@@ -222,38 +218,14 @@ export async function runModerationPipeline(
     };
   }
 
-  // Tier 2: Platform rules (if platform rules exist)
-  if (campfire.platform_rules) {
-    const platformRulesPrompt = buildCategoryPrompt(
-      campfire.name,
-      campfire.platform_rules,
-      content
-    );
-    const platformRulesDecision = await runTier(
-      client,
-      platformRulesPrompt,
-      campfire.platform_prompt_version ?? 1
-    );
-    tierDecisions.push(platformRulesDecision);
-
-    if (platformRulesDecision.decision === "removed") {
-      return {
-        final_decision: "removed",
-        tier_decisions: tierDecisions,
-        total_time_ms: Date.now() - pipelineStart,
-        stopped_at_tier: "platform",
-      };
-    }
-  }
-
-  // Tier 3: Community agent (community-specific rules)
+  // Tier 2: Campfire agent (campfire-specific Tender rules)
   // If structured config exists, generate prompt from it; otherwise use raw ai_prompt
-  const communityRules = campfire.ai_config
+  const campfireRules = campfire.ai_config
     ? buildPromptFromConfig(campfire.name, campfire.ai_config)
     : campfire.ai_prompt;
   const campfirePrompt = buildCampfirePrompt(
     campfire.name,
-    communityRules,
+    campfireRules,
     content
   );
   const campfireDecision = await runTier(
@@ -268,7 +240,7 @@ export async function runModerationPipeline(
       final_decision: "removed",
       tier_decisions: tierDecisions,
       total_time_ms: Date.now() - pipelineStart,
-      stopped_at_tier: "community",
+      stopped_at_tier: "campfire",
     };
   }
 
@@ -416,7 +388,7 @@ function runBasicSafetyFilter(
         confidence: 1.0,
         reasoning:
           "Auto-approved (AI moderation unavailable — basic safety check passed)",
-        agent_level: "community",
+        agent_level: "campfire",
         ai_model: "basic-safety-filter",
         prompt_version: 0,
         injection_detected: false,

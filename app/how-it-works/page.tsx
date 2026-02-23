@@ -260,7 +260,7 @@ export default function HowItWorksPage() {
             Campfires
           </h2>
           <p className="mt-3 text-ash-400 leading-relaxed">
-            A campfire is a self-governing discussion space — like a dedicated discussion space,
+            A campfire is a self-governing community — like a subreddit,
             but with transparent AI moderation and democratic governance. Each
             campfire has its own Tender (compiled AI governance prompt), its own rules, and its
             own public mod log.
@@ -274,7 +274,7 @@ export default function HowItWorksPage() {
               <p className="mt-1 text-xs text-ash-400">
                 No categories, no nesting. Every campfire is a direct child of
                 the platform. Route:{" "}
-                <code className="text-flame-400 text-xs">f | campfire-name</code>
+                <code className="text-flame-400 text-xs">/f/campfire-name</code>
               </p>
             </div>
             <div className="border border-ash-800 bg-ash-900/30 p-4">

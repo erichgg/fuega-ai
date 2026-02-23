@@ -1,8 +1,8 @@
 /**
  * AI moderation engine — synchronous content moderation via Claude API.
  *
- * This module bridges the existing post/comment services with the full
- * three-tier AI moderation pipeline in lib/ai/moderation.service.ts.
+ * This module bridges the existing post/comment services with the
+ * two-tier AI moderation pipeline in lib/ai/moderation.service.ts.
  *
  * The interface is kept backwards-compatible with Phase 2 consumers.
  */
@@ -10,7 +10,6 @@
 import {
   moderateContentWithAI,
   type CampfireContext,
-  type ModerationPipelineResult,
 } from "@/lib/ai/moderation.service";
 import { sanitizeText } from "@/lib/sanitize";
 
@@ -18,12 +17,11 @@ export interface ModerationDecision {
   decision: "approved" | "removed" | "flagged" | "warned";
   confidence: number;
   reasoning: string;
-  agent_level: "community" | "cohort" | "category" | "platform";
+  agent_level: "campfire" | "platform";
   ai_model: string | null;
   prompt_version: number;
   injection_detected?: boolean;
   injection_patterns?: string[];
-  tier_decisions?: ModerationPipelineResult["tier_decisions"];
 }
 
 export interface ModerationInput {
@@ -36,15 +34,13 @@ export interface ModerationInput {
   campfire_name?: string;
   campfire_ai_prompt?: string;
   campfire_ai_prompt_version?: number;
-  platform_rules?: string;
-  platform_prompt_version?: number;
 }
 
 /**
  * Run AI moderation on content. Must complete in <5s (sync).
  *
- * When ANTHROPIC_API_KEY is set, runs the full three-tier Claude API pipeline.
- * Otherwise falls back to basic safety filter.
+ * When ANTHROPIC_API_KEY is set, runs the two-tier Claude API pipeline
+ * (Platform Principles + Campfire Tender). Otherwise falls back to basic safety filter.
  */
 export async function moderateContent(
   input: ModerationInput
@@ -54,8 +50,6 @@ export async function moderateContent(
     name: input.campfire_name ?? "unknown",
     ai_prompt: input.campfire_ai_prompt ?? "Be respectful and follow common sense.",
     ai_prompt_version: input.campfire_ai_prompt_version ?? 1,
-    platform_rules: input.platform_rules,
-    platform_prompt_version: input.platform_prompt_version,
   };
 
   const result = await moderateContentWithAI(
@@ -76,17 +70,16 @@ export async function moderateContent(
     decision: result.final_decision,
     confidence: lastDecision?.confidence ?? 0,
     reasoning: lastDecision?.reasoning ?? "No decision available",
-    agent_level: result.stopped_at_tier ?? lastDecision?.agent_level ?? "community",
+    agent_level: result.stopped_at_tier ?? lastDecision?.agent_level ?? "campfire",
     ai_model: lastDecision?.ai_model ?? null,
     prompt_version: lastDecision?.prompt_version ?? 0,
     injection_detected: result.tier_decisions.some((d) => d.injection_detected),
     injection_patterns: result.tier_decisions.flatMap((d) => d.injection_patterns),
-    tier_decisions: result.tier_decisions,
   };
 }
 
 /**
- * Log a moderation decision to the moderation_log table.
+ * Log a moderation decision to the campfire_mod_logs table.
  */
 export async function logModerationDecision(
   contentType: "post" | "comment",
