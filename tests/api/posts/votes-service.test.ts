@@ -133,7 +133,7 @@ describe("votes service", () => {
         [TEST_IDS.testUser1]
       );
 
-      expect(afterUser.rows[0].post_sparks).toBe(beforeUser.rows[0].post_sparks + 1);
+      expect(afterUser.rows[0]!.post_sparks).toBe(beforeUser.rows[0]!.post_sparks + 1);
     });
 
     it("updates author spark score on douse", async () => {
@@ -149,7 +149,7 @@ describe("votes service", () => {
         [TEST_IDS.testUser1]
       );
 
-      expect(afterUser.rows[0].post_sparks).toBe(beforeUser.rows[0].post_sparks - 1);
+      expect(afterUser.rows[0]!.post_sparks).toBe(beforeUser.rows[0]!.post_sparks - 1);
     });
   });
 
@@ -209,7 +209,7 @@ describe("votes service", () => {
         [TEST_IDS.testUser2]
       );
 
-      expect(after.rows[0].comment_sparks).toBe(before.rows[0].comment_sparks + 1);
+      expect(after.rows[0]!.comment_sparks).toBe(before.rows[0]!.comment_sparks + 1);
     });
   });
 

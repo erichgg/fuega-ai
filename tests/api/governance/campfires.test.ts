@@ -158,7 +158,6 @@ describe("campfires service", () => {
             name: "unique_name",
             display_name: "Different Display",
             description: "Second one",
-            category: "science",
           },
           TEST_IDS.testUser2
         )
@@ -170,7 +169,6 @@ describe("campfires service", () => {
             name: "unique_name",
             display_name: "Different Display",
             description: "Second one",
-            category: "science",
           },
           TEST_IDS.testUser2
         );
@@ -665,7 +663,6 @@ describe("campfire validation schemas", () => {
         name: "test_name",
         display_name: "Test",
         description: "Test",
-        category: "invalid_category",
       });
       expect(result.success).toBe(false);
     });
@@ -677,7 +674,6 @@ describe("campfire validation schemas", () => {
           name: "test_name",
           display_name: "Test",
           description: "Test",
-          category,
         });
         expect(result.success).toBe(true);
       }

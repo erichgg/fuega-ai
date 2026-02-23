@@ -126,7 +126,7 @@ describe("total index count", () => {
       `SELECT COUNT(*) as count FROM pg_indexes
        WHERE schemaname = 'public' AND tablename != '_migrations'`
     );
-    expect(parseInt(rows[0].count)).toBeGreaterThanOrEqual(40);
+    expect(parseInt((rows[0] as any).count)).toBeGreaterThanOrEqual(40);
   });
 });
 
@@ -158,7 +158,7 @@ describe("query performance", () => {
     // Verify query completes in under 100ms.
     const timeMatch = plan.match(/Execution Time: ([\d.]+) ms/);
     expect(timeMatch).toBeTruthy();
-    expect(parseFloat(timeMatch![1])).toBeLessThan(100);
+    expect(parseFloat(timeMatch![1]!)).toBeLessThan(100);
   });
 
   it("user lookup by username uses index", async () => {
@@ -168,7 +168,7 @@ describe("query performance", () => {
     );
     const timeMatch = plan.match(/Execution Time: ([\d.]+) ms/);
     expect(timeMatch).toBeTruthy();
-    expect(parseFloat(timeMatch![1])).toBeLessThan(100);
+    expect(parseFloat(timeMatch![1]!)).toBeLessThan(100);
   });
 
   it("comment threading query performs well", async () => {
@@ -182,36 +182,36 @@ describe("query performance", () => {
     );
     const timeMatch = plan.match(/Execution Time: ([\d.]+) ms/);
     expect(timeMatch).toBeTruthy();
-    expect(parseFloat(timeMatch![1])).toBeLessThan(100);
+    expect(parseFloat(timeMatch![1]!)).toBeLessThan(100);
   });
 
   it("community posts query performs well", async () => {
     const plan = await getQueryPlan(
       `SELECT id, title, sparks, douses, created_at
        FROM posts
-       WHERE community_id = $1
+       WHERE campfire_id = $1
          AND is_approved = TRUE AND is_removed = FALSE AND deleted_at IS NULL
        ORDER BY (sparks - douses) DESC, created_at DESC
        LIMIT 25`,
-      [TEST_IDS.communityTestTech]
+      [TEST_IDS.campfireTestTech]
     );
     const timeMatch = plan.match(/Execution Time: ([\d.]+) ms/);
     expect(timeMatch).toBeTruthy();
-    expect(parseFloat(timeMatch![1])).toBeLessThan(100);
+    expect(parseFloat(timeMatch![1]!)).toBeLessThan(100);
   });
 
   it("moderation log query for community performs well", async () => {
     const plan = await getQueryPlan(
       `SELECT id, content_type, decision, reason, created_at
        FROM moderation_log
-       WHERE community_id = $1
+       WHERE campfire_id = $1
        ORDER BY created_at DESC
        LIMIT 50`,
-      [TEST_IDS.communityTestTech]
+      [TEST_IDS.campfireTestTech]
     );
     const timeMatch = plan.match(/Execution Time: ([\d.]+) ms/);
     expect(timeMatch).toBeTruthy();
-    expect(parseFloat(timeMatch![1])).toBeLessThan(100);
+    expect(parseFloat(timeMatch![1]!)).toBeLessThan(100);
   });
 
   it("vote lookup for a post performs well", async () => {
@@ -223,7 +223,7 @@ describe("query performance", () => {
     );
     const timeMatch = plan.match(/Execution Time: ([\d.]+) ms/);
     expect(timeMatch).toBeTruthy();
-    expect(parseFloat(timeMatch![1])).toBeLessThan(100);
+    expect(parseFloat(timeMatch![1]!)).toBeLessThan(100);
   });
 });
 
@@ -236,7 +236,7 @@ describe("partial indexes", () => {
       `SELECT indexdef FROM pg_indexes WHERE indexname = $1`,
       [indexName]
     );
-    return rows.length > 0 ? rows[0].indexdef : "";
+    return rows.length > 0 ? (rows[0] as any).indexdef : "";
   }
 
   it("idx_posts_hot_score is partial (approved, not removed, not deleted)", async () => {

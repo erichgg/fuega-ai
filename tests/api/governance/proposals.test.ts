@@ -80,7 +80,7 @@ describe("governance service", () => {
     it("should create a modify_prompt proposal", async () => {
       const result = await createProposal(
         {
-          community_id: TEST_IDS.communityTestTech,
+          campfire_id: TEST_IDS.campfireTestTech,
           proposal_type: "modify_prompt",
           title: "Update AI agent rules",
           description: "I propose we update the AI agent rules to be more lenient on memes.",
@@ -102,7 +102,7 @@ describe("governance service", () => {
     it("should create an addendum_prompt proposal", async () => {
       const result = await createProposal(
         {
-          community_id: TEST_IDS.communityTestTech,
+          campfire_id: TEST_IDS.campfireTestTech,
           proposal_type: "addendum_prompt",
           title: "Add meme policy",
           description: "Append meme handling rules to the AI agent prompt.",
@@ -117,7 +117,7 @@ describe("governance service", () => {
     it("should create a change_settings proposal", async () => {
       const result = await createProposal(
         {
-          community_id: TEST_IDS.communityTestTech,
+          campfire_id: TEST_IDS.campfireTestTech,
           proposal_type: "change_settings",
           title: "Lower quorum to 20%",
           description: "Reduce the quorum requirement to 20% of members.",
@@ -132,7 +132,7 @@ describe("governance service", () => {
     it("should set discussion and voting end times based on governance config", async () => {
       const result = await createProposal(
         {
-          community_id: TEST_IDS.communityTestTech,
+          campfire_id: TEST_IDS.campfireTestTech,
           proposal_type: "modify_prompt",
           title: "Timing test",
           description: "Testing timing calculation.",
@@ -160,7 +160,7 @@ describe("governance service", () => {
       await expect(
         createProposal(
           {
-            community_id: TEST_IDS.communityDemoScience,
+            campfire_id: TEST_IDS.campfireDemoScience,
             proposal_type: "modify_prompt",
             title: "External proposal",
             description: "This should fail.",
@@ -173,7 +173,7 @@ describe("governance service", () => {
       try {
         await createProposal(
           {
-            community_id: TEST_IDS.communityDemoScience,
+            campfire_id: TEST_IDS.campfireDemoScience,
             proposal_type: "modify_prompt",
             title: "External proposal",
             description: "This should fail.",
@@ -189,14 +189,14 @@ describe("governance service", () => {
     it("should reject proposals from new members (< 7 days)", async () => {
       // Create a fresh membership
       await db.exec(
-        `INSERT INTO community_memberships (user_id, community_id, role, joined_at)
-         VALUES ('${TEST_IDS.testUser1}', '${TEST_IDS.communityDemoScience}', 'member', NOW())`
+        `INSERT INTO community_memberships (user_id, campfire_id, role, joined_at)
+         VALUES ('${TEST_IDS.testUser1}', '${TEST_IDS.campfireDemoScience}', 'member', NOW())`
       );
 
       await expect(
         createProposal(
           {
-            community_id: TEST_IDS.communityDemoScience,
+            campfire_id: TEST_IDS.campfireDemoScience,
             proposal_type: "modify_prompt",
             title: "Too early",
             description: "Member too new.",
@@ -209,7 +209,7 @@ describe("governance service", () => {
       try {
         await createProposal(
           {
-            community_id: TEST_IDS.communityDemoScience,
+            campfire_id: TEST_IDS.campfireDemoScience,
             proposal_type: "modify_prompt",
             title: "Too early",
             description: "Member too new.",
@@ -225,7 +225,7 @@ describe("governance service", () => {
       await db.exec(
         `DELETE FROM community_memberships
          WHERE user_id = '${TEST_IDS.testUser1}'
-         AND community_id = '${TEST_IDS.communityDemoScience}'`
+         AND campfire_id = '${TEST_IDS.campfireDemoScience}'`
       );
     });
 
@@ -233,7 +233,7 @@ describe("governance service", () => {
       await expect(
         createProposal(
           {
-            community_id: "99999999-9999-9999-9999-999999999999",
+            campfire_id: "99999999-9999-9999-9999-999999999999",
             proposal_type: "modify_prompt",
             title: "Ghost community",
             description: "This community does not exist.",
@@ -251,7 +251,7 @@ describe("governance service", () => {
     it("should return a proposal by ID", async () => {
       const created = await createProposal(
         {
-          community_id: TEST_IDS.communityTestTech,
+          campfire_id: TEST_IDS.campfireTestTech,
           proposal_type: "modify_prompt",
           title: "Findable proposal",
           description: "This proposal can be found by ID.",
@@ -265,7 +265,7 @@ describe("governance service", () => {
       expect(found!.id).toBe(created.id);
       expect(found!.title).toBe("Findable proposal");
       expect(found!.creator_username).toBeTruthy();
-      expect(found!.community_name).toBeTruthy();
+      expect(found!.campfire_name).toBeTruthy();
     });
 
     it("should return null for non-existent proposal", async () => {
@@ -278,7 +278,7 @@ describe("governance service", () => {
     it("should list proposals for a community", async () => {
       await createProposal(
         {
-          community_id: TEST_IDS.communityTestTech,
+          campfire_id: TEST_IDS.campfireTestTech,
           proposal_type: "modify_prompt",
           title: "Proposal 1",
           description: "First proposal",
@@ -288,7 +288,7 @@ describe("governance service", () => {
       );
       await createProposal(
         {
-          community_id: TEST_IDS.communityTestTech,
+          campfire_id: TEST_IDS.campfireTestTech,
           proposal_type: "addendum_prompt",
           title: "Proposal 2",
           description: "Second proposal",
@@ -298,7 +298,7 @@ describe("governance service", () => {
       );
 
       const result = await listProposals({
-        community_id: TEST_IDS.communityTestTech,
+        campfire_id: TEST_IDS.campfireTestTech,
         limit: 25,
         offset: 0,
       });
@@ -309,7 +309,7 @@ describe("governance service", () => {
     it("should filter by status", async () => {
       await createProposal(
         {
-          community_id: TEST_IDS.communityTestTech,
+          campfire_id: TEST_IDS.campfireTestTech,
           proposal_type: "modify_prompt",
           title: "Discussion proposal",
           description: "In discussion",
@@ -319,7 +319,7 @@ describe("governance service", () => {
       );
 
       const discussion = await listProposals({
-        community_id: TEST_IDS.communityTestTech,
+        campfire_id: TEST_IDS.campfireTestTech,
         status: "discussion",
         limit: 25,
         offset: 0,
@@ -327,7 +327,7 @@ describe("governance service", () => {
       expect(discussion.length).toBe(1);
 
       const voting = await listProposals({
-        community_id: TEST_IDS.communityTestTech,
+        campfire_id: TEST_IDS.campfireTestTech,
         status: "voting",
         limit: 25,
         offset: 0,
@@ -338,7 +338,7 @@ describe("governance service", () => {
     it("should paginate correctly", async () => {
       await createProposal(
         {
-          community_id: TEST_IDS.communityTestTech,
+          campfire_id: TEST_IDS.campfireTestTech,
           proposal_type: "modify_prompt",
           title: "Paginate 1",
           description: "Test",
@@ -348,7 +348,7 @@ describe("governance service", () => {
       );
       await createProposal(
         {
-          community_id: TEST_IDS.communityTestTech,
+          campfire_id: TEST_IDS.campfireTestTech,
           proposal_type: "modify_prompt",
           title: "Paginate 2",
           description: "Test",
@@ -358,19 +358,19 @@ describe("governance service", () => {
       );
 
       const page1 = await listProposals({
-        community_id: TEST_IDS.communityTestTech,
+        campfire_id: TEST_IDS.campfireTestTech,
         limit: 1,
         offset: 0,
       });
       expect(page1.length).toBe(1);
 
       const page2 = await listProposals({
-        community_id: TEST_IDS.communityTestTech,
+        campfire_id: TEST_IDS.campfireTestTech,
         limit: 1,
         offset: 1,
       });
       expect(page2.length).toBe(1);
-      expect(page2[0].id).not.toBe(page1[0].id);
+      expect(page2[0]!.id).not.toBe(page1[0]!.id);
     });
   });
 
@@ -380,7 +380,7 @@ describe("governance service", () => {
     it("should allow voting on a proposal in voting status", async () => {
       const proposal = await createProposal(
         {
-          community_id: TEST_IDS.communityTestTech,
+          campfire_id: TEST_IDS.campfireTestTech,
           proposal_type: "modify_prompt",
           title: "Votable proposal",
           description: "Let's vote!",
@@ -406,7 +406,7 @@ describe("governance service", () => {
     it("should increment votes_for for value 1", async () => {
       const proposal = await createProposal(
         {
-          community_id: TEST_IDS.communityTestTech,
+          campfire_id: TEST_IDS.campfireTestTech,
           proposal_type: "modify_prompt",
           title: "For vote test",
           description: "Test for vote",
@@ -430,7 +430,7 @@ describe("governance service", () => {
     it("should increment votes_against for value -1", async () => {
       const proposal = await createProposal(
         {
-          community_id: TEST_IDS.communityTestTech,
+          campfire_id: TEST_IDS.campfireTestTech,
           proposal_type: "modify_prompt",
           title: "Against vote test",
           description: "Test against vote",
@@ -454,7 +454,7 @@ describe("governance service", () => {
     it("should reject duplicate votes", async () => {
       const proposal = await createProposal(
         {
-          community_id: TEST_IDS.communityTestTech,
+          campfire_id: TEST_IDS.campfireTestTech,
           proposal_type: "modify_prompt",
           title: "No double vote",
           description: "Cannot vote twice",
@@ -484,7 +484,7 @@ describe("governance service", () => {
     it("should reject voting during discussion period", async () => {
       const proposal = await createProposal(
         {
-          community_id: TEST_IDS.communityTestTech,
+          campfire_id: TEST_IDS.campfireTestTech,
           proposal_type: "modify_prompt",
           title: "Still discussing",
           description: "Cannot vote yet",
@@ -508,7 +508,7 @@ describe("governance service", () => {
     it("should auto-transition from discussion to voting when discussion period ends", async () => {
       const proposal = await createProposal(
         {
-          community_id: TEST_IDS.communityTestTech,
+          campfire_id: TEST_IDS.campfireTestTech,
           proposal_type: "modify_prompt",
           title: "Auto transition",
           description: "Should auto-transition",
@@ -542,7 +542,7 @@ describe("governance service", () => {
     it("should reject voting from non-members", async () => {
       const proposal = await createProposal(
         {
-          community_id: TEST_IDS.communityTestTech,
+          campfire_id: TEST_IDS.campfireTestTech,
           proposal_type: "modify_prompt",
           title: "Non-member vote",
           description: "Non-member should not vote",
@@ -561,7 +561,7 @@ describe("governance service", () => {
       await db.exec(
         `DELETE FROM community_memberships
          WHERE user_id = '${TEST_IDS.testUser1}'
-         AND community_id = '${TEST_IDS.communityTestTech}'`
+         AND campfire_id = '${TEST_IDS.campfireTestTech}'`
       );
 
       await expect(
@@ -570,15 +570,15 @@ describe("governance service", () => {
 
       // Restore
       await db.exec(
-        `INSERT INTO community_memberships (user_id, community_id, role, joined_at)
-         VALUES ('${TEST_IDS.testUser1}', '${TEST_IDS.communityTestTech}', 'admin', NOW() - INTERVAL '30 days')`
+        `INSERT INTO community_memberships (user_id, campfire_id, role, joined_at)
+         VALUES ('${TEST_IDS.testUser1}', '${TEST_IDS.campfireTestTech}', 'admin', NOW() - INTERVAL '30 days')`
       );
     });
 
     it("should reject voting after voting period ends", async () => {
       const proposal = await createProposal(
         {
-          community_id: TEST_IDS.communityTestTech,
+          campfire_id: TEST_IDS.campfireTestTech,
           proposal_type: "modify_prompt",
           title: "Expired vote",
           description: "Voting ended",
@@ -609,7 +609,7 @@ describe("governance service", () => {
     it("should reject voting on passed/failed proposals", async () => {
       const proposal = await createProposal(
         {
-          community_id: TEST_IDS.communityTestTech,
+          campfire_id: TEST_IDS.campfireTestTech,
           proposal_type: "modify_prompt",
           title: "Already passed",
           description: "Cannot vote on passed proposals",
@@ -640,7 +640,7 @@ describe("governance service", () => {
     it("should not process a proposal whose voting period has not ended", async () => {
       const proposal = await createProposal(
         {
-          community_id: TEST_IDS.communityTestTech,
+          campfire_id: TEST_IDS.campfireTestTech,
           proposal_type: "modify_prompt",
           title: "Still open",
           description: "Voting not done",
@@ -656,7 +656,7 @@ describe("governance service", () => {
     it("should pass a proposal with majority and quorum", async () => {
       const proposal = await createProposal(
         {
-          community_id: TEST_IDS.communityTestTech,
+          campfire_id: TEST_IDS.campfireTestTech,
           proposal_type: "modify_prompt",
           title: "Should pass",
           description: "Majority + quorum",
@@ -685,7 +685,7 @@ describe("governance service", () => {
     it("should fail a proposal without quorum", async () => {
       const proposal = await createProposal(
         {
-          community_id: TEST_IDS.communityTestTech,
+          campfire_id: TEST_IDS.campfireTestTech,
           proposal_type: "modify_prompt",
           title: "No quorum",
           description: "Not enough votes",
@@ -698,7 +698,7 @@ describe("governance service", () => {
       await db.exec(
         `UPDATE communities SET governance_config =
            jsonb_set(governance_config, '{quorum_percentage}', '100')
-         WHERE id = '${TEST_IDS.communityTestTech}'`
+         WHERE id = '${TEST_IDS.campfireTestTech}'`
       );
 
       await db.exec(
@@ -718,14 +718,14 @@ describe("governance service", () => {
       await db.exec(
         `UPDATE communities SET governance_config =
            jsonb_set(governance_config, '{quorum_percentage}', '10')
-         WHERE id = '${TEST_IDS.communityTestTech}'`
+         WHERE id = '${TEST_IDS.campfireTestTech}'`
       );
     });
 
     it("should fail a proposal where majority is against", async () => {
       const proposal = await createProposal(
         {
-          community_id: TEST_IDS.communityTestTech,
+          campfire_id: TEST_IDS.campfireTestTech,
           proposal_type: "modify_prompt",
           title: "Majority against",
           description: "More against than for",
@@ -752,7 +752,7 @@ describe("governance service", () => {
       const newPrompt = "This is the brand new AI agent prompt for the community.";
       const proposal = await createProposal(
         {
-          community_id: TEST_IDS.communityTestTech,
+          campfire_id: TEST_IDS.campfireTestTech,
           proposal_type: "modify_prompt",
           title: "Replace prompt",
           description: "Full prompt replacement",
@@ -776,26 +776,26 @@ describe("governance service", () => {
       // Check community prompt was updated
       const community = await db.query(
         `SELECT ai_prompt, ai_prompt_version FROM communities WHERE id = $1`,
-        [TEST_IDS.communityTestTech]
+        [TEST_IDS.campfireTestTech]
       );
-      expect(community.rows[0].ai_prompt).toBe(newPrompt);
-      expect(community.rows[0].ai_prompt_version).toBe(2);
+      expect((community.rows[0] as any).ai_prompt).toBe(newPrompt);
+      expect((community.rows[0] as any).ai_prompt_version).toBe(2);
 
       // Check prompt history was logged
       const history = await db.query(
         `SELECT * FROM ai_prompt_history
          WHERE entity_id = $1 AND proposal_id = $2`,
-        [TEST_IDS.communityTestTech, proposal.id]
+        [TEST_IDS.campfireTestTech, proposal.id]
       );
       expect(history.rows.length).toBe(1);
-      expect(history.rows[0].prompt_text).toBe(newPrompt);
+      expect((history.rows[0] as any).prompt_text).toBe(newPrompt);
     });
 
     it("should execute addendum_prompt by appending to existing prompt", async () => {
       const addendum = "Additional rule: No memes on weekdays.";
       const proposal = await createProposal(
         {
-          community_id: TEST_IDS.communityTestTech,
+          campfire_id: TEST_IDS.campfireTestTech,
           proposal_type: "addendum_prompt",
           title: "Add meme rule",
           description: "Append a meme rule",
@@ -807,9 +807,9 @@ describe("governance service", () => {
       // Get original prompt
       const before = await db.query(
         `SELECT ai_prompt FROM communities WHERE id = $1`,
-        [TEST_IDS.communityTestTech]
+        [TEST_IDS.campfireTestTech]
       );
-      const originalPrompt = before.rows[0].ai_prompt;
+      const originalPrompt = (before.rows[0] as any).ai_prompt;
 
       await db.exec(
         `UPDATE proposals
@@ -825,16 +825,16 @@ describe("governance service", () => {
 
       const after = await db.query(
         `SELECT ai_prompt FROM communities WHERE id = $1`,
-        [TEST_IDS.communityTestTech]
+        [TEST_IDS.campfireTestTech]
       );
-      expect(after.rows[0].ai_prompt).toContain(originalPrompt);
-      expect(after.rows[0].ai_prompt).toContain(addendum);
+      expect((after.rows[0] as any).ai_prompt).toContain(originalPrompt);
+      expect((after.rows[0] as any).ai_prompt).toContain(addendum);
     });
 
     it("should execute change_settings by merging into governance_config", async () => {
       const proposal = await createProposal(
         {
-          community_id: TEST_IDS.communityTestTech,
+          campfire_id: TEST_IDS.campfireTestTech,
           proposal_type: "change_settings",
           title: "Change quorum",
           description: "Change quorum to 25%",
@@ -857,22 +857,22 @@ describe("governance service", () => {
 
       const after = await db.query(
         `SELECT governance_config FROM communities WHERE id = $1`,
-        [TEST_IDS.communityTestTech]
+        [TEST_IDS.campfireTestTech]
       );
-      expect(after.rows[0].governance_config.quorum_percentage).toBe(25);
+      expect((after.rows[0] as any).governance_config.quorum_percentage).toBe(25);
 
       // Restore
       await db.exec(
         `UPDATE communities SET governance_config =
            jsonb_set(governance_config, '{quorum_percentage}', '10')
-         WHERE id = '${TEST_IDS.communityTestTech}'`
+         WHERE id = '${TEST_IDS.campfireTestTech}'`
       );
     });
 
     it("should not re-process already passed proposals", async () => {
       const proposal = await createProposal(
         {
-          community_id: TEST_IDS.communityTestTech,
+          campfire_id: TEST_IDS.campfireTestTech,
           proposal_type: "modify_prompt",
           title: "Already done",
           description: "Already passed",
@@ -898,7 +898,7 @@ describe("proposal validation schemas", () => {
   describe("createProposalSchema", () => {
     it("should accept valid input", () => {
       const result = createProposalSchema.safeParse({
-        community_id: "30000000-0000-0000-0000-000000000001",
+        campfire_id: "30000000-0000-0000-0000-000000000001",
         proposal_type: "modify_prompt",
         title: "Valid proposal",
         description: "A valid proposal description",
@@ -907,9 +907,9 @@ describe("proposal validation schemas", () => {
       expect(result.success).toBe(true);
     });
 
-    it("should reject invalid community_id", () => {
+    it("should reject invalid campfire_id", () => {
       const result = createProposalSchema.safeParse({
-        community_id: "not-a-uuid",
+        campfire_id: "not-a-uuid",
         proposal_type: "modify_prompt",
         title: "Test",
         description: "Test",
@@ -920,7 +920,7 @@ describe("proposal validation schemas", () => {
 
     it("should reject invalid proposal types", () => {
       const result = createProposalSchema.safeParse({
-        community_id: "30000000-0000-0000-0000-000000000001",
+        campfire_id: "30000000-0000-0000-0000-000000000001",
         proposal_type: "invalid_type",
         title: "Test",
         description: "Test",
@@ -933,7 +933,7 @@ describe("proposal validation schemas", () => {
       const types = ["modify_prompt", "addendum_prompt", "change_settings"];
       for (const proposal_type of types) {
         const result = createProposalSchema.safeParse({
-          community_id: "30000000-0000-0000-0000-000000000001",
+          campfire_id: "30000000-0000-0000-0000-000000000001",
           proposal_type,
           title: "Test",
           description: "Test",
@@ -945,7 +945,7 @@ describe("proposal validation schemas", () => {
 
     it("should reject titles over 200 chars", () => {
       const result = createProposalSchema.safeParse({
-        community_id: "30000000-0000-0000-0000-000000000001",
+        campfire_id: "30000000-0000-0000-0000-000000000001",
         proposal_type: "modify_prompt",
         title: "x".repeat(201),
         description: "Test",
@@ -956,7 +956,7 @@ describe("proposal validation schemas", () => {
 
     it("should reject descriptions over 5000 chars", () => {
       const result = createProposalSchema.safeParse({
-        community_id: "30000000-0000-0000-0000-000000000001",
+        campfire_id: "30000000-0000-0000-0000-000000000001",
         proposal_type: "modify_prompt",
         title: "Test",
         description: "x".repeat(5001),
@@ -967,7 +967,7 @@ describe("proposal validation schemas", () => {
 
     it("should reject empty proposed_changes", () => {
       const result = createProposalSchema.safeParse({
-        community_id: "30000000-0000-0000-0000-000000000001",
+        campfire_id: "30000000-0000-0000-0000-000000000001",
         proposal_type: "modify_prompt",
         title: "Test",
         description: "Test",
@@ -978,9 +978,9 @@ describe("proposal validation schemas", () => {
   });
 
   describe("listProposalsSchema", () => {
-    it("should accept valid community_id", () => {
+    it("should accept valid campfire_id", () => {
       const result = listProposalsSchema.safeParse({
-        community_id: "30000000-0000-0000-0000-000000000001",
+        campfire_id: "30000000-0000-0000-0000-000000000001",
       });
       expect(result.success).toBe(true);
     });
@@ -988,7 +988,7 @@ describe("proposal validation schemas", () => {
     it("should accept status filter", () => {
       for (const status of ["discussion", "voting", "passed", "failed", "implemented"]) {
         const result = listProposalsSchema.safeParse({
-          community_id: "30000000-0000-0000-0000-000000000001",
+          campfire_id: "30000000-0000-0000-0000-000000000001",
           status,
         });
         expect(result.success).toBe(true);
@@ -997,7 +997,7 @@ describe("proposal validation schemas", () => {
 
     it("should reject invalid status", () => {
       const result = listProposalsSchema.safeParse({
-        community_id: "30000000-0000-0000-0000-000000000001",
+        campfire_id: "30000000-0000-0000-0000-000000000001",
         status: "invalid",
       });
       expect(result.success).toBe(false);

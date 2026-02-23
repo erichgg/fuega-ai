@@ -345,7 +345,7 @@ describe("simulated RLS behavior", () => {
     const { rows } = await db.query(
       `SELECT current_setting('app.user_id', true) as uid`
     );
-    expect(rows[0].uid).toBe(TEST_IDS.testUser1);
+    expect((rows[0] as any).uid).toBe(TEST_IDS.testUser1);
     // Clean up
     await db.query(`SELECT set_config('app.user_id', '', false)`);
   });
@@ -355,7 +355,7 @@ describe("simulated RLS behavior", () => {
     const { rows } = await db.query(
       `SELECT current_setting('app.user_role', true) as role`
     );
-    expect(rows[0].role).toBe("admin");
+    expect((rows[0] as any).role).toBe("admin");
     // Clean up
     await db.query(`SELECT set_config('app.user_role', '', false)`);
   });
@@ -378,7 +378,7 @@ describe("simulated RLS behavior", () => {
       `SELECT anonymized FROM votes WHERE id = $1`,
       ["dddddddd-dddd-dddd-dddd-dddddddddd01"]
     );
-    expect(rows[0].anonymized).toBe(false);
+    expect((rows[0] as any).anonymized).toBe(false);
 
     // After anonymization, the user_id association should be privacy-protected
     await db.query(
@@ -390,7 +390,7 @@ describe("simulated RLS behavior", () => {
       `SELECT anonymized FROM votes WHERE id = $1`,
       ["dddddddd-dddd-dddd-dddd-dddddddddd01"]
     );
-    expect(after[0].anonymized).toBe(true);
+    expect((after[0] as any).anonymized).toBe(true);
 
     // Cleanup
     await db.query(`DELETE FROM votes WHERE id = $1`, [
@@ -402,14 +402,14 @@ describe("simulated RLS behavior", () => {
     // Soft delete a community by setting deleted_at
     await db.query(
       `UPDATE communities SET deleted_at = NOW() WHERE id = $1`,
-      [TEST_IDS.communityTestTech]
+      [TEST_IDS.campfireTestTech]
     );
 
     const { rows } = await db.query(
       `SELECT deleted_at FROM communities WHERE id = $1`,
-      [TEST_IDS.communityTestTech]
+      [TEST_IDS.campfireTestTech]
     );
-    expect(rows[0].deleted_at).toBeTruthy();
+    expect((rows[0] as any).deleted_at).toBeTruthy();
 
     // The RLS policy filters deleted_at IS NULL, so this community
     // would be hidden from regular users (verified via policy definition above)
@@ -417,7 +417,7 @@ describe("simulated RLS behavior", () => {
     // Restore
     await db.query(
       `UPDATE communities SET deleted_at = NULL WHERE id = $1`,
-      [TEST_IDS.communityTestTech]
+      [TEST_IDS.campfireTestTech]
     );
   });
 });

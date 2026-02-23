@@ -73,7 +73,7 @@ describe("posts service", () => {
     );
     // Reset post_count for test community
     await db.exec(
-      `UPDATE communities SET post_count = 2 WHERE id = '${TEST_IDS.communityTestTech}'`
+      `UPDATE communities SET post_count = 2 WHERE id = '${TEST_IDS.campfireTestTech}'`
     );
   });
 
@@ -82,7 +82,7 @@ describe("posts service", () => {
   it("creates a text post with moderation", async () => {
     const result = await createPost(
       {
-        community_id: TEST_IDS.communityTestTech,
+        campfire_id: TEST_IDS.campfireTestTech,
         title: "Integration test post",
         body: "This is a test post body for integration testing.",
         post_type: "text",
@@ -101,7 +101,7 @@ describe("posts service", () => {
   it("creates a link post", async () => {
     const result = await createPost(
       {
-        community_id: TEST_IDS.communityTestTech,
+        campfire_id: TEST_IDS.campfireTestTech,
         title: "Cool link",
         post_type: "link",
         url: "https://example.com/article",
@@ -117,7 +117,7 @@ describe("posts service", () => {
     await expect(
       createPost(
         {
-          community_id: "99999999-9999-9999-9999-999999999999",
+          campfire_id: "99999999-9999-9999-9999-999999999999",
           title: "Bad community",
           post_type: "text",
           body: "Test",
@@ -130,12 +130,12 @@ describe("posts service", () => {
   it("increments community post_count", async () => {
     const before = await db.query<{ post_count: number }>(
       `SELECT post_count FROM communities WHERE id = $1`,
-      [TEST_IDS.communityTestTech]
+      [TEST_IDS.campfireTestTech]
     );
 
     await createPost(
       {
-        community_id: TEST_IDS.communityTestTech,
+        campfire_id: TEST_IDS.campfireTestTech,
         title: "Post count test",
         post_type: "text",
         body: "Testing post count increment",
@@ -145,10 +145,10 @@ describe("posts service", () => {
 
     const after = await db.query<{ post_count: number }>(
       `SELECT post_count FROM communities WHERE id = $1`,
-      [TEST_IDS.communityTestTech]
+      [TEST_IDS.campfireTestTech]
     );
 
-    expect(after.rows[0].post_count).toBe(before.rows[0].post_count + 1);
+    expect(after.rows[0]!.post_count).toBe(before.rows[0]!.post_count + 1);
   });
 
   // ─── Read ────────────────────────────────────────────────
@@ -158,7 +158,7 @@ describe("posts service", () => {
     expect(post).not.toBeNull();
     expect(post!.title).toBe("Welcome to f/test_tech!");
     expect(post!.author_username).toBe("test_user_1");
-    expect(post!.community_name).toBe("test_tech");
+    expect(post!.campfire_name).toBe("test_tech");
   });
 
   it("returns null for nonexistent post", async () => {
@@ -181,8 +181,8 @@ describe("posts service", () => {
     expect(posts.length).toBeGreaterThan(0);
     // Posts should be in descending chronological order
     for (let i = 1; i < posts.length; i++) {
-      expect(new Date(posts[i - 1].created_at).getTime())
-        .toBeGreaterThanOrEqual(new Date(posts[i].created_at).getTime());
+      expect(new Date(posts[i - 1]!.created_at).getTime())
+        .toBeGreaterThanOrEqual(new Date(posts[i]!.created_at).getTime());
     }
   });
 
@@ -191,21 +191,21 @@ describe("posts service", () => {
     expect(posts.length).toBeGreaterThan(0);
     // Posts should be in descending net sparks order
     for (let i = 1; i < posts.length; i++) {
-      const prev = posts[i - 1].sparks - posts[i - 1].douses;
-      const curr = posts[i].sparks - posts[i].douses;
+      const prev = posts[i - 1]!.sparks - posts[i - 1]!.douses;
+      const curr = posts[i]!.sparks - posts[i]!.douses;
       expect(prev).toBeGreaterThanOrEqual(curr);
     }
   });
 
   it("filters posts by community name", async () => {
     const posts = await listPosts({
-      community: "test_tech",
+      campfire: "test_tech",
       sort: "new",
       limit: 25,
       offset: 0,
     });
     for (const post of posts) {
-      expect(post.community_name).toBe("test_tech");
+      expect(post.campfire_name).toBe("test_tech");
     }
   });
 
@@ -213,11 +213,11 @@ describe("posts service", () => {
     const all = await listPosts({ sort: "new", limit: 100, offset: 0 });
     const page = await listPosts({ sort: "new", limit: 1, offset: 0 });
     expect(page).toHaveLength(1);
-    expect(page[0].id).toBe(all[0].id);
+    expect(page[0]!.id).toBe(all[0]!.id);
 
     if (all.length > 1) {
       const page2 = await listPosts({ sort: "new", limit: 1, offset: 1 });
-      expect(page2[0].id).toBe(all[1].id);
+      expect(page2[0]!.id).toBe(all[1]!.id);
     }
   });
 
@@ -227,7 +227,7 @@ describe("posts service", () => {
     // Create a post first
     const created = await createPost(
       {
-        community_id: TEST_IDS.communityTestTech,
+        campfire_id: TEST_IDS.campfireTestTech,
         title: "Original Title",
         post_type: "text",
         body: "Original body",
@@ -246,7 +246,7 @@ describe("posts service", () => {
   it("updates a post body", async () => {
     const created = await createPost(
       {
-        community_id: TEST_IDS.communityTestTech,
+        campfire_id: TEST_IDS.campfireTestTech,
         title: "Body update test",
         post_type: "text",
         body: "Original body text",
@@ -264,7 +264,7 @@ describe("posts service", () => {
   it("rejects edit by non-owner", async () => {
     const created = await createPost(
       {
-        community_id: TEST_IDS.communityTestTech,
+        campfire_id: TEST_IDS.campfireTestTech,
         title: "Owner only edit",
         post_type: "text",
         body: "Test",
@@ -280,7 +280,7 @@ describe("posts service", () => {
   it("re-runs moderation on edit", async () => {
     const created = await createPost(
       {
-        community_id: TEST_IDS.communityTestTech,
+        campfire_id: TEST_IDS.campfireTestTech,
         title: "Clean post",
         post_type: "text",
         body: "Normal content",
@@ -311,7 +311,7 @@ describe("posts service", () => {
   it("soft deletes a post (sets deleted_at)", async () => {
     const created = await createPost(
       {
-        community_id: TEST_IDS.communityTestTech,
+        campfire_id: TEST_IDS.campfireTestTech,
         title: "Delete me",
         post_type: "text",
         body: "To be deleted",
@@ -330,13 +330,13 @@ describe("posts service", () => {
       `SELECT deleted_at FROM posts WHERE id = $1`,
       [created.id]
     );
-    expect(raw.rows[0].deleted_at).not.toBeNull();
+    expect(raw.rows[0]!.deleted_at).not.toBeNull();
   });
 
   it("rejects delete by non-owner", async () => {
     const created = await createPost(
       {
-        community_id: TEST_IDS.communityTestTech,
+        campfire_id: TEST_IDS.campfireTestTech,
         title: "Not yours to delete",
         post_type: "text",
         body: "Test",
@@ -352,7 +352,7 @@ describe("posts service", () => {
   it("decrements community post_count on delete", async () => {
     const created = await createPost(
       {
-        community_id: TEST_IDS.communityTestTech,
+        campfire_id: TEST_IDS.campfireTestTech,
         title: "Count decrement test",
         post_type: "text",
         body: "Test",
@@ -362,16 +362,16 @@ describe("posts service", () => {
 
     const before = await db.query<{ post_count: number }>(
       `SELECT post_count FROM communities WHERE id = $1`,
-      [TEST_IDS.communityTestTech]
+      [TEST_IDS.campfireTestTech]
     );
 
     await deletePost(created.id, TEST_IDS.testUser1);
 
     const after = await db.query<{ post_count: number }>(
       `SELECT post_count FROM communities WHERE id = $1`,
-      [TEST_IDS.communityTestTech]
+      [TEST_IDS.campfireTestTech]
     );
 
-    expect(after.rows[0].post_count).toBe(before.rows[0].post_count - 1);
+    expect(after.rows[0]!.post_count).toBe(before.rows[0]!.post_count - 1);
   });
 });

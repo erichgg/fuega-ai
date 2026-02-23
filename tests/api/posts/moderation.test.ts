@@ -7,7 +7,7 @@ describe("moderateContent", () => {
       content_type: "post",
       title: "Hello World",
       body: "This is a normal technology discussion post.",
-      community_id: "30000000-0000-0000-0000-000000000001",
+      campfire_id: "30000000-0000-0000-0000-000000000001",
       author_id: "20000000-0000-0000-0000-000000000001",
     });
 
@@ -23,7 +23,7 @@ describe("moderateContent", () => {
       content_type: "post",
       title: "Terrible post",
       body: "kill yourself right now",
-      community_id: "30000000-0000-0000-0000-000000000001",
+      campfire_id: "30000000-0000-0000-0000-000000000001",
       author_id: "20000000-0000-0000-0000-000000000001",
     });
 
@@ -36,7 +36,7 @@ describe("moderateContent", () => {
     const decision = await moderateContent({
       content_type: "comment",
       body: "Great discussion point! I agree.",
-      community_id: "30000000-0000-0000-0000-000000000001",
+      campfire_id: "30000000-0000-0000-0000-000000000001",
       author_id: "20000000-0000-0000-0000-000000000002",
     });
 
@@ -49,7 +49,7 @@ describe("moderateContent", () => {
       content_type: "post",
       title: "Test",
       body: "Normal content",
-      community_id: "30000000-0000-0000-0000-000000000001",
+      campfire_id: "30000000-0000-0000-0000-000000000001",
       author_id: "20000000-0000-0000-0000-000000000001",
     });
 

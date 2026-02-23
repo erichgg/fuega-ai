@@ -81,73 +81,73 @@ describe("column types", () => {
     const cols = await getColumns("users");
     const colMap = Object.fromEntries(cols.map((c) => [c.column_name, c]));
 
-    expect(colMap["id"].data_type).toBe("uuid");
-    expect(colMap["username"].data_type).toBe("character varying");
-    expect(colMap["password_hash"].data_type).toBe("character varying");
-    expect(colMap["created_at"].data_type).toBe("timestamp with time zone");
-    expect(colMap["updated_at"].data_type).toBe("timestamp with time zone");
-    expect(colMap["is_banned"].data_type).toBe("boolean");
-    expect(colMap["post_sparks"].data_type).toBe("integer");
-    expect(colMap["comment_sparks"].data_type).toBe("integer");
-    expect(colMap["founder_badge_number"].data_type).toBe("integer");
-    expect(colMap["ip_address_hash"].data_type).toBe("character varying");
-    expect(colMap["deleted_at"].data_type).toBe("timestamp with time zone");
+    expect((colMap["id"] as any)?.data_type).toBe("uuid");
+    expect((colMap["username"] as any)?.data_type).toBe("character varying");
+    expect((colMap["password_hash"] as any)?.data_type).toBe("character varying");
+    expect((colMap["created_at"] as any)?.data_type).toBe("timestamp with time zone");
+    expect((colMap["updated_at"] as any)?.data_type).toBe("timestamp with time zone");
+    expect((colMap["is_banned"] as any)?.data_type).toBe("boolean");
+    expect((colMap["post_sparks"] as any)?.data_type).toBe("integer");
+    expect((colMap["comment_sparks"] as any)?.data_type).toBe("integer");
+    expect((colMap["founder_badge_number"] as any)?.data_type).toBe("integer");
+    expect((colMap["ip_address_hash"] as any)?.data_type).toBe("character varying");
+    expect((colMap["deleted_at"] as any)?.data_type).toBe("timestamp with time zone");
   });
 
   it("posts table has correct column types", async () => {
     const cols = await getColumns("posts");
     const colMap = Object.fromEntries(cols.map((c) => [c.column_name, c]));
 
-    expect(colMap["id"].data_type).toBe("uuid");
-    expect(colMap["community_id"].data_type).toBe("uuid");
-    expect(colMap["author_id"].data_type).toBe("uuid");
-    expect(colMap["title"].data_type).toBe("character varying");
-    expect(colMap["body"].data_type).toBe("text");
-    expect(colMap["post_type"].data_type).toBe("character varying");
-    expect(colMap["sparks"].data_type).toBe("integer");
-    expect(colMap["douses"].data_type).toBe("integer");
-    expect(colMap["comment_count"].data_type).toBe("integer");
-    expect(colMap["is_approved"].data_type).toBe("boolean");
-    expect(colMap["is_removed"].data_type).toBe("boolean");
+    expect((colMap["id"] as any)?.data_type).toBe("uuid");
+    expect((colMap["campfire_id"] as any)?.data_type).toBe("uuid");
+    expect((colMap["author_id"] as any)?.data_type).toBe("uuid");
+    expect((colMap["title"] as any)?.data_type).toBe("character varying");
+    expect((colMap["body"] as any)?.data_type).toBe("text");
+    expect((colMap["post_type"] as any)?.data_type).toBe("character varying");
+    expect((colMap["sparks"] as any)?.data_type).toBe("integer");
+    expect((colMap["douses"] as any)?.data_type).toBe("integer");
+    expect((colMap["comment_count"] as any)?.data_type).toBe("integer");
+    expect((colMap["is_approved"] as any)?.data_type).toBe("boolean");
+    expect((colMap["is_removed"] as any)?.data_type).toBe("boolean");
   });
 
   it("comments table has correct column types", async () => {
     const cols = await getColumns("comments");
     const colMap = Object.fromEntries(cols.map((c) => [c.column_name, c]));
 
-    expect(colMap["id"].data_type).toBe("uuid");
-    expect(colMap["post_id"].data_type).toBe("uuid");
-    expect(colMap["author_id"].data_type).toBe("uuid");
-    expect(colMap["parent_id"].data_type).toBe("uuid");
-    expect(colMap["body"].data_type).toBe("text");
-    expect(colMap["depth"].data_type).toBe("integer");
-    expect(colMap["sparks"].data_type).toBe("integer");
+    expect((colMap["id"] as any)?.data_type).toBe("uuid");
+    expect((colMap["post_id"] as any)?.data_type).toBe("uuid");
+    expect((colMap["author_id"] as any)?.data_type).toBe("uuid");
+    expect((colMap["parent_id"] as any)?.data_type).toBe("uuid");
+    expect((colMap["body"] as any)?.data_type).toBe("text");
+    expect((colMap["depth"] as any)?.data_type).toBe("integer");
+    expect((colMap["sparks"] as any)?.data_type).toBe("integer");
   });
 
   it("votes table has correct column types", async () => {
     const cols = await getColumns("votes");
     const colMap = Object.fromEntries(cols.map((c) => [c.column_name, c]));
 
-    expect(colMap["id"].data_type).toBe("uuid");
-    expect(colMap["user_id"].data_type).toBe("uuid");
-    expect(colMap["votable_type"].data_type).toBe("character varying");
-    expect(colMap["votable_id"].data_type).toBe("uuid");
-    expect(colMap["vote_value"].data_type).toBe("smallint");
-    expect(colMap["anonymized"].data_type).toBe("boolean");
+    expect((colMap["id"] as any)?.data_type).toBe("uuid");
+    expect((colMap["user_id"] as any)?.data_type).toBe("uuid");
+    expect((colMap["votable_type"] as any)?.data_type).toBe("character varying");
+    expect((colMap["votable_id"] as any)?.data_type).toBe("uuid");
+    expect((colMap["vote_value"] as any)?.data_type).toBe("smallint");
+    expect((colMap["anonymized"] as any)?.data_type).toBe("boolean");
   });
 
   it("communities table has JSONB governance_config", async () => {
     const cols = await getColumns("communities");
     const colMap = Object.fromEntries(cols.map((c) => [c.column_name, c]));
 
-    expect(colMap["governance_config"].data_type).toBe("jsonb");
+    expect((colMap["governance_config"] as any)?.data_type).toBe("jsonb");
   });
 
   it("proposals table has JSONB proposed_changes", async () => {
     const cols = await getColumns("proposals");
     const colMap = Object.fromEntries(cols.map((c) => [c.column_name, c]));
 
-    expect(colMap["proposed_changes"].data_type).toBe("jsonb");
+    expect((colMap["proposed_changes"] as any)?.data_type).toBe("jsonb");
   });
 });
 
@@ -171,10 +171,10 @@ describe("NOT NULL constraints", () => {
     expect(notNull).toContain("password_hash");
   });
 
-  it("posts requires id, community_id, author_id, title, post_type", async () => {
+  it("posts requires id, campfire_id, author_id, title, post_type", async () => {
     const notNull = await getNonNullableCols("posts");
     expect(notNull).toContain("id");
-    expect(notNull).toContain("community_id");
+    expect(notNull).toContain("campfire_id");
     expect(notNull).toContain("author_id");
     expect(notNull).toContain("title");
     expect(notNull).toContain("post_type");
@@ -197,12 +197,12 @@ describe("NOT NULL constraints", () => {
     expect(notNull).toContain("vote_value");
   });
 
-  it("moderation_log requires content_type, content_id, community_id, author_id, agent_level, decision, reason", async () => {
+  it("moderation_log requires content_type, content_id, campfire_id, author_id, agent_level, decision, reason", async () => {
     const notNull = await getNonNullableCols("moderation_log");
     for (const col of [
       "content_type",
       "content_id",
-      "community_id",
+      "campfire_id",
       "author_id",
       "agent_level",
       "decision",
@@ -229,7 +229,7 @@ describe("CHECK constraints", () => {
   it("rejects invalid post_type", async () => {
     await expect(
       db.query(
-        `INSERT INTO posts (community_id, author_id, title, body, post_type)
+        `INSERT INTO posts (campfire_id, author_id, title, body, post_type)
          VALUES ($1, $2, $3, $4, $5)`,
         [
           "30000000-0000-0000-0000-000000000001",
@@ -324,7 +324,7 @@ describe("CHECK constraints", () => {
   it("rejects invalid proposal_type", async () => {
     await expect(
       db.query(
-        `INSERT INTO proposals (community_id, proposal_type, title, description, proposed_changes, created_by, discussion_ends_at, voting_ends_at)
+        `INSERT INTO proposals (campfire_id, proposal_type, title, description, proposed_changes, created_by, discussion_ends_at, voting_ends_at)
          VALUES ($1, $2, $3, $4, $5, $6, NOW() + interval '2 days', NOW() + interval '9 days')`,
         [
           "30000000-0000-0000-0000-000000000001",
@@ -341,7 +341,7 @@ describe("CHECK constraints", () => {
   it("rejects invalid proposal vote value", async () => {
     // First create a valid proposal
     const { rows } = await db.query<{ id: string }>(
-      `INSERT INTO proposals (community_id, proposal_type, title, description, proposed_changes, created_by, discussion_ends_at, voting_ends_at)
+      `INSERT INTO proposals (campfire_id, proposal_type, title, description, proposed_changes, created_by, discussion_ends_at, voting_ends_at)
        VALUES ($1, $2, $3, $4, $5, $6, NOW() + interval '2 days', NOW() + interval '9 days')
        RETURNING id`,
       [
@@ -353,7 +353,7 @@ describe("CHECK constraints", () => {
         "20000000-0000-0000-0000-000000000001",
       ]
     );
-    const proposalId = rows[0].id;
+    const proposalId = (rows[0] as any).id;
 
     await expect(
       db.query(
@@ -385,7 +385,7 @@ describe("CHECK constraints", () => {
     const longTitle = "x".repeat(301);
     await expect(
       db.query(
-        `INSERT INTO posts (community_id, author_id, title, post_type)
+        `INSERT INTO posts (campfire_id, author_id, title, post_type)
          VALUES ($1, $2, $3, $4)`,
         [
           "30000000-0000-0000-0000-000000000001",
@@ -400,7 +400,7 @@ describe("CHECK constraints", () => {
   it("rejects invalid moderation decision", async () => {
     await expect(
       db.query(
-        `INSERT INTO moderation_log (content_type, content_id, community_id, author_id, agent_level, decision, reason)
+        `INSERT INTO moderation_log (content_type, content_id, campfire_id, author_id, agent_level, decision, reason)
          VALUES ($1, $2, $3, $4, $5, $6, $7)`,
         [
           "post",
@@ -418,7 +418,7 @@ describe("CHECK constraints", () => {
   it("rejects invalid agent_level", async () => {
     await expect(
       db.query(
-        `INSERT INTO moderation_log (content_type, content_id, community_id, author_id, agent_level, decision, reason)
+        `INSERT INTO moderation_log (content_type, content_id, campfire_id, author_id, agent_level, decision, reason)
          VALUES ($1, $2, $3, $4, $5, $6, $7)`,
         [
           "post",
@@ -502,7 +502,7 @@ describe("UNIQUE constraints", () => {
   it("rejects duplicate community membership", async () => {
     await expect(
       db.query(
-        `INSERT INTO community_memberships (user_id, community_id, role)
+        `INSERT INTO community_memberships (user_id, campfire_id, role)
          VALUES ($1, $2, $3)`,
         [
           "20000000-0000-0000-0000-000000000001",
@@ -545,11 +545,11 @@ describe("default values", () => {
       ["eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee"]
     );
 
-    expect(rows[0].post_sparks).toBe(0);
-    expect(rows[0].comment_sparks).toBe(0);
-    expect(rows[0].is_banned).toBe(false);
-    expect(rows[0].created_at).toBeTruthy();
-    expect(rows[0].updated_at).toBeTruthy();
+    expect((rows[0] as any).post_sparks).toBe(0);
+    expect((rows[0] as any).comment_sparks).toBe(0);
+    expect((rows[0] as any).is_banned).toBe(false);
+    expect((rows[0] as any).created_at).toBeTruthy();
+    expect((rows[0] as any).updated_at).toBeTruthy();
 
     await db.query(`DELETE FROM users WHERE id = $1`, [
       "eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee",
@@ -558,7 +558,7 @@ describe("default values", () => {
 
   it("posts get default values for sparks, douses, is_approved, is_removed", async () => {
     await db.query(
-      `INSERT INTO posts (id, community_id, author_id, title, post_type)
+      `INSERT INTO posts (id, campfire_id, author_id, title, post_type)
        VALUES ($1, $2, $3, $4, $5)`,
       [
         "eeeeeeee-eeee-eeee-eeee-eeeeeeeeee01",
@@ -575,11 +575,11 @@ describe("default values", () => {
       ["eeeeeeee-eeee-eeee-eeee-eeeeeeeeee01"]
     );
 
-    expect(rows[0].sparks).toBe(0);
-    expect(rows[0].douses).toBe(0);
-    expect(rows[0].comment_count).toBe(0);
-    expect(rows[0].is_approved).toBe(false);
-    expect(rows[0].is_removed).toBe(false);
+    expect((rows[0] as any).sparks).toBe(0);
+    expect((rows[0] as any).douses).toBe(0);
+    expect((rows[0] as any).comment_count).toBe(0);
+    expect((rows[0] as any).is_approved).toBe(false);
+    expect((rows[0] as any).is_removed).toBe(false);
 
     await db.query(`DELETE FROM posts WHERE id = $1`, [
       "eeeeeeee-eeee-eeee-eeee-eeeeeeeeee01",
@@ -603,7 +603,7 @@ describe("default values", () => {
       `SELECT anonymized FROM votes WHERE id = $1`,
       ["eeeeeeee-eeee-eeee-eeee-eeeeeeeeee02"]
     );
-    expect(rows[0].anonymized).toBe(false);
+    expect((rows[0] as any).anonymized).toBe(false);
 
     await db.query(`DELETE FROM votes WHERE id = $1`, [
       "eeeeeeee-eeee-eeee-eeee-eeeeeeeeee02",
@@ -615,7 +615,7 @@ describe("default values", () => {
       `SELECT governance_config FROM communities WHERE id = $1`,
       ["30000000-0000-0000-0000-000000000001"]
     );
-    const config = rows[0].governance_config;
+    const config = (rows[0] as any).governance_config;
     expect(config.voting_type).toBe("simple_majority");
     expect(config.quorum_percentage).toBe(10);
     expect(config.proposal_discussion_hours).toBe(48);
@@ -636,7 +636,7 @@ describe("default values", () => {
       ["uuid_test_user"]
     );
     // UUID format: 8-4-4-4-12 hex
-    expect(rows[0].id).toMatch(
+    expect((rows[0] as any).id).toMatch(
       /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
     );
 
@@ -648,10 +648,10 @@ describe("default values", () => {
 // FOREIGN KEYS
 // ─────────────────────────────────────────────────
 describe("foreign keys", () => {
-  it("posts.community_id references communities(id)", async () => {
+  it("posts.campfire_id references communities(id)", async () => {
     await expect(
       db.query(
-        `INSERT INTO posts (community_id, author_id, title, post_type)
+        `INSERT INTO posts (campfire_id, author_id, title, post_type)
          VALUES ($1, $2, $3, $4)`,
         [
           "ffffffff-ffff-ffff-ffff-ffffffffffff", // non-existent community
@@ -666,7 +666,7 @@ describe("foreign keys", () => {
   it("posts.author_id references users(id)", async () => {
     await expect(
       db.query(
-        `INSERT INTO posts (community_id, author_id, title, post_type)
+        `INSERT INTO posts (campfire_id, author_id, title, post_type)
          VALUES ($1, $2, $3, $4)`,
         [
           "30000000-0000-0000-0000-000000000001",
@@ -713,7 +713,7 @@ describe("foreign keys", () => {
     // Bad user
     await expect(
       db.query(
-        `INSERT INTO community_memberships (user_id, community_id)
+        `INSERT INTO community_memberships (user_id, campfire_id)
          VALUES ($1, $2)`,
         [
           "ffffffff-ffff-ffff-ffff-ffffffffffff",
@@ -725,7 +725,7 @@ describe("foreign keys", () => {
     // Bad community
     await expect(
       db.query(
-        `INSERT INTO community_memberships (user_id, community_id)
+        `INSERT INTO community_memberships (user_id, campfire_id)
          VALUES ($1, $2)`,
         [
           "20000000-0000-0000-0000-000000000001",
@@ -768,7 +768,7 @@ describe("foreign keys", () => {
   it("council_members references categories, communities, and users", async () => {
     await expect(
       db.query(
-        `INSERT INTO council_members (category_id, community_id, user_id, term_end)
+        `INSERT INTO council_members (category_id, campfire_id, user_id, term_end)
          VALUES ($1, $2, $3, NOW() + interval '1 year')`,
         [
           "ffffffff-ffff-ffff-ffff-ffffffffffff", // bad category
@@ -802,8 +802,8 @@ describe("updated_at trigger", () => {
       ["20000000-0000-0000-0000-000000000001"]
     );
 
-    expect(new Date(after[0].updated_at).getTime()).toBeGreaterThanOrEqual(
-      new Date(before[0].updated_at).getTime()
+    expect(new Date((after[0] as any).updated_at).getTime()).toBeGreaterThanOrEqual(
+      new Date((before[0] as any).updated_at).getTime()
     );
 
     // Restore
@@ -830,8 +830,8 @@ describe("updated_at trigger", () => {
       ["40000000-0000-0000-0000-000000000001"]
     );
 
-    expect(new Date(after[0].updated_at).getTime()).toBeGreaterThanOrEqual(
-      new Date(before[0].updated_at).getTime()
+    expect(new Date((after[0] as any).updated_at).getTime()).toBeGreaterThanOrEqual(
+      new Date((before[0] as any).updated_at).getTime()
     );
 
     // Restore

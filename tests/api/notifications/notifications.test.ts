@@ -73,21 +73,31 @@ vi.mock("@/lib/services/push-notifications", () => ({
   }),
 }));
 
-// Import after mocks
-const {
-  createNotification,
-  listNotifications,
-  markAsRead,
-  markAllAsRead,
-  getPreferences,
-  updatePreferences,
-} = await import("@/lib/services/notifications.service");
-
-const { subscribePush, unsubscribePush } = await import("@/lib/services/push-notifications");
+// Import after mocks (lazy-loaded to avoid top-level await)
+type NotifService = typeof import("@/lib/services/notifications.service");
+type PushService = typeof import("@/lib/services/push-notifications");
+let createNotification: NotifService["createNotification"];
+let listNotifications: NotifService["listNotifications"];
+let markAsRead: NotifService["markAsRead"];
+let markAllAsRead: NotifService["markAllAsRead"];
+let getPreferences: NotifService["getPreferences"];
+let updatePreferences: NotifService["updatePreferences"];
+let subscribePush: PushService["subscribePush"];
+let unsubscribePush: PushService["unsubscribePush"];
 
 describe("Notification System", () => {
   beforeAll(async () => {
     db = await getTestDb();
+    const notifSvc = await import("@/lib/services/notifications.service");
+    const pushSvc = await import("@/lib/services/push-notifications");
+    createNotification = notifSvc.createNotification;
+    listNotifications = notifSvc.listNotifications;
+    markAsRead = notifSvc.markAsRead;
+    markAllAsRead = notifSvc.markAllAsRead;
+    getPreferences = notifSvc.getPreferences;
+    updatePreferences = notifSvc.updatePreferences;
+    subscribePush = pushSvc.subscribePush;
+    unsubscribePush = pushSvc.unsubscribePush;
   });
 
   afterAll(async () => {
@@ -217,7 +227,7 @@ describe("Notification System", () => {
       expect(list.notifications.length).toBe(1);
 
       // Should show correct spark count
-      const batched = list.notifications[0];
+      const batched = list.notifications[0]!;
       expect(batched.id).toBe(firstId);
       const batchedContent = batched.content as { spark_count: number; latest_sparker: string };
       expect(batchedContent.spark_count).toBe(5);
@@ -363,7 +373,7 @@ describe("Notification System", () => {
 
       const mentions = await listNotifications(TEST_IDS.testUser1, { page: 1, limit: 20, type: "mention" });
       expect(mentions.notifications.length).toBe(1);
-      expect(mentions.notifications[0].type).toBe("mention");
+      expect(mentions.notifications[0]!.type).toBe("mention");
     });
   });
 

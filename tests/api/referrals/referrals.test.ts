@@ -61,13 +61,13 @@ vi.mock("@/lib/services/push-notifications", () => ({
 }));
 
 // Import after mocks
-const {
-  getReferralLink,
-  getReferralStats,
-  getReferralHistory,
-  processReferral,
-  revertBannedReferrals,
-} = await import("@/lib/services/referrals.service");
+// Lazy-loaded to avoid top-level await
+type ReferralService = typeof import("@/lib/services/referrals.service");
+let getReferralLink: ReferralService["getReferralLink"];
+let getReferralStats: ReferralService["getReferralStats"];
+let getReferralHistory: ReferralService["getReferralHistory"];
+let processReferral: ReferralService["processReferral"];
+let revertBannedReferrals: ReferralService["revertBannedReferrals"];
 
 // Helper: create a test user with a specific created_at
 async function createTestUser(
@@ -95,6 +95,12 @@ const REFEREE2_ID = "a0000000-0000-0000-0000-000000000003";
 describe("Referral System", () => {
   beforeAll(async () => {
     db = await getTestDb();
+    const refSvc = await import("@/lib/services/referrals.service");
+    getReferralLink = refSvc.getReferralLink;
+    getReferralStats = refSvc.getReferralStats;
+    getReferralHistory = refSvc.getReferralHistory;
+    processReferral = refSvc.processReferral;
+    revertBannedReferrals = refSvc.revertBannedReferrals;
     // Create test users
     await createTestUser(REFERRER_ID, "referrer_user", {
       referralCode: "abc12345",
@@ -118,15 +124,15 @@ describe("Referral System", () => {
 
   describe("getReferralLink", () => {
     it("returns existing referral link when user has a code", async () => {
-      const link = await getReferralLink(REFERRER_ID);
-      expect(link).toContain("/join?ref=abc12345");
+      const result = await getReferralLink(REFERRER_ID);
+      expect(result.referral_link).toContain("/join?ref=abc12345");
     });
 
     it("generates a new referral code when user has none", async () => {
-      const link = await getReferralLink(REFEREE_ID);
-      expect(link).toContain("/join?ref=");
+      const result2 = await getReferralLink(REFEREE_ID);
+      expect(result2.referral_link).toContain("/join?ref=");
       // Should be 8 hex chars
-      const code = link.split("ref=")[1];
+      const code = result2.referral_link.split("ref=")[1];
       expect(code).toMatch(/^[a-f0-9]{8}$/);
     });
 

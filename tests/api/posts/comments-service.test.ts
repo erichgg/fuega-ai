@@ -117,7 +117,7 @@ describe("comments service", () => {
       [TEST_IDS.post3]
     );
 
-    expect(after.rows[0].comment_count).toBe(before.rows[0].comment_count + 1);
+    expect((after.rows[0] as any).comment_count).toBe((before.rows[0] as any).comment_count + 1);
   });
 
   it("throws POST_NOT_FOUND for invalid post", async () => {
@@ -155,7 +155,7 @@ describe("comments service", () => {
 
   it("enforces max depth of 10 levels", async () => {
     // Build a chain of comments, each replying to the previous
-    let parentId = TEST_IDS.comment1; // depth 0
+    let parentId: string = TEST_IDS.comment1; // depth 0
 
     // comment2 is already at depth 1, but we need to build from scratch
     // Create comments at depths 1 through 9
@@ -195,7 +195,7 @@ describe("comments service", () => {
     expect(firstComment).toBeDefined();
     expect(firstComment!.children).toBeDefined();
     expect(firstComment!.children!.length).toBeGreaterThan(0);
-    expect(firstComment!.children![0].id).toBe(TEST_IDS.comment2);
+    expect(firstComment!.children![0]!.id).toBe(TEST_IDS.comment2);
   });
 
   it("sorts comments by top (default)", async () => {
@@ -279,7 +279,7 @@ describe("comments service", () => {
       `SELECT deleted_at FROM comments WHERE id = $1`,
       [created.id]
     );
-    expect(raw.rows[0].deleted_at).not.toBeNull();
+    expect((raw.rows[0] as any).deleted_at).not.toBeNull();
   });
 
   it("rejects delete by non-owner", async () => {
@@ -316,7 +316,7 @@ describe("comments service", () => {
       `SELECT parent_id FROM comments WHERE id = $1`,
       [child.id]
     );
-    expect(childRow.rows[0].parent_id).toBe(parent.id);
+    expect((childRow.rows[0] as any).parent_id).toBe(parent.id);
   });
 
   it("decrements post comment_count on delete", async () => {
@@ -338,6 +338,6 @@ describe("comments service", () => {
       [TEST_IDS.post3]
     );
 
-    expect(after.rows[0].comment_count).toBe(before.rows[0].comment_count - 1);
+    expect((after.rows[0] as any).comment_count).toBe((before.rows[0] as any).comment_count - 1);
   });
 });
