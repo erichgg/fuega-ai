@@ -1,13 +1,14 @@
 "use client";
 
 import * as React from "react";
+import { Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Flame, ArrowRight, Users } from "lucide-react";
 import { FlameLogo } from "@/components/fuega/flame-logo";
 import { useAuth } from "@/lib/contexts/auth-context";
 
-export default function JoinPage() {
+function JoinContent() {
   const searchParams = useSearchParams();
   const { user } = useAuth();
   const ref = searchParams.get("ref");
@@ -132,5 +133,13 @@ export default function JoinPage() {
         </p>
       </div>
     </div>
+  );
+}
+
+export default function JoinPage() {
+  return (
+    <Suspense>
+      <JoinContent />
+    </Suspense>
   );
 }
