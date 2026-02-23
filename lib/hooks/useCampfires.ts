@@ -176,6 +176,7 @@ export function useCampfireMembership(): UseCampfireMembershipReturn {
 
 interface CreateCampfireInput {
   name: string;
+  display_name: string;
   description: string;
 }
 

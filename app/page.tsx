@@ -15,6 +15,8 @@ import {
 import { FlameLogo } from "@/components/fuega/flame-logo";
 import { CampfirePrefix } from "@/components/fuega/campfire-prefix";
 import { EmberParticles } from "@/components/fuega/ember-particles";
+import { ThemeToggle } from "@/components/fuega/theme-toggle";
+import { AuthRedirect } from "@/components/fuega/auth-redirect";
 
 const principles = [
   {
@@ -84,6 +86,9 @@ const howItWorks = [
 export default function LandingPage() {
   return (
     <div className="min-h-screen bg-background">
+      {/* Redirect logged-in users to app */}
+      <AuthRedirect />
+
       {/* Navigation */}
       <nav className="sticky top-0 z-50 border-b border-ash-800 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4 2xl:px-8">
@@ -113,6 +118,7 @@ export default function LandingPage() {
             >
               Mod Log
             </Link>
+            <ThemeToggle />
             <Link
               href="/login"
               className="text-sm text-ash-400 transition-colors hover:text-ash-200"

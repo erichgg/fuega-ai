@@ -21,73 +21,10 @@ import { UserAvatar } from "@/components/fuega/user-avatar";
 import { ModBadge } from "@/components/fuega/mod-badge";
 import { PostDetailSkeleton } from "@/components/fuega/page-skeleton";
 import { useAuth } from "@/lib/contexts/auth-context";
-
-// TEST_DATA - DELETE BEFORE PRODUCTION
-function getMockPost(campfire: string, postId: string) {
-  return {
-    id: postId,
-    title: "Welcome to fuega.ai — the future of campfire discussion",
-    body: `We're building something different here. A platform where AI moderation is transparent, campfires govern themselves, and privacy is a right.\n\nEvery moderation decision is public. Every campfire sets its own governance variables. Every voice matters.\n\nHere's what makes fuega different:\n\n1. **Transparent AI moderation** — Every decision logged publicly with reasoning\n2. **Campfire governance** — You write and vote on moderation rules\n3. **True anonymity** — No email required, IPs hashed and deleted\n4. **Spark & Douse** — Vote on quality, not popularity\n\nJoin the conversation. Shape the rules. Build something better.`,
-    author: "fuega_team",
-    campfire,
-    sparkCount: 247,
-    commentCount: 5,
-    createdAt: new Date(Date.now() - 3600000).toISOString(),
-    editedAt: null as string | null,
-    moderation: { action: "approved" as const, confidence: 0.98 },
-  };
-}
-
-// TEST_DATA - DELETE BEFORE PRODUCTION
-function getMockComments() {
-  return [
-    {
-      id: "cm1",
-      body: "This is exactly what online discussion needs. Tired of opaque moderation and shadow bans. Looking forward to seeing how governance evolves.",
-      author: "early_adopter",
-      sparkCount: 45,
-      replyCount: 2,
-      createdAt: new Date(Date.now() - 2400000).toISOString(),
-      depth: 0,
-    },
-    {
-      id: "cm2",
-      body: "Agreed! The transparency aspect is huge. Being able to see WHY something was moderated changes everything.",
-      author: "transparency_fan",
-      sparkCount: 23,
-      replyCount: 0,
-      createdAt: new Date(Date.now() - 2000000).toISOString(),
-      depth: 1,
-    },
-    {
-      id: "cm3",
-      body: "How does the AI handle edge cases? Like satire or sarcasm?",
-      author: "curious_mind",
-      sparkCount: 18,
-      replyCount: 1,
-      createdAt: new Date(Date.now() - 1800000).toISOString(),
-      depth: 1,
-    },
-    {
-      id: "cm4",
-      body: "Great question. The AI uses confidence scores — low-confidence decisions get flagged for campfire review rather than auto-removed. Campfires can tune this threshold through governance.",
-      author: "fuega_team",
-      sparkCount: 56,
-      replyCount: 0,
-      createdAt: new Date(Date.now() - 1200000).toISOString(),
-      depth: 2,
-    },
-    {
-      id: "cm5",
-      body: "The Founder badge is a nice touch. Good incentive for early adoption.",
-      author: "badge_collector",
-      sparkCount: 12,
-      replyCount: 0,
-      createdAt: new Date(Date.now() - 600000).toISOString(),
-      depth: 0,
-    },
-  ];
-}
+import { usePost } from "@/lib/hooks/usePosts";
+import { useComments, useCreateComment } from "@/lib/hooks/useComments";
+import { useVoting } from "@/lib/hooks/useVoting";
+import { toPostCardData, flattenCommentsForDisplay } from "@/lib/adapters/post-adapter";
 
 function timeAgo(dateStr: string): string {
   const now = Date.now();
@@ -106,83 +43,111 @@ export default function PostDetailPage() {
   const campfireSlug = params.campfire as string;
   const postId = params.postId as string;
 
-  const [post, setPost] = React.useState<ReturnType<typeof getMockPost> | null>(
-    null,
-  );
-  const [comments, setComments] = React.useState<
-    ReturnType<typeof getMockComments>
-  >([]);
-  const [loading, setLoading] = React.useState(true);
+  // Fetch post + comments from API
+  const {
+    post: rawPost,
+    loading: postLoading,
+    error: postError,
+    refresh: refreshPost,
+  } = usePost(postId);
+  const {
+    comments: rawComments,
+    loading: commentsLoading,
+    error: commentsError,
+    refresh: refreshComments,
+  } = useComments(postId);
+  const { createComment, creating } = useCreateComment();
+  const { vote } = useVoting();
+
+  // Local state
   const [postVote, setPostVote] = React.useState<
     "sparked" | "doused" | null
   >(null);
+  const [postSparkDelta, setPostSparkDelta] = React.useState(0);
   const [commentVotes, setCommentVotes] = React.useState<
     Record<string, "sparked" | "doused" | null>
   >({});
   const [commentText, setCommentText] = React.useState("");
-  const [submitting, setSubmitting] = React.useState(false);
 
-  React.useEffect(() => {
-    const timer = setTimeout(() => {
-      setPost(getMockPost(campfireSlug, postId));
-      setComments(getMockComments());
-      setLoading(false);
-    }, 300);
-    return () => clearTimeout(timer);
-  }, [campfireSlug, postId]);
+  // Convert to UI shapes
+  const post = rawPost ? toPostCardData(rawPost) : null;
+  const displayComments = flattenCommentsForDisplay(rawComments);
 
-  const handlePostVote = (vote: "spark" | "douse") => {
-    const voteState = vote === "spark" ? "sparked" : "doused";
-    setPostVote((prev) => (prev === voteState ? null : voteState));
+  const handlePostVote = async (voteType: "spark" | "douse") => {
+    const current = postVote;
+    const newState = voteType === "spark" ? "sparked" : "doused";
+
+    if (current === newState) {
+      setPostVote(null);
+      setPostSparkDelta(0);
+    } else {
+      setPostVote(newState);
+      setPostSparkDelta(voteType === "spark" ? 1 : -1);
+    }
+
+    try {
+      await vote("post", postId, voteType);
+    } catch {
+      setPostVote(current);
+      setPostSparkDelta(0);
+    }
   };
 
-  const handleCommentVote = (
+  const handleCommentVote = async (
     commentId: string,
-    vote: "spark" | "douse",
+    voteType: "spark" | "douse",
   ) => {
-    setCommentVotes((prev) => {
-      const current = prev[commentId];
-      const voteState = vote === "spark" ? "sparked" : "doused";
-      return {
-        ...prev,
-        [commentId]: current === voteState ? null : voteState,
-      };
-    });
+    const current = commentVotes[commentId] ?? null;
+    const newState = voteType === "spark" ? "sparked" : "doused";
+
+    setCommentVotes((prev) => ({
+      ...prev,
+      [commentId]: current === newState ? null : newState,
+    }));
+
+    try {
+      await vote("comment", commentId, voteType);
+    } catch {
+      setCommentVotes((prev) => ({ ...prev, [commentId]: current }));
+    }
   };
 
   const handleSubmitComment = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!commentText.trim() || submitting) return;
-    setSubmitting(true);
+    if (!commentText.trim() || creating) return;
 
-    // Simulate API call
-    await new Promise((r) => setTimeout(r, 500));
-
-    setComments((prev) => [
-      ...prev,
-      {
-        id: `cm-new-${Date.now()}`,
-        body: commentText,
-        author: user?.username ?? "anonymous",
-        sparkCount: 0,
-        replyCount: 0,
-        createdAt: new Date().toISOString(),
-        depth: 0,
-      },
-    ]);
-    setCommentText("");
-    setSubmitting(false);
+    try {
+      await createComment({
+        post_id: postId,
+        body: commentText.trim(),
+      });
+      setCommentText("");
+      refreshComments();
+      refreshPost();
+    } catch {
+      // Error handled by hook
+    }
   };
 
+  const loading = postLoading || commentsLoading;
+
   if (loading) return <PostDetailSkeleton />;
-  if (!post)
+  if (postError || !post) {
     return (
       <div className="py-16 text-center">
-        <p className="text-ash-400">Post not found</p>
+        <p className="text-ash-400">{postError ?? "Post not found"}</p>
+        <Link
+          href={`/f/${campfireSlug}`}
+          className="mt-2 inline-block text-xs text-flame-400 hover:underline"
+        >
+          ← Back to campfire
+        </Link>
       </div>
     );
+  }
 
   const isOwner = user?.username === post.author;
+  const adjustedSparkCount = post.sparkCount + postSparkDelta;
 
   return (
     <div>
@@ -192,14 +157,16 @@ export default function PostDetailPage() {
         className="inline-flex items-center gap-1.5 text-sm text-ash-500 transition-colors hover:text-ash-300"
       >
         <ArrowLeft className="h-3.5 w-3.5" />
-        <span className="text-lava-hot">f</span><span className="text-smoke mx-1">|</span><span>{campfireSlug}</span>
+        <span className="text-lava-hot">f</span>
+        <span className="text-smoke mx-1">|</span>
+        <span>{campfireSlug}</span>
       </Link>
 
       {/* Post */}
       <article className="mt-4 rounded-lg border border-ash-800 bg-ash-900/50 p-4">
         <div className="flex gap-3">
           <SparkButton
-            sparkCount={post.sparkCount}
+            sparkCount={adjustedSparkCount}
             userVote={postVote}
             onVote={handlePostVote}
           />
@@ -210,14 +177,13 @@ export default function PostDetailPage() {
                 href={`/f/${post.campfire}`}
                 className="font-medium text-flame-400 hover:underline"
               >
-                <span className="text-lava-hot">f</span><span className="text-smoke mx-1">|</span><span>{post.campfire}</span>
+                <span className="text-lava-hot">f</span>
+                <span className="text-smoke mx-1">|</span>
+                <span>{post.campfire}</span>
               </Link>
               <span>·</span>
               <UserAvatar username={post.author} size="sm" />
-              <Link
-                href={`/u/${post.author}`}
-                className="hover:underline"
-              >
+              <Link href={`/u/${post.author}`} className="hover:underline">
                 {post.author}
               </Link>
               <span>·</span>
@@ -225,7 +191,7 @@ export default function PostDetailPage() {
                 <Clock className="h-3 w-3" />
                 {timeAgo(post.createdAt)}
               </span>
-              {post.editedAt && (
+              {rawPost?.edited_at && (
                 <span className="text-ash-600">(edited)</span>
               )}
               {post.moderation && (
@@ -236,19 +202,16 @@ export default function PostDetailPage() {
               )}
             </div>
 
-            {/* Title */}
             <h1 className="mt-2 text-xl font-bold text-ash-100">
               {post.title}
             </h1>
 
-            {/* Body */}
             {post.body && (
               <div className="mt-3 whitespace-pre-wrap text-sm leading-relaxed text-ash-300">
                 {post.body}
               </div>
             )}
 
-            {/* Actions */}
             <div className="mt-4 flex items-center gap-4 text-xs text-ash-500">
               <span className="flex items-center gap-1.5">
                 <MessageSquare className="h-3.5 w-3.5" />
@@ -300,11 +263,11 @@ export default function PostDetailPage() {
                   type="submit"
                   variant="spark"
                   size="sm"
-                  disabled={!commentText.trim() || submitting}
+                  disabled={!commentText.trim() || creating}
                   className="gap-1.5"
                 >
                   <Send className="h-3.5 w-3.5" />
-                  {submitting ? "Posting..." : "Comment"}
+                  {creating ? "Posting..." : "Comment"}
                 </Button>
               </div>
             </div>
@@ -322,15 +285,19 @@ export default function PostDetailPage() {
       {/* Comments */}
       <div className="mt-4">
         <h2 className="text-sm font-medium text-ash-300">
-          {comments.length} {comments.length === 1 ? "Comment" : "Comments"}
+          {displayComments.length}{" "}
+          {displayComments.length === 1 ? "Comment" : "Comments"}
         </h2>
+        {commentsError && (
+          <p className="mt-2 text-xs text-red-400">{commentsError}</p>
+        )}
         <div className="mt-3 space-y-0.5">
-          {comments.map((comment) => (
+          {displayComments.map((comment) => (
             <CommentCard
               key={comment.id}
               comment={comment}
               userVote={commentVotes[comment.id] ?? null}
-              onVote={(vote) => handleCommentVote(comment.id, vote)}
+              onVote={(v) => handleCommentVote(comment.id, v)}
             />
           ))}
         </div>

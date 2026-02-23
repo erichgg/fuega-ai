@@ -13,6 +13,31 @@
   --void: #000000;
   --coal: #0A0A0A;
 
+  /* Theme-aware ash scale (inverts in light mode) */
+  --ash-50: #FAFAFA;
+  --ash-100: #F0F0F0;
+  --ash-200: #D4D4D4;
+  --ash-300: #A3A3A3;
+  --ash-400: #8B8B8B;
+  --ash-500: #737373;
+  --ash-600: #555555;
+  --ash-700: #333333;
+  --ash-800: #1F1F1F;
+  --ash-900: #0F0F0F;
+  --ash-950: #080808;
+
+  /* Theme-aware flame scale */
+  --flame-50: #FFF7ED;
+  --flame-100: #FFEDD5;
+  --flame-200: #FED7AA;
+  --flame-300: #FDBA74;
+  --flame-400: #FF8C42;
+  --flame-500: #FF4500;
+  --flame-600: #E03E00;
+  --flame-700: #C23500;
+  --flame-800: #9A2C00;
+  --flame-900: #7C2D12;
+
   /* Legacy aliases */
   --fire: #FF4500;
   --fire-light: #FF5722;
@@ -84,29 +109,30 @@
   --color-void: var(--void);
   --color-coal: var(--coal);
 
-  /* Flame scale (orange/lava brand) */
-  --color-flame-50: #FFF7ED;
-  --color-flame-100: #FFEDD5;
-  --color-flame-200: #FED7AA;
-  --color-flame-300: #FDBA74;
-  --color-flame-400: #FF8C42;
-  --color-flame-500: #FF4500;
-  --color-flame-600: #E03E00;
-  --color-flame-700: #C23500;
-  --color-flame-800: #9A2C00;
-  --color-flame-900: #7C2D12;
+  /* Flame scale — theme-aware via CSS vars */
+  --color-flame-50: var(--flame-50);
+  --color-flame-100: var(--flame-100);
+  --color-flame-200: var(--flame-200);
+  --color-flame-300: var(--flame-300);
+  --color-flame-400: var(--flame-400);
+  --color-flame-500: var(--flame-500);
+  --color-flame-600: var(--flame-600);
+  --color-flame-700: var(--flame-700);
+  --color-flame-800: var(--flame-800);
+  --color-flame-900: var(--flame-900);
 
-  /* Ash scale (grays for dark theme) */
-  --color-ash-50: #FAFAFA;
-  --color-ash-100: #F0F0F0;
-  --color-ash-200: #D4D4D4;
-  --color-ash-300: #A3A3A3;
-  --color-ash-400: #8B8B8B;
-  --color-ash-500: #737373;
-  --color-ash-600: #555555;
-  --color-ash-700: #333333;
-  --color-ash-800: #1F1F1F;
-  --color-ash-900: #0F0F0F;
+  /* Ash scale — theme-aware via CSS vars (inverts in light mode) */
+  --color-ash-50: var(--ash-50);
+  --color-ash-100: var(--ash-100);
+  --color-ash-200: var(--ash-200);
+  --color-ash-300: var(--ash-300);
+  --color-ash-400: var(--ash-400);
+  --color-ash-500: var(--ash-500);
+  --color-ash-600: var(--ash-600);
+  --color-ash-700: var(--ash-700);
+  --color-ash-800: var(--ash-800);
+  --color-ash-900: var(--ash-900);
+  --color-ash-950: var(--ash-950);
 
   /* Ember scale */
   --color-ember-50: #FFF1F0;
@@ -206,7 +232,7 @@ body::before {
 
 /* Fire gradient text */
 .text-gradient-fire {
-  background: linear-gradient(135deg, #FF4500, #FF6B35, #FF8C42);
+  background: linear-gradient(135deg, var(--lava-hot), var(--lava-mid), var(--flame-400));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -214,12 +240,12 @@ body::before {
 
 /* Fire gradient background */
 .bg-gradient-fire {
-  background: linear-gradient(135deg, #FF4500, #FF6B35);
+  background: linear-gradient(135deg, var(--lava-hot), var(--lava-mid));
 }
 
 /* Glow text */
 .glow-text {
-  text-shadow: 0 0 20px rgba(255, 69, 0, 0.4), 0 0 40px rgba(255, 69, 0, 0.15);
+  text-shadow: 0 0 20px var(--lava-glow), 0 0 40px rgba(255, 69, 0, 0.15);
 }
 
 .glow-text-subtle {
@@ -229,7 +255,7 @@ body::before {
 .glow-text-intense {
   text-shadow:
     0 0 10px rgba(255, 69, 0, 0.8),
-    0 0 30px rgba(255, 69, 0, 0.5),
+    0 0 30px var(--lava-glow),
     0 0 60px rgba(255, 69, 0, 0.3),
     0 0 100px rgba(255, 69, 0, 0.15);
 }
@@ -247,10 +273,10 @@ body::before {
 /* Terminal card */
 .terminal-card {
   background: var(--coal);
-  border: 1px solid rgba(255, 69, 0, 0.2);
+  border: 1px solid var(--border);
 }
 .terminal-card:hover {
-  border-color: rgba(255, 69, 0, 0.4);
+  border-color: var(--ash);
 }
 
 /* Prompt prefix */
@@ -264,7 +290,7 @@ hr.lava-rule,
 .lava-rule {
   border: none;
   height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(255, 69, 0, 0.4), transparent);
+  background: linear-gradient(90deg, transparent, var(--lava-glow), transparent);
 }
 
 /* Ember particles */
@@ -280,12 +306,12 @@ hr.lava-rule,
   background: var(--lava-hot);
   border-radius: 50%;
   animation: ember-rise linear infinite;
-  box-shadow: 0 0 6px rgba(255, 69, 0, 0.6);
+  box-shadow: 0 0 6px var(--lava-glow);
 }
 
 /* Spark/douse glow effects */
 .spark-glow {
-  box-shadow: 0 0 12px rgba(255, 69, 0, 0.4);
+  box-shadow: 0 0 12px var(--lava-glow);
 }
 
 .douse-glow {
@@ -351,7 +377,7 @@ hr.lava-rule,
 @keyframes badge-fire-glow {
   0%, 100% { box-shadow: 0 0 8px rgba(249, 115, 22, 0.3); }
   33% { box-shadow: 0 0 16px rgba(249, 115, 22, 0.5), 0 0 32px rgba(249, 115, 22, 0.2); }
-  66% { box-shadow: 0 0 12px rgba(255, 69, 0, 0.4), 0 0 24px rgba(255, 69, 0, 0.15); }
+  66% { box-shadow: 0 0 12px var(--lava-glow), 0 0 24px rgba(255, 69, 0, 0.15); }
 }
 
 .badge-shimmer {
@@ -368,12 +394,12 @@ hr.lava-rule,
 
 /* Scrollbar */
 ::-webkit-scrollbar { width: 4px; }
-::-webkit-scrollbar-track { background: #000; }
+::-webkit-scrollbar-track { background: var(--background); }
 ::-webkit-scrollbar-thumb { background: var(--lava-hot); border-radius: 0; }
 
 /* Selection */
 ::selection {
-  background: rgba(255, 69, 0, 0.3);
+  background: var(--lava-glow);
   color: white;
 }
 
@@ -394,6 +420,31 @@ hr.lava-rule,
 /* ===== LIGHT MODE ===== */
 .light,
 [data-theme="light"] {
+  /* Invert ash scale for light backgrounds */
+  --ash-50: #171717;
+  --ash-100: #262626;
+  --ash-200: #404040;
+  --ash-300: #525252;
+  --ash-400: #737373;
+  --ash-500: #8B8B8B;
+  --ash-600: #A3A3A3;
+  --ash-700: #D4D4D4;
+  --ash-800: #E5E5E5;
+  --ash-900: #F5F5F5;
+  --ash-950: #FAFAFA;
+
+  /* Crimson-red flame scale for light backgrounds */
+  --flame-50: #7F1D1D;
+  --flame-100: #991B1B;
+  --flame-200: #B91C1C;
+  --flame-300: #DC2626;
+  --flame-400: #B91C1C;
+  --flame-500: #A31800;
+  --flame-600: #8B1500;
+  --flame-700: #7F1D1D;
+  --flame-800: #FEE2E2;
+  --flame-900: #FEF2F2;
+
   --void: #F5F5F5;
   --coal: #FFFFFF;
   --charcoal: #E5E5E5;
@@ -401,9 +452,9 @@ hr.lava-rule,
   --smoke: #999999;
   --foreground: #1A1A1A;
 
-  --lava-hot: #CC3700;
-  --lava-mid: #B85A2B;
-  --ember: #992900;
+  --lava-hot: #B91C1C;
+  --lava-mid: #A31800;
+  --ember: #7F1D1D;
   --teal: #0D9488;
   --destructive: #DC2626;
 
@@ -412,7 +463,7 @@ hr.lava-rule,
   --card-foreground: #1A1A1A;
   --popover: #FFFFFF;
   --popover-foreground: #1A1A1A;
-  --primary: #CC3700;
+  --primary: #B91C1C;
   --primary-foreground: #FFFFFF;
   --secondary: #0D9488;
   --secondary-foreground: #FFFFFF;
@@ -422,15 +473,19 @@ hr.lava-rule,
   --accent-foreground: #1A1A1A;
   --border: #E5E5E5;
   --input: #E5E5E5;
-  --ring: #CC3700;
+  --ring: #B91C1C;
   --foreground-muted: #666666;
 
-  --spark: #B85A2B;
+  --spark: #B91C1C;
   --douse: #2E7AD6;
   --success: #0D9488;
-  --warning: #B85A2B;
+  --warning: #A31800;
+
+  --lava-glow: rgba(185, 28, 28, 0.3);
+  --void-shadow: rgba(0, 0, 0, 0.1);
 }
 
+/* Light mode: softer CRT scanlines */
 .light body::before,
 [data-theme="light"] body::before {
   background: repeating-linear-gradient(
@@ -442,8 +497,15 @@ hr.lava-rule,
   );
 }
 
+/* Light mode: no glow text (it looks bad on light backgrounds) */
 .light .glow-text,
 [data-theme="light"] .glow-text {
+  text-shadow: none;
+  color: var(--lava-hot);
+}
+
+.light .glow-text-subtle,
+[data-theme="light"] .glow-text-subtle {
   text-shadow: none;
   color: var(--lava-hot);
 }
@@ -453,6 +515,7 @@ hr.lava-rule,
   text-shadow: 0 1px 3px rgba(204, 55, 0, 0.2);
 }
 
+/* Light mode: terminal card */
 .light .terminal-card,
 [data-theme="light"] .terminal-card {
   background: var(--coal);
@@ -463,4 +526,17 @@ hr.lava-rule,
 .light .terminal-card:hover,
 [data-theme="light"] .terminal-card:hover {
   border-color: var(--ash);
+}
+
+/* Light mode: selection */
+.light ::selection,
+[data-theme="light"] ::selection {
+  background: rgba(204, 55, 0, 0.2);
+  color: #1A1A1A;
+}
+
+/* Light mode: hide ember particles (too noisy on light bg) */
+.light .ember,
+[data-theme="light"] .ember {
+  opacity: 0.3;
 }

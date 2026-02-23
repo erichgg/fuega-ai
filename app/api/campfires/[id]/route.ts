@@ -4,6 +4,7 @@ import { checkGeneralRateLimit } from "@/lib/auth/rate-limit";
 import { updateCampfireSchema } from "@/lib/validation/campfires";
 import {
   getCampfireById,
+  getCampfireByName,
   updateCampfire,
   ServiceError,
 } from "@/lib/services/campfires.service";
@@ -14,15 +15,22 @@ interface RouteParams {
   params: Promise<{ id: string }>;
 }
 
+// UUID v4 pattern for detecting whether the param is a UUID or a slug name
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 /**
  * GET /api/campfires/:id
- * Get full campfire details.
+ * Get full campfire details. Supports both UUID and slug name.
  */
 export async function GET(req: Request, { params }: RouteParams) {
   try {
     const { id } = await params;
 
-    const campfire = await getCampfireById(id);
+    // Support both UUID lookup and name-based lookup
+    const campfire = UUID_RE.test(id)
+      ? await getCampfireById(id)
+      : await getCampfireByName(id);
+
     if (!campfire) {
       return NextResponse.json(
         { error: "Campfire not found", code: "CAMPFIRE_NOT_FOUND" },

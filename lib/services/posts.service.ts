@@ -148,6 +148,12 @@ export async function listPosts(input: ListPostsInput): Promise<Post[]> {
     paramIdx++;
   }
 
+  if (input.author) {
+    conditions.push(`u.username = $${paramIdx}`);
+    params.push(input.author);
+    paramIdx++;
+  }
+
   const whereClause = conditions.join(" AND ");
 
   let orderBy: string;

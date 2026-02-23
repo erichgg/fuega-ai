@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label";
 import { FlameLogo } from "@/components/fuega/flame-logo";
 import { useAuth } from "@/lib/contexts/auth-context";
 import { EmberParticles } from "@/components/fuega/ember-particles";
+import { ThemeToggle } from "@/components/fuega/theme-toggle";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -41,6 +42,9 @@ export default function LoginPage() {
 
   return (
     <div className="relative flex min-h-screen items-center justify-center bg-background px-4 overflow-hidden">
+      <div className="absolute top-4 right-4 z-10">
+        <ThemeToggle />
+      </div>
       <EmberParticles count={8} />
       <div className="w-full max-w-sm">
         <div className="text-center">

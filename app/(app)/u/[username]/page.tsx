@@ -18,6 +18,10 @@ import { PostCard } from "@/components/fuega/post-card";
 import { UserAvatar } from "@/components/fuega/user-avatar";
 import { ProfileSkeleton } from "@/components/fuega/page-skeleton";
 import { useAuth } from "@/lib/contexts/auth-context";
+import { usePosts } from "@/lib/hooks/usePosts";
+import { useVoting } from "@/lib/hooks/useVoting";
+import { toPostCardData } from "@/lib/adapters/post-adapter";
+import { api } from "@/lib/api/client";
 
 interface UserProfile {
   username: string;
@@ -28,6 +32,7 @@ interface UserProfile {
   socialLinks: Record<string, string>;
   profileVisible: boolean;
   brandText: string | null;
+  brandStyle: Record<string, string>;
   glow: number;
   postGlow: number;
   commentGlow: number;
@@ -46,75 +51,6 @@ const SOCIAL_ICONS: Record<string, string> = {
   linkedin: "LI",
 };
 
-// TEST_DATA - DELETE BEFORE PRODUCTION
-function getMockProfile(username: string): UserProfile {
-  return {
-    username,
-    displayName: "Campfire Keeper",
-    bio: "Passionate about transparent AI and campfire governance. Early adopter and active contributor.",
-    location: "The internet",
-    website: "https://example.com",
-    socialLinks: { github: "keeper42", twitter: "@keeper" },
-    profileVisible: true,
-    brandText: "Early Adopter",
-    glow: 1247 + Math.floor(Math.random() * 500),
-    postGlow: 800,
-    commentGlow: 447,
-    founderNumber: 42,
-    createdAt: "2024-01-15T00:00:00Z",
-  };
-}
-
-// TEST_DATA - DELETE BEFORE PRODUCTION
-function getMockUserPosts(username: string) {
-  return [
-    {
-      id: "up1",
-      title: "My thoughts on transparent AI moderation after one month",
-      body: "After using fuega for a month, here are my observations about how AI moderation changes the discussion dynamic...",
-      author: username,
-      campfire: "meta",
-      sparkCount: 89,
-      commentCount: 23,
-      createdAt: new Date(Date.now() - 86400000).toISOString(),
-      moderation: { action: "approved" as const, confidence: 0.97 },
-    },
-    {
-      id: "up2",
-      title: "Proposal for improved governance voting UI",
-      author: username,
-      campfire: "meta",
-      sparkCount: 45,
-      commentCount: 12,
-      createdAt: new Date(Date.now() - 172800000).toISOString(),
-    },
-  ];
-}
-
-// TEST_DATA - DELETE BEFORE PRODUCTION
-function getMockUserComments(username: string) {
-  return [
-    {
-      id: "uc1",
-      postTitle: "How AI moderation actually works on fuega",
-      postCampfire: "tech",
-      postId: "2",
-      body: "The confidence scoring system is brilliant. Low-confidence decisions go to campfire review instead of auto-removal.",
-      sparkCount: 34,
-      createdAt: new Date(Date.now() - 43200000).toISOString(),
-    },
-    {
-      id: "uc2",
-      postTitle: "Welcome to fuega.ai",
-      postCampfire: "meta",
-      postId: "1",
-      body: "Excited to be part of this from the beginning. The Founder badge is a nice touch!",
-      sparkCount: 12,
-      createdAt: new Date(Date.now() - 86400000).toISOString(),
-    },
-  ];
-}
-
 function timeAgo(dateStr: string): string {
   const now = Date.now();
   const then = new Date(dateStr).getTime();
@@ -131,48 +67,109 @@ export default function UserProfilePage() {
   const { user: currentUser } = useAuth();
   const username = params.username as string;
 
+  // Fetch profile
   const [profile, setProfile] = React.useState<UserProfile | null>(null);
-  const [posts, setPosts] = React.useState<ReturnType<typeof getMockUserPosts>>(
-    [],
-  );
-  const [comments, setComments] = React.useState<
-    ReturnType<typeof getMockUserComments>
-  >([]);
-  const [loading, setLoading] = React.useState(true);
+  const [profileLoading, setProfileLoading] = React.useState(true);
+  const [profileError, setProfileError] = React.useState<string | null>(null);
+
+  React.useEffect(() => {
+    let cancelled = false;
+    setProfileLoading(true);
+    setProfileError(null);
+
+    api
+      .get<{ profile: UserProfile }>(`/api/users/${encodeURIComponent(username)}/profile`)
+      .then((data) => {
+        if (!cancelled) {
+          setProfile(data.profile);
+          setProfileLoading(false);
+        }
+      })
+      .catch((err) => {
+        if (!cancelled) {
+          setProfileError(err instanceof Error ? err.message : "Failed to load profile");
+          setProfileLoading(false);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [username]);
+
+  // Fetch user's posts
+  const {
+    posts: rawPosts,
+    loading: postsLoading,
+    hasMore,
+    loadMore,
+  } = usePosts({ author: username, sort: "new" });
+
+  // Voting
+  const { vote } = useVoting();
   const [votes, setVotes] = React.useState<
     Record<string, "sparked" | "doused" | null>
   >({});
+  const [sparkDeltas, setSparkDeltas] = React.useState<Record<string, number>>(
+    {},
+  );
 
-  React.useEffect(() => {
-    const timer = setTimeout(() => {
-      setProfile(getMockProfile(username));
-      setPosts(getMockUserPosts(username));
-      setComments(getMockUserComments(username));
-      setLoading(false);
-    }, 300);
-    return () => clearTimeout(timer);
-  }, [username]);
+  const handleVote = async (postId: string, voteType: "spark" | "douse") => {
+    const current = votes[postId] ?? null;
+    const newState = voteType === "spark" ? "sparked" : "doused";
 
-  const handleVote = (postId: string, vote: "spark" | "douse") => {
-    setVotes((prev) => {
-      const current = prev[postId];
-      const voteState = vote === "spark" ? "sparked" : "doused";
-      return { ...prev, [postId]: current === voteState ? null : voteState };
-    });
+    if (current === newState) {
+      setVotes((prev) => ({ ...prev, [postId]: null }));
+      setSparkDeltas((prev) => ({ ...prev, [postId]: 0 }));
+    } else {
+      setVotes((prev) => ({ ...prev, [postId]: newState }));
+      setSparkDeltas((prev) => ({
+        ...prev,
+        [postId]: voteType === "spark" ? 1 : -1,
+      }));
+    }
+
+    try {
+      await vote("post", postId, voteType);
+    } catch {
+      setVotes((prev) => ({ ...prev, [postId]: current }));
+      setSparkDeltas((prev) => ({ ...prev, [postId]: 0 }));
+    }
   };
 
+  // Convert posts to card shape
+  const postCards = rawPosts.map((p) => {
+    const card = toPostCardData(p);
+    if (sparkDeltas[p.id] !== undefined) {
+      card.sparkCount += sparkDeltas[p.id] ?? 0;
+    }
+    return card;
+  });
+
+  const loading = profileLoading || postsLoading;
+
   if (loading) return <ProfileSkeleton />;
-  if (!profile)
+
+  if (profileError || !profile) {
     return (
       <div className="py-16 text-center">
-        <p className="text-ash-400">User not found</p>
+        <p className="text-ash-400">
+          {profileError ?? "User not found"}
+        </p>
+        <Link
+          href="/home"
+          className="mt-2 inline-block text-xs text-flame-400 hover:underline"
+        >
+          &larr; Back to home
+        </Link>
       </div>
     );
+  }
 
   const isOwnProfile = currentUser?.username === profile.username;
   const isHidden = !profile.profileVisible && !isOwnProfile;
-  const filledSocials = Object.entries(profile.socialLinks).filter(
-    ([, val]) => val && val.trim() !== ""
+  const filledSocials = Object.entries(profile.socialLinks ?? {}).filter(
+    ([, val]) => val && val.trim() !== "",
   );
 
   return (
@@ -227,7 +224,7 @@ export default function UserProfilePage() {
               <span className="flex items-center gap-1.5">
                 <Flame className="h-3.5 w-3.5 text-flame-400" />
                 <span className="font-semibold text-flame-400">
-                  {profile.glow.toLocaleString()}
+                  {(profile.glow ?? 0).toLocaleString()}
                 </span>{" "}
                 glow
               </span>
@@ -253,7 +250,13 @@ export default function UserProfilePage() {
                   className="flex items-center gap-1.5 text-flame-400 hover:text-flame-300"
                 >
                   <ExternalLink className="h-3.5 w-3.5" />
-                  {new URL(profile.website).hostname}
+                  {(() => {
+                    try {
+                      return new URL(profile.website).hostname;
+                    } catch {
+                      return profile.website;
+                    }
+                  })()}
                 </a>
               )}
             </div>
@@ -278,8 +281,8 @@ export default function UserProfilePage() {
             {/* Glow breakdown */}
             {profile.profileVisible && (
               <div className="mt-2 flex items-center gap-3 text-[10px] text-ash-600">
-                <span>Post glow: {profile.postGlow.toLocaleString()}</span>
-                <span>Comment glow: {profile.commentGlow.toLocaleString()}</span>
+                <span>Post glow: {(profile.postGlow ?? 0).toLocaleString()}</span>
+                <span>Comment glow: {(profile.commentGlow ?? 0).toLocaleString()}</span>
               </div>
             )}
           </div>
@@ -293,70 +296,41 @@ export default function UserProfilePage() {
             value="posts"
             className="rounded-none border-b-2 border-transparent px-4 pb-2 pt-2 text-ash-400 data-[state=active]:border-flame-400 data-[state=active]:text-flame-400 data-[state=active]:bg-transparent"
           >
-            Posts ({posts.length})
-          </TabsTrigger>
-          <TabsTrigger
-            value="comments"
-            className="rounded-none border-b-2 border-transparent px-4 pb-2 pt-2 text-ash-400 data-[state=active]:border-flame-400 data-[state=active]:text-flame-400 data-[state=active]:bg-transparent"
-          >
-            Comments ({comments.length})
+            Posts ({postCards.length})
           </TabsTrigger>
           <Link
             href={`/u/${profile.username}/badges`}
             className="ml-auto self-end pb-2 text-xs text-ash-500 hover:text-flame-400 transition-colors"
           >
-            View badges →
+            View badges &rarr;
           </Link>
         </TabsList>
 
         <TabsContent value="posts" className="mt-4 space-y-2">
-          {posts.length === 0 ? (
+          {postCards.length === 0 ? (
             <p className="py-8 text-center text-sm text-ash-500">
               No posts yet
             </p>
           ) : (
-            posts.map((post) => (
-              <PostCard
-                key={post.id}
-                post={post}
-                userVote={votes[post.id] ?? null}
-                onVote={(vote) => handleVote(post.id, vote)}
-              />
-            ))
-          )}
-        </TabsContent>
-
-        <TabsContent value="comments" className="mt-4 space-y-2">
-          {comments.length === 0 ? (
-            <p className="py-8 text-center text-sm text-ash-500">
-              No comments yet
-            </p>
-          ) : (
-            comments.map((comment) => (
-              <div
-                key={comment.id}
-                className="rounded-lg border border-ash-800 bg-ash-900/50 p-3"
-              >
-                <div className="text-xs text-ash-500">
-                  Commented on{" "}
-                  <span className="text-ash-300 font-medium">
-                    {comment.postTitle}
-                  </span>{" "}
-                  in{" "}
-                  <span className="text-flame-400">
-                    <span className="text-lava-hot">f</span>
-                    <span className="text-smoke mx-1">|</span>
-                    <span>{comment.postCampfire}</span>
-                  </span>{" "}
-                  · {timeAgo(comment.createdAt)}
-                </div>
-                <p className="mt-1.5 text-sm text-ash-300">{comment.body}</p>
-                <div className="mt-1.5 flex items-center gap-2 text-xs text-ash-500">
-                  <Flame className="h-3 w-3 text-flame-400" />
-                  {comment.sparkCount} glow
-                </div>
-              </div>
-            ))
+            <>
+              {postCards.map((post) => (
+                <Link key={post.id} href={`/f/${post.campfire}/${post.id}`}>
+                  <PostCard
+                    post={post}
+                    userVote={votes[post.id] ?? null}
+                    onVote={(v) => handleVote(post.id, v)}
+                  />
+                </Link>
+              ))}
+              {hasMore && (
+                <button
+                  onClick={loadMore}
+                  className="w-full py-3 text-center text-xs text-ash-400 hover:text-flame-400 transition-colors"
+                >
+                  Load more posts
+                </button>
+              )}
+            </>
           )}
         </TabsContent>
       </Tabs>

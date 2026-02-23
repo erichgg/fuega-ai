@@ -15,6 +15,7 @@ export async function GET(req: Request) {
     const url = new URL(req.url);
     const parsed = listPostsSchema.safeParse({
       campfire: url.searchParams.get("campfire") ?? undefined,
+      author: url.searchParams.get("author") ?? undefined,
       sort: url.searchParams.get("sort") ?? "hot",
       limit: url.searchParams.get("limit") ?? "25",
       offset: url.searchParams.get("offset") ?? "0",

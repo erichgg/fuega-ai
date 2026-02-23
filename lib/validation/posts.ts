@@ -54,6 +54,7 @@ export const updatePostSchema = z.object({
 
 export const listPostsSchema = z.object({
   campfire: z.string().optional(),
+  author: z.string().optional(),
   sort: z
     .enum(["hot", "new", "top", "rising", "controversial"])
     .default("hot"),

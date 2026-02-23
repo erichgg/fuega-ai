@@ -8,128 +8,65 @@ import { PostCard } from "@/components/fuega/post-card";
 import { FeedSort } from "@/components/fuega/feed-sort";
 import { FeedSkeleton } from "@/components/fuega/page-skeleton";
 import { useAuth } from "@/lib/contexts/auth-context";
+import { usePosts } from "@/lib/hooks/usePosts";
+import { useVoting } from "@/lib/hooks/useVoting";
+import { toPostCardData } from "@/lib/adapters/post-adapter";
 
 type SortOption = "hot" | "new" | "top" | "rising";
-
-interface Post {
-  id: string;
-  title: string;
-  body?: string;
-  author: string;
-  campfire: string;
-  sparkCount: number;
-  commentCount: number;
-  createdAt: string;
-  moderation?: {
-    action: "approved" | "flagged" | "removed";
-    confidence?: number;
-  };
-}
-
-// TEST_DATA - DELETE BEFORE PRODUCTION
-const MOCK_POSTS: Post[] = [
-  {
-    id: "1",
-    title: "Welcome to fuega.ai — the future of campfire discussion",
-    body: "We're building something different here. A platform where AI moderation is transparent, campfires govern themselves, and privacy is a right. Join the conversation.",
-    author: "fuega_team",
-    campfire: "meta",
-    sparkCount: 247,
-    commentCount: 89,
-    createdAt: new Date(Date.now() - 3600000).toISOString(),
-    moderation: { action: "approved", confidence: 0.98 },
-  },
-  {
-    id: "2",
-    title: "How AI moderation actually works on fuega — a deep dive",
-    body: "Every post goes through Claude-based AI moderation in real-time. Here's exactly how it works, what prompts are used, and how you can change them through governance.",
-    author: "transparency_fan",
-    campfire: "tech",
-    sparkCount: 182,
-    commentCount: 45,
-    createdAt: new Date(Date.now() - 7200000).toISOString(),
-    moderation: { action: "approved", confidence: 0.95 },
-  },
-  {
-    id: "3",
-    title: "Proposal: Update f | science moderation prompt to allow more speculative discussion",
-    body: "The current prompt is too strict on speculative content. I think we should allow more hypothesis-driven posts as long as they're clearly labeled.",
-    author: "science_nerd_42",
-    campfire: "science",
-    sparkCount: 94,
-    commentCount: 67,
-    createdAt: new Date(Date.now() - 14400000).toISOString(),
-  },
-  {
-    id: "4",
-    title: "Why spark/douse voting is better than traditional voting",
-    body: "The spark/douse system isn't just a rename — it fundamentally changes the incentive structure. Here's my analysis of why it leads to better discussions.",
-    author: "game_theory_nerd",
-    campfire: "meta",
-    sparkCount: 156,
-    commentCount: 34,
-    createdAt: new Date(Date.now() - 21600000).toISOString(),
-    moderation: { action: "approved", confidence: 0.99 },
-  },
-  {
-    id: "5",
-    title: "First governance vote results are in! f | tech campfire prompt updated",
-    body: "The campfire voted 78% in favor of adding more nuance to the tech campfire's moderation prompt. The new prompt takes effect immediately.",
-    author: "governance_watch",
-    campfire: "tech",
-    sparkCount: 210,
-    commentCount: 23,
-    createdAt: new Date(Date.now() - 43200000).toISOString(),
-    moderation: { action: "approved", confidence: 0.97 },
-  },
-];
 
 export default function HomeFeedPage() {
   const { user, loading: authLoading } = useAuth();
   const [sort, setSort] = React.useState<SortOption>("hot");
-  const [posts, setPosts] = React.useState<Post[]>([]);
-  const [loading, setLoading] = React.useState(true);
+  const { posts, loading, error, hasMore, loadMore } = usePosts({ sort });
+  const { vote } = useVoting();
+
+  // Track local vote state for optimistic UI
   const [votes, setVotes] = React.useState<
     Record<string, "sparked" | "doused" | null>
   >({});
+  const [sparkDeltas, setSparkDeltas] = React.useState<Record<string, number>>(
+    {},
+  );
 
-  React.useEffect(() => {
-    // Simulate API call
-    const timer = setTimeout(() => {
-      let sorted = [...MOCK_POSTS];
-      switch (sort) {
-        case "new":
-          sorted.sort(
-            (a, b) =>
-              new Date(b.createdAt).getTime() -
-              new Date(a.createdAt).getTime(),
-          );
-          break;
-        case "top":
-          sorted.sort((a, b) => b.sparkCount - a.sparkCount);
-          break;
-        case "rising":
-          sorted.sort((a, b) => b.commentCount - a.commentCount);
-          break;
-        default: // "hot" - default order
-          break;
-      }
-      setPosts(sorted);
-      setLoading(false);
-    }, 300);
-    return () => clearTimeout(timer);
-  }, [sort]);
+  const handleVote = async (postId: string, voteType: "spark" | "douse") => {
+    const current = votes[postId] ?? null;
+    const newState = voteType === "spark" ? "sparked" : "doused";
 
-  const handleVote = (postId: string, vote: "spark" | "douse") => {
-    setVotes((prev) => {
-      const current = prev[postId];
-      const voteState = vote === "spark" ? "sparked" : "doused";
-      return {
+    // Optimistic update
+    if (current === newState) {
+      // Un-vote
+      setVotes((prev) => ({ ...prev, [postId]: null }));
+      setSparkDeltas((prev) => ({ ...prev, [postId]: 0 }));
+    } else {
+      setVotes((prev) => ({ ...prev, [postId]: newState }));
+      setSparkDeltas((prev) => ({
         ...prev,
-        [postId]: current === voteState ? null : voteState,
-      };
-    });
+        [postId]: voteType === "spark" ? 1 : -1,
+      }));
+    }
+
+    try {
+      if (current === newState) {
+        await vote("post", postId, voteType);
+      } else {
+        await vote("post", postId, voteType);
+      }
+    } catch {
+      // Revert on error
+      setVotes((prev) => ({ ...prev, [postId]: current }));
+      setSparkDeltas((prev) => ({ ...prev, [postId]: 0 }));
+    }
   };
+
+  // Convert API posts to UI shape
+  const postCards = posts.map((p) => {
+    const card = toPostCardData(p);
+    // Apply optimistic vote delta
+    if (sparkDeltas[p.id] !== undefined) {
+      card.sparkCount += sparkDeltas[p.id] ?? 0;
+    }
+    return card;
+  });
 
   return (
     <div>
@@ -148,20 +85,48 @@ export default function HomeFeedPage() {
       <div className="mt-4 space-y-2">
         {loading || authLoading ? (
           <FeedSkeleton />
-        ) : posts.length === 0 ? (
+        ) : error ? (
+          <div className="py-16 text-center">
+            <p className="text-red-400">{error}</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="mt-2 text-xs text-flame-400 hover:underline"
+            >
+              Try again
+            </button>
+          </div>
+        ) : postCards.length === 0 ? (
           <div className="py-16 text-center">
             <p className="text-ash-400">No posts yet. Be the first!</p>
+            {user && (
+              <Link
+                href="/submit"
+                className="mt-2 inline-block text-xs text-flame-400 hover:underline"
+              >
+                Create a post →
+              </Link>
+            )}
           </div>
         ) : (
-          posts.map((post) => (
-            <Link key={post.id} href={`/f/${post.campfire}/${post.id}`}>
-              <PostCard
-                post={post}
-                userVote={votes[post.id] ?? null}
-                onVote={(vote) => handleVote(post.id, vote)}
-              />
-            </Link>
-          ))
+          <>
+            {postCards.map((post) => (
+              <Link key={post.id} href={`/f/${post.campfire}/${post.id}`}>
+                <PostCard
+                  post={post}
+                  userVote={votes[post.id] ?? null}
+                  onVote={(v) => handleVote(post.id, v)}
+                />
+              </Link>
+            ))}
+            {hasMore && (
+              <button
+                onClick={loadMore}
+                className="w-full py-3 text-center text-xs text-ash-400 hover:text-flame-400 transition-colors"
+              >
+                Load more posts
+              </button>
+            )}
+          </>
         )}
       </div>
     </div>

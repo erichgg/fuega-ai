@@ -5,7 +5,8 @@ import { api, type Post, type ModerationResult, ApiError } from "@/lib/api/clien
 
 interface UsePostsOptions {
   campfire?: string;
-  sort?: "hot" | "new" | "top";
+  sort?: "hot" | "new" | "top" | "rising" | "controversial";
+  author?: string;
   limit?: number;
 }
 
@@ -19,7 +20,7 @@ interface UsePostsReturn {
 }
 
 export function usePosts(opts: UsePostsOptions = {}): UsePostsReturn {
-  const { campfire, sort = "hot", limit = 25 } = opts;
+  const { campfire, author, sort = "hot", limit = 25 } = opts;
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -40,7 +41,7 @@ export function usePosts(opts: UsePostsOptions = {}): UsePostsReturn {
       try {
         const data = await api.get<{ posts: Post[]; count: number }>(
           "/api/posts",
-          { campfire, sort, limit, offset: currentOffset },
+          { campfire, author, sort, limit, offset: currentOffset },
           controller.signal,
         );
 
@@ -59,7 +60,7 @@ export function usePosts(opts: UsePostsOptions = {}): UsePostsReturn {
         setLoading(false);
       }
     },
-    [campfire, sort, limit, offset],
+    [campfire, author, sort, limit, offset],
   );
 
   useEffect(() => {
@@ -68,7 +69,7 @@ export function usePosts(opts: UsePostsOptions = {}): UsePostsReturn {
     fetchPosts(true);
     return () => abortRef.current?.abort();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [campfire, sort, limit]);
+  }, [campfire, author, sort, limit]);
 
   const loadMore = useCallback(async () => {
     if (!hasMore || loading) return;

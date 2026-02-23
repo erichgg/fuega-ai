@@ -140,15 +140,23 @@ export interface Post {
   campfire_id: string;
   author_id: string;
   title: string;
-  body: string;
+  body: string | null;
   post_type: "text" | "link" | "image";
   url: string | null;
+  image_url: string | null;
+  // DB columns are `sparks` and `douses`, but adapter normalizes to spark_count/douse_count
+  sparks: number;
+  douses: number;
   spark_count: number;
   douse_count: number;
   comment_count: number;
+  is_approved: boolean;
+  is_removed: boolean;
+  removal_reason: string | null;
   moderation_status: "approved" | "flagged" | "removed" | "pending";
   created_at: string;
   updated_at: string;
+  edited_at: string | null;
   deleted_at: string | null;
   author_username?: string;
   campfire_name?: string;

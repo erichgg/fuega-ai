@@ -15,8 +15,6 @@ import {
   Settings,
   User,
   LogOut,
-  Sun,
-  Moon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FlameLogo } from "@/components/fuega/flame-logo";
@@ -36,7 +34,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/lib/contexts/auth-context";
-import { useTheme } from "@/lib/contexts/theme-context";
+import { ThemeToggle } from "@/components/fuega/theme-toggle";
 import { cn } from "@/lib/utils";
 
 // ---------------------------------------------------------------------------
@@ -198,7 +196,6 @@ function ShortcutsHelp({
 
 export function Navbar() {
   const { user, logout } = useAuth();
-  const { theme, toggleTheme } = useTheme();
   const pathname = usePathname();
   const [scrolled, setScrolled] = React.useState(false);
   const [mobileOpen, setMobileOpen] = React.useState(false);
@@ -284,17 +281,7 @@ export function Navbar() {
           {/* Right actions */}
           <div className="flex items-center gap-1">
             {/* Theme toggle */}
-            <button
-              onClick={toggleTheme}
-              className="p-2 text-ash hover:text-lava-hot transition-colors"
-              aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
-            >
-              {theme === "dark" ? (
-                <Sun className="h-4 w-4" />
-              ) : (
-                <Moon className="h-4 w-4" />
-              )}
-            </button>
+            <ThemeToggle />
 
             {user ? (
               <>

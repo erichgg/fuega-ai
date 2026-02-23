@@ -3,113 +3,123 @@
 import * as React from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { Users, Bot, Plus, Shield, Flame, Clock, Settings } from "lucide-react";
+import { Users, Bot, Plus, Shield, Clock, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { PostCard } from "@/components/fuega/post-card";
 import { FeedSort } from "@/components/fuega/feed-sort";
 import { CampfireSkeleton } from "@/components/fuega/page-skeleton";
 import { useAuth } from "@/lib/contexts/auth-context";
+import { useCampfire, useCampfireMembership } from "@/lib/hooks/useCampfires";
+import { usePosts } from "@/lib/hooks/usePosts";
+import { useVoting } from "@/lib/hooks/useVoting";
+import { toPostCardData } from "@/lib/adapters/post-adapter";
 
 type SortOption = "hot" | "new" | "top" | "rising";
-
-// TEST_DATA - DELETE BEFORE PRODUCTION
-function getMockCampfire(slug: string) {
-  return {
-    id: slug,
-    name: slug,
-    description: `Welcome to f | ${slug}. A campfire for open discussion about ${slug}-related topics with transparent AI moderation.`,
-    memberCount: 12400 + Math.floor(Math.random() * 5000),
-    activeCount: 340 + Math.floor(Math.random() * 200),
-    createdAt: "2024-01-15T00:00:00Z",
-    aiPrompt:
-      "Moderate content for quality and relevance. Allow disagreement but remove personal attacks. Flag misinformation for campfire review.",
-    isJoined: false,
-    isAdmin: false,
-  };
-}
-
-// TEST_DATA - DELETE BEFORE PRODUCTION
-function getMockPosts(campfire: string) {
-  return [
-    {
-      id: "c1",
-      title: `Best resources for learning about ${campfire} in 2026`,
-      body: "I've compiled a list of the best resources for getting started. Would love to hear your recommendations too.",
-      author: "helpful_user",
-      campfire,
-      sparkCount: 89,
-      commentCount: 23,
-      createdAt: new Date(Date.now() - 3600000).toISOString(),
-      moderation: { action: "approved" as const, confidence: 0.96 },
-    },
-    {
-      id: "c2",
-      title: `Controversial take: ${campfire} needs to rethink its fundamentals`,
-      body: "I know this might be unpopular, but hear me out. The way we approach this topic needs a fundamental rethink.",
-      author: "critical_thinker",
-      campfire,
-      sparkCount: 156,
-      commentCount: 89,
-      createdAt: new Date(Date.now() - 7200000).toISOString(),
-      moderation: { action: "flagged" as const, confidence: 0.72 },
-    },
-    {
-      id: "c3",
-      title: "Weekly discussion thread — share what you're working on",
-      author: "campfire_bot",
-      campfire,
-      sparkCount: 45,
-      commentCount: 67,
-      createdAt: new Date(Date.now() - 14400000).toISOString(),
-      moderation: { action: "approved" as const, confidence: 0.99 },
-    },
-  ];
-}
 
 export default function CampfirePage() {
   const params = useParams();
   const { user } = useAuth();
   const campfireSlug = params.campfire as string;
 
-  const [campfire, setCampfire] = React.useState<ReturnType<
-    typeof getMockCampfire
-  > | null>(null);
-  const [posts, setPosts] = React.useState<ReturnType<typeof getMockPosts>>([]);
+  // Fetch campfire by name (slug)
+  const {
+    campfire,
+    loading: campfireLoading,
+    error: campfireError,
+    refresh: refreshCampfire,
+  } = useCampfire(campfireSlug);
+
+  // Fetch posts for this campfire
   const [sort, setSort] = React.useState<SortOption>("hot");
-  const [loading, setLoading] = React.useState(true);
-  const [joined, setJoined] = React.useState(false);
+  const {
+    posts,
+    loading: postsLoading,
+    error: postsError,
+    hasMore,
+    loadMore,
+  } = usePosts({ campfire: campfireSlug, sort });
+
+  // Voting
+  const { vote } = useVoting();
   const [votes, setVotes] = React.useState<
     Record<string, "sparked" | "doused" | null>
   >({});
+  const [sparkDeltas, setSparkDeltas] = React.useState<Record<string, number>>(
+    {},
+  );
 
-  React.useEffect(() => {
-    const timer = setTimeout(() => {
-      setCampfire(getMockCampfire(campfireSlug));
-      setPosts(getMockPosts(campfireSlug));
-      setLoading(false);
-    }, 300);
-    return () => clearTimeout(timer);
-  }, [campfireSlug]);
+  // Membership
+  const { join, leave, loading: membershipLoading } = useCampfireMembership();
+  const [joined, setJoined] = React.useState(false);
 
-  const handleVote = (postId: string, vote: "spark" | "douse") => {
-    setVotes((prev) => {
-      const current = prev[postId];
-      const voteState = vote === "spark" ? "sparked" : "doused";
-      return {
+  const handleVote = async (postId: string, voteType: "spark" | "douse") => {
+    const current = votes[postId] ?? null;
+    const newState = voteType === "spark" ? "sparked" : "doused";
+
+    if (current === newState) {
+      setVotes((prev) => ({ ...prev, [postId]: null }));
+      setSparkDeltas((prev) => ({ ...prev, [postId]: 0 }));
+    } else {
+      setVotes((prev) => ({ ...prev, [postId]: newState }));
+      setSparkDeltas((prev) => ({
         ...prev,
-        [postId]: current === voteState ? null : voteState,
-      };
-    });
+        [postId]: voteType === "spark" ? 1 : -1,
+      }));
+    }
+
+    try {
+      await vote("post", postId, voteType);
+    } catch {
+      setVotes((prev) => ({ ...prev, [postId]: current }));
+      setSparkDeltas((prev) => ({ ...prev, [postId]: 0 }));
+    }
   };
 
+  const handleToggleMembership = async () => {
+    if (!campfire) return;
+    try {
+      if (joined) {
+        await leave(campfire.id);
+        setJoined(false);
+      } else {
+        await join(campfire.id);
+        setJoined(true);
+      }
+      refreshCampfire();
+    } catch {
+      // Error handled by hook
+    }
+  };
+
+  // Convert API posts to PostCard shape
+  const postCards = posts.map((p) => {
+    const card = toPostCardData(p);
+    if (sparkDeltas[p.id] !== undefined) {
+      card.sparkCount += sparkDeltas[p.id] ?? 0;
+    }
+    return card;
+  });
+
+  const loading = campfireLoading || postsLoading;
+
   if (loading) return <CampfireSkeleton />;
-  if (!campfire)
+
+  if (campfireError || !campfire) {
     return (
       <div className="py-16 text-center">
-        <p className="text-ash-400">Campfire not found</p>
+        <p className="text-ash-400">
+          {campfireError ?? "Campfire not found"}
+        </p>
+        <Link
+          href="/home"
+          className="mt-2 inline-block text-xs text-flame-400 hover:underline"
+        >
+          ← Back to home
+        </Link>
       </div>
     );
+  }
 
   return (
     <div>
@@ -118,7 +128,9 @@ export default function CampfirePage() {
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <h1 className="text-2xl font-bold text-flame-400">
-              <span className="text-lava-hot">f</span><span className="text-smoke mx-1">|</span><span>{campfire.name}</span>
+              <span className="text-lava-hot">f</span>
+              <span className="text-smoke mx-1">|</span>
+              <span>{campfire.name}</span>
             </h1>
             <p className="mt-1 text-sm text-ash-400">
               {campfire.description}
@@ -126,16 +138,12 @@ export default function CampfirePage() {
             <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-ash-500">
               <span className="flex items-center gap-1">
                 <Users className="h-3.5 w-3.5" />
-                {campfire.memberCount.toLocaleString()} members
-              </span>
-              <span className="flex items-center gap-1">
-                <Flame className="h-3.5 w-3.5 text-flame-500" />
-                {campfire.activeCount} active now
+                {(campfire.member_count ?? 0).toLocaleString()} members
               </span>
               <span className="flex items-center gap-1">
                 <Clock className="h-3.5 w-3.5" />
                 Created{" "}
-                {new Date(campfire.createdAt).toLocaleDateString("en-US", {
+                {new Date(campfire.created_at).toLocaleDateString("en-US", {
                   month: "short",
                   year: "numeric",
                 })}
@@ -147,14 +155,19 @@ export default function CampfirePage() {
               <Button
                 variant={joined ? "outline" : "spark"}
                 size="sm"
-                onClick={() => setJoined(!joined)}
+                onClick={handleToggleMembership}
+                disabled={membershipLoading}
                 className={
                   joined
                     ? "border-ash-700 text-ash-400 hover:border-red-500/50 hover:text-red-400"
                     : ""
                 }
               >
-                {joined ? "Joined" : "Join"}
+                {membershipLoading
+                  ? "..."
+                  : joined
+                    ? "Joined"
+                    : "Join"}
               </Button>
             )}
           </div>
@@ -202,22 +215,39 @@ export default function CampfirePage() {
 
       {/* Posts */}
       <div className="mt-4 space-y-2">
-        {posts.length === 0 ? (
+        {postsError ? (
+          <div className="py-16 text-center">
+            <p className="text-red-400">{postsError}</p>
+          </div>
+        ) : postCards.length === 0 ? (
           <div className="py-16 text-center">
             <p className="text-ash-400">
-              No posts in <span className="text-lava-hot">f</span><span className="text-smoke mx-1">|</span><span>{campfire.name}</span> yet. Be the first!
+              No posts in{" "}
+              <span className="text-lava-hot">f</span>
+              <span className="text-smoke mx-1">|</span>
+              <span>{campfire.name}</span> yet. Be the first!
             </p>
           </div>
         ) : (
-          posts.map((post) => (
-            <Link key={post.id} href={`/f/${campfire.name}/${post.id}`}>
-              <PostCard
-                post={post}
-                userVote={votes[post.id] ?? null}
-                onVote={(vote) => handleVote(post.id, vote)}
-              />
-            </Link>
-          ))
+          <>
+            {postCards.map((post) => (
+              <Link key={post.id} href={`/f/${campfire.name}/${post.id}`}>
+                <PostCard
+                  post={post}
+                  userVote={votes[post.id] ?? null}
+                  onVote={(v) => handleVote(post.id, v)}
+                />
+              </Link>
+            ))}
+            {hasMore && (
+              <button
+                onClick={loadMore}
+                className="w-full py-3 text-center text-xs text-ash-400 hover:text-flame-400 transition-colors"
+              >
+                Load more posts
+              </button>
+            )}
+          </>
         )}
       </div>
     </div>
