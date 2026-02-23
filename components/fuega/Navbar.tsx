@@ -320,7 +320,7 @@ export function Navbar() {
                           {user.username}
                         </div>
                         <div className="text-[10px] text-lava-hot">
-                          {user.sparkScore} glow
+                          {user.glow} glow
                         </div>
                       </div>
                     </button>

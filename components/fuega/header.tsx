@@ -21,7 +21,7 @@ import { cn } from "@/lib/utils";
 interface HeaderProps {
   user?: {
     username: string;
-    sparkScore: number;
+    glow: number;
   } | null;
   onMenuToggle?: () => void;
   className?: string;
@@ -99,7 +99,7 @@ export function Header({ user, onMenuToggle, className }: HeaderProps) {
                       {user.username}
                     </div>
                     <div className="text-[10px] text-flame-400">
-                      {user.sparkScore} glow
+                      {user.glow} glow
                     </div>
                   </div>
                 </button>

@@ -42,9 +42,9 @@ export async function GET(
     const user = await queryOne<ProfileRow>(
       `SELECT id, username, display_name, bio, location, website,
               social_links, profile_visible, brand_text, brand_style,
-              COALESCE(post_glow, post_sparks, 0) as post_glow,
-              COALESCE(comment_glow, comment_sparks, 0) as comment_glow,
-              COALESCE(founder_number, founder_badge_number) as founder_number,
+              post_glow,
+              comment_glow,
+              founder_number,
               created_at
        FROM users
        WHERE ${whereClause} AND deleted_at IS NULL AND is_banned = false`,

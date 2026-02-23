@@ -71,12 +71,12 @@ export async function POST(req: Request) {
     const user = await queryOne<{
       id: string;
       username: string;
-      founder_badge_number: number | null;
+      founder_number: number | null;
       created_at: string;
     }>(
-      `INSERT INTO users (username, password_hash, ip_address_hash, ip_last_seen, founder_badge_number)
+      `INSERT INTO users (username, password_hash, ip_address_hash, ip_last_seen, founder_number)
        VALUES ($1, $2, $3, NOW(), $4)
-       RETURNING id, username, founder_badge_number, created_at`,
+       RETURNING id, username, founder_number, created_at`,
       [username, passwordHash, ipHash, founderBadgeNumber]
     );
 
@@ -102,7 +102,7 @@ export async function POST(req: Request) {
         user: {
           id: user.id,
           username: user.username,
-          founderBadgeNumber: user.founder_badge_number,
+          founderBadgeNumber: user.founder_number,
           createdAt: user.created_at,
         },
         token,

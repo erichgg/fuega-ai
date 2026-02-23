@@ -10,7 +10,7 @@ interface UserMetrics {
   total_approved_comments: number;
   campfires_joined: number;
   total_sparks_received: number;
-  max_post_sparks: number;
+  max_post_glow: number;
   consecutive_active_days: number;
   account_age_days: number;
   total_proposal_votes: number;
@@ -53,8 +53,8 @@ const THRESHOLD_BADGES: ThresholdBadge[] = [
   { badge_id: "spark_magnet", metric: "total_sparks_received", threshold: 1000 },
   { badge_id: "inferno_contributor", metric: "total_sparks_received", threshold: 10000 },
   { badge_id: "legendary_contributor", metric: "total_sparks_received", threshold: 100000 },
-  { badge_id: "hot_post", metric: "max_post_sparks", threshold: 100 },
-  { badge_id: "viral_post", metric: "max_post_sparks", threshold: 1000 },
+  { badge_id: "hot_post", metric: "max_post_glow", threshold: 100 },
+  { badge_id: "viral_post", metric: "max_post_glow", threshold: 1000 },
   { badge_id: "community_builder", metric: "max_campfire_members_created", threshold: 100 },
   { badge_id: "community_architect", metric: "max_campfire_members_created", threshold: 1000 },
 
@@ -84,7 +84,7 @@ async function getUserMetrics(userId: string): Promise<UserMetrics> {
     commentCounts,
     campfiresJoined,
     sparksReceived,
-    maxPostSparks,
+    maxPostGlow,
     streakDays,
     accountAge,
     proposalVotes,
@@ -132,8 +132,8 @@ async function getUserMetrics(userId: string): Promise<UserMetrics> {
     ),
 
     // Max sparks on any single post
-    queryOne<{ max_sparks: string }>(
-      `SELECT COALESCE(MAX(sparks), 0) AS max_sparks
+    queryOne<{ max_glow: string }>(
+      `SELECT COALESCE(MAX(sparks), 0) AS max_glow
        FROM posts
        WHERE author_id = $1 AND deleted_at IS NULL AND is_approved = TRUE`,
       [userId]
@@ -243,7 +243,7 @@ async function getUserMetrics(userId: string): Promise<UserMetrics> {
     campfires_joined: parseInt(campfiresJoined?.count ?? "0", 10),
     total_sparks_received:
       (sparksReceived?.post_glow ?? 0) + (sparksReceived?.comment_glow ?? 0),
-    max_post_sparks: parseInt(maxPostSparks?.max_sparks ?? "0", 10),
+    max_post_glow: parseInt(maxPostGlow?.max_glow ?? "0", 10),
     consecutive_active_days: parseInt(streakDays?.streak ?? "0", 10),
     account_age_days: parseInt(accountAge?.age_days ?? "0", 10),
     total_proposal_votes: parseInt(proposalVotes?.count ?? "0", 10),
@@ -403,8 +403,8 @@ export async function checkBadgesAfterSpark(userId: string): Promise<AwardResult
     { badge_id: "spark_magnet", metric: "total_sparks_received", threshold: 1000 },
     { badge_id: "inferno_contributor", metric: "total_sparks_received", threshold: 10000 },
     { badge_id: "legendary_contributor", metric: "total_sparks_received", threshold: 100000 },
-    { badge_id: "hot_post", metric: "max_post_sparks", threshold: 100 },
-    { badge_id: "viral_post", metric: "max_post_sparks", threshold: 1000 },
+    { badge_id: "hot_post", metric: "max_post_glow", threshold: 100 },
+    { badge_id: "viral_post", metric: "max_post_glow", threshold: 1000 },
   ];
 
   for (const tb of sparkBadges) {

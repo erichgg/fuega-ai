@@ -48,13 +48,13 @@ export async function POST(req: Request) {
       password_hash: string;
       is_banned: boolean;
       ban_reason: string | null;
-      founder_badge_number: number | null;
-      post_sparks: number;
-      comment_sparks: number;
+      founder_number: number | null;
+      post_glow: number;
+      comment_glow: number;
       created_at: string;
     }>(
       `SELECT id, username, password_hash, is_banned, ban_reason,
-              founder_badge_number, post_sparks, comment_sparks, created_at
+              founder_number, post_glow, comment_glow, created_at
        FROM users
        WHERE LOWER(username) = LOWER($1) AND deleted_at IS NULL`,
       [username]
@@ -102,8 +102,8 @@ export async function POST(req: Request) {
       user: {
         id: user.id,
         username: user.username,
-        founderBadgeNumber: user.founder_badge_number,
-        sparkScore: user.post_sparks + user.comment_sparks,
+        founderBadgeNumber: user.founder_number,
+        glowScore: user.post_glow + user.comment_glow,
         createdAt: user.created_at,
       },
       token,

@@ -14,8 +14,6 @@ export async function GET(req: Request) {
       );
     }
 
-    // Migration 009 renames post_sparks→post_glow, comment_sparks→comment_glow.
-    // Use COALESCE to handle both pre- and post-migration column names gracefully.
     const user = await queryOne<{
       id: string;
       username: string;
@@ -24,11 +22,7 @@ export async function GET(req: Request) {
       comment_glow: number;
       created_at: string;
     }>(
-      `SELECT id, username,
-              COALESCE(founder_number, founder_badge_number) as founder_number,
-              COALESCE(post_glow, post_sparks) as post_glow,
-              COALESCE(comment_glow, comment_sparks) as comment_glow,
-              created_at
+      `SELECT id, username, founder_number, post_glow, comment_glow, created_at
        FROM users
        WHERE id = $1 AND deleted_at IS NULL AND is_banned = false`,
       [auth.userId]
@@ -48,7 +42,6 @@ export async function GET(req: Request) {
         username: user.username,
         founderBadgeNumber: user.founder_number,
         glow,
-        sparkScore: glow, // backward compat during redesign
         createdAt: user.created_at,
       },
     });
