@@ -5,11 +5,19 @@ import {
   markRefunded,
   removeFromActive,
 } from "@/lib/services/cosmetics.service";
+import {
+  recordTip,
+  awardSupporterBadge,
+  awardRecurringSupporterBadge,
+  revokeRecurringSupporterBadge,
+  findUserBySubscriptionId,
+  notifyTipReceived,
+} from "@/lib/services/tips.service";
 
 /**
  * POST /api/webhooks/stripe
  * Stripe webhook handler.
- * Verifies signature, processes checkout.session.completed and charge.refunded.
+ * Handles cosmetics purchases, refunds, and tip jar events.
  * Always returns 200 to acknowledge receipt.
  */
 export async function POST(req: Request) {
@@ -41,23 +49,56 @@ export async function POST(req: Request) {
       case "checkout.session.completed": {
         const session = event.data.object;
         const userId = session.metadata?.user_id;
-        const cosmeticId = session.metadata?.cosmetic_id;
+        const metaType = session.metadata?.type;
 
-        if (!userId || !cosmeticId) {
-          console.error("Webhook missing metadata:", { userId, cosmeticId });
+        // ── Tip checkout (one-time) ──
+        if (metaType === "tip" && userId) {
+          const amountTotal = session.amount_total ?? 0;
+          let paymentIntentId = "unknown";
+          if (typeof session.payment_intent === "string") {
+            paymentIntentId = session.payment_intent;
+          }
+
+          const recurring = session.metadata?.recurring === "true";
+          const message = session.metadata?.message ?? null;
+
+          if (!recurring) {
+            // One-time tip completed
+            await recordTip(
+              userId,
+              amountTotal,
+              paymentIntentId,
+              false,
+              null,
+              message
+            );
+            await awardSupporterBadge(userId);
+            await notifyTipReceived(userId, amountTotal, false);
+            console.log(
+              `[stripe-webhook] One-time tip recorded: user=${userId} amount=${amountTotal} payment=${paymentIntentId}`
+            );
+          }
+          // Recurring tip checkout creates a subscription — first payment
+          // handled by invoice.paid below
           break;
         }
 
-        // Extract payment intent ID
+        // ── Cosmetic purchase ──
+        const cosmeticId = session.metadata?.cosmetic_id;
+        if (!userId || !cosmeticId) {
+          console.error("Webhook missing metadata:", {
+            userId,
+            cosmeticId,
+          });
+          break;
+        }
+
         let paymentIntentId: string | null = null;
         if (typeof session.payment_intent === "string") {
           paymentIntentId = session.payment_intent;
         }
 
-        // Get amount paid from session
         const amountTotal = session.amount_total ?? 0;
-
-        // Record purchase in DB
         await recordPurchase(userId, cosmeticId, amountTotal, paymentIntentId);
 
         console.log(
@@ -66,25 +107,99 @@ export async function POST(req: Request) {
         break;
       }
 
+      // ── Recurring tip: invoice paid (first + subsequent months) ──
+      case "invoice.paid": {
+        // Stripe v20 types are narrow — cast to access invoice fields
+        const invoice = event.data.object as unknown as Record<string, unknown>;
+        const subscriptionId =
+          typeof invoice.subscription === "string"
+            ? invoice.subscription
+            : null;
+
+        if (!subscriptionId) break;
+
+        // Get metadata from subscription (Stripe propagates it)
+        const subDetails = invoice.subscription_details as
+          | { metadata?: Record<string, string> }
+          | undefined;
+        const subMeta = subDetails?.metadata;
+        const userId = subMeta?.user_id;
+
+        if (!userId || subMeta?.type !== "tip") break;
+
+        const amountPaid = (invoice.amount_paid as number) ?? 0;
+        const paymentIntentId =
+          typeof invoice.payment_intent === "string"
+            ? invoice.payment_intent
+            : `inv_${invoice.id}`;
+        const message = subMeta?.message ?? null;
+
+        await recordTip(
+          userId,
+          amountPaid,
+          paymentIntentId,
+          true,
+          subscriptionId,
+          message
+        );
+        await awardSupporterBadge(userId);
+        await awardRecurringSupporterBadge(userId);
+        await notifyTipReceived(userId, amountPaid, true);
+
+        console.log(
+          `[stripe-webhook] Recurring tip recorded: user=${userId} amount=${amountPaid} sub=${subscriptionId}`
+        );
+        break;
+      }
+
+      // ── Subscription cancelled ──
+      case "customer.subscription.deleted": {
+        const subscription = event.data.object;
+        const subscriptionId = subscription.id;
+
+        const userId = await findUserBySubscriptionId(subscriptionId);
+        if (userId) {
+          await revokeRecurringSupporterBadge(userId);
+          console.log(
+            `[stripe-webhook] Subscription deleted: user=${userId} sub=${subscriptionId}`
+          );
+        }
+        break;
+      }
+
+      // ── Payment failed on recurring tip ──
+      case "invoice.payment_failed": {
+        const invoice = event.data.object as unknown as Record<string, unknown>;
+        const subscriptionId =
+          typeof invoice.subscription === "string"
+            ? invoice.subscription
+            : null;
+        console.warn(
+          `[stripe-webhook] Payment failed: sub=${subscriptionId} invoice=${invoice.id}. Stripe will retry.`
+        );
+        break;
+      }
+
       case "charge.refunded": {
         const charge = event.data.object;
-        const paymentIntentId =
+        const chargePaymentIntentId =
           typeof charge.payment_intent === "string"
             ? charge.payment_intent
             : null;
 
-        if (!paymentIntentId) {
+        if (!chargePaymentIntentId) {
           console.error("Webhook charge.refunded missing payment_intent");
           break;
         }
 
-        // Find the user_cosmetics record by stripe_payment_id and mark refunded
-        // We need to look up by payment ID since charge.refunded doesn't have our metadata
         const { queryOne } = await import("@/lib/db");
-        const record = await queryOne<{ user_id: string; cosmetic_id: string }>(
+        const record = await queryOne<{
+          user_id: string;
+          cosmetic_id: string;
+        }>(
           `SELECT user_id, cosmetic_id FROM user_cosmetics
            WHERE stripe_payment_id = $1 AND refunded = FALSE`,
-          [paymentIntentId]
+          [chargePaymentIntentId]
         );
 
         if (record) {
@@ -95,14 +210,13 @@ export async function POST(req: Request) {
           );
         } else {
           console.warn(
-            `[stripe-webhook] No matching purchase for payment_intent=${paymentIntentId}`
+            `[stripe-webhook] No matching purchase for payment_intent=${chargePaymentIntentId}`
           );
         }
         break;
       }
 
       default:
-        // Unhandled event type — log but don't fail
         console.log(`[stripe-webhook] Unhandled event type: ${event.type}`);
     }
 

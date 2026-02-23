@@ -74,6 +74,122 @@ export async function createCheckoutSession(
   return session.url;
 }
 
+// ─── Create Tip Checkout Session ─────────────────────────────
+
+export interface TipCheckoutParams {
+  userId: string;
+  amountCents: number;
+  recurring: boolean;
+  message: string | null;
+}
+
+export async function createTipCheckoutSession(
+  params: TipCheckoutParams
+): Promise<string> {
+  const stripe = getStripe();
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+
+  const metadata: Record<string, string> = {
+    user_id: params.userId,
+    type: "tip",
+    recurring: String(params.recurring),
+  };
+  if (params.message) {
+    metadata.message = params.message.slice(0, 500);
+  }
+
+  if (params.recurring) {
+    // Subscription mode for recurring tips
+    const session = await stripe.checkout.sessions.create({
+      mode: "subscription",
+      payment_method_types: ["card"],
+      line_items: [
+        {
+          price_data: {
+            currency: "usd",
+            product_data: {
+              name: "Monthly Tip — fuega.ai",
+            },
+            unit_amount: params.amountCents,
+            recurring: { interval: "month" },
+          },
+          quantity: 1,
+        },
+      ],
+      metadata,
+      subscription_data: {
+        metadata,
+      },
+      success_url: `${appUrl}/supporters?thanks=recurring`,
+      cancel_url: `${appUrl}/supporters`,
+    });
+
+    if (!session.url) {
+      throw new Error("Failed to create tip checkout session URL");
+    }
+    return session.url;
+  }
+
+  // One-time payment mode
+  const session = await stripe.checkout.sessions.create({
+    mode: "payment",
+    payment_method_types: ["card"],
+    line_items: [
+      {
+        price_data: {
+          currency: "usd",
+          product_data: {
+            name: "Tip — fuega.ai",
+          },
+          unit_amount: params.amountCents,
+        },
+        quantity: 1,
+      },
+    ],
+    metadata,
+    success_url: `${appUrl}/supporters?thanks=one-time`,
+    cancel_url: `${appUrl}/supporters`,
+  });
+
+  if (!session.url) {
+    throw new Error("Failed to create tip checkout session URL");
+  }
+  return session.url;
+}
+
+// ─── Cancel Stripe Subscription ─────────────────────────────
+
+export async function cancelStripeSubscription(
+  subscriptionId: string
+): Promise<void> {
+  const stripe = getStripe();
+  await stripe.subscriptions.update(subscriptionId, {
+    cancel_at_period_end: true,
+  });
+}
+
+// ─── Get Stripe Subscription ────────────────────────────────
+
+export async function getStripeSubscription(
+  subscriptionId: string
+): Promise<{ status: string; current_period_end: number } | null> {
+  const stripe = getStripe();
+  try {
+    const sub = await stripe.subscriptions.retrieve(subscriptionId);
+    // Stripe v20 returns Response<Subscription> — access data properties
+    const subData = sub as unknown as {
+      status: string;
+      current_period_end: number;
+    };
+    return {
+      status: subData.status,
+      current_period_end: subData.current_period_end,
+    };
+  } catch {
+    return null;
+  }
+}
+
 // ─── Create Refund ──────────────────────────────────────────
 
 export async function createRefund(
