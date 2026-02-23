@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { FlameLogo } from "@/components/fuega/flame-logo";
 import { useAuth } from "@/lib/contexts/auth-context";
+import { EmberParticles } from "@/components/fuega/ember-particles";
 import { cn } from "@/lib/utils";
 
 function getPasswordStrength(password: string): {
@@ -79,7 +80,8 @@ export default function SignupPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4 py-12">
+    <div className="relative flex min-h-screen items-center justify-center bg-background px-4 py-12 overflow-hidden">
+      <EmberParticles count={10} />
       <div className="w-full max-w-sm">
         <div className="text-center">
           <Link href="/">

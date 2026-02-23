@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { FlameLogo } from "@/components/fuega/flame-logo";
 import { useAuth } from "@/lib/contexts/auth-context";
+import { EmberParticles } from "@/components/fuega/ember-particles";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -39,7 +40,8 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
+    <div className="relative flex min-h-screen items-center justify-center bg-background px-4 overflow-hidden">
+      <EmberParticles count={8} />
       <div className="w-full max-w-sm">
         <div className="text-center">
           <Link href="/">
