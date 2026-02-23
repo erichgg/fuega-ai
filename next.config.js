@@ -1,22 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   poweredByHeader: false,
-  // Prevent jsdom (used by isomorphic-dompurify for SSR HTML sanitization)
-  // from being bundled by webpack — it must run as a native Node.js require.
-  serverExternalPackages: ["isomorphic-dompurify", "jsdom"],
-  webpack(config, { isServer }) {
-    if (isServer) {
-      // Ensure jsdom and its CSS file lookups resolve correctly at runtime
-      // by keeping it as a Node.js external rather than bundling it.
-      const existing = config.externals ?? [];
-      config.externals = [
-        ...(Array.isArray(existing) ? existing : [existing]),
-        "isomorphic-dompurify",
-        "jsdom",
-      ];
-    }
-    return config;
-  },
   async headers() {
     return [
       {
