@@ -7,7 +7,8 @@
 export type FeatureFlag =
   | "ENABLE_BADGE_DISTRIBUTION"
   | "ENABLE_TIP_JAR"
-  | "ENABLE_NOTIFICATIONS";
+  | "ENABLE_NOTIFICATIONS"
+  | "ENABLE_COSMETICS_SHOP";
 
 /**
  * Check if a feature flag is enabled.
@@ -26,6 +27,7 @@ export function getAllFeatureFlags(): Record<FeatureFlag, boolean> {
     "ENABLE_BADGE_DISTRIBUTION",
     "ENABLE_TIP_JAR",
     "ENABLE_NOTIFICATIONS",
+    "ENABLE_COSMETICS_SHOP",
   ];
 
   return flags.reduce(

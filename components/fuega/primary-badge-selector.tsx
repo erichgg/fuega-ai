@@ -68,7 +68,7 @@ export function PrimaryBadgeSelector({
           </DialogTitle>
           <DialogDescription className="text-ash text-xs">
             Your primary badge is displayed next to your username across{" "}
-            <span className="text-lava-hot font-semibold">fuega</span>.
+            <span className="text-flame-400 font-semibold">fuega</span>.
           </DialogDescription>
         </DialogHeader>
 

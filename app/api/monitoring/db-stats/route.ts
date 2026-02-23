@@ -5,15 +5,16 @@ export const dynamic = "force-dynamic";
 /**
  * GET /api/monitoring/db-stats
  * Returns database statistics (connections, sizes, slow queries).
- * Protected by MONITORING_SECRET in production.
+ * Protected by MONITORING_SECRET — always required.
  */
 export async function GET(req: Request) {
   const secret = process.env.MONITORING_SECRET;
-  if (secret) {
-    const auth = req.headers.get("authorization");
-    if (auth !== `Bearer ${secret}`) {
-      return Response.json({ error: "Unauthorized", code: "UNAUTHORIZED" }, { status: 401 });
-    }
+  if (!secret) {
+    return Response.json({ error: "Monitoring not configured", code: "NOT_CONFIGURED" }, { status: 503 });
+  }
+  const auth = req.headers.get("authorization");
+  if (auth !== `Bearer ${secret}`) {
+    return Response.json({ error: "Unauthorized", code: "UNAUTHORIZED" }, { status: 401 });
   }
 
   try {

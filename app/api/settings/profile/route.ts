@@ -1,7 +1,10 @@
 import { NextResponse } from "next/server";
 import { authenticate } from "@/lib/auth/jwt";
+import { checkGeneralRateLimit } from "@/lib/auth/rate-limit";
 import { queryOne } from "@/lib/db";
 import { updateProfileSchema } from "@/lib/auth/profile-validation";
+
+export const dynamic = 'force-dynamic';
 
 interface ProfileRow {
   display_name: string | null;
@@ -75,6 +78,14 @@ export async function PUT(req: Request) {
       return NextResponse.json(
         { error: "Not authenticated", code: "UNAUTHORIZED" },
         { status: 401 }
+      );
+    }
+
+    const rateLimit = await checkGeneralRateLimit(auth.userId);
+    if (!rateLimit.allowed) {
+      return NextResponse.json(
+        { error: "Too many requests. Try again later.", code: "RATE_LIMITED" },
+        { status: 429, headers: { "Retry-After": String(rateLimit.retryAfterSeconds) } }
       );
     }
 

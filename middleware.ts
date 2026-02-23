@@ -18,23 +18,35 @@ const CSRF_EXEMPT = [
   "/api/auth/logout",
 ];
 
+function withSecurityHeaders(response: NextResponse): NextResponse {
+  response.headers.set('X-Frame-Options', 'DENY');
+  response.headers.set('X-Content-Type-Options', 'nosniff');
+  response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
+  response.headers.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+  response.headers.set('X-XSS-Protection', '1; mode=block');
+  if (process.env.NODE_ENV === 'production') {
+    response.headers.set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+  }
+  return response;
+}
+
 export function middleware(req: NextRequest) {
   const method = req.method.toUpperCase();
 
   // Safe methods don't need CSRF
   if (["GET", "HEAD", "OPTIONS"].includes(method)) {
-    return NextResponse.next();
+    return withSecurityHeaders(NextResponse.next());
   }
 
   // Only apply to API routes
   const pathname = req.nextUrl.pathname;
   if (!pathname.startsWith("/api/")) {
-    return NextResponse.next();
+    return withSecurityHeaders(NextResponse.next());
   }
 
   // Skip CSRF for exempt routes
   if (CSRF_EXEMPT.some((path) => pathname.startsWith(path))) {
-    return NextResponse.next();
+    return withSecurityHeaders(NextResponse.next());
   }
 
   // Validate CSRF token
@@ -68,7 +80,7 @@ export function middleware(req: NextRequest) {
     );
   }
 
-  return NextResponse.next();
+  return withSecurityHeaders(NextResponse.next());
 }
 
 export const config = {

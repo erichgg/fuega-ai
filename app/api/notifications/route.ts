@@ -3,6 +3,8 @@ import { authenticate } from "@/lib/auth/jwt";
 import { isFeatureEnabled } from "@/lib/feature-flags";
 import { listNotifications, type NotificationType } from "@/lib/services/notifications.service";
 
+export const dynamic = "force-dynamic";
+
 const VALID_TYPES: NotificationType[] = [
   "reply_post", "reply_comment", "spark", "mention",
   "campfire_update", "governance", "badge_earned",

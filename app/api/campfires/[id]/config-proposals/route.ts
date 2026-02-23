@@ -1,11 +1,15 @@
 import { NextResponse } from "next/server";
+import { z } from "zod";
 import { authenticate } from "@/lib/auth/jwt";
+import { checkGeneralRateLimit } from "@/lib/auth/rate-limit";
 import { query, queryOne, queryAll } from "@/lib/db";
 import {
   DEFAULT_AI_CONFIG,
   validateAndMergeConfig,
   type CampfireAIConfig,
 } from "@/lib/ai/structured-config";
+
+export const dynamic = "force-dynamic";
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -36,6 +40,18 @@ interface ProposalRow {
   voting_ends_at: string;
   created_at: string;
 }
+
+const configProposalSchema = z.object({
+  changes: z
+    .record(z.string(), z.unknown())
+    .refine((val) => Object.keys(val).length > 0, {
+      message: "At least one config change is required",
+    }),
+  rationale: z
+    .string()
+    .min(10, "Rationale must be at least 10 characters")
+    .max(2000, "Rationale must be at most 2000 characters"),
+});
 
 /**
  * GET /api/campfires/:id/config-proposals
@@ -94,6 +110,14 @@ export async function POST(req: Request, { params }: RouteParams) {
       );
     }
 
+    const rateLimit = await checkGeneralRateLimit(user.userId);
+    if (!rateLimit.allowed) {
+      return NextResponse.json(
+        { error: "Too many requests. Try again later.", code: "RATE_LIMITED" },
+        { status: 429, headers: { "Retry-After": String(rateLimit.retryAfterSeconds) } }
+      );
+    }
+
     const { id } = await params;
 
     // Check campfire exists and get current config
@@ -149,30 +173,20 @@ export async function POST(req: Request, { params }: RouteParams) {
       );
     }
 
-    // Parse and validate body
+    // Parse and validate body with Zod
     const body = await req.json();
-    const { changes, rationale } = body;
-
-    if (!changes || typeof changes !== "object" || Object.keys(changes).length === 0) {
+    const parsed = configProposalSchema.safeParse(body);
+    if (!parsed.success) {
       return NextResponse.json(
-        { error: "At least one config change is required", code: "VALIDATION_ERROR" },
+        {
+          error: parsed.error.errors[0]?.message ?? "Invalid input",
+          code: "VALIDATION_ERROR",
+        },
         { status: 400 }
       );
     }
 
-    if (!rationale || typeof rationale !== "string" || rationale.length < 10) {
-      return NextResponse.json(
-        { error: "Rationale must be at least 10 characters", code: "VALIDATION_ERROR" },
-        { status: 400 }
-      );
-    }
-
-    if (rationale.length > 2000) {
-      return NextResponse.json(
-        { error: "Rationale must be at most 2000 characters", code: "VALIDATION_ERROR" },
-        { status: 400 }
-      );
-    }
+    const { changes, rationale } = parsed.data;
 
     // Validate changes against guardrails
     const currentConfig = campfire.ai_config ?? DEFAULT_AI_CONFIG;

@@ -1,11 +1,34 @@
 import { NextResponse } from "next/server";
+import { z } from "zod";
 import { authenticate } from "@/lib/auth/jwt";
+import { checkGeneralRateLimit } from "@/lib/auth/rate-limit";
 import { isFeatureEnabled } from "@/lib/feature-flags";
 import {
   getPreferences,
   updatePreferences,
-  type NotificationPreferences,
 } from "@/lib/services/notifications.service";
+
+export const dynamic = "force-dynamic";
+
+const notificationPreferencesSchema = z.object({
+  reply_post: z.boolean().optional(),
+  reply_comment: z.boolean().optional(),
+  spark: z.boolean().optional(),
+  mention: z.boolean().optional(),
+  campfire_update: z.boolean().optional(),
+  governance: z.boolean().optional(),
+  badge_earned: z.boolean().optional(),
+  tip_received: z.boolean().optional(),
+  referral: z.boolean().optional(),
+  push_enabled: z.boolean().optional(),
+  push_reply_post: z.boolean().optional(),
+  push_reply_comment: z.boolean().optional(),
+  push_spark: z.boolean().optional(),
+  push_mention: z.boolean().optional(),
+  push_governance: z.boolean().optional(),
+  push_badge_earned: z.boolean().optional(),
+  push_referral: z.boolean().optional(),
+}).strict();
 
 /**
  * GET /api/notifications/preferences
@@ -68,19 +91,27 @@ export async function PUT(req: Request) {
       );
     }
 
-    const body = await req.json() as Partial<NotificationPreferences>;
-
-    // Validate: all values must be booleans
-    for (const [key, value] of Object.entries(body)) {
-      if (typeof value !== "boolean") {
-        return NextResponse.json(
-          { error: `Invalid value for '${key}': must be boolean`, code: "INVALID_INPUT" },
-          { status: 400 }
-        );
-      }
+    const rateLimit = await checkGeneralRateLimit(user.userId);
+    if (!rateLimit.allowed) {
+      return NextResponse.json(
+        { error: "Too many requests. Try again later.", code: "RATE_LIMITED" },
+        { status: 429, headers: { "Retry-After": String(rateLimit.retryAfterSeconds) } }
+      );
     }
 
-    const preferences = await updatePreferences(user.userId, body);
+    const body = await req.json();
+    const parsed = notificationPreferencesSchema.safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json(
+        {
+          error: parsed.error.errors[0]?.message ?? "Invalid input",
+          code: "INVALID_INPUT",
+        },
+        { status: 400 }
+      );
+    }
+
+    const preferences = await updatePreferences(user.userId, parsed.data);
     return NextResponse.json({ preferences });
   } catch (err) {
     if (err instanceof Error && "code" in err) {

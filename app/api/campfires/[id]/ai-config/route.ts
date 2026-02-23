@@ -8,6 +8,8 @@ import {
   type CampfireAIConfig,
 } from "@/lib/ai/structured-config";
 
+export const dynamic = "force-dynamic";
+
 interface RouteParams {
   params: Promise<{ id: string }>;
 }

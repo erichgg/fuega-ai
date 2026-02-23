@@ -3,6 +3,9 @@ import { authenticate, clearAuthCookie } from "@/lib/auth/jwt";
 import { queryOne } from "@/lib/db";
 import { changePasswordSchema } from "@/lib/auth/profile-validation";
 import { hashPassword, verifyPassword } from "@/lib/auth/password";
+import { checkPasswordChangeRateLimit, checkGeneralRateLimit } from "@/lib/auth/rate-limit";
+
+export const dynamic = "force-dynamic";
 
 /**
  * PUT /api/settings/account
@@ -15,6 +18,14 @@ export async function PUT(req: Request) {
       return NextResponse.json(
         { error: "Not authenticated", code: "UNAUTHORIZED" },
         { status: 401 }
+      );
+    }
+
+    const rateLimit = await checkPasswordChangeRateLimit(auth.userId);
+    if (!rateLimit.allowed) {
+      return NextResponse.json(
+        { error: "Too many password change attempts. Try again later.", code: "RATE_LIMITED" },
+        { status: 429, headers: { "Retry-After": String(rateLimit.retryAfterSeconds) } }
       );
     }
 
@@ -76,6 +87,14 @@ export async function DELETE(req: Request) {
       return NextResponse.json(
         { error: "Not authenticated", code: "UNAUTHORIZED" },
         { status: 401 }
+      );
+    }
+
+    const rateLimit = await checkGeneralRateLimit(auth.userId);
+    if (!rateLimit.allowed) {
+      return NextResponse.json(
+        { error: "Too many requests. Try again later.", code: "RATE_LIMITED" },
+        { status: 429, headers: { "Retry-After": String(rateLimit.retryAfterSeconds) } }
       );
     }
 

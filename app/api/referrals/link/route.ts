@@ -3,6 +3,8 @@ import { authenticate } from "@/lib/auth/jwt";
 import { getReferralLink } from "@/lib/services/referrals.service";
 import { ServiceError } from "@/lib/services/posts.service";
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(req: Request) {
   try {
     const user = await authenticate(req);
@@ -13,9 +15,9 @@ export async function GET(req: Request) {
       );
     }
 
-    const link = await getReferralLink(user.userId);
+    const { referral_code, referral_link } = await getReferralLink(user.userId);
 
-    return NextResponse.json({ referral_link: link });
+    return NextResponse.json({ referral_code, referral_link });
   } catch (err) {
     if (err instanceof ServiceError) {
       return NextResponse.json(

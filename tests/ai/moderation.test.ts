@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import {
-  buildCommunityPrompt,
+  buildCampfirePrompt as buildCommunityPrompt,
   buildCategoryPrompt,
   buildPlatformPrompt,
   PLATFORM_TOS,
@@ -10,7 +10,7 @@ import {
   runModerationPipeline,
   callClaudeForModeration,
   logModerationDecision,
-  type CommunityContext,
+  type CampfireContext as CommunityContext,
   type ModerationDB,
 } from "@/lib/ai/moderation.service";
 import type { ModerationContent } from "@/lib/ai/prompt-builder";
@@ -35,8 +35,8 @@ const mockCommunity: CommunityContext = {
 
 const mockCommunityWithCategory: CommunityContext = {
   ...mockCommunity,
-  category_rules: "All STEM communities must maintain academic integrity.",
-  category_prompt_version: 2,
+  platform_rules: "All STEM communities must maintain academic integrity.",
+  platform_prompt_version: 2,
 };
 
 const normalContent: ModerationContent = {
@@ -194,7 +194,7 @@ describe("moderation.service", () => {
       );
       expect(result.final_decision).toBe("approved");
       expect(result.tier_decisions).toHaveLength(1);
-      expect(result.tier_decisions[0].ai_model).toBe("basic-safety-filter");
+      expect(result.tier_decisions[0]!.ai_model).toBe("basic-safety-filter");
     });
 
     it("removes extreme content via basic safety filter", async () => {
@@ -345,8 +345,8 @@ describe("moderation.service", () => {
       const result = await runModerationPipeline(client as any, normalContent, mockCommunity);
       expect(result.final_decision).toBe("approved");
       expect(result.tier_decisions).toHaveLength(2);
-      expect(result.tier_decisions[0].agent_level).toBe("platform");
-      expect(result.tier_decisions[1].agent_level).toBe("community");
+      expect(result.tier_decisions[0]!.agent_level).toBe("platform");
+      expect(result.tier_decisions[1]!.agent_level).toBe("community");
       expect(result.stopped_at_tier).toBeNull();
       expect(client.messages.create).toHaveBeenCalledTimes(2);
     });
@@ -361,9 +361,9 @@ describe("moderation.service", () => {
       const result = await runModerationPipeline(client as any, normalContent, mockCommunityWithCategory);
       expect(result.final_decision).toBe("approved");
       expect(result.tier_decisions).toHaveLength(3);
-      expect(result.tier_decisions[0].agent_level).toBe("platform");
-      expect(result.tier_decisions[1].agent_level).toBe("category");
-      expect(result.tier_decisions[2].agent_level).toBe("community");
+      expect(result.tier_decisions[0]!.agent_level).toBe("platform");
+      expect(result.tier_decisions[1]!.agent_level).toBe("category");
+      expect(result.tier_decisions[2]!.agent_level).toBe("community");
     });
 
     it("stops at platform tier if platform removes", async () => {
@@ -433,8 +433,8 @@ describe("moderation.service", () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const result = await runModerationPipeline(client as any, normalContent, mockCommunity);
       // Platform tier fails, returns flagged
-      expect(result.tier_decisions[0].decision).toBe("flagged");
-      expect(result.tier_decisions[0].reasoning).toContain("API rate limited");
+      expect(result.tier_decisions[0]!.decision).toBe("flagged");
+      expect(result.tier_decisions[0]!.reasoning).toContain("API rate limited");
     });
 
     it("tracks processing time for each tier", async () => {
@@ -480,7 +480,7 @@ describe("moderation.service", () => {
 
       expect(logId).toBe("log-uuid-123");
       expect(mockDb.query).toHaveBeenCalledTimes(1);
-      const [sql, params] = (mockDb.query as ReturnType<typeof vi.fn>).mock.calls[0];
+      const [sql, params] = (mockDb.query as ReturnType<typeof vi.fn>).mock.calls[0]!;
       expect(sql).toContain("INSERT INTO moderation_log");
       expect(params).toContain("post");
       expect(params).toContain("approved");
@@ -513,7 +513,7 @@ describe("moderation.service", () => {
         }
       );
 
-      const [, params] = (mockDb.query as ReturnType<typeof vi.fn>).mock.calls[0];
+      const [, params] = (mockDb.query as ReturnType<typeof vi.fn>).mock.calls[0]!;
       expect(params).toContain("removed");
       expect(params).toContain("platform");
       expect(params).toContain(true); // injection_detected
@@ -544,7 +544,7 @@ describe("moderation.service", () => {
 
       // Should timeout and return flagged
       expect(result.final_decision).toBe("flagged");
-      expect(result.tier_decisions[0].reasoning).toContain("error");
+      expect(result.tier_decisions[0]!.reasoning).toContain("error");
     }, 10_000);
   });
 });

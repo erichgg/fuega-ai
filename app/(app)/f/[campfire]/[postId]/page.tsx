@@ -27,7 +27,7 @@ function getMockPost(campfire: string, postId: string) {
   return {
     id: postId,
     title: "Welcome to fuega.ai — the future of campfire discussion",
-    body: `We're building something different here. A platform where AI moderation is transparent, campfires govern themselves, and privacy is a right.\n\nEvery moderation decision is public. Every campfire writes its own AI moderator prompt. Every voice matters.\n\nHere's what makes fuega different:\n\n1. **Transparent AI moderation** — Every decision logged publicly with reasoning\n2. **Campfire governance** — You write and vote on moderation rules\n3. **True anonymity** — No email required, IPs hashed and deleted\n4. **Spark & Douse** — Vote on quality, not popularity\n\nJoin the conversation. Shape the rules. Build something better.`,
+    body: `We're building something different here. A platform where AI moderation is transparent, campfires govern themselves, and privacy is a right.\n\nEvery moderation decision is public. Every campfire sets its own governance variables. Every voice matters.\n\nHere's what makes fuega different:\n\n1. **Transparent AI moderation** — Every decision logged publicly with reasoning\n2. **Campfire governance** — You write and vote on moderation rules\n3. **True anonymity** — No email required, IPs hashed and deleted\n4. **Spark & Douse** — Vote on quality, not popularity\n\nJoin the conversation. Shape the rules. Build something better.`,
     author: "fuega_team",
     campfire,
     sparkCount: 247,

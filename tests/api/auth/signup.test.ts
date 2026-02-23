@@ -47,7 +47,7 @@ describe("signup integration", () => {
     const countResult = await db.query<{ count: string }>(
       "SELECT COUNT(*) as count FROM users WHERE deleted_at IS NULL AND id != '00000000-0000-0000-0000-000000000001'"
     );
-    const existingCount = parseInt(countResult.rows[0].count, 10);
+    const existingCount = parseInt(countResult.rows[0]!.count, 10);
     const founderNumber = existingCount < 5000 ? existingCount + 1 : null;
 
     // Insert user
@@ -59,7 +59,7 @@ describe("signup integration", () => {
     );
 
     expect(result.rows).toHaveLength(1);
-    const user = result.rows[0] as {
+    const user = result.rows[0]! as {
       id: string;
       username: string;
       founder_badge_number: number | null;
@@ -73,7 +73,7 @@ describe("signup integration", () => {
       "SELECT password_hash FROM users WHERE id = $1",
       [user.id]
     );
-    const valid = await verifyPassword("securepass123", dbUser.rows[0].password_hash);
+    const valid = await verifyPassword("securepass123", dbUser.rows[0]!.password_hash);
     expect(valid).toBe(true);
   });
 
@@ -114,9 +114,9 @@ describe("signup integration", () => {
       ["signup_test_ip"]
     );
 
-    expect(result.rows[0].ip_address_hash).toBe(ipHash);
-    expect(result.rows[0].ip_address_hash).toHaveLength(64);
-    expect(result.rows[0].ip_address_hash).not.toContain("192");
+    expect(result.rows[0]!.ip_address_hash).toBe(ipHash);
+    expect(result.rows[0]!.ip_address_hash).toHaveLength(64);
+    expect(result.rows[0]!.ip_address_hash).not.toContain("192");
   });
 
   it("assigns sequential founder badges", async () => {
@@ -124,7 +124,7 @@ describe("signup integration", () => {
     const countBefore = await db.query<{ count: string }>(
       "SELECT COUNT(*) as count FROM users WHERE deleted_at IS NULL AND id != '00000000-0000-0000-0000-000000000001'"
     );
-    const before = parseInt(countBefore.rows[0].count, 10);
+    const before = parseInt(countBefore.rows[0]!.count, 10);
 
     const hash = await hashPassword("password123");
     await db.query(
@@ -136,7 +136,7 @@ describe("signup integration", () => {
       "SELECT founder_badge_number FROM users WHERE username = $1",
       ["signup_test_badge"]
     );
-    expect(result.rows[0].founder_badge_number).toBe(before + 1);
+    expect(result.rows[0]!.founder_badge_number).toBe(before + 1);
   });
 
   it("rejects invalid username format via schema", () => {

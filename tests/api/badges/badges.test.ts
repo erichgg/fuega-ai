@@ -54,17 +54,29 @@ vi.mock("@/lib/feature-flags", () => ({
   }),
 }));
 
-// Import after mocks
-const { listAllBadges, getBadgeById, getUserBadges, setPrimaryBadge, awardBadge } = await import(
-  "@/lib/services/badges.service"
-);
-const { checkAllBadges, checkBadgesAfterPost } = await import(
-  "@/lib/services/badge-eligibility"
-);
+// Import after mocks (lazy-loaded to avoid top-level await)
+type BadgesService = typeof import("@/lib/services/badges.service");
+type BadgeEligibility = typeof import("@/lib/services/badge-eligibility");
+let listAllBadges: BadgesService["listAllBadges"];
+let getBadgeById: BadgesService["getBadgeById"];
+let getUserBadges: BadgesService["getUserBadges"];
+let setPrimaryBadge: BadgesService["setPrimaryBadge"];
+let awardBadge: BadgesService["awardBadge"];
+let checkAllBadges: BadgeEligibility["checkAllBadges"];
+let checkBadgesAfterPost: BadgeEligibility["checkBadgesAfterPost"];
 
 describe("Badge System", () => {
   beforeAll(async () => {
     db = await getTestDb();
+    const badgesSvc = await import("@/lib/services/badges.service");
+    const eligibility = await import("@/lib/services/badge-eligibility");
+    listAllBadges = badgesSvc.listAllBadges;
+    getBadgeById = badgesSvc.getBadgeById;
+    getUserBadges = badgesSvc.getUserBadges;
+    setPrimaryBadge = badgesSvc.setPrimaryBadge;
+    awardBadge = badgesSvc.awardBadge;
+    checkAllBadges = eligibility.checkAllBadges;
+    checkBadgesAfterPost = eligibility.checkBadgesAfterPost;
   });
 
   afterAll(async () => {
@@ -227,7 +239,7 @@ describe("Badge System", () => {
         "SELECT primary_badge FROM users WHERE id = $1",
         [TEST_IDS.testUser1]
       );
-      expect(result.rows[0].primary_badge).toBe("first_post");
+      expect(result.rows[0]!.primary_badge).toBe("first_post");
 
       // Clean up
       await db.query(
@@ -313,8 +325,8 @@ describe("Badge System", () => {
       expect(badges.length).toBe(4);
 
       // Legendary should come first
-      expect(badges[0].rarity).toBe("legendary");
-      expect(badges[0].badge_id).toBe("v1_founder");
+      expect(badges[0]!.rarity).toBe("legendary");
+      expect(badges[0]!.badge_id).toBe("v1_founder");
 
       // Clean up
       await db.query(
@@ -359,7 +371,7 @@ describe("Badge System", () => {
         [TEST_IDS.testUser1]
       );
       expect(result.rows.length).toBe(1);
-      expect(result.rows[0].title).toContain("First Flame");
+      expect(result.rows[0]!.title).toContain("First Flame");
     });
 
     it("does NOT send notification when ENABLE_NOTIFICATIONS=false", async () => {
@@ -371,7 +383,7 @@ describe("Badge System", () => {
         "SELECT COUNT(*) as count FROM notifications WHERE user_id = $1 AND type = 'badge_earned'",
         [TEST_IDS.testUser1]
       );
-      expect(parseInt(result.rows[0].count, 10)).toBe(0);
+      expect(parseInt(result.rows[0]!.count, 10)).toBe(0);
     });
   });
 

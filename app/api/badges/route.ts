@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { listAllBadges } from "@/lib/services/badges.service";
 
+export const dynamic = 'force-dynamic';
+
 /**
  * GET /api/badges
  * List all 40 badge definitions. Public, no auth required.

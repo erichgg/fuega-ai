@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { queryOne } from "@/lib/db";
 
+export const dynamic = "force-dynamic";
+
 interface ProfileRow {
   id: string;
   username: string;

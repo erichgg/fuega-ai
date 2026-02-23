@@ -80,7 +80,7 @@ export function Header({ user, onMenuToggle, className }: HeaderProps) {
                       {user.username}
                     </div>
                     <div className="text-[10px] text-flame-400">
-                      {user.sparkScore} spark score
+                      {user.sparkScore} glow
                     </div>
                   </div>
                 </button>
@@ -97,7 +97,7 @@ export function Header({ user, onMenuToggle, className }: HeaderProps) {
                   Profile
                 </DropdownMenuItem>
                 <DropdownMenuItem className="text-ash-200 focus:bg-ash-800 focus:text-ash-100">
-                  My Communities
+                  My Campfires
                 </DropdownMenuItem>
                 <DropdownMenuItem className="text-ash-200 focus:bg-ash-800 focus:text-ash-100">
                   Settings

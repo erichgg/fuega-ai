@@ -37,8 +37,8 @@ function JoinContent() {
             </div>
             <p className="text-xs text-ash mb-6">
               You&apos;re already part of the{" "}
-              <span className="text-lava-hot font-semibold">fuega</span>{" "}
-              community.
+              <span className="text-flame-400 font-semibold">fuega</span>{" "}
+              campfire.
             </p>
             <Link
               href="/home"
@@ -65,7 +65,7 @@ function JoinContent() {
             <span className="w-3 h-3 bg-lava-mid" />
             <span className="w-3 h-3 bg-ash/40" />
             <span className="text-xs text-ash ml-2">
-              fuega.ai &mdash; invite
+              <span className="text-flame-400">fuega</span>.ai &mdash; invite
             </span>
           </div>
 
@@ -76,7 +76,7 @@ function JoinContent() {
 
             <h1 className="text-xl sm:text-2xl font-bold text-foreground mb-2 glow-text-subtle">
               You&apos;ve been invited to{" "}
-              <span className="text-lava-hot">fuega</span>
+              <span className="text-flame-400 font-semibold">fuega</span>
               <span className="text-ash">.ai</span>
             </h1>
 
@@ -111,7 +111,7 @@ function JoinContent() {
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="text-teal">&#x2713;</span>
-                  <span>Communities set their own rules via democratic governance</span>
+                  <span>Campfires set their own rules via democratic governance</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="text-teal">&#x2713;</span>
@@ -128,7 +128,7 @@ function JoinContent() {
 
         <p className="mt-4 text-xs text-smoke">
           <Link href="/" className="text-ash hover:text-lava-hot transition-colors">
-            Learn more about <span className="text-lava-hot font-semibold">fuega</span>
+            Learn more about <span className="text-flame-400 font-semibold">fuega</span>
           </Link>
         </p>
       </div>

@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { getUserBadges } from "@/lib/services/badges.service";
 import { ServiceError } from "@/lib/services/posts.service";
 
+export const dynamic = "force-dynamic";
+
 /**
  * GET /api/users/:id/badges
  * Get all badges earned by a user, sorted by rarity (legendary first).

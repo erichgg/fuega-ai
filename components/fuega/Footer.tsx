@@ -28,7 +28,7 @@ const footerSections = [
     ],
   },
   {
-    title: "Community",
+    title: "Campfire",
     links: [
       { href: "https://github.com/fuega", label: "GitHub" },
       { href: "/join", label: "Join" },
@@ -71,7 +71,7 @@ export function Footer() {
 
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-smoke">
           <div className="flex items-center gap-1">
-            <span className="text-lava-hot font-bold">fuega</span>
+            <span className="text-flame-400 font-bold">fuega</span>
             <span className="text-smoke">.</span>
             <span className="text-ash">ai</span>
             <span className="ml-2">

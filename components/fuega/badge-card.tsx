@@ -20,57 +20,64 @@ export type BadgeRarity = "common" | "uncommon" | "rare" | "epic" | "legendary";
 export const RARITY_CONFIG: Record<
   BadgeRarity,
   {
-    color: string;
+    /** Tailwind-palette hex used only where a raw color is unavoidable (box-shadow, CSS gradients). */
     hex: string;
     borderClass: string;
     bgClass: string;
+    /** Tailwind class for progress bar fill — mirrors bgClass without opacity modifier. */
+    progressClass: string;
     textClass: string;
     glowClass: string;
     label: string;
   }
 > = {
   common: {
-    color: "#A0A0A0",
-    hex: "#A0A0A0",
-    borderClass: "border-[#A0A0A0]/30",
-    bgClass: "bg-[#A0A0A0]/10",
-    textClass: "text-[#A0A0A0]",
+    // slate-400 → #94a3b8
+    hex: "#94a3b8",
+    borderClass: "border-slate-400/30",
+    bgClass: "bg-slate-400/10",
+    progressClass: "bg-slate-400",
+    textClass: "text-slate-400",
     glowClass: "",
     label: "Common",
   },
   uncommon: {
-    color: "#4ADE80",
-    hex: "#4ADE80",
-    borderClass: "border-[#4ADE80]/30",
-    bgClass: "bg-[#4ADE80]/10",
-    textClass: "text-[#4ADE80]",
+    // green-400 → #4ade80
+    hex: "#4ade80",
+    borderClass: "border-green-400/30",
+    bgClass: "bg-green-400/10",
+    progressClass: "bg-green-400",
+    textClass: "text-green-400",
     glowClass: "animate-pulse",
     label: "Uncommon",
   },
   rare: {
-    color: "#60A5FA",
-    hex: "#60A5FA",
-    borderClass: "border-[#60A5FA]/30",
-    bgClass: "bg-[#60A5FA]/10",
-    textClass: "text-[#60A5FA]",
+    // blue-400 → #60a5fa
+    hex: "#60a5fa",
+    borderClass: "border-blue-400/30",
+    bgClass: "bg-blue-400/10",
+    progressClass: "bg-blue-400",
+    textClass: "text-blue-400",
     glowClass: "badge-shimmer",
     label: "Rare",
   },
   epic: {
-    color: "#A855F7",
-    hex: "#A855F7",
-    borderClass: "border-[#A855F7]/30",
-    bgClass: "bg-[#A855F7]/10",
-    textClass: "text-[#A855F7]",
+    // purple-400 → #c084fc
+    hex: "#c084fc",
+    borderClass: "border-purple-400/30",
+    bgClass: "bg-purple-400/10",
+    progressClass: "bg-purple-400",
+    textClass: "text-purple-400",
     glowClass: "badge-radiance",
     label: "Epic",
   },
   legendary: {
-    color: "#F97316",
-    hex: "#F97316",
-    borderClass: "border-[#F97316]/30",
-    bgClass: "bg-[#F97316]/10",
-    textClass: "text-[#F97316]",
+    // orange-400 → #fb923c (closest Tailwind orange to flame)
+    hex: "#fb923c",
+    borderClass: "border-orange-400/30",
+    bgClass: "bg-orange-400/10",
+    progressClass: "bg-orange-400",
+    textClass: "text-orange-400",
     glowClass: "badge-fire-glow",
     label: "Legendary",
   },
@@ -217,10 +224,9 @@ export function BadgeCard({
         <div className="w-full mt-1">
           <div className="h-1 w-full bg-charcoal overflow-hidden">
             <div
-              className="h-full transition-all duration-500"
+              className={cn("h-full transition-all duration-500", config.progressClass)}
               style={{
                 width: `${Math.min(100, (progress.current / progress.target) * 100)}%`,
-                backgroundColor: config.hex,
               }}
             />
           </div>

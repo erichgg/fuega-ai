@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { authenticate } from "@/lib/auth/jwt";
+import { checkGeneralRateLimit } from "@/lib/auth/rate-limit";
 import {
   createProposalSchema,
   listProposalsSchema,
@@ -9,6 +10,8 @@ import {
   listProposals,
   GovernanceError,
 } from "@/lib/services/governance.service";
+
+export const dynamic = "force-dynamic";
 
 /**
  * GET /api/proposals?campfire_id=&status=&limit=&offset=
@@ -69,6 +72,14 @@ export async function POST(req: Request) {
       return NextResponse.json(
         { error: "Authentication required", code: "UNAUTHORIZED" },
         { status: 401 }
+      );
+    }
+
+    const rateLimit = await checkGeneralRateLimit(user.userId);
+    if (!rateLimit.allowed) {
+      return NextResponse.json(
+        { error: "Too many requests. Try again later.", code: "RATE_LIMITED" },
+        { status: 429, headers: { "Retry-After": String(rateLimit.retryAfterSeconds) } }
       );
     }
 

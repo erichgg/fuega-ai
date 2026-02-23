@@ -62,11 +62,12 @@ export function BadgeProgress({
         {/* Progress bar */}
         <div className="h-1.5 w-full bg-charcoal mt-1.5 overflow-hidden">
           <div
-            className="h-full transition-all duration-700 ease-out"
-            style={{
-              width: `${pct}%`,
-              backgroundColor: isComplete ? config.hex : `${config.hex}99`,
-            }}
+            className={cn(
+              "h-full transition-all duration-700 ease-out",
+              config.progressClass,
+              !isComplete && "opacity-60",
+            )}
+            style={{ width: `${pct}%` }}
           />
         </div>
 

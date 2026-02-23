@@ -62,7 +62,7 @@ const MOCK_POSTS: Post[] = [
   },
   {
     id: "4",
-    title: "Why spark/douse voting is better than upvote/downvote",
+    title: "Why spark/douse voting is better than traditional voting",
     body: "The spark/douse system isn't just a rename — it fundamentally changes the incentive structure. Here's my analysis of why it leads to better discussions.",
     author: "game_theory_nerd",
     campfire: "meta",

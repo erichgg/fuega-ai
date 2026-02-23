@@ -59,9 +59,8 @@ export function BadgeNotification({
       )}
     >
       <div
-        className="bg-coal border p-4 relative overflow-hidden"
+        className={cn("bg-coal border p-4 relative overflow-hidden", config.borderClass)}
         style={{
-          borderColor: `${config.hex}40`,
           boxShadow:
             rarity === "legendary"
               ? `0 0 30px ${config.hex}30, 0 0 60px ${config.hex}15`
@@ -95,11 +94,6 @@ export function BadgeNotification({
               rarity === "legendary" && "badge-fire-glow",
               rarity === "epic" && "badge-radiance",
             )}
-            style={
-              rarity === "legendary"
-                ? { boxShadow: `0 0 12px ${config.hex}40` }
-                : undefined
-            }
           >
             <span className="text-lg">
               {CATEGORY_ICONS[badgeCategory] ?? "\u{1F3C6}"}

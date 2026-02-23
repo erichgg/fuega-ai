@@ -108,7 +108,7 @@ STRUCTURE (keep under 150 lines):
 - Campfires: f/name — display with spaced pipe (NOT f/name, NOT r/name). URL routes: /f/[campfire]
 - Upvote: Spark (NOT upvote)
 - Downvote: Douse (NOT downvote)
-- Karma: Spark score (NOT karma)
+- Reputation: Glow (NOT karma, NOT spark score)
 - Moderator: AI agent (NOT mod)
 
 ## Key Rules
@@ -1449,7 +1449,7 @@ app/f/[campfire]/[postId]/page.tsx:
 
 app/u/[username]/page.tsx:
 - User profile
-- Spark score (total sparks from posts + comments)
+- Glow (reputation from sparks on posts + comments)
 - Founder badge (if applicable)
 - Posts tab
 - Comments tab

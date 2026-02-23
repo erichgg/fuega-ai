@@ -1,11 +1,26 @@
 import { NextResponse } from "next/server";
+import { z } from "zod";
 import { authenticate } from "@/lib/auth/jwt";
+import { checkGeneralRateLimit } from "@/lib/auth/rate-limit";
 import { isFeatureEnabled } from "@/lib/feature-flags";
 import {
   subscribePush,
   unsubscribePush,
-  type PushSubscriptionData,
 } from "@/lib/services/push-notifications";
+
+const pushSubscribeSchema = z.object({
+  subscription: z.object({
+    endpoint: z.string().url("Invalid endpoint URL"),
+    keys: z.object({
+      p256dh: z.string().min(1, "p256dh key is required"),
+      auth: z.string().min(1, "auth key is required"),
+    }),
+  }),
+});
+
+const pushUnsubscribeSchema = z.object({
+  endpoint: z.string().url().optional(),
+});
 
 /**
  * POST /api/notifications/push-subscribe
@@ -29,15 +44,27 @@ export async function POST(req: Request) {
       );
     }
 
-    const body = await req.json() as { subscription: PushSubscriptionData };
-    if (!body.subscription) {
+    const rateLimit = await checkGeneralRateLimit(user.userId);
+    if (!rateLimit.allowed) {
       return NextResponse.json(
-        { error: "subscription is required", code: "INVALID_INPUT" },
+        { error: "Too many requests. Try again later.", code: "RATE_LIMITED" },
+        { status: 429, headers: { "Retry-After": String(rateLimit.retryAfterSeconds) } }
+      );
+    }
+
+    const body = await req.json();
+    const parsed = pushSubscribeSchema.safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json(
+        {
+          error: parsed.error.errors[0]?.message ?? "Invalid input",
+          code: "INVALID_INPUT",
+        },
         { status: 400 }
       );
     }
 
-    const result = await subscribePush(user.userId, body.subscription);
+    const result = await subscribePush(user.userId, parsed.data.subscription);
     return NextResponse.json({ subscription: { id: result.id, endpoint: result.endpoint } }, { status: 201 });
   } catch (err) {
     if (err instanceof Error && "code" in err) {
@@ -77,10 +104,21 @@ export async function DELETE(req: Request) {
       );
     }
 
+    const rateLimit = await checkGeneralRateLimit(user.userId);
+    if (!rateLimit.allowed) {
+      return NextResponse.json(
+        { error: "Too many requests. Try again later.", code: "RATE_LIMITED" },
+        { status: 429, headers: { "Retry-After": String(rateLimit.retryAfterSeconds) } }
+      );
+    }
+
     let endpoint: string | undefined;
     try {
-      const body = await req.json() as { endpoint?: string };
-      endpoint = body.endpoint;
+      const body = await req.json();
+      const parsed = pushUnsubscribeSchema.safeParse(body);
+      if (parsed.success) {
+        endpoint = parsed.data.endpoint;
+      }
     } catch {
       // No body is fine — will remove all subscriptions
     }

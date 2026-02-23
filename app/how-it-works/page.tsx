@@ -16,11 +16,11 @@ import { FlameLogo } from "@/components/fuega/flame-logo";
 export const metadata: Metadata = {
   title: "How It Works",
   description:
-    "How fuega.ai governance works — community-driven moderation, governance variables, and the Principles that keep everyone safe.",
+    "How fuega.ai governance works — campfire-driven moderation, governance variables, and the Principles that keep everyone safe.",
   openGraph: {
     title: "How It Works | fuega.ai",
     description:
-      "How fuega.ai governance works — community-driven moderation, governance variables, and the Principles that keep everyone safe.",
+      "How fuega.ai governance works — campfire-driven moderation, governance variables, and the Principles that keep everyone safe.",
   },
 };
 
@@ -143,7 +143,7 @@ function SecuritySandwich() {
             </p>
           </div>
           <p className="text-xs text-ash-400 mt-0.5">
-            Community descriptions, custom rule text. Treated as untrusted user
+            Campfire descriptions, custom rule text. Treated as untrusted user
             input — sanitized and sandboxed.
           </p>
         </div>
@@ -234,7 +234,7 @@ export default function HowItWorksPage() {
           <p className="mt-4 max-w-2xl text-base leading-relaxed text-ash-300">
             Every campfire on <F /> governs itself. Members vote on structured
             settings — not raw AI prompts — and the system compiles those
-            settings into an AI moderator called a{" "}
+            settings into a{" "}
             <span className="font-medium text-ash-200">Tender</span>.
             Injection-proof by design.
           </p>
@@ -260,7 +260,7 @@ export default function HowItWorksPage() {
             Campfires
           </h2>
           <p className="mt-3 text-ash-400 leading-relaxed">
-            A campfire is a self-governing discussion space — like a subreddit,
+            A campfire is a self-governing discussion space — like a dedicated discussion space,
             but with transparent AI moderation and democratic governance. Each
             campfire has its own Tender (AI moderator), its own rules, and its
             own public mod log.

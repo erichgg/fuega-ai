@@ -32,7 +32,7 @@ const principles = [
     icon: Vote,
     title: "Flat governance, fully democratic",
     description:
-      "Platform Principles are immutable. Beyond that, each community — we call them campfires — governs itself through structured variables and votes. No hierarchy, no gatekeepers — just your campfire, your rules.",
+      "Platform Principles are immutable. Beyond that, each campfire governs itself through structured variables and votes. No hierarchy, no gatekeepers — just your campfire, your rules.",
   },
   {
     icon: FileCode2,
@@ -137,7 +137,7 @@ export default function LandingPage() {
         </div>
 
         <div className="mx-auto flex w-full max-w-7xl flex-1 flex-col justify-center">
-          <div className="mx-auto max-w-4xl lg:max-w-5xl">
+          <div className="mx-auto max-w-7xl">
             {/* Terminal-style manifesto */}
             <div className="mb-6 inline-flex items-center gap-2 border border-ash-800 bg-ash-900/60 px-3 py-1.5 text-xs text-ash-500">
               <span className="h-2 w-2 rounded-full bg-flame-500 animate-flame-flicker" />
@@ -149,7 +149,7 @@ export default function LandingPage() {
             </div>
 
             <h1 className="text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl 2xl:text-7xl">
-              <span className="text-ash-200">Your community.</span>
+              <span className="text-ash-200">Your campfire.</span>
               <br />
               <span className="text-ash-200">Your standards.</span>
               <br />
@@ -160,7 +160,7 @@ export default function LandingPage() {
             <div className="mt-6 space-y-1 text-sm text-ash-500 sm:text-base lg:text-lg">
               <p>
                 <span className="text-flame-500/70 mr-2">&gt;</span>
-                <span className="text-ash-300">Communities write their own rules and vote on them.</span>
+                <span className="text-ash-300">Campfires write their own rules and vote on them.</span>
               </p>
               <p>
                 <span className="text-flame-500/70 mr-2">&gt;</span>
@@ -252,7 +252,7 @@ export default function LandingPage() {
               Built for people who don&apos;t trust platforms
             </h2>
             <p className="mt-2 text-sm text-ash-500">
-              Every design decision answers the same question: does the community control this, or does someone else?
+              Every design decision answers the same question: does the campfire control this, or does someone else?
             </p>
           </div>
 
@@ -319,7 +319,7 @@ export default function LandingPage() {
 
       {/* CTA */}
       <section className="border-t border-ash-800/50 px-4 py-12 lg:py-10 2xl:px-8">
-        <div className="mx-auto max-w-3xl text-center">
+        <div className="mx-auto max-w-7xl text-center">
           <MessageSquare className="mx-auto h-10 w-10 text-flame-400" />
           <h2 className="mt-4 text-2xl font-bold text-ash-100 sm:text-3xl">
             Find your people. Set your standards.
@@ -345,7 +345,7 @@ export default function LandingPage() {
             <div>
               <FlameLogo size="sm" />
               <p className="mt-2 text-xs text-ash-500">
-                AI-moderated discussion with transparent community governance.
+                AI-moderated discussion with transparent campfire governance.
               </p>
             </div>
             <div>
@@ -405,7 +405,10 @@ export default function LandingPage() {
             </div>
           </div>
           <div className="mt-6 border-t border-ash-800 pt-4 text-center text-xs text-ash-600">
-            &copy; {new Date().getFullYear()} fuega.ai — Built for the campfire, by the campfire.
+            &copy; {new Date().getFullYear()}{" "}
+            <span className="text-flame-400 font-bold">fuega</span>
+            <span className="text-ash-500">.ai</span>
+            {" "}— Built for the campfire, by the campfire.
           </div>
         </div>
       </footer>

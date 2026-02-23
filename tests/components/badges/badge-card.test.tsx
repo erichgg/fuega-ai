@@ -119,7 +119,7 @@ describe("InlineBadge", () => {
     const { container } = render(<InlineBadge badge={MOCK_BADGE} />);
     const span = container.querySelector("span");
     // Legendary color class
-    expect(span?.className).toContain("text-[#F97316]");
+    expect(span?.className).toContain("text-orange-400");
   });
 });
 
@@ -130,7 +130,7 @@ describe("RARITY_CONFIG", () => {
   });
 
   it("legendary uses orange color", () => {
-    expect(RARITY_CONFIG.legendary.hex).toBe("#F97316");
+    expect(RARITY_CONFIG.legendary.hex).toBe("#fb923c");
   });
 
   it("common has no glow class", () => {

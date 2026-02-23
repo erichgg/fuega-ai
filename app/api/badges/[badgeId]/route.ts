@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { getBadgeById } from "@/lib/services/badges.service";
 
+export const dynamic = "force-dynamic";
+
 /**
  * GET /api/badges/:badgeId
  * Get single badge definition + percentage of users who have it.

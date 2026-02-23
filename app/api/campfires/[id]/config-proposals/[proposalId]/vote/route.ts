@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { authenticate } from "@/lib/auth/jwt";
+import { checkVoteRateLimit } from "@/lib/auth/rate-limit";
 import { query, queryOne } from "@/lib/db";
 import {
   DEFAULT_AI_CONFIG,
@@ -47,6 +48,14 @@ export async function POST(req: Request, { params }: RouteParams) {
       return NextResponse.json(
         { error: "Authentication required", code: "UNAUTHORIZED" },
         { status: 401 }
+      );
+    }
+
+    const rateLimit = await checkVoteRateLimit(user.userId);
+    if (!rateLimit.allowed) {
+      return NextResponse.json(
+        { error: "Too many requests. Try again later.", code: "RATE_LIMITED" },
+        { status: 429, headers: { "Retry-After": String(rateLimit.retryAfterSeconds) } }
       );
     }
 
@@ -126,22 +135,27 @@ export async function POST(req: Request, { params }: RouteParams) {
     if (existingVote) {
       // Update existing vote
       const oldVote = existingVote.vote as VoteValue;
-      const oldColumn = `votes_${oldVote}` as const;
-      const newColumn = `votes_${vote as VoteValue}` as const;
 
       await query(
         `UPDATE config_proposal_votes SET vote = $1 WHERE id = $2`,
         [vote, existingVote.id]
       );
 
-      // Adjust vote counts
+      // Adjust vote counts using CASE expressions (no column interpolation)
       if (oldVote !== vote) {
         await query(
           `UPDATE config_proposals
-           SET ${oldColumn} = ${oldColumn} - 1,
-               ${newColumn} = ${newColumn} + 1
+           SET votes_for = votes_for
+                 + CASE WHEN $2 = 'for' THEN 1 ELSE 0 END
+                 - CASE WHEN $3 = 'for' THEN 1 ELSE 0 END,
+               votes_against = votes_against
+                 + CASE WHEN $2 = 'against' THEN 1 ELSE 0 END
+                 - CASE WHEN $3 = 'against' THEN 1 ELSE 0 END,
+               votes_abstain = votes_abstain
+                 + CASE WHEN $2 = 'abstain' THEN 1 ELSE 0 END
+                 - CASE WHEN $3 = 'abstain' THEN 1 ELSE 0 END
            WHERE id = $1`,
-          [proposalId]
+          [proposalId, vote, oldVote]
         );
       }
     } else {
@@ -152,10 +166,13 @@ export async function POST(req: Request, { params }: RouteParams) {
         [proposalId, user.userId, vote]
       );
 
-      const column = `votes_${vote as VoteValue}` as const;
       await query(
-        `UPDATE config_proposals SET ${column} = ${column} + 1 WHERE id = $1`,
-        [proposalId]
+        `UPDATE config_proposals
+         SET votes_for = votes_for + CASE WHEN $2 = 'for' THEN 1 ELSE 0 END,
+             votes_against = votes_against + CASE WHEN $2 = 'against' THEN 1 ELSE 0 END,
+             votes_abstain = votes_abstain + CASE WHEN $2 = 'abstain' THEN 1 ELSE 0 END
+         WHERE id = $1`,
+        [proposalId, vote]
       );
     }
 

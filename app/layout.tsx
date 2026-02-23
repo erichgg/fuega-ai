@@ -16,7 +16,7 @@ export const metadata: Metadata = {
     template: "%s | fuega.ai",
   },
   description:
-    "Community-driven discussions with transparent AI moderation. Communities write and vote on their own AI moderator prompts.",
+    "Campfire-governed discussions with transparent AI moderation. Campfires write and vote on their own AI moderator prompts.",
   keywords: [
     "discussion",
     "campfire",
@@ -33,13 +33,13 @@ export const metadata: Metadata = {
     siteName: "fuega.ai",
     title: "fuega.ai — AI-Moderated Discussion",
     description:
-      "Community-driven discussions with transparent AI moderation.",
+      "Campfire-governed discussions with transparent AI moderation.",
   },
   twitter: {
     card: "summary_large_image",
     title: "fuega.ai",
     description:
-      "Community-driven discussions with transparent AI moderation.",
+      "Campfire-governed discussions with transparent AI moderation.",
   },
   robots: {
     index: true,

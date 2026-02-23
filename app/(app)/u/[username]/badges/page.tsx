@@ -6,7 +6,7 @@ import { useParams } from "next/navigation";
 import { ArrowLeft, Award, Settings } from "lucide-react";
 import { BadgeGallery } from "@/components/fuega/badge-gallery";
 import { PrimaryBadgeSelector } from "@/components/fuega/primary-badge-selector";
-import { InlineBadge } from "@/components/fuega/badge-card";
+import { InlineBadge, RARITY_CONFIG } from "@/components/fuega/badge-card";
 import { useAuth } from "@/lib/contexts/auth-context";
 import type { Badge, UserBadge } from "@/lib/api/client";
 
@@ -151,19 +151,10 @@ export default function UserBadgesPage() {
         {(["legendary", "epic", "rare", "uncommon", "common"] as const).map((rarity) => {
           const count = earnedBadges.filter((b) => b.rarity === rarity).length;
           if (count === 0) return null;
-          const color =
-            rarity === "legendary"
-              ? "text-[#F97316]"
-              : rarity === "epic"
-                ? "text-[#A855F7]"
-                : rarity === "rare"
-                  ? "text-[#60A5FA]"
-                  : rarity === "uncommon"
-                    ? "text-[#4ADE80]"
-                    : "text-[#A0A0A0]";
+          const { textClass } = RARITY_CONFIG[rarity];
           return (
             <div key={rarity} className="terminal-card px-3 py-2 flex items-center gap-2">
-              <span className={`text-xs font-semibold capitalize ${color}`}>
+              <span className={`text-xs font-semibold capitalize ${textClass}`}>
                 {rarity}
               </span>
               <span className="text-xs text-smoke">&times;{count}</span>

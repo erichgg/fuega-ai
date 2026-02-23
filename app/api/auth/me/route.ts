@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { authenticate } from "@/lib/auth/jwt";
 import { queryOne } from "@/lib/db";
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(req: Request) {
   try {
     const auth = await authenticate(req);

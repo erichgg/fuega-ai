@@ -9,6 +9,8 @@ import {
 } from "@/lib/services/posts.service";
 import { getCommentsForPost } from "@/lib/services/comments.service";
 
+export const dynamic = "force-dynamic";
+
 interface RouteContext {
   params: Promise<{ id: string }>;
 }

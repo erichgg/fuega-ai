@@ -28,7 +28,7 @@ export function useVoting(): UseVotingReturn {
           : `/api/comments/${contentId}/vote`;
 
       try {
-        const result = await api.post<VoteResult>(path, { vote_type: voteType });
+        const result = await api.post<VoteResult>(path, { value: voteType === "spark" ? 1 : -1 });
         return result;
       } catch (err) {
         const msg = err instanceof ApiError ? err.message : "Failed to vote";

@@ -1,12 +1,44 @@
 import { NextResponse } from "next/server";
 import { authenticate } from "@/lib/auth/jwt";
 import { createCommentSchema } from "@/lib/validation/comments";
-import { createComment } from "@/lib/services/comments.service";
+import { createComment, getCommentsForPost } from "@/lib/services/comments.service";
 import { ServiceError } from "@/lib/services/posts.service";
 import { checkCommentRateLimit } from "@/lib/auth/rate-limit";
 
+export const dynamic = "force-dynamic";
+
 interface RouteContext {
   params: Promise<{ id: string }>;
+}
+
+/**
+ * GET /api/posts/:id/comments?sort=top|new|controversial
+ * List comments for a post (threaded). No auth required.
+ */
+export async function GET(req: Request, context: RouteContext) {
+  try {
+    const { id: postId } = await context.params;
+    const url = new URL(req.url);
+    const sort = url.searchParams.get("sort") as "top" | "new" | "controversial" | null;
+
+    const validSorts = ["top", "new", "controversial"];
+    const sortBy = sort && validSorts.includes(sort) ? sort : "top";
+
+    const comments = await getCommentsForPost(postId, sortBy);
+    return NextResponse.json({ comments });
+  } catch (err) {
+    if (err instanceof ServiceError) {
+      return NextResponse.json(
+        { error: err.message, code: err.code },
+        { status: err.status }
+      );
+    }
+    console.error("List comments error:", err);
+    return NextResponse.json(
+      { error: "Internal server error", code: "INTERNAL_ERROR" },
+      { status: 500 }
+    );
+  }
 }
 
 /**

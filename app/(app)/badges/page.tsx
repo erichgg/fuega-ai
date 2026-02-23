@@ -99,7 +99,10 @@ export default function BadgesPage() {
   const [earnedBadges] = React.useState<UserBadge[]>(
     user ? getMockUserBadges() : [],
   );
-  const progressMap = user ? getMockProgress() : {};
+  const progressMap = React.useMemo(
+    () => (user ? getMockProgress() : {}),
+    [user],
+  );
 
   // Next threshold badges for progress display
   const nextBadges = React.useMemo(() => {
@@ -118,8 +121,8 @@ export default function BadgesPage() {
           badges
         </h1>
         <p className="text-xs text-ash mt-1">
-          Earn badges for milestones, contributions, and community engagement on{" "}
-          <span className="text-lava-hot font-semibold">fuega</span>.
+          Earn badges for milestones, contributions, and campfire engagement on{" "}
+          <span className="text-flame-400 font-semibold">fuega</span>.
         </p>
       </div>
 

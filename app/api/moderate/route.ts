@@ -17,6 +17,9 @@ import {
   logModerationDecision,
   type CampfireContext,
 } from "@/lib/ai/moderation.service";
+import { authenticate } from "@/lib/auth/jwt";
+import { checkModerationRateLimit } from "@/lib/auth/rate-limit";
+import { hashIp, getClientIp } from "@/lib/auth/ip-hash";
 import { query, queryOne } from "@/lib/db";
 
 const moderateRequestSchema = z.object({
@@ -31,6 +34,23 @@ const moderateRequestSchema = z.object({
 
 export async function POST(req: Request) {
   try {
+    const user = await authenticate(req);
+    if (!user) {
+      return NextResponse.json(
+        { error: "Authentication required", code: "UNAUTHORIZED" },
+        { status: 401 }
+      );
+    }
+
+    const ipHash = hashIp(getClientIp(req));
+    const rateLimit = await checkModerationRateLimit(ipHash);
+    if (!rateLimit.allowed) {
+      return NextResponse.json(
+        { error: "Too many moderation requests. Try again later.", code: "RATE_LIMITED" },
+        { status: 429, headers: { "Retry-After": String(rateLimit.retryAfterSeconds) } }
+      );
+    }
+
     const body = await req.json();
     const validated = moderateRequestSchema.parse(body);
 

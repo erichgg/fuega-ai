@@ -31,7 +31,9 @@ const nextConfig = {
             key: "Content-Security-Policy",
             value: [
               "default-src 'self'",
-              "script-src 'self' 'unsafe-inline'",
+              // Next.js requires 'unsafe-inline' for styles (CSS-in-JS/Tailwind).
+              // Scripts use 'strict-dynamic' with 'unsafe-inline' as fallback for older browsers.
+              "script-src 'self' 'strict-dynamic' 'unsafe-inline'",
               "style-src 'self' 'unsafe-inline'",
               "img-src 'self' data: blob:",
               "font-src 'self'",

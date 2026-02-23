@@ -226,7 +226,7 @@ export default function ProfileSettingsPage() {
             value={form.brandText}
             onChange={(e) => setForm((f) => ({ ...f, brandText: e.target.value }))}
             maxLength={50}
-            placeholder="Custom flair text"
+            placeholder="Custom brand text"
             className="mt-1 bg-ash-900/50 border-ash-700 text-ash-200 placeholder:text-ash-600"
           />
           <p className="text-[10px] text-ash-600 mt-1">

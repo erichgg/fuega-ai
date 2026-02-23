@@ -63,7 +63,7 @@ describe("login integration", () => {
     );
 
     expect(result.rows).toHaveLength(1);
-    const user = result.rows[0];
+    const user = result.rows[0]!;
     expect(user.is_banned).toBe(false);
 
     const valid = await verifyPassword(input.password, user.password_hash);
@@ -81,7 +81,7 @@ describe("login integration", () => {
       ["login_test_user"]
     );
 
-    const valid = await verifyPassword("wrongPassword", result.rows[0].password_hash);
+    const valid = await verifyPassword("wrongPassword", result.rows[0]!.password_hash);
     expect(valid).toBe(false);
   });
 
@@ -98,8 +98,8 @@ describe("login integration", () => {
       "SELECT is_banned, ban_reason FROM users WHERE username = $1",
       ["login_banned_user"]
     );
-    expect(result.rows[0].is_banned).toBe(true);
-    expect(result.rows[0].ban_reason).toBe("test ban");
+    expect(result.rows[0]!.is_banned).toBe(true);
+    expect(result.rows[0]!.ban_reason).toBe("test ban");
   });
 
   it("updates last_login_at on successful login", async () => {
@@ -107,7 +107,7 @@ describe("login integration", () => {
       "SELECT id FROM users WHERE username = $1",
       ["login_test_user"]
     );
-    const userId = user.rows[0].id;
+    const userId = user.rows[0]!.id;
 
     await db.query(
       "UPDATE users SET last_login_at = NOW() WHERE id = $1",
@@ -118,7 +118,7 @@ describe("login integration", () => {
       "SELECT last_login_at FROM users WHERE id = $1",
       [userId]
     );
-    expect(updated.rows[0].last_login_at).not.toBeNull();
+    expect(updated.rows[0]!.last_login_at).not.toBeNull();
   });
 
   it("case-insensitive username lookup", async () => {
@@ -148,7 +148,7 @@ describe("login integration", () => {
       "SELECT post_sparks, comment_sparks FROM users WHERE username = $1",
       ["login_test_user"]
     );
-    const sparkScore = result.rows[0].post_sparks + result.rows[0].comment_sparks;
+    const sparkScore = result.rows[0]!.post_sparks + result.rows[0]!.comment_sparks;
     expect(sparkScore).toBe(15);
   });
 });

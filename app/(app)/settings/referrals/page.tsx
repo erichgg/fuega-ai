@@ -38,7 +38,7 @@ export default function ReferralDashboardPage() {
           referrals
         </h1>
         <p className="text-xs text-ash mt-1">
-          Invite friends to <span className="text-lava-hot font-semibold">fuega</span> and earn referral badges
+          Invite friends to <span className="text-flame-400 font-semibold">fuega</span> and earn referral badges
         </p>
       </div>
 

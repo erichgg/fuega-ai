@@ -47,7 +47,7 @@ function generateReferralCode(): string {
 
 // ─── Get or create referral link ─────────────────────────────
 
-export async function getReferralLink(userId: string): Promise<string> {
+export async function getReferralLink(userId: string): Promise<{ referral_code: string; referral_link: string }> {
   // Check if user already has a referral code
   const user = await queryOne<{ referral_code: string | null }>(
     `SELECT referral_code FROM users WHERE id = $1 AND deleted_at IS NULL`,
@@ -59,7 +59,10 @@ export async function getReferralLink(userId: string): Promise<string> {
 
   if (user.referral_code) {
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://fuega.ai";
-    return `${baseUrl}/join?ref=${user.referral_code}`;
+    return {
+      referral_code: user.referral_code,
+      referral_link: `${baseUrl}/join?ref=${user.referral_code}`,
+    };
   }
 
   // Lazy-generate a referral code
@@ -91,7 +94,10 @@ export async function getReferralLink(userId: string): Promise<string> {
   );
 
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://fuega.ai";
-  return `${baseUrl}/join?ref=${code}`;
+  return {
+    referral_code: code,
+    referral_link: `${baseUrl}/join?ref=${code}`,
+  };
 }
 
 // ─── Get referral stats ──────────────────────────────────────

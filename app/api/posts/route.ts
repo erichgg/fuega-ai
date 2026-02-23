@@ -4,6 +4,8 @@ import { createPostSchema, listPostsSchema } from "@/lib/validation/posts";
 import { createPost, listPosts, ServiceError } from "@/lib/services/posts.service";
 import { checkPostRateLimit } from "@/lib/auth/rate-limit";
 
+export const dynamic = "force-dynamic";
+
 /**
  * GET /api/posts?campfire=&sort=&limit=&offset=
  * List posts with sorting and pagination.

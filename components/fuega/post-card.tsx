@@ -26,6 +26,9 @@ interface PostCardProps {
   };
   userVote: "sparked" | "doused" | null;
   onVote: (vote: "spark" | "douse") => void;
+  onClickComments?: () => void;
+  onShare?: () => void;
+  onReport?: () => void;
   compact?: boolean;
   className?: string;
 }
@@ -46,6 +49,9 @@ export function PostCard({
   post,
   userVote,
   onVote,
+  onClickComments,
+  onShare,
+  onReport,
   compact = false,
   className,
 }: PostCardProps) {
@@ -97,15 +103,24 @@ export function PostCard({
           )}
 
           <div className="mt-2 flex items-center gap-4 text-xs text-ash-500">
-            <button className="flex items-center gap-1.5 transition-colors hover:text-ash-300">
+            <button
+              onClick={onClickComments}
+              className="flex items-center gap-1.5 transition-colors hover:text-ash-300"
+            >
               <MessageSquare className="h-3.5 w-3.5" />
               <span>{post.commentCount} comments</span>
             </button>
-            <button className="flex items-center gap-1.5 transition-colors hover:text-ash-300">
+            <button
+              onClick={onShare}
+              className="flex items-center gap-1.5 transition-colors hover:text-ash-300"
+            >
               <Share2 className="h-3.5 w-3.5" />
               <span>Share</span>
             </button>
-            <button className="flex items-center gap-1.5 transition-colors hover:text-ash-300">
+            <button
+              onClick={onReport}
+              className="flex items-center gap-1.5 transition-colors hover:text-ash-300"
+            >
               <Flag className="h-3.5 w-3.5" />
               <span>Report</span>
             </button>

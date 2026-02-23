@@ -28,7 +28,7 @@ describe("founder badge assignment", () => {
     const countResult = await db.query<{ count: string }>(
       "SELECT COUNT(*) as count FROM users WHERE deleted_at IS NULL AND id != '00000000-0000-0000-0000-000000000001'"
     );
-    const currentCount = parseInt(countResult.rows[0].count, 10);
+    const currentCount = parseInt(countResult.rows[0]!.count, 10);
     const expectedBadge = currentCount + 1;
 
     const hash = await hashPassword("pass12345");
@@ -37,7 +37,7 @@ describe("founder badge assignment", () => {
       ["founder_test_1", hash, expectedBadge]
     );
 
-    expect(result.rows[0].founder_badge_number).toBe(expectedBadge);
+    expect(result.rows[0]!.founder_badge_number).toBe(expectedBadge);
   });
 
   it("founder badge numbers are unique", async () => {

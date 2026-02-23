@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { authenticate } from "@/lib/auth/jwt";
 import { voteSchema } from "@/lib/validation/votes";
-import { voteOnComment } from "@/lib/services/votes.service";
+import { voteOnComment, removeVoteOnComment } from "@/lib/services/votes.service";
 import { ServiceError } from "@/lib/services/posts.service";
 import { checkVoteRateLimit } from "@/lib/auth/rate-limit";
 
@@ -58,6 +58,44 @@ export async function POST(req: Request, context: RouteContext) {
       );
     }
     console.error("Vote on comment error:", err);
+    return NextResponse.json(
+      { error: "Internal server error", code: "INTERNAL_ERROR" },
+      { status: 500 }
+    );
+  }
+}
+
+/**
+ * DELETE /api/comments/:id/vote
+ * Remove the current user's vote on a comment. Auth required.
+ */
+export async function DELETE(req: Request, context: RouteContext) {
+  try {
+    const user = await authenticate(req);
+    if (!user) {
+      return NextResponse.json(
+        { error: "Authentication required", code: "UNAUTHORIZED" },
+        { status: 401 }
+      );
+    }
+
+    const { id: commentId } = await context.params;
+    const result = await removeVoteOnComment(commentId, user.userId);
+
+    return NextResponse.json({
+      vote: result.vote,
+      sparks: result.sparks,
+      douses: result.douses,
+      action: result.action,
+    });
+  } catch (err) {
+    if (err instanceof ServiceError) {
+      return NextResponse.json(
+        { error: err.message, code: err.code },
+        { status: err.status }
+      );
+    }
+    console.error("Remove comment vote error:", err);
     return NextResponse.json(
       { error: "Internal server error", code: "INTERNAL_ERROR" },
       { status: 500 }

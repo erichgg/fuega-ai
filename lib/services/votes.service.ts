@@ -275,6 +275,50 @@ function sendSparkNotification(
   }).catch(() => {}); // Non-blocking
 }
 
+// ─── Remove Vote on Post ─────────────────────────────────────
+
+export async function removeVoteOnPost(
+  postId: string,
+  userId: string
+): Promise<VoteResult> {
+  const existing = await getUserVote(userId, "post", postId);
+  if (!existing) {
+    // No vote to remove — return current counts
+    const counts = await queryOne<{ sparks: number; douses: number }>(
+      `SELECT sparks, douses FROM posts WHERE id = $1 AND deleted_at IS NULL`,
+      [postId]
+    );
+    if (!counts) {
+      throw new ServiceError("Post not found", "POST_NOT_FOUND", 404);
+    }
+    return { vote: null, sparks: counts.sparks, douses: counts.douses, action: "removed" };
+  }
+
+  // Remove existing vote using the toggle-off logic (vote same value)
+  return voteOnPost(postId, userId, existing.vote_value as 1 | -1);
+}
+
+// ─── Remove Vote on Comment ──────────────────────────────────
+
+export async function removeVoteOnComment(
+  commentId: string,
+  userId: string
+): Promise<VoteResult> {
+  const existing = await getUserVote(userId, "comment", commentId);
+  if (!existing) {
+    const counts = await queryOne<{ sparks: number; douses: number }>(
+      `SELECT sparks, douses FROM comments WHERE id = $1 AND deleted_at IS NULL`,
+      [commentId]
+    );
+    if (!counts) {
+      throw new ServiceError("Comment not found", "COMMENT_NOT_FOUND", 404);
+    }
+    return { vote: null, sparks: counts.sparks, douses: counts.douses, action: "removed" };
+  }
+
+  return voteOnComment(commentId, userId, existing.vote_value as 1 | -1);
+}
+
 // ─── Get User's Vote ─────────────────────────────────────────
 
 export async function getUserVote(

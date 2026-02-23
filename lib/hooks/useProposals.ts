@@ -168,7 +168,7 @@ export function useCreateProposal(): UseCreateProposalReturn {
 // Vote on proposal
 // ---------------------------------------------------------------------------
 
-type ProposalVote = "for" | "against" | "abstain";
+type ProposalVote = "for" | "against";
 
 interface UseProposalVoteReturn {
   voteOnProposal: (proposalId: string, vote: ProposalVote) => Promise<void>;
@@ -184,7 +184,9 @@ export function useProposalVote(): UseProposalVoteReturn {
     setVoting(true);
     setError(null);
     try {
-      await api.post(`/api/proposals/${proposalId}/vote`, { vote });
+      await api.post(`/api/proposals/${proposalId}/vote`, {
+        value: vote === "for" ? 1 : -1,
+      });
     } catch (err) {
       const msg = err instanceof ApiError ? err.message : "Failed to vote on proposal";
       setError(msg);

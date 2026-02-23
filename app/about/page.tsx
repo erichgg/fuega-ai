@@ -15,11 +15,11 @@ import { FlameLogo } from "@/components/fuega/flame-logo";
 export const metadata: Metadata = {
   title: "About",
   description:
-    "Learn about fuega.ai — an AI-moderated discussion platform with transparent community governance.",
+    "Learn about fuega.ai — an AI-moderated discussion platform with transparent campfire governance.",
   openGraph: {
     title: "About fuega.ai",
     description:
-      "Learn about fuega.ai — an AI-moderated discussion platform with transparent community governance.",
+      "Learn about fuega.ai — an AI-moderated discussion platform with transparent campfire governance.",
   },
 };
 
@@ -35,7 +35,7 @@ const comparisonRows: {
   fuega: CellValue;
 }[] = [
   {
-    feature: "Community-written rules",
+    feature: "Campfire-written rules",
     reddit: "partial",
     discord: "partial",
     x: "no",
@@ -140,7 +140,7 @@ const comparisonRows: {
     fuega: "yes",
   },
   {
-    feature: "Community chooses AI model",
+    feature: "Campfire chooses AI model",
     reddit: "no",
     discord: "no",
     x: "no",
@@ -233,7 +233,7 @@ export default function AboutPage() {
             These platforms don&apos;t work for you. They work on you.
           </p>
           <p className="mt-4 text-base leading-relaxed text-ash-400">
-            <F /> is the opposite. Communities — we call them campfires — write their own rules, vote on
+            <F /> is the opposite. Campfires write their own rules, vote on
             them, and AI enforces exactly what was decided — nothing more. The
             whole thing is tip-supported: help keep the lights on and you get a
             badge and some cosmetics. That&apos;s it. No ads, no data
@@ -369,8 +369,8 @@ export default function AboutPage() {
           <p className="mt-4 text-ash-300 leading-relaxed">
             Each campfire on <F /> governs itself. Members vote on governance
             settings — toxicity thresholds, spam sensitivity, content rules —
-            and the system compiles those settings into an AI moderator called
-            a <span className="font-medium text-ash-200">Tender</span>. No
+            and the system compiles those settings into a
+            <span className="font-medium text-ash-200">Tender</span>. No
             human writes moderation rules directly. Campfires turn dials; the
             Tender enforces what was decided.
           </p>
@@ -411,7 +411,7 @@ export default function AboutPage() {
           </p>
           <p className="mt-4 text-ash-500 leading-relaxed">
             We don&apos;t have a marketing team, a sales team, or a PR
-            department. We have a community, a codebase, and a belief that
+            department. We have a campfire, a codebase, and a belief that
             common sense still works when you put the right people in charge of
             their own spaces.
           </p>

@@ -268,9 +268,10 @@ export interface FeatureFlags {
 }
 
 export interface VoteResult {
-  spark_count: number;
-  douse_count: number;
-  user_vote: "spark" | "douse" | null;
+  vote: 1 | -1 | null;
+  sparks: number;
+  douses: number;
+  action: "voted" | "changed" | "removed";
 }
 
 export interface ModerationResult {

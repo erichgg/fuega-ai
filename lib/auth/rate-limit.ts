@@ -9,6 +9,8 @@
  *   - Comments: 30 per hour per user
  *   - Votes:  100 per hour per user
  *   - AI mod:  50 per hour per IP hash
+ *   - Password: 3 per hour per user (brute-force protection)
+ *   - General: 20 per minute per user (catch-all for settings/actions)
  */
 
 import { RateLimiterMemory } from "rate-limiter-flexible";
@@ -47,6 +49,18 @@ const moderationLimiter = new RateLimiterMemory({
   points: 50,
   duration: 60 * 60, // 1 hour
   keyPrefix: "ai_mod",
+});
+
+const passwordChangeLimiter = new RateLimiterMemory({
+  points: 3,
+  duration: 60 * 60, // 1 hour
+  keyPrefix: "password_change",
+});
+
+const generalActionLimiter = new RateLimiterMemory({
+  points: 20,
+  duration: 60, // 1 minute
+  keyPrefix: "general_action",
 });
 
 export interface RateLimitResult {
@@ -163,6 +177,43 @@ export async function checkModerationRateLimit(
 }
 
 /**
+ * Check password change rate limit for a user ID.
+ */
+export async function checkPasswordChangeRateLimit(
+  userId: string
+): Promise<RateLimitResult> {
+  try {
+    await passwordChangeLimiter.consume(userId);
+    return { allowed: true, retryAfterSeconds: 0 };
+  } catch (err: unknown) {
+    const rlErr = err as { msBeforeNext?: number };
+    return {
+      allowed: false,
+      retryAfterSeconds: Math.ceil((rlErr.msBeforeNext ?? 3600000) / 1000),
+    };
+  }
+}
+
+/**
+ * Check general action rate limit for a user ID.
+ * Used as catch-all for settings, profile updates, etc.
+ */
+export async function checkGeneralRateLimit(
+  userId: string
+): Promise<RateLimitResult> {
+  try {
+    await generalActionLimiter.consume(userId);
+    return { allowed: true, retryAfterSeconds: 0 };
+  } catch (err: unknown) {
+    const rlErr = err as { msBeforeNext?: number };
+    return {
+      allowed: false,
+      retryAfterSeconds: Math.ceil((rlErr.msBeforeNext ?? 60000) / 1000),
+    };
+  }
+}
+
+/**
  * Reset rate limiters — for testing only.
  */
 export async function resetRateLimiters(): Promise<void> {
@@ -172,6 +223,8 @@ export async function resetRateLimiters(): Promise<void> {
   await commentLimiter.delete("*");
   await voteLimiter.delete("*");
   await moderationLimiter.delete("*");
+  await passwordChangeLimiter.delete("*");
+  await generalActionLimiter.delete("*");
 }
 
 export {
@@ -181,4 +234,6 @@ export {
   commentLimiter,
   voteLimiter,
   moderationLimiter,
+  passwordChangeLimiter,
+  generalActionLimiter,
 };
