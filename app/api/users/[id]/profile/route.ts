@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+import { checkReadRateLimit } from "@/lib/auth/rate-limit";
+import { hashIp, getClientIp } from "@/lib/auth/ip-hash";
 import { queryOne } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
@@ -28,10 +30,19 @@ const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
  * Returns profile data if profile_visible = true; otherwise limited info.
  */
 export async function GET(
-  _req: Request,
+  req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const ipHash = hashIp(getClientIp(req));
+    const rateLimit = await checkReadRateLimit(ipHash);
+    if (!rateLimit.allowed) {
+      return NextResponse.json(
+        { error: "Too many requests. Try again later.", code: "RATE_LIMITED" },
+        { status: 429, headers: { "Retry-After": String(rateLimit.retryAfterSeconds) } }
+      );
+    }
+
     const { id } = await params;
 
     const isUuid = UUID_RE.test(id);

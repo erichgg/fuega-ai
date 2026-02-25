@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { authenticate } from "@/lib/auth/jwt";
-import { checkGeneralRateLimit } from "@/lib/auth/rate-limit";
+import { checkGeneralRateLimit, checkReadRateLimit } from "@/lib/auth/rate-limit";
+import { hashIp, getClientIp } from "@/lib/auth/ip-hash";
 import { updateCampfireSchema } from "@/lib/validation/campfires";
 import {
   getCampfireById,
@@ -24,6 +25,15 @@ const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
  */
 export async function GET(req: Request, { params }: RouteParams) {
   try {
+    const ipHash = hashIp(getClientIp(req));
+    const rateLimit = await checkReadRateLimit(ipHash);
+    if (!rateLimit.allowed) {
+      return NextResponse.json(
+        { error: "Too many requests. Try again later.", code: "RATE_LIMITED" },
+        { status: 429, headers: { "Retry-After": String(rateLimit.retryAfterSeconds) } }
+      );
+    }
+
     const { id } = await params;
 
     // Support both UUID lookup and name-based lookup

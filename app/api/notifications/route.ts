@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import { authenticate } from "@/lib/auth/jwt";
+import { checkReadRateLimit } from "@/lib/auth/rate-limit";
+import { hashIp, getClientIp } from "@/lib/auth/ip-hash";
 import { isFeatureEnabled } from "@/lib/feature-flags";
 import { listNotifications, type NotificationType } from "@/lib/services/notifications.service";
 
@@ -17,6 +19,15 @@ const VALID_TYPES: NotificationType[] = [
  */
 export async function GET(req: Request) {
   try {
+    const ipHash = hashIp(getClientIp(req));
+    const rateLimit = await checkReadRateLimit(ipHash);
+    if (!rateLimit.allowed) {
+      return NextResponse.json(
+        { error: "Too many requests. Try again later.", code: "RATE_LIMITED" },
+        { status: 429, headers: { "Retry-After": String(rateLimit.retryAfterSeconds) } }
+      );
+    }
+
     if (!isFeatureEnabled("ENABLE_NOTIFICATIONS")) {
       return NextResponse.json({ notifications: [], unread_count: 0, total: 0, page: 1, limit: 20 });
     }

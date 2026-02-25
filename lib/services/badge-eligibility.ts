@@ -169,7 +169,7 @@ async function getUserMetrics(userId: string): Promise<UserMetrics> {
     // Total governance proposal votes
     queryOne<{ count: string }>(
       `SELECT COUNT(*) AS count
-       FROM prompt_votes
+       FROM proposal_votes
        WHERE user_id = $1`,
       [userId]
     ),
@@ -177,7 +177,7 @@ async function getUserMetrics(userId: string): Promise<UserMetrics> {
     // Total proposals created
     queryOne<{ count: string }>(
       `SELECT COUNT(*) AS count
-       FROM moderation_prompts
+       FROM proposals
        WHERE proposed_by = $1`,
       [userId]
     ),
@@ -185,7 +185,7 @@ async function getUserMetrics(userId: string): Promise<UserMetrics> {
     // Total proposals passed
     queryOne<{ count: string }>(
       `SELECT COUNT(*) AS count
-       FROM moderation_prompts
+       FROM proposals
        WHERE proposed_by = $1 AND status = 'active'`,
       [userId]
     ),
@@ -194,7 +194,7 @@ async function getUserMetrics(userId: string): Promise<UserMetrics> {
     queryOne<{ count: string }>(
       `SELECT COUNT(*) AS count
        FROM referrals
-       WHERE referrer_id = $1 AND status = 'completed'`,
+       WHERE referrer_id = $1 AND reverted = false`,
       [userId]
     ).catch(() => ({ count: "0" })),
 

@@ -1,3 +1,15 @@
+/**
+ * Config-proposals routes — supplementary API for governance-variable proposals.
+ *
+ * The CANONICAL proposal system is the main `/api/proposals` route + `governance.service.ts`.
+ * That system uses the `proposals` table which the frontend consumes.
+ * When a `change_settings` proposal passes there, `executeProposal()` calls
+ * `updateSetting()` from governance-variables.service.ts to apply the change.
+ *
+ * This config-proposals route uses a separate `config_proposals` table and
+ * provides an alternative API scoped to a single campfire. It can be used as
+ * a supplementary interface but is NOT the primary governance flow.
+ */
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { authenticate } from "@/lib/auth/jwt";

@@ -7,6 +7,7 @@ import {
   createRoom,
   getOrCreateDefaultRoom,
 } from "@/lib/services/chat.service";
+import { getMembership } from "@/lib/services/campfires.service";
 import { ServiceError } from "@/lib/services/posts.service";
 
 const createRoomSchema = z.object({
@@ -47,7 +48,7 @@ export async function GET(_req: Request, context: RouteContext) {
 
 /**
  * POST /api/campfires/:id/chat/rooms
- * Create a new room. Auth required. Only campfire creator can create rooms.
+ * Create a new room. Auth required. Only campfire admins/moderators can create rooms.
  * Body: { name: string, description?: string }
  */
 export async function POST(req: Request, context: RouteContext) {
@@ -66,6 +67,16 @@ export async function POST(req: Request, context: RouteContext) {
     }
 
     const { id: campfireId } = await context.params;
+
+    // Authorization: only campfire admins/moderators can create rooms
+    const membership = await getMembership(user.userId, campfireId);
+    if (!membership || (membership.role !== "admin" && membership.role !== "moderator")) {
+      return NextResponse.json(
+        { error: "Only campfire admins or moderators can create rooms", code: "FORBIDDEN" },
+        { status: 403 }
+      );
+    }
+
     const body = await req.json();
     const parsed = createRoomSchema.safeParse(body);
     if (!parsed.success) {

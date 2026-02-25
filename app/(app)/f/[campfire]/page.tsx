@@ -7,6 +7,7 @@ import { Users, Bot, Plus, Shield, Clock, Settings, AlertCircle, MessageSquare, 
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { PostCard } from "@/components/fuega/post-card";
+import { ReportDialog } from "@/components/fuega/report-dialog";
 import { FeedSort } from "@/components/fuega/feed-sort";
 import { ChatPanel } from "@/components/fuega/chat-panel";
 import { CampfireSkeleton } from "@/components/fuega/page-skeleton";
@@ -47,6 +48,9 @@ export default function CampfirePage() {
 
   // View mode (posts vs chat)
   const [viewMode, setViewMode] = React.useState<ViewMode>("posts");
+
+  // Report dialog
+  const [reportPostId, setReportPostId] = React.useState<string | null>(null);
 
   // Membership
   const { join, leave, loading: membershipLoading, error: membershipError } = useCampfireMembership();
@@ -291,6 +295,7 @@ export default function CampfirePage() {
                       post={post}
                       userVote={getVote(post.id)}
                       onVote={(v) => handleVote(post.id, v)}
+                      onReport={() => setReportPostId(post.id)}
                     />
                   </Link>
                 ))}
@@ -317,6 +322,13 @@ export default function CampfirePage() {
         </div>
       )}
       </div>{/* end max-w-5xl */}
+
+      {/* Report dialog */}
+      <ReportDialog
+        open={reportPostId !== null}
+        onOpenChange={(open) => { if (!open) setReportPostId(null); }}
+        postId={reportPostId ?? undefined}
+      />
     </div>
   );
 }

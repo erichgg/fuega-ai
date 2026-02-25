@@ -7,6 +7,7 @@ import { api, type Badge, type UserBadge, ApiError } from "@/lib/api/client";
 // All badge definitions (public catalog)
 // ---------------------------------------------------------------------------
 
+/** Available for future use — fetches the full badge catalog from /api/badges */
 interface UseBadgeCatalogReturn {
   badges: Badge[];
   loading: boolean;
@@ -45,6 +46,7 @@ export function useBadgeCatalog(): UseBadgeCatalogReturn {
 // User's earned badges
 // ---------------------------------------------------------------------------
 
+/** Available for future use — fetches badges earned by a specific user */
 interface UseUserBadgesReturn {
   badges: UserBadge[];
   loading: boolean;
@@ -82,6 +84,7 @@ export function useUserBadges(userId: string | undefined): UseUserBadgesReturn {
 // Set primary badge
 // ---------------------------------------------------------------------------
 
+/** Available for future use — sets a user's displayed primary badge */
 interface UseSetPrimaryBadgeReturn {
   setPrimaryBadge: (userId: string, badgeId: string) => Promise<void>;
   setting: boolean;

@@ -5,6 +5,7 @@ import type {
 } from "@/lib/validation/proposals";
 import { getMembership } from "@/lib/services/campfires.service";
 import { createNotification } from "@/lib/services/notifications.service";
+import { updateSetting } from "@/lib/services/governance-variables.service";
 
 // ─── Types ───────────────────────────────────────────────────
 
@@ -411,6 +412,10 @@ async function executeProposal(proposal: Proposal): Promise<void> {
   const changes = proposal.proposed_changes;
 
   switch (proposal.proposal_type) {
+    // DEPRECATED: modify_prompt and addendum_prompt are pre-redesign proposal types.
+    // New proposals should use "change_settings" which works with the governance
+    // variables system (campfire_settings table + governance_variables registry).
+    // These legacy types are kept for backwards compatibility with existing proposals.
     case "modify_prompt": {
       const newPrompt = changes.new_prompt;
       if (typeof newPrompt !== "string") break;
@@ -447,6 +452,7 @@ async function executeProposal(proposal: Proposal): Promise<void> {
       break;
     }
 
+    // DEPRECATED: See modify_prompt comment above.
     case "addendum_prompt": {
       const addendum = changes.addendum;
       if (typeof addendum !== "string") break;
@@ -486,24 +492,43 @@ async function executeProposal(proposal: Proposal): Promise<void> {
     }
 
     case "change_settings": {
+      // proposed_changes should contain a "settings" object with key-value pairs
+      // matching governance variable keys, e.g. { settings: { allow_images: "false", max_post_length: "5000" } }
       const settings = changes.settings;
       if (typeof settings !== "object" || settings === null) break;
 
-      // Merge new settings into existing governance_config
+      // Apply each setting change via the governance-variables service.
+      // This validates against the governance_variables registry, enforces
+      // constraints (min/max, allowed_values, data_type), and writes an
+      // audit trail to campfire_settings_history.
+      const entries = Object.entries(settings as Record<string, unknown>);
+      for (const [key, value] of entries) {
+        if (typeof value !== "string") continue;
+        await updateSetting(
+          proposal.campfire_id,
+          key,
+          value,
+          proposal.created_by,
+          "proposal",
+          proposal.id,
+          `Implemented via governance proposal: ${proposal.title}`
+        );
+      }
+
+      // Also keep governance_config in sync for legacy compatibility
       const campfire = await queryOne<{
         governance_config: Record<string, unknown>;
       }>(
         `SELECT governance_config FROM campfires WHERE id = $1`,
         [proposal.campfire_id]
       );
-      if (!campfire) break;
-
-      const merged = { ...campfire.governance_config, ...settings };
-
-      await query(
-        `UPDATE campfires SET governance_config = $1 WHERE id = $2`,
-        [JSON.stringify(merged), proposal.campfire_id]
-      );
+      if (campfire) {
+        const merged = { ...campfire.governance_config, ...settings };
+        await query(
+          `UPDATE campfires SET governance_config = $1 WHERE id = $2`,
+          [JSON.stringify(merged), proposal.campfire_id]
+        );
+      }
       break;
     }
   }

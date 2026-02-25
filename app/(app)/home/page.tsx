@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Plus, Flame, Vote, Award, TrendingUp, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PostCard } from "@/components/fuega/post-card";
+import { ReportDialog } from "@/components/fuega/report-dialog";
 import { FeedSort } from "@/components/fuega/feed-sort";
 import { FeedSkeleton } from "@/components/fuega/page-skeleton";
 import { useAuth } from "@/lib/contexts/auth-context";
@@ -22,6 +23,9 @@ export default function HomeFeedPage() {
   const [sort, setSort] = React.useState<SortOption>("hot");
   const { posts, loading, error, hasMore, loadMore } = usePosts({ sort });
   const { handleVote, getVote, getDelta } = useOptimisticVoting();
+
+  // Report dialog
+  const [reportPostId, setReportPostId] = React.useState<string | null>(null);
 
   // Right-rail data
   const [trendingCampfires, setTrendingCampfires] = React.useState<Campfire[]>([]);
@@ -103,6 +107,7 @@ export default function HomeFeedPage() {
                     post={post}
                     userVote={getVote(post.id)}
                     onVote={(v) => handleVote(post.id, v)}
+                    onReport={() => setReportPostId(post.id)}
                   />
                 </Link>
               ))}
@@ -237,6 +242,13 @@ export default function HomeFeedPage() {
           </div>
         </div>
       </aside>
+
+      {/* Report dialog */}
+      <ReportDialog
+        open={reportPostId !== null}
+        onOpenChange={(open) => { if (!open) setReportPostId(null); }}
+        postId={reportPostId ?? undefined}
+      />
     </div>
   );
 }

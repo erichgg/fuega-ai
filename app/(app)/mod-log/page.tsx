@@ -10,26 +10,32 @@ import {
   Filter,
   Search,
   Clock,
+  Loader2,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { ModLogSkeleton } from "@/components/fuega/page-skeleton";
 import { cn } from "@/lib/utils";
 import { timeAgo } from "@/lib/utils/time-ago";
+import { api, ApiError } from "@/lib/api/client";
 
-type Decision = "approved" | "flagged" | "removed";
-type Tier = "campfire" | "platform";
+type Decision = "approved" | "flagged" | "removed" | "warned";
 
 interface ModLogEntry {
   id: string;
-  contentSnippet: string;
-  contentType: "post" | "comment";
-  campfire: string;
+  campfire_id: string;
+  campfire_name: string;
+  content_type: string;
+  content_id: string;
   decision: Decision;
-  confidence: number;
-  reasoning: string;
-  tier: Tier;
-  createdAt: string;
+  reason: string;
+  agent_level: string;
+  ai_model: string | null;
+  created_at: string;
+  injection_detected: boolean;
 }
 
 const decisionConfig: Record<
@@ -51,50 +57,100 @@ const decisionConfig: Record<
     icon: XCircle,
     color: "bg-red-500/20 text-red-400 border-red-500/30",
   },
+  warned: {
+    label: "Warned",
+    icon: AlertTriangle,
+    color: "bg-orange-500/20 text-orange-400 border-orange-500/30",
+  },
 };
 
-const tierLabels: Record<Tier, string> = {
-  campfire: "Campfire",
-  platform: "Platform",
-};
-
+const PAGE_SIZE = 50;
 
 export default function ModLogPage() {
   const [entries, setEntries] = React.useState<ModLogEntry[]>([]);
+  const [total, setTotal] = React.useState(0);
   const [loading, setLoading] = React.useState(true);
+  const [error, setError] = React.useState<string | null>(null);
+  const [offset, setOffset] = React.useState(0);
   const [decisionFilter, setDecisionFilter] = React.useState<Decision | "all">(
     "all",
   );
   const [campfireFilter, setCampfireFilter] = React.useState("");
   const [searchQuery, setSearchQuery] = React.useState("");
 
+  // Debounce campfire filter to avoid excessive API calls
+  const [debouncedCampfire, setDebouncedCampfire] = React.useState("");
   React.useEffect(() => {
-    // No mod-log API endpoint yet — show empty state.
-    // Once /api/campfires/:id/moderation is built, fetch real entries here.
-    setEntries([]);
-    setLoading(false);
-  }, []);
+    const timer = setTimeout(() => setDebouncedCampfire(campfireFilter), 300);
+    return () => clearTimeout(timer);
+  }, [campfireFilter]);
 
-  const filteredEntries = entries.filter((entry) => {
-    if (decisionFilter !== "all" && entry.decision !== decisionFilter)
-      return false;
-    if (
-      campfireFilter &&
-      !entry.campfire
-        .toLowerCase()
-        .includes(campfireFilter.toLowerCase())
-    )
-      return false;
-    if (
-      searchQuery &&
-      !entry.contentSnippet
-        .toLowerCase()
-        .includes(searchQuery.toLowerCase()) &&
-      !entry.reasoning.toLowerCase().includes(searchQuery.toLowerCase())
-    )
-      return false;
-    return true;
-  });
+  React.useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    setError(null);
+
+    const params: Record<string, string | number | boolean | undefined> = {
+      limit: PAGE_SIZE,
+      offset,
+    };
+    if (decisionFilter !== "all") {
+      params.action = decisionFilter;
+    }
+    // Note: campfire_id filter requires a UUID, not a name.
+    // Client-side filtering on campfire name is applied below.
+
+    api
+      .get<{ entries: ModLogEntry[]; total: number }>("/api/mod-log", params)
+      .then((data) => {
+        if (!cancelled) {
+          setEntries(data.entries);
+          setTotal(data.total);
+        }
+      })
+      .catch((err) => {
+        if (!cancelled) {
+          setError(
+            err instanceof ApiError ? err.message : "Failed to load mod log",
+          );
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+
+    return () => { cancelled = true; };
+  }, [offset, decisionFilter]);
+
+  // Reset offset when filter changes
+  React.useEffect(() => {
+    setOffset(0);
+  }, [decisionFilter]);
+
+  // Client-side filtering for campfire name and search query
+  const filteredEntries = React.useMemo(() => {
+    return entries.filter((entry) => {
+      if (
+        debouncedCampfire &&
+        !entry.campfire_name
+          .toLowerCase()
+          .includes(debouncedCampfire.toLowerCase())
+      ) {
+        return false;
+      }
+      if (
+        searchQuery &&
+        !entry.reason.toLowerCase().includes(searchQuery.toLowerCase()) &&
+        !entry.content_type.toLowerCase().includes(searchQuery.toLowerCase())
+      ) {
+        return false;
+      }
+      return true;
+    });
+  }, [entries, debouncedCampfire, searchQuery]);
+
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  const currentPage = Math.floor(offset / PAGE_SIZE) + 1;
 
   return (
     <div className="max-w-5xl">
@@ -107,20 +163,20 @@ export default function ModLogPage() {
         </div>
         <p className="mt-1 text-sm text-ash">
           Every AI moderation decision is logged here with full transparency.
-          See exactly what was moderated, why, and at what tier.
+          See exactly what was moderated, why, and the decision made.
         </p>
       </div>
 
       {/* Filters */}
-      <div className="mt-6 space-y-3 opacity-50 pointer-events-none">
+      <div className="mt-6 space-y-3">
         <div className="flex flex-col gap-3 sm:flex-row">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-smoke" />
             <Input
-              placeholder="Search content or reasoning..."
+              placeholder="Search reasoning..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              aria-label="Search moderation log content or reasoning"
+              aria-label="Search moderation log reasoning"
               className="h-9 border-charcoal bg-coal pl-9 text-sm placeholder:text-smoke focus-visible:ring-flame-500/50"
             />
           </div>
@@ -135,7 +191,7 @@ export default function ModLogPage() {
 
         <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Filter by decision">
           <Filter className="h-4 w-4 text-smoke" />
-          {(["all", "approved", "flagged", "removed"] as const).map((d) => (
+          {(["all", "approved", "flagged", "removed", "warned"] as const).map((d) => (
             <button
               key={d}
               onClick={() => setDecisionFilter(d)}
@@ -156,18 +212,34 @@ export default function ModLogPage() {
       <div className="mt-6 space-y-2">
         {loading ? (
           <ModLogSkeleton />
+        ) : error ? (
+          <div className="py-16 text-center">
+            <XCircle className="mx-auto h-12 w-12 text-red-400/60" />
+            <p className="mt-4 text-ash">{error}</p>
+            <Button
+              variant="outline"
+              size="sm"
+              className="mt-4 border-charcoal text-ash"
+              onClick={() => setOffset(0)}
+            >
+              Retry
+            </Button>
+          </div>
         ) : filteredEntries.length === 0 ? (
           <div className="py-16 text-center">
             <Shield className="mx-auto h-12 w-12 text-smoke/40" />
-            <h3 className="mt-4 text-lg font-medium text-ash">Mod Log — Coming Soon</h3>
+            <h3 className="mt-4 text-lg font-medium text-ash">
+              {total === 0 ? "No moderation entries yet" : "No matching entries"}
+            </h3>
             <p className="mt-2 text-sm text-smoke max-w-md mx-auto">
-              Every AI moderation decision will be logged here publicly.
-              This feature is under development.
+              {total === 0
+                ? "Moderation decisions will appear here as content is reviewed by the AI."
+                : "Try adjusting your filters to see more results."}
             </p>
           </div>
         ) : (
           filteredEntries.map((entry) => {
-            const config = decisionConfig[entry.decision];
+            const config = decisionConfig[entry.decision] ?? decisionConfig.flagged;
             const Icon = config.icon;
 
             return (
@@ -181,18 +253,25 @@ export default function ModLogPage() {
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-sm text-foreground">
-                      {entry.contentSnippet}
+                      {entry.content_type === "post" ? "Post" : "Comment"} moderated
+                      {entry.injection_detected && (
+                        <span className="ml-2 text-[10px] text-red-400 font-medium">
+                          INJECTION DETECTED
+                        </span>
+                      )}
                     </p>
                     <div className="flex items-center gap-2 text-[10px] text-smoke">
                       <span className="text-flame-400">
-                        <span className="text-lava-hot">f</span><span className="text-smoke mx-1">|</span><span>{entry.campfire}</span>
+                        <span className="text-lava-hot">f</span>
+                        <span className="text-smoke mx-1">|</span>
+                        <span>{entry.campfire_name}</span>
                       </span>
                       <span>·</span>
-                      <span>{entry.contentType}</span>
+                      <span>{entry.content_type}</span>
                       <span>·</span>
                       <span className="flex items-center gap-1">
                         <Clock className="h-2.5 w-2.5" />
-                        {timeAgo(entry.createdAt)}
+                        {timeAgo(entry.created_at)}
                       </span>
                     </div>
                   </div>
@@ -206,9 +285,6 @@ export default function ModLogPage() {
                     >
                       {config.label}
                     </Badge>
-                    <span className="text-[10px] tabular-nums text-smoke">
-                      {Math.round(entry.confidence * 100)}%
-                    </span>
                   </div>
                 </summary>
 
@@ -219,34 +295,26 @@ export default function ModLogPage() {
                         AI Reasoning
                       </span>
                       <p className="mt-1 text-sm leading-relaxed text-ash">
-                        {entry.reasoning}
+                        {entry.reason}
                       </p>
                     </div>
-                    <div className="flex items-center gap-3 text-xs text-smoke">
+                    <div className="flex flex-wrap items-center gap-3 text-xs text-smoke">
                       <span>
-                        Tier:{" "}
-                        <span className="text-ash">
-                          {tierLabels[entry.tier]}
+                        Level:{" "}
+                        <span className="text-ash capitalize">
+                          {entry.agent_level}
                         </span>
                       </span>
-                      <span>
-                        Confidence:{" "}
-                        <span
-                          className={cn(
-                            entry.confidence >= 0.9 && "text-green-400",
-                            entry.confidence >= 0.7 &&
-                              entry.confidence < 0.9 &&
-                              "text-amber-400",
-                            entry.confidence < 0.7 && "text-red-400",
-                          )}
-                        >
-                          {Math.round(entry.confidence * 100)}%
+                      {entry.ai_model && (
+                        <span>
+                          Model:{" "}
+                          <span className="text-ash">{entry.ai_model}</span>
                         </span>
-                      </span>
-                      {entry.confidence < 0.8 && (
-                        <span className="flex items-center gap-1 text-amber-400">
+                      )}
+                      {entry.injection_detected && (
+                        <span className="flex items-center gap-1 text-red-400">
                           <AlertTriangle className="h-3 w-3" />
-                          Low confidence — flagged for review
+                          Injection attempt detected
                         </span>
                       )}
                     </div>
@@ -257,6 +325,41 @@ export default function ModLogPage() {
           })
         )}
       </div>
+
+      {/* Pagination */}
+      {total > PAGE_SIZE && (
+        <div className="mt-6 flex items-center justify-between text-xs text-smoke">
+          <span>
+            Showing {offset + 1}–{Math.min(offset + PAGE_SIZE, total)} of{" "}
+            {total}
+          </span>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={offset === 0}
+              className="h-7 border-charcoal text-ash"
+              onClick={() => setOffset(Math.max(0, offset - PAGE_SIZE))}
+            >
+              <ChevronLeft className="h-3.5 w-3.5" />
+              Prev
+            </Button>
+            <span className="text-ash">
+              Page {currentPage} of {totalPages}
+            </span>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={offset + PAGE_SIZE >= total}
+              className="h-7 border-charcoal text-ash"
+              onClick={() => setOffset(offset + PAGE_SIZE)}
+            >
+              Next
+              <ChevronRight className="h-3.5 w-3.5" />
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

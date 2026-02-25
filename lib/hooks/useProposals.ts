@@ -7,6 +7,7 @@ import { api, type Proposal, ApiError } from "@/lib/api/client";
 // List proposals for a campfire
 // ---------------------------------------------------------------------------
 
+/** Available for future use — paginated proposal list for a campfire */
 interface UseProposalsOptions {
   campfireId: string;
   status?: "discussion" | "voting" | "passed" | "failed" | "implemented";
@@ -92,6 +93,7 @@ export function useProposals(opts: UseProposalsOptions): UseProposalsReturn {
 // Single proposal
 // ---------------------------------------------------------------------------
 
+/** Available for future use — fetches a single proposal by ID */
 interface UseProposalReturn {
   proposal: Proposal | null;
   loading: boolean;
@@ -129,9 +131,11 @@ export function useProposal(proposalId: string | undefined): UseProposalReturn {
 // Create proposal
 // ---------------------------------------------------------------------------
 
+/** @see Used by governance/create page */
 interface CreateProposalInput {
   campfire_id: string;
-  proposal_type: "modify_prompt" | "addendum_prompt" | "change_settings";
+  /** Primary type is "change_settings". Legacy types "modify_prompt" and "addendum_prompt" are deprecated. */
+  proposal_type: "change_settings" | "modify_config" | "amend_rules" | "custom" | "rename_agent" | "modify_prompt" | "addendum_prompt";
   title: string;
   description: string;
   proposed_changes: Record<string, unknown>;
@@ -169,6 +173,7 @@ export function useCreateProposal(): UseCreateProposalReturn {
 // Vote on proposal
 // ---------------------------------------------------------------------------
 
+/** Available for future use — casts a vote on a governance proposal */
 type ProposalVote = "for" | "against";
 
 interface UseProposalVoteReturn {

@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import {
   ArrowLeft,
   Share2,
@@ -13,23 +13,30 @@ import {
   MessageSquare,
   Send,
   AlertCircle,
+  X,
+  Check,
+  Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { SparkButton } from "@/components/fuega/spark-button";
 import { CommentCard } from "@/components/fuega/comment-card";
 import { UserAvatar } from "@/components/fuega/user-avatar";
 import { ModBadge } from "@/components/fuega/mod-badge";
 import { PostDetailSkeleton } from "@/components/fuega/page-skeleton";
+import { ReportDialog } from "@/components/fuega/report-dialog";
 import { useAuth } from "@/lib/contexts/auth-context";
 import { usePost } from "@/lib/hooks/usePosts";
 import { useComments, useCreateComment } from "@/lib/hooks/useComments";
 import { useVoting } from "@/lib/hooks/useVoting";
+import { api, ApiError } from "@/lib/api/client";
 import { toPostCardData, flattenCommentsForDisplay } from "@/lib/adapters/post-adapter";
 import { timeAgo } from "@/lib/utils/time-ago";
 
 export default function PostDetailPage() {
   const params = useParams();
+  const router = useRouter();
   const { user } = useAuth();
   const campfireSlug = params.campfire as string;
   const postId = params.postId as string;
@@ -60,9 +67,70 @@ export default function PostDetailPage() {
   >({});
   const [commentText, setCommentText] = React.useState("");
 
+  // Edit mode state
+  const [editing, setEditing] = React.useState(false);
+  const [editTitle, setEditTitle] = React.useState("");
+  const [editBody, setEditBody] = React.useState("");
+  const [editSaving, setEditSaving] = React.useState(false);
+  const [editError, setEditError] = React.useState<string | null>(null);
+
+  // Delete state
+  const [deleting, setDeleting] = React.useState(false);
+
+  // Report dialog state
+  const [reportOpen, setReportOpen] = React.useState(false);
+
   // Convert to UI shapes
   const post = rawPost ? toPostCardData(rawPost) : null;
   const displayComments = flattenCommentsForDisplay(rawComments);
+
+  // --- Edit handlers ---
+  const handleStartEdit = () => {
+    if (!rawPost) return;
+    setEditTitle(rawPost.title);
+    setEditBody(rawPost.body ?? "");
+    setEditError(null);
+    setEditing(true);
+  };
+
+  const handleCancelEdit = () => {
+    setEditing(false);
+    setEditError(null);
+  };
+
+  const handleSaveEdit = async () => {
+    if (!rawPost) return;
+    setEditSaving(true);
+    setEditError(null);
+    try {
+      await api.patch(`/api/posts/${postId}`, {
+        title: editTitle,
+        body: editBody || null,
+      });
+      setEditing(false);
+      await refreshPost();
+    } catch (err) {
+      setEditError(err instanceof ApiError ? err.message : "Failed to save changes");
+    } finally {
+      setEditSaving(false);
+    }
+  };
+
+  // --- Delete handler ---
+  const handleDelete = async () => {
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this post? This action cannot be undone."
+    );
+    if (!confirmed) return;
+    setDeleting(true);
+    try {
+      await api.delete(`/api/posts/${postId}`);
+      router.push(`/f/${campfireSlug}`);
+    } catch (err) {
+      alert(err instanceof ApiError ? err.message : "Failed to delete post");
+      setDeleting(false);
+    }
+  };
 
   const handlePostVote = async (voteType: "spark" | "douse") => {
     const current = postVote;
@@ -186,14 +254,74 @@ export default function PostDetailPage() {
           )}
         </div>
 
-        <h1 className="mt-2 text-xl font-bold text-foreground">
-          {post.title}
-        </h1>
-
-        {post.body && (
-          <div className="mt-3 whitespace-pre-wrap text-sm leading-relaxed text-ash">
-            {post.body}
+        {editing ? (
+          <div className="mt-3 space-y-3">
+            <div>
+              <Input
+                value={editTitle}
+                onChange={(e) => setEditTitle(e.target.value)}
+                placeholder="Post title"
+                className="border-charcoal bg-coal text-foreground font-bold placeholder:text-smoke focus-visible:ring-flame-500/50"
+                maxLength={300}
+                aria-label="Edit title"
+              />
+            </div>
+            <div>
+              <Textarea
+                value={editBody}
+                onChange={(e) => setEditBody(e.target.value)}
+                placeholder="Post body (optional)"
+                rows={6}
+                className="min-h-[120px] resize-y border-charcoal bg-coal text-ash placeholder:text-smoke focus-visible:ring-flame-500/50"
+                maxLength={40000}
+                aria-label="Edit body"
+              />
+            </div>
+            {editError && (
+              <div className="flex items-center gap-2 text-sm text-red-400">
+                <AlertCircle className="h-4 w-4 shrink-0" />
+                {editError}
+              </div>
+            )}
+            <div className="flex items-center gap-2">
+              <Button
+                variant="spark"
+                size="sm"
+                onClick={handleSaveEdit}
+                disabled={editSaving || !editTitle.trim()}
+                className="gap-1.5"
+              >
+                {editSaving ? (
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                ) : (
+                  <Check className="h-3.5 w-3.5" />
+                )}
+                {editSaving ? "Saving..." : "Save"}
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleCancelEdit}
+                disabled={editSaving}
+                className="gap-1.5 text-smoke hover:text-foreground"
+              >
+                <X className="h-3.5 w-3.5" />
+                Cancel
+              </Button>
+            </div>
           </div>
+        ) : (
+          <>
+            <h1 className="mt-2 text-xl font-bold text-foreground">
+              {post.title}
+            </h1>
+
+            {post.body && (
+              <div className="mt-3 whitespace-pre-wrap text-sm leading-relaxed text-ash">
+                {post.body}
+              </div>
+            )}
+          </>
         )}
 
         {/* Action bar — inline voting */}
@@ -217,22 +345,35 @@ export default function PostDetailPage() {
             Share
           </button>
           <button
-            onClick={() => { alert("Reporting is coming soon."); }}
+            onClick={() => setReportOpen(true)}
             className="flex items-center gap-1.5 transition-colors hover:text-foreground"
             aria-label="Report post"
           >
             <Flag className="h-3.5 w-3.5" />
             Report
           </button>
-          {isOwner && (
+          {isOwner && !editing && (
             <>
-              <button className="flex items-center gap-1.5 text-smoke/50 cursor-not-allowed" aria-label="Edit post" disabled title="Editing coming soon">
+              <button
+                onClick={handleStartEdit}
+                className="flex items-center gap-1.5 transition-colors hover:text-foreground"
+                aria-label="Edit post"
+              >
                 <Edit3 className="h-3.5 w-3.5" />
                 Edit
               </button>
-              <button className="flex items-center gap-1.5 text-smoke/50 cursor-not-allowed" aria-label="Delete post" disabled title="Deleting coming soon">
-                <Trash2 className="h-3.5 w-3.5" />
-                Delete
+              <button
+                onClick={handleDelete}
+                disabled={deleting}
+                className="flex items-center gap-1.5 transition-colors hover:text-red-400 disabled:opacity-50"
+                aria-label="Delete post"
+              >
+                {deleting ? (
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                ) : (
+                  <Trash2 className="h-3.5 w-3.5" />
+                )}
+                {deleting ? "Deleting..." : "Delete"}
               </button>
             </>
           )}
@@ -312,6 +453,13 @@ export default function PostDetailPage() {
           )}
         </div>
       </div>
+
+      {/* Report dialog */}
+      <ReportDialog
+        open={reportOpen}
+        onOpenChange={setReportOpen}
+        postId={postId}
+      />
     </div>
   );
 }

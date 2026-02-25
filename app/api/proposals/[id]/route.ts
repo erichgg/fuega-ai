@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+import { checkReadRateLimit } from "@/lib/auth/rate-limit";
+import { hashIp, getClientIp } from "@/lib/auth/ip-hash";
 import {
   getProposalById,
   checkAndExecuteProposal,
@@ -16,8 +18,17 @@ interface RouteParams {
  * Get full proposal details with current vote counts.
  * Also triggers lifecycle check (discussion → voting → pass/fail).
  */
-export async function GET(_req: Request, { params }: RouteParams) {
+export async function GET(req: Request, { params }: RouteParams) {
   try {
+    const ipHash = hashIp(getClientIp(req));
+    const rateLimit = await checkReadRateLimit(ipHash);
+    if (!rateLimit.allowed) {
+      return NextResponse.json(
+        { error: "Too many requests. Try again later.", code: "RATE_LIMITED" },
+        { status: 429, headers: { "Retry-After": String(rateLimit.retryAfterSeconds) } }
+      );
+    }
+
     const { id } = await params;
 
     // Check and potentially execute the proposal lifecycle

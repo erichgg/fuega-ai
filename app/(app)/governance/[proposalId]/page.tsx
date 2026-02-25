@@ -8,21 +8,20 @@ import {
   Clock,
   CheckCircle2,
   XCircle,
-  Vote,
   ThumbsUp,
   ThumbsDown,
-  Send,
   Bot,
+  MessageSquare,
+  Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Textarea } from "@/components/ui/textarea";
-import { UserAvatar } from "@/components/fuega/user-avatar";
 import { GovernanceSkeleton } from "@/components/fuega/page-skeleton";
 import { useAuth } from "@/lib/contexts/auth-context";
 import { cn } from "@/lib/utils";
 import { timeAgo } from "@/lib/utils/time-ago";
 import { api, ApiError } from "@/lib/api/client";
+import { useProposalVote } from "@/lib/hooks/useProposals";
 
 type ProposalStatus = "discussion" | "voting" | "passed" | "rejected" | "executed";
 
@@ -45,12 +44,6 @@ interface ProposalDetail {
   proposedPrompt: string | null;
 }
 
-interface DiscussionComment {
-  id: string;
-  body: string;
-  author: string;
-  createdAt: string;
-}
 
 function timeRemaining(dateStr: string): string {
   const diff = new Date(dateStr).getTime() - Date.now();
@@ -67,13 +60,67 @@ export default function ProposalDetailPage() {
   const proposalId = params.proposalId as string;
 
   const [proposal, setProposal] = React.useState<ProposalDetail | null>(null);
-  const [discussion, setDiscussion] = React.useState<DiscussionComment[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
   const [userVote, setUserVote] = React.useState<"for" | "against" | null>(
     null,
   );
-  const [commentText, setCommentText] = React.useState("");
+  const [voteError, setVoteError] = React.useState<string | null>(null);
+  const { voteOnProposal, voting } = useProposalVote();
+
+  interface ApiProposalDetail {
+    id: string;
+    campfire_id: string;
+    proposal_type: string;
+    title: string;
+    description: string;
+    proposed_changes: Record<string, unknown>;
+    status: string;
+    votes_for: number;
+    votes_against: number;
+    votes_abstain: number;
+    discussion_ends_at: string;
+    voting_ends_at: string;
+    created_at: string;
+    creator_username?: string;
+    campfire_name?: string;
+  }
+
+  const mapProposal = React.useCallback((p: ApiProposalDetail): ProposalDetail => {
+    const statusMap: Record<string, ProposalStatus> = {
+      failed: "rejected",
+      implemented: "executed",
+    };
+    return {
+      id: p.id,
+      title: p.title,
+      description: p.description,
+      campfire: p.campfire_name ?? "unknown",
+      proposalType: p.proposal_type,
+      status: (statusMap[p.status] ?? p.status) as ProposalStatus,
+      votesFor: p.votes_for,
+      votesAgainst: p.votes_against,
+      commentCount: 0,
+      quorum: 100,
+      author: p.creator_username ?? "unknown",
+      createdAt: p.created_at,
+      discussionEndsAt: p.discussion_ends_at,
+      votingEndsAt: p.voting_ends_at,
+      currentPrompt: (p.proposed_changes?.current_prompt as string) ?? null,
+      proposedPrompt: (p.proposed_changes?.proposed_prompt as string) ?? null,
+    };
+  }, []);
+
+  const refreshProposal = React.useCallback(async () => {
+    try {
+      const res = await api.get<{ proposal: ApiProposalDetail }>(
+        `/api/proposals/${proposalId}`,
+      );
+      setProposal(mapProposal(res.proposal));
+    } catch {
+      // Silently fail on refresh — stale data is still visible
+    }
+  }, [proposalId, mapProposal]);
 
   React.useEffect(() => {
     let cancelled = false;
@@ -82,53 +129,11 @@ export default function ProposalDetailPage() {
       setLoading(true);
       setError(null);
       try {
-        interface ApiProposalDetail {
-          id: string;
-          campfire_id: string;
-          proposal_type: string;
-          title: string;
-          description: string;
-          proposed_changes: Record<string, unknown>;
-          status: string;
-          votes_for: number;
-          votes_against: number;
-          votes_abstain: number;
-          discussion_ends_at: string;
-          voting_ends_at: string;
-          created_at: string;
-          creator_username?: string;
-          campfire_name?: string;
-        }
-
         const res = await api.get<{ proposal: ApiProposalDetail }>(
           `/api/proposals/${proposalId}`,
         );
         if (!cancelled) {
-          const p = res.proposal;
-          const statusMap: Record<string, ProposalStatus> = {
-            failed: "rejected",
-            implemented: "executed",
-          };
-          setProposal({
-            id: p.id,
-            title: p.title,
-            description: p.description,
-            campfire: p.campfire_name ?? "unknown",
-            proposalType: p.proposal_type,
-            status: (statusMap[p.status] ?? p.status) as ProposalStatus,
-            votesFor: p.votes_for,
-            votesAgainst: p.votes_against,
-            commentCount: 0,
-            quorum: 100,
-            author: p.creator_username ?? "unknown",
-            createdAt: p.created_at,
-            discussionEndsAt: p.discussion_ends_at,
-            votingEndsAt: p.voting_ends_at,
-            currentPrompt: (p.proposed_changes?.current_prompt as string) ?? null,
-            proposedPrompt: (p.proposed_changes?.proposed_prompt as string) ?? null,
-          });
-          // API does not return discussion comments yet
-          setDiscussion([]);
+          setProposal(mapProposal(res.proposal));
         }
       } catch (err) {
         if (!cancelled) {
@@ -147,7 +152,21 @@ export default function ProposalDetailPage() {
 
     fetchProposal();
     return () => { cancelled = true; };
-  }, [proposalId]);
+  }, [proposalId, mapProposal]);
+
+  const handleVote = React.useCallback(async (vote: "for" | "against") => {
+    if (voting) return;
+    setVoteError(null);
+    try {
+      await voteOnProposal(proposalId, vote);
+      setUserVote(vote);
+      await refreshProposal();
+    } catch (err) {
+      setVoteError(
+        err instanceof ApiError ? err.message : "Failed to cast vote",
+      );
+    }
+  }, [proposalId, voteOnProposal, voting, refreshProposal]);
 
   if (loading) return <GovernanceSkeleton />;
   if (error)
@@ -298,39 +317,53 @@ export default function ProposalDetailPage() {
         </div>
 
         {/* Vote buttons */}
-        {canVote && (
+        {canVote && !userVote && (
           <div className="mt-4 flex gap-3">
             <Button
-              variant={userVote === "for" ? "default" : "outline"}
+              variant="outline"
               size="sm"
-              className={cn(
-                "flex-1 gap-1.5",
-                userVote === "for"
-                  ? "bg-green-500 text-white hover:bg-green-600"
-                  : "border-charcoal text-ash hover:border-green-500/50 hover:text-green-400",
-              )}
-              onClick={() => setUserVote(userVote === "for" ? null : "for")}
+              disabled={voting}
+              className="flex-1 gap-1.5 border-charcoal text-ash hover:border-green-500/50 hover:text-green-400"
+              onClick={() => handleVote("for")}
             >
-              <ThumbsUp className="h-3.5 w-3.5" />
+              {voting ? (
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              ) : (
+                <ThumbsUp className="h-3.5 w-3.5" />
+              )}
               Vote For
             </Button>
             <Button
-              variant={userVote === "against" ? "default" : "outline"}
+              variant="outline"
               size="sm"
-              className={cn(
-                "flex-1 gap-1.5",
-                userVote === "against"
-                  ? "bg-red-500 text-white hover:bg-red-600"
-                  : "border-charcoal text-ash hover:border-red-500/50 hover:text-red-400",
-              )}
-              onClick={() =>
-                setUserVote(userVote === "against" ? null : "against")
-              }
+              disabled={voting}
+              className="flex-1 gap-1.5 border-charcoal text-ash hover:border-red-500/50 hover:text-red-400"
+              onClick={() => handleVote("against")}
             >
-              <ThumbsDown className="h-3.5 w-3.5" />
+              {voting ? (
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              ) : (
+                <ThumbsDown className="h-3.5 w-3.5" />
+              )}
               Vote Against
             </Button>
           </div>
+        )}
+
+        {canVote && userVote && (
+          <div className="mt-4 rounded-md border border-charcoal bg-charcoal/30 p-3 text-center">
+            <p className="text-sm text-ash">
+              You voted{" "}
+              <span className={userVote === "for" ? "text-green-400 font-medium" : "text-red-400 font-medium"}>
+                {userVote}
+              </span>{" "}
+              this proposal
+            </p>
+          </div>
+        )}
+
+        {voteError && (
+          <p className="mt-2 text-center text-xs text-red-400">{voteError}</p>
         )}
 
         {!user && proposal.status === "voting" && (
@@ -344,74 +377,14 @@ export default function ProposalDetailPage() {
       </div>
 
       {/* Discussion */}
-      <div className="mt-4">
-        <h2 className="text-sm font-medium text-ash">
-          Discussion ({discussion.length})
+      <div className="mt-4 rounded-lg border border-charcoal bg-charcoal/50 p-5">
+        <h2 className="flex items-center gap-2 text-sm font-medium text-ash">
+          <MessageSquare className="h-4 w-4" />
+          Discussion
         </h2>
-
-        {user && (
-          <div className="mt-3 flex gap-3 rounded-lg border border-charcoal bg-charcoal/50 p-3">
-            <UserAvatar username={user.username} size="sm" />
-            <div className="flex-1">
-              <Textarea
-                placeholder="Add to the discussion..."
-                value={commentText}
-                onChange={(e) => setCommentText(e.target.value)}
-                rows={2}
-                className="min-h-[60px] resize-y border-charcoal bg-coal text-sm placeholder:text-smoke focus-visible:ring-flame-500/50"
-              />
-              <div className="mt-2 flex justify-end">
-                <Button
-                  variant="spark"
-                  size="sm"
-                  disabled={!commentText.trim()}
-                  className="gap-1.5"
-                  onClick={() => {
-                    setDiscussion((prev) => [
-                      ...prev,
-                      {
-                        id: `gd-new-${Date.now()}`,
-                        body: commentText,
-                        author: user.username,
-                        createdAt: new Date().toISOString(),
-                      },
-                    ]);
-                    setCommentText("");
-                  }}
-                >
-                  <Send className="h-3.5 w-3.5" />
-                  Comment
-                </Button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        <div className="mt-3 space-y-2">
-          {discussion.length === 0 && (
-            <div className="py-8 text-center">
-              <p className="text-sm text-smoke">No discussion yet</p>
-            </div>
-          )}
-          {discussion.map((comment) => (
-            <div
-              key={comment.id}
-              className="rounded-lg border border-charcoal/50 bg-charcoal/30 p-3"
-            >
-              <div className="flex items-center gap-2 text-xs text-smoke">
-                <UserAvatar username={comment.author} size="sm" />
-                <span className="font-medium text-ash">
-                  {comment.author}
-                </span>
-                <span>·</span>
-                <span>{timeAgo(comment.createdAt)}</span>
-              </div>
-              <p className="mt-1.5 text-sm text-ash leading-relaxed">
-                {comment.body}
-              </p>
-            </div>
-          ))}
-        </div>
+        <p className="mt-3 text-center text-sm text-smoke py-4">
+          Discussion comments coming soon. Proposal discussion will be available in a future update.
+        </p>
       </div>
     </div>
   );

@@ -87,9 +87,9 @@ describe("column types", () => {
     expect((colMap["created_at"] as any)?.data_type).toBe("timestamp with time zone");
     expect((colMap["updated_at"] as any)?.data_type).toBe("timestamp with time zone");
     expect((colMap["is_banned"] as any)?.data_type).toBe("boolean");
-    expect((colMap["post_sparks"] as any)?.data_type).toBe("integer");
-    expect((colMap["comment_sparks"] as any)?.data_type).toBe("integer");
-    expect((colMap["founder_badge_number"] as any)?.data_type).toBe("integer");
+    expect((colMap["post_glow"] as any)?.data_type).toBe("integer");
+    expect((colMap["comment_glow"] as any)?.data_type).toBe("integer");
+    expect((colMap["founder_number"] as any)?.data_type).toBe("integer");
     expect((colMap["ip_address_hash"] as any)?.data_type).toBe("character varying");
     expect((colMap["deleted_at"] as any)?.data_type).toBe("timestamp with time zone");
   });
@@ -136,8 +136,8 @@ describe("column types", () => {
     expect((colMap["anonymized"] as any)?.data_type).toBe("boolean");
   });
 
-  it("communities table has JSONB governance_config", async () => {
-    const cols = await getColumns("communities");
+  it("campfires table has JSONB governance_config", async () => {
+    const cols = await getColumns("campfires");
     const colMap = Object.fromEntries(cols.map((c) => [c.column_name, c]));
 
     expect((colMap["governance_config"] as any)?.data_type).toBe("jsonb");
@@ -197,8 +197,8 @@ describe("NOT NULL constraints", () => {
     expect(notNull).toContain("vote_value");
   });
 
-  it("moderation_log requires content_type, content_id, campfire_id, author_id, agent_level, decision, reason", async () => {
-    const notNull = await getNonNullableCols("moderation_log");
+  it("campfire_mod_logs requires content_type, content_id, campfire_id, author_id, agent_level, decision, reason", async () => {
+    const notNull = await getNonNullableCols("campfire_mod_logs");
     for (const col of [
       "content_type",
       "content_id",
@@ -280,18 +280,18 @@ describe("CHECK constraints", () => {
     ).rejects.toThrow();
   });
 
-  it("rejects negative sparks on users", async () => {
+  it("rejects negative glow on users", async () => {
     await expect(
-      db.query(`UPDATE users SET post_sparks = -1 WHERE id = $1`, [
+      db.query(`UPDATE users SET post_glow = -1 WHERE id = $1`, [
         "20000000-0000-0000-0000-000000000001",
       ])
     ).rejects.toThrow();
   });
 
-  it("rejects community name with invalid characters", async () => {
+  it("rejects campfire name with invalid characters", async () => {
     await expect(
       db.query(
-        `INSERT INTO communities (name, display_name, description, ai_prompt, created_by)
+        `INSERT INTO campfires (name, display_name, description, ai_prompt, created_by)
          VALUES ($1, $2, $3, $4, $5)`,
         [
           "Invalid Name!", // spaces + special chars
@@ -304,10 +304,10 @@ describe("CHECK constraints", () => {
     ).rejects.toThrow();
   });
 
-  it("accepts valid community name", async () => {
+  it("accepts valid campfire name", async () => {
     // Should not throw
     await db.query(
-      `INSERT INTO communities (name, display_name, description, ai_prompt, created_by)
+      `INSERT INTO campfires (name, display_name, description, ai_prompt, created_by)
        VALUES ($1, $2, $3, $4, $5)`,
       [
         "valid_name_123",
@@ -318,7 +318,7 @@ describe("CHECK constraints", () => {
       ]
     );
     // Cleanup
-    await db.query(`DELETE FROM communities WHERE name = 'valid_name_123'`);
+    await db.query(`DELETE FROM campfires WHERE name = 'valid_name_123'`);
   });
 
   it("rejects invalid proposal_type", async () => {
@@ -400,14 +400,14 @@ describe("CHECK constraints", () => {
   it("rejects invalid moderation decision", async () => {
     await expect(
       db.query(
-        `INSERT INTO moderation_log (content_type, content_id, campfire_id, author_id, agent_level, decision, reason)
+        `INSERT INTO campfire_mod_logs (content_type, content_id, campfire_id, author_id, agent_level, decision, reason)
          VALUES ($1, $2, $3, $4, $5, $6, $7)`,
         [
           "post",
           "40000000-0000-0000-0000-000000000001",
           "30000000-0000-0000-0000-000000000001",
           "20000000-0000-0000-0000-000000000001",
-          "community",
+          "campfire",
           "deleted", // invalid — must be approved/removed/flagged/warned
           "test",
         ]
@@ -418,7 +418,7 @@ describe("CHECK constraints", () => {
   it("rejects invalid agent_level", async () => {
     await expect(
       db.query(
-        `INSERT INTO moderation_log (content_type, content_id, campfire_id, author_id, agent_level, decision, reason)
+        `INSERT INTO campfire_mod_logs (content_type, content_id, campfire_id, author_id, agent_level, decision, reason)
          VALUES ($1, $2, $3, $4, $5, $6, $7)`,
         [
           "post",
@@ -447,10 +447,10 @@ describe("UNIQUE constraints", () => {
     ).rejects.toThrow();
   });
 
-  it("rejects duplicate community name", async () => {
+  it("rejects duplicate campfire name", async () => {
     await expect(
       db.query(
-        `INSERT INTO communities (name, display_name, description, ai_prompt, created_by)
+        `INSERT INTO campfires (name, display_name, description, ai_prompt, created_by)
          VALUES ($1, $2, $3, $4, $5)`,
         [
           "test_tech", // already exists
@@ -499,10 +499,10 @@ describe("UNIQUE constraints", () => {
     );
   });
 
-  it("rejects duplicate community membership", async () => {
+  it("rejects duplicate campfire membership", async () => {
     await expect(
       db.query(
-        `INSERT INTO community_memberships (user_id, campfire_id, role)
+        `INSERT INTO campfire_members (user_id, campfire_id, role)
          VALUES ($1, $2, $3)`,
         [
           "20000000-0000-0000-0000-000000000001",
@@ -528,7 +528,7 @@ describe("UNIQUE constraints", () => {
 // DEFAULT VALUES
 // ─────────────────────────────────────────────────
 describe("default values", () => {
-  it("users get default values for sparks, is_banned", async () => {
+  it("users get default values for glow, is_banned", async () => {
     await db.query(
       `INSERT INTO users (id, username, password_hash)
        VALUES ($1, $2, $3)`,
@@ -540,13 +540,13 @@ describe("default values", () => {
     );
 
     const { rows } = await db.query(
-      `SELECT post_sparks, comment_sparks, is_banned, created_at, updated_at
+      `SELECT post_glow, comment_glow, is_banned, created_at, updated_at
        FROM users WHERE id = $1`,
       ["eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee"]
     );
 
-    expect((rows[0] as any).post_sparks).toBe(0);
-    expect((rows[0] as any).comment_sparks).toBe(0);
+    expect((rows[0] as any).post_glow).toBe(0);
+    expect((rows[0] as any).comment_glow).toBe(0);
     expect((rows[0] as any).is_banned).toBe(false);
     expect((rows[0] as any).created_at).toBeTruthy();
     expect((rows[0] as any).updated_at).toBeTruthy();
@@ -610,9 +610,9 @@ describe("default values", () => {
     ]);
   });
 
-  it("communities get default governance_config JSONB", async () => {
+  it("campfires get default governance_config JSONB", async () => {
     const { rows } = await db.query(
-      `SELECT governance_config FROM communities WHERE id = $1`,
+      `SELECT governance_config FROM campfires WHERE id = $1`,
       ["30000000-0000-0000-0000-000000000001"]
     );
     const config = (rows[0] as any).governance_config;
@@ -648,13 +648,13 @@ describe("default values", () => {
 // FOREIGN KEYS
 // ─────────────────────────────────────────────────
 describe("foreign keys", () => {
-  it("posts.campfire_id references communities(id)", async () => {
+  it("posts.campfire_id references campfires(id)", async () => {
     await expect(
       db.query(
         `INSERT INTO posts (campfire_id, author_id, title, post_type)
          VALUES ($1, $2, $3, $4)`,
         [
-          "ffffffff-ffff-ffff-ffff-ffffffffffff", // non-existent community
+          "ffffffff-ffff-ffff-ffff-ffffffffffff", // non-existent campfire
           "20000000-0000-0000-0000-000000000001",
           "Orphan post",
           "text",
@@ -709,11 +709,11 @@ describe("foreign keys", () => {
     ).rejects.toThrow();
   });
 
-  it("community_memberships references both users and communities", async () => {
+  it("campfire_members references both users and campfires", async () => {
     // Bad user
     await expect(
       db.query(
-        `INSERT INTO community_memberships (user_id, campfire_id)
+        `INSERT INTO campfire_members (user_id, campfire_id)
          VALUES ($1, $2)`,
         [
           "ffffffff-ffff-ffff-ffff-ffffffffffff",
@@ -722,10 +722,10 @@ describe("foreign keys", () => {
       )
     ).rejects.toThrow();
 
-    // Bad community
+    // Bad campfire
     await expect(
       db.query(
-        `INSERT INTO community_memberships (user_id, campfire_id)
+        `INSERT INTO campfire_members (user_id, campfire_id)
          VALUES ($1, $2)`,
         [
           "20000000-0000-0000-0000-000000000001",
@@ -735,10 +735,10 @@ describe("foreign keys", () => {
     ).rejects.toThrow();
   });
 
-  it("communities.created_by references users(id)", async () => {
+  it("campfires.created_by references users(id)", async () => {
     await expect(
       db.query(
-        `INSERT INTO communities (name, display_name, description, ai_prompt, created_by)
+        `INSERT INTO campfires (name, display_name, description, ai_prompt, created_by)
          VALUES ($1, $2, $3, $4, $5)`,
         [
           "fk_test_comm",
@@ -751,7 +751,7 @@ describe("foreign keys", () => {
     ).rejects.toThrow();
   });
 
-  it("moderation_appeals.moderation_log_id references moderation_log(id)", async () => {
+  it("moderation_appeals.moderation_log_id references campfire_mod_logs(id)", async () => {
     await expect(
       db.query(
         `INSERT INTO moderation_appeals (moderation_log_id, appellant_id, appeal_text)
@@ -765,7 +765,7 @@ describe("foreign keys", () => {
     ).rejects.toThrow();
   });
 
-  it("council_members references categories, communities, and users", async () => {
+  it("council_members references categories, campfires, and users", async () => {
     await expect(
       db.query(
         `INSERT INTO council_members (category_id, campfire_id, user_id, term_end)
@@ -793,7 +793,7 @@ describe("updated_at trigger", () => {
     // Small delay to ensure timestamp difference
     await new Promise((r) => setTimeout(r, 50));
 
-    await db.query(`UPDATE users SET post_sparks = post_sparks + 1 WHERE id = $1`, [
+    await db.query(`UPDATE users SET post_glow = post_glow + 1 WHERE id = $1`, [
       "20000000-0000-0000-0000-000000000001",
     ]);
 
@@ -807,7 +807,7 @@ describe("updated_at trigger", () => {
     );
 
     // Restore
-    await db.query(`UPDATE users SET post_sparks = post_sparks - 1 WHERE id = $1`, [
+    await db.query(`UPDATE users SET post_glow = post_glow - 1 WHERE id = $1`, [
       "20000000-0000-0000-0000-000000000001",
     ]);
   });

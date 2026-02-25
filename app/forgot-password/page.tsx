@@ -2,24 +2,33 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { Mail, Loader2, CheckCircle } from "lucide-react";
+import { Mail, Loader2, CheckCircle, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { FlameLogo } from "@/components/fuega/flame-logo";
+import { api, ApiError } from "@/lib/api/client";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = React.useState("");
   const [submitted, setSubmitted] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
+  const [error, setError] = React.useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    // Stub: simulate a short delay then show confirmation
-    await new Promise((resolve) => setTimeout(resolve, 800));
-    setLoading(false);
-    setSubmitted(true);
+    setError("");
+    try {
+      await api.post("/api/auth/forgot-password", { email });
+      setSubmitted(true);
+    } catch (err) {
+      setError(
+        err instanceof ApiError ? err.message : "Something went wrong. Please try again."
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -65,6 +74,15 @@ export default function ForgotPasswordPage() {
               </p>
 
               <form onSubmit={handleSubmit} className="space-y-4">
+                {error && (
+                  <div
+                    className="flex items-center gap-2 rounded-lg border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-400"
+                    role="alert"
+                  >
+                    <AlertCircle className="h-4 w-4 shrink-0" />
+                    {error}
+                  </div>
+                )}
                 <div className="space-y-2">
                   <Label htmlFor="email" className="text-ash">
                     Email address

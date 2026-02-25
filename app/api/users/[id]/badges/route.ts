@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+import { checkReadRateLimit } from "@/lib/auth/rate-limit";
+import { hashIp, getClientIp } from "@/lib/auth/ip-hash";
 import { getUserBadges } from "@/lib/services/badges.service";
 import { ServiceError } from "@/lib/services/posts.service";
 
@@ -10,10 +12,19 @@ export const dynamic = "force-dynamic";
  * Public (badges are visible on profiles).
  */
 export async function GET(
-  _req: Request,
+  req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const ipHash = hashIp(getClientIp(req));
+    const rateLimit = await checkReadRateLimit(ipHash);
+    if (!rateLimit.allowed) {
+      return NextResponse.json(
+        { error: "Too many requests. Try again later.", code: "RATE_LIMITED" },
+        { status: 429, headers: { "Retry-After": String(rateLimit.retryAfterSeconds) } }
+      );
+    }
+
     const { id } = await params;
 
     const badges = await getUserBadges(id);

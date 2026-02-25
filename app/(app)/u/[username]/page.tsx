@@ -15,6 +15,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PostCard } from "@/components/fuega/post-card";
+import { ReportDialog } from "@/components/fuega/report-dialog";
 import { UserAvatar } from "@/components/fuega/user-avatar";
 import { ProfileSkeleton } from "@/components/fuega/page-skeleton";
 import { useAuth } from "@/lib/contexts/auth-context";
@@ -97,6 +98,9 @@ export default function UserProfilePage() {
 
   // Voting
   const { handleVote, getVote, getDelta } = useOptimisticVoting();
+
+  // Report dialog
+  const [reportPostId, setReportPostId] = React.useState<string | null>(null);
 
   // Convert posts to card shape
   const postCards = rawPosts.map((p) => {
@@ -285,6 +289,7 @@ export default function UserProfilePage() {
                     post={post}
                     userVote={getVote(post.id)}
                     onVote={(v) => handleVote(post.id, v)}
+                    onReport={() => setReportPostId(post.id)}
                   />
                 </Link>
               ))}
@@ -300,6 +305,13 @@ export default function UserProfilePage() {
           )}
         </TabsContent>
       </Tabs>
+
+      {/* Report dialog */}
+      <ReportDialog
+        open={reportPostId !== null}
+        onOpenChange={(open) => { if (!open) setReportPostId(null); }}
+        postId={reportPostId ?? undefined}
+      />
     </div>
   );
 }

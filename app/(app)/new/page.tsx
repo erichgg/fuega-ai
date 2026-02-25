@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Clock, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PostCard } from "@/components/fuega/post-card";
+import { ReportDialog } from "@/components/fuega/report-dialog";
 import { FeedSkeleton } from "@/components/fuega/page-skeleton";
 import { useAuth } from "@/lib/contexts/auth-context";
 import { usePosts } from "@/lib/hooks/usePosts";
@@ -15,6 +16,7 @@ export default function NewPostsPage() {
   const { user } = useAuth();
   const { posts, loading, error, hasMore, loadMore } = usePosts({ sort: "new" });
   const { handleVote, getVote, getDelta } = useOptimisticVoting();
+  const [reportPostId, setReportPostId] = React.useState<string | null>(null);
 
   const postCards = posts.map((p) => {
     const card = toPostCardData(p);
@@ -82,6 +84,7 @@ export default function NewPostsPage() {
                   post={post}
                   userVote={getVote(post.id)}
                   onVote={(v) => handleVote(post.id, v)}
+                  onReport={() => setReportPostId(post.id)}
                 />
               </Link>
             ))}
@@ -96,6 +99,13 @@ export default function NewPostsPage() {
           </>
         )}
       </div>
+
+      {/* Report dialog */}
+      <ReportDialog
+        open={reportPostId !== null}
+        onOpenChange={(open) => { if (!open) setReportPostId(null); }}
+        postId={reportPostId ?? undefined}
+      />
     </div>
   );
 }

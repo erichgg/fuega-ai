@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+import { checkSearchRateLimit } from "@/lib/auth/rate-limit";
+import { hashIp, getClientIp } from "@/lib/auth/ip-hash";
 import { searchSchema } from "@/lib/validation/search";
 import {
   searchAll,
@@ -15,6 +17,15 @@ export const dynamic = "force-dynamic";
  */
 export async function GET(req: Request) {
   try {
+    const ipHash = hashIp(getClientIp(req));
+    const rateLimit = await checkSearchRateLimit(ipHash);
+    if (!rateLimit.allowed) {
+      return NextResponse.json(
+        { error: "Too many requests. Try again later.", code: "RATE_LIMITED" },
+        { status: 429, headers: { "Retry-After": String(rateLimit.retryAfterSeconds) } }
+      );
+    }
+
     const url = new URL(req.url);
     const parsed = searchSchema.safeParse({
       q: url.searchParams.get("q") ?? "",

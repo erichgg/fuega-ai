@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { authenticate } from "@/lib/auth/jwt";
-import { checkGeneralRateLimit } from "@/lib/auth/rate-limit";
+import { checkGeneralRateLimit, checkReadRateLimit } from "@/lib/auth/rate-limit";
+import { hashIp, getClientIp } from "@/lib/auth/ip-hash";
 import {
   createCampfireSchema,
   listCampfiresSchema,
@@ -19,6 +20,15 @@ export const dynamic = "force-dynamic";
  */
 export async function GET(req: Request) {
   try {
+    const ipHash = hashIp(getClientIp(req));
+    const rateLimit = await checkReadRateLimit(ipHash);
+    if (!rateLimit.allowed) {
+      return NextResponse.json(
+        { error: "Too many requests. Try again later.", code: "RATE_LIMITED" },
+        { status: 429, headers: { "Retry-After": String(rateLimit.retryAfterSeconds) } }
+      );
+    }
+
     const url = new URL(req.url);
     const parsed = listCampfiresSchema.safeParse({
       sort: url.searchParams.get("sort") ?? "members",

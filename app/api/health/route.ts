@@ -1,3 +1,5 @@
+import { checkReadRateLimit } from "@/lib/auth/rate-limit";
+import { hashIp, getClientIp } from "@/lib/auth/ip-hash";
 import { checkDbHealth, getPoolStats } from "@/lib/monitoring/db-monitor";
 import { logger } from "@/lib/monitoring/logger";
 
@@ -48,7 +50,16 @@ function checkEnvironment(): HealthCheck {
   };
 }
 
-export async function GET() {
+export async function GET(req: Request) {
+  const ipHash = hashIp(getClientIp(req));
+  const rateLimit = await checkReadRateLimit(ipHash);
+  if (!rateLimit.allowed) {
+    return Response.json(
+      { error: "Too many requests. Try again later.", code: "RATE_LIMITED" },
+      { status: 429, headers: { "Retry-After": String(rateLimit.retryAfterSeconds) } }
+    );
+  }
+
   const checks: HealthCheck[] = [];
 
   const [db, ai] = await Promise.all([checkDatabase(), checkAnthropicApi()]);

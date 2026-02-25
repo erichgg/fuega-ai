@@ -10,6 +10,7 @@
  *   - Votes:  100 per hour per user
  *   - AI mod:  50 per hour per IP hash
  *   - Password: 3 per hour per user (brute-force protection)
+ *   - Reports: 10 per hour per user
  *   - General: 20 per minute per user (catch-all for settings/actions)
  */
 
@@ -61,6 +62,30 @@ const generalActionLimiter = new RateLimiterMemory({
   points: 20,
   duration: 60, // 1 minute
   keyPrefix: "general_action",
+});
+
+const readLimiter = new RateLimiterMemory({
+  points: 60,
+  duration: 60, // 1 minute — generous for GET endpoints
+  keyPrefix: "read",
+});
+
+const searchLimiter = new RateLimiterMemory({
+  points: 15,
+  duration: 60, // 1 minute — tighter for expensive search queries
+  keyPrefix: "search",
+});
+
+const forgotPasswordLimiter = new RateLimiterMemory({
+  points: 3,
+  duration: 60 * 60, // 1 hour
+  keyPrefix: "forgot_password",
+});
+
+const reportLimiter = new RateLimiterMemory({
+  points: 10,
+  duration: 60 * 60, // 1 hour
+  keyPrefix: "report",
 });
 
 const cspReportLimiter = new RateLimiterMemory({
@@ -220,6 +245,83 @@ export async function checkGeneralRateLimit(
 }
 
 /**
+ * Check read rate limit for public GET endpoints.
+ * Keyed by IP hash (works for unauthenticated requests too).
+ */
+export async function checkReadRateLimit(
+  ipHash: string
+): Promise<RateLimitResult> {
+  try {
+    await readLimiter.consume(ipHash);
+    return { allowed: true, retryAfterSeconds: 0 };
+  } catch (err: unknown) {
+    const rlErr = err as { msBeforeNext?: number };
+    return {
+      allowed: false,
+      retryAfterSeconds: Math.ceil((rlErr.msBeforeNext ?? 60000) / 1000),
+    };
+  }
+}
+
+/**
+ * Check search rate limit for search endpoints.
+ * Tighter than general reads because search is more expensive.
+ * Keyed by IP hash.
+ */
+export async function checkSearchRateLimit(
+  ipHash: string
+): Promise<RateLimitResult> {
+  try {
+    await searchLimiter.consume(ipHash);
+    return { allowed: true, retryAfterSeconds: 0 };
+  } catch (err: unknown) {
+    const rlErr = err as { msBeforeNext?: number };
+    return {
+      allowed: false,
+      retryAfterSeconds: Math.ceil((rlErr.msBeforeNext ?? 60000) / 1000),
+    };
+  }
+}
+
+/**
+ * Check forgot-password rate limit for an IP hash.
+ * IP-based since the user is unauthenticated. Max 3 per hour.
+ */
+export async function checkForgotPasswordRateLimit(
+  ipHash: string
+): Promise<RateLimitResult> {
+  try {
+    await forgotPasswordLimiter.consume(ipHash);
+    return { allowed: true, retryAfterSeconds: 0 };
+  } catch (err: unknown) {
+    const rlErr = err as { msBeforeNext?: number };
+    return {
+      allowed: false,
+      retryAfterSeconds: Math.ceil((rlErr.msBeforeNext ?? 3600000) / 1000),
+    };
+  }
+}
+
+/**
+ * Check report rate limit for a user ID.
+ * Max 10 reports per hour per user.
+ */
+export async function checkReportRateLimit(
+  userId: string
+): Promise<RateLimitResult> {
+  try {
+    await reportLimiter.consume(userId);
+    return { allowed: true, retryAfterSeconds: 0 };
+  } catch (err: unknown) {
+    const rlErr = err as { msBeforeNext?: number };
+    return {
+      allowed: false,
+      retryAfterSeconds: Math.ceil((rlErr.msBeforeNext ?? 3600000) / 1000),
+    };
+  }
+}
+
+/**
  * Check CSP report rate limit for an IP hash.
  * IP-based since CSP reports are unauthenticated.
  */
@@ -250,6 +352,10 @@ export async function resetRateLimiters(): Promise<void> {
   await moderationLimiter.delete("*");
   await passwordChangeLimiter.delete("*");
   await generalActionLimiter.delete("*");
+  await readLimiter.delete("*");
+  await searchLimiter.delete("*");
+  await forgotPasswordLimiter.delete("*");
+  await reportLimiter.delete("*");
   await cspReportLimiter.delete("*");
 }
 
@@ -262,5 +368,9 @@ export {
   moderationLimiter,
   passwordChangeLimiter,
   generalActionLimiter,
+  readLimiter,
+  searchLimiter,
+  forgotPasswordLimiter,
+  reportLimiter,
   cspReportLimiter,
 };
