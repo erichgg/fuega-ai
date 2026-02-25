@@ -15,6 +15,11 @@ import {
   Flame,
   Plus,
 } from "lucide-react";
+import {
+  Sheet,
+  SheetContent,
+  SheetTitle,
+} from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 
 // ---------------------------------------------------------------------------
@@ -35,9 +40,8 @@ interface SidebarCampfire {
 interface SidebarProps {
   campfires?: SidebarCampfire[];
   popularCampfires?: SidebarCampfire[];
-  open?: boolean;
-  onClose?: () => void;
-  className?: string;
+  open: boolean;
+  onClose: () => void;
 }
 
 // ---------------------------------------------------------------------------
@@ -56,49 +60,37 @@ const discoverLinks: SidebarLink[] = [
   { icon: Vote, label: "Governance", href: "/governance" },
 ];
 
-const defaultPopular: SidebarCampfire[] = [
-  { name: "tech", memberCount: 12400 },
-  { name: "science", memberCount: 8900 },
-  { name: "gaming", memberCount: 15200 },
-  { name: "music", memberCount: 6700 },
-];
-
 // ---------------------------------------------------------------------------
-// Sidebar
+// Sidebar (Sheet overlay)
 // ---------------------------------------------------------------------------
 
 export function Sidebar({
   campfires = [],
-  popularCampfires = defaultPopular,
-  open = true,
+  popularCampfires = [],
+  open,
   onClose,
-  className,
 }: SidebarProps) {
   const pathname = usePathname();
   const [myExpanded, setMyExpanded] = React.useState(true);
   const [popularExpanded, setPopularExpanded] = React.useState(true);
 
   return (
-    <>
-      {/* Mobile overlay */}
-      {open && (
-        <div
-          className="fixed inset-0 z-30 bg-void/50 lg:hidden"
-          onClick={onClose}
-          aria-hidden="true"
-        />
-      )}
-
-      <aside
-        className={cn(
-          "fixed left-0 top-14 z-30 flex h-[calc(100vh-3.5rem)] w-64 flex-col border-r border-lava-hot/10 bg-coal transition-transform lg:sticky lg:translate-x-0",
-          open ? "translate-x-0" : "-translate-x-full",
-          className,
-        )}
-        role="complementary"
-        aria-label="Sidebar navigation"
+    <Sheet open={open} onOpenChange={(v) => !v && onClose()}>
+      <SheetContent
+        side="left"
+        className="bg-coal border-lava-hot/10 w-64 sm:w-72 overflow-hidden p-0"
       >
-        <nav className="flex-1 overflow-y-auto p-3">
+        {/* Header */}
+        <div className="flex items-center gap-2 border-b border-lava-hot/10 px-4 py-3">
+          <Flame className="h-5 w-5 text-lava-hot" />
+          <SheetTitle className="font-bold font-mono truncate">
+            <span className="text-flame-400 font-semibold">fuega</span>
+            <span className="text-ash">.ai</span>
+          </SheetTitle>
+        </div>
+
+        {/* Scrollable nav */}
+        <nav className="flex-1 overflow-y-auto p-3" style={{ maxHeight: "calc(100vh - 8rem)" }}>
           {/* Main navigation */}
           <div className="space-y-0.5">
             {mainLinks.map((link) => (
@@ -115,7 +107,7 @@ export function Sidebar({
 
           {/* Discover */}
           <div className="space-y-0.5">
-            <span className="px-3 text-[10px] font-semibold uppercase tracking-wider text-smoke">
+            <span className="px-3 text-[10px] font-semibold font-mono uppercase tracking-wider text-smoke">
               Discover
             </span>
             {discoverLinks.map((link) => (
@@ -138,7 +130,7 @@ export function Sidebar({
                 aria-label="My Campfires"
                 className="flex w-full items-center justify-between px-3 py-1"
               >
-                <span className="text-[10px] font-semibold uppercase tracking-wider text-smoke">
+                <span className="text-[10px] font-semibold font-mono uppercase tracking-wider text-smoke">
                   My Campfires
                 </span>
                 {myExpanded ? (
@@ -163,33 +155,37 @@ export function Sidebar({
           )}
 
           {/* Popular Campfires */}
-          <div className="lava-rule my-3" />
-          <button
-            onClick={() => setPopularExpanded(!popularExpanded)}
-            aria-expanded={popularExpanded}
-            aria-label="Popular Campfires"
-            className="flex w-full items-center justify-between px-3 py-1"
-          >
-            <span className="text-[10px] font-semibold uppercase tracking-wider text-smoke">
-              Popular
-            </span>
-            {popularExpanded ? (
-              <ChevronDown className="h-3 w-3 text-smoke" />
-            ) : (
-              <ChevronRight className="h-3 w-3 text-smoke" />
-            )}
-          </button>
-          {popularExpanded && (
-            <div className="mt-1 space-y-0.5">
-              {popularCampfires.map((c) => (
-                <CampfireLink
-                  key={c.name}
-                  campfire={c}
-                  active={pathname === `/f/${c.name}`}
-                  onClick={onClose}
-                />
-              ))}
-            </div>
+          {popularCampfires.length > 0 && (
+            <>
+              <div className="lava-rule my-3" />
+              <button
+                onClick={() => setPopularExpanded(!popularExpanded)}
+                aria-expanded={popularExpanded}
+                aria-label="Popular Campfires"
+                className="flex w-full items-center justify-between px-3 py-1"
+              >
+                <span className="text-[10px] font-semibold font-mono uppercase tracking-wider text-smoke">
+                  Popular
+                </span>
+                {popularExpanded ? (
+                  <ChevronDown className="h-3 w-3 text-smoke" />
+                ) : (
+                  <ChevronRight className="h-3 w-3 text-smoke" />
+                )}
+              </button>
+              {popularExpanded && (
+                <div className="mt-1 space-y-0.5">
+                  {popularCampfires.map((c) => (
+                    <CampfireLink
+                      key={c.name}
+                      campfire={c}
+                      active={pathname === `/f/${c.name}`}
+                      onClick={onClose}
+                    />
+                  ))}
+                </div>
+              )}
+            </>
           )}
         </nav>
 
@@ -197,14 +193,15 @@ export function Sidebar({
         <div className="border-t border-lava-hot/10 p-3">
           <Link
             href="/create-campfire"
-            className="flex w-full items-center justify-center gap-2 border border-lava-hot bg-transparent px-4 py-2 text-sm font-medium uppercase tracking-wider text-lava-hot transition-all hover:bg-lava-hot hover:text-black"
+            onClick={onClose}
+            className="flex w-full items-center justify-center gap-2 rounded-md border border-lava-hot bg-transparent px-4 py-2 text-sm font-medium font-mono uppercase tracking-wider text-lava-hot transition-all hover:bg-lava-hot hover:text-black"
           >
             <Plus className="h-4 w-4" />
             Create Campfire
           </Link>
         </div>
-      </aside>
-    </>
+      </SheetContent>
+    </Sheet>
   );
 }
 
@@ -227,7 +224,7 @@ function SidebarItem({
       href={link.href}
       onClick={onClick}
       className={cn(
-        "flex items-center gap-3 px-3 py-2 text-sm transition-colors",
+        "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-mono transition-colors",
         active
           ? "bg-lava-hot/10 font-medium text-lava-hot border-r-2 border-lava-hot"
           : "text-ash hover:bg-charcoal/50 hover:text-foreground",
@@ -253,7 +250,7 @@ function CampfireLink({
       href={`/f/${campfire.name}`}
       onClick={onClick}
       className={cn(
-        "flex items-center gap-2 px-3 py-1.5 text-sm transition-colors",
+        "flex items-center gap-2 rounded-md px-3 py-1.5 text-sm font-mono transition-colors",
         active
           ? "text-lava-hot font-medium"
           : "text-ash hover:bg-charcoal/50 hover:text-foreground",

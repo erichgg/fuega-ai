@@ -47,7 +47,7 @@ export function Footer() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
           {footerSections.map((section) => (
             <div key={section.title}>
-              <h3 className="text-xs font-semibold uppercase tracking-wider text-foreground mb-3">
+              <h3 className="text-xs font-semibold font-mono uppercase tracking-wider text-foreground mb-3">
                 <span className="text-lava-hot font-bold">$ </span>
                 {section.title}
               </h3>
@@ -69,7 +69,7 @@ export function Footer() {
 
         <hr className="lava-rule my-8" />
 
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-smoke">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-mono text-smoke">
           <div className="flex items-center gap-1">
             <span className="text-flame-400 font-bold">fuega</span>
             <span className="text-smoke">.</span>

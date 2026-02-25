@@ -11,6 +11,8 @@ interface SparkButtonProps {
   userVote: VoteState;
   onVote: (vote: "spark" | "douse") => void;
   disabled?: boolean;
+  /** "vertical" = stacked column (legacy), "horizontal" = inline action bar */
+  variant?: "vertical" | "horizontal";
   className?: string;
 }
 
@@ -19,6 +21,7 @@ export function SparkButton({
   userVote,
   onVote,
   disabled = false,
+  variant = "vertical",
   className,
 }: SparkButtonProps) {
   const [animating, setAnimating] = React.useState<"spark" | "douse" | null>(
@@ -32,6 +35,77 @@ export function SparkButton({
     setTimeout(() => setAnimating(null), 600);
   };
 
+  if (variant === "horizontal") {
+    return (
+      <div className={cn("flex items-center gap-1", className)}>
+        {/* Spark */}
+        <button
+          onClick={() => handleVote("spark")}
+          disabled={disabled}
+          className={cn(
+            "group relative flex items-center gap-1 rounded-md px-2 py-1 transition-all hover:bg-flame-500/10",
+            userVote === "sparked" && "text-flame-400",
+            userVote !== "sparked" && "text-ash hover:text-flame-400",
+            disabled && "cursor-not-allowed opacity-50",
+          )}
+          aria-label="Spark"
+        >
+          <Flame
+            className={cn(
+              "h-4 w-4 transition-transform group-hover:scale-110",
+              userVote === "sparked" && "fill-flame-400",
+            )}
+          />
+          {animating === "spark" && (
+            <span className="absolute left-1 top-0 animate-spark-rise">
+              <Flame className="h-3 w-3 text-flame-400 fill-flame-400" />
+            </span>
+          )}
+        </button>
+
+        {/* Count */}
+        <span
+          aria-live="polite"
+          aria-label={`${sparkCount} sparks`}
+          className={cn(
+            "text-xs font-semibold font-mono tabular-nums min-w-[2ch] text-center",
+            userVote === "sparked" && "text-flame-400",
+            userVote === "doused" && "text-blue-400",
+            userVote === null && "text-ash",
+          )}
+        >
+          {sparkCount}
+        </span>
+
+        {/* Douse */}
+        <button
+          onClick={() => handleVote("douse")}
+          disabled={disabled}
+          className={cn(
+            "group relative flex items-center gap-1 rounded-md px-2 py-1 transition-all hover:bg-blue-500/10",
+            userVote === "doused" && "text-blue-400",
+            userVote !== "doused" && "text-ash hover:text-blue-400",
+            disabled && "cursor-not-allowed opacity-50",
+          )}
+          aria-label="Douse"
+        >
+          <Droplets
+            className={cn(
+              "h-4 w-4 transition-transform group-hover:scale-110",
+              userVote === "doused" && "fill-blue-400",
+            )}
+          />
+          {animating === "douse" && (
+            <span className="absolute left-1 top-0 animate-douse-fall">
+              <Droplets className="h-3 w-3 text-blue-400 fill-blue-400" />
+            </span>
+          )}
+        </button>
+      </div>
+    );
+  }
+
+  // Vertical variant (default — kept for detail pages, etc.)
   return (
     <div
       className={cn(
@@ -67,7 +141,7 @@ export function SparkButton({
         aria-live="polite"
         aria-label={`${sparkCount} sparks`}
         className={cn(
-          "text-xs font-semibold tabular-nums min-w-[2ch] text-center",
+          "text-xs font-semibold font-mono tabular-nums min-w-[2ch] text-center",
           userVote === "sparked" && "text-flame-400",
           userVote === "doused" && "text-blue-400",
           userVote === null && "text-ash-400",

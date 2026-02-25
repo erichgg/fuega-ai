@@ -30,7 +30,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           );
         }
       } catch {
-        // Sidebar falls back to defaults in component
+        // Sidebar falls back to empty
       }
     }
     load();
@@ -39,27 +39,28 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-screen bg-void flex flex-col">
-      <Navbar />
+      <Navbar onOpenSidebar={() => setSidebarOpen(true)} />
+
+      {/* Sidebar drawer */}
+      <Sidebar
+        popularCampfires={popularCampfires.length > 0 ? popularCampfires : undefined}
+        open={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
+      />
 
       {/* Spacer for fixed navbar */}
       <div className="h-14" />
 
-      <div className="flex flex-1">
-        <Sidebar
-          popularCampfires={popularCampfires.length > 0 ? popularCampfires : undefined}
-          open={sidebarOpen}
-          onClose={() => setSidebarOpen(false)}
-        />
-        <main
-          id="main-content"
-          className="flex-1 px-3 py-4 sm:px-6 lg:px-12 2xl:px-8"
-          role="main"
-        >
-          <div className="mx-auto max-w-7xl">
-            <ErrorBoundary>{children}</ErrorBoundary>
-          </div>
-        </main>
-      </div>
+      {/* Centered main content — no persistent sidebar */}
+      <main
+        id="main-content"
+        className="flex-1 w-full px-3 py-4 sm:px-6"
+        role="main"
+      >
+        <div className="mx-auto max-w-2xl">
+          <ErrorBoundary>{children}</ErrorBoundary>
+        </div>
+      </main>
 
       <Footer />
     </div>

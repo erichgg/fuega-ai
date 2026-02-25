@@ -1,9 +1,14 @@
 import type { Metadata } from "next";
-import { JetBrains_Mono } from "next/font/google";
+import { Inter, JetBrains_Mono } from "next/font/google";
 import { AuthProvider } from "@/lib/contexts/auth-context";
 import { ThemeProvider } from "@/lib/contexts/theme-context";
 import { NotificationProvider } from "@/lib/contexts/notification-context";
 import "./globals.css";
+
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+});
 
 const jetbrainsMono = JetBrains_Mono({
   subsets: ["latin"],
@@ -55,7 +60,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark" suppressHydrationWarning>
       <body
-        className={`${jetbrainsMono.variable} font-mono antialiased bg-void text-foreground`}
+        className={`${inter.variable} ${jetbrainsMono.variable} font-sans antialiased bg-void text-foreground`}
       >
         <ThemeProvider>
           <AuthProvider>

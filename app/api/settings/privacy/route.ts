@@ -4,6 +4,8 @@ import { checkGeneralRateLimit } from "@/lib/auth/rate-limit";
 import { queryOne } from "@/lib/db";
 import { updatePrivacySchema } from "@/lib/auth/profile-validation";
 
+export const dynamic = "force-dynamic";
+
 /**
  * PUT /api/settings/privacy
  * Update profile visibility.

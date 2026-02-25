@@ -194,7 +194,11 @@ function ShortcutsHelp({
 // Navbar
 // ---------------------------------------------------------------------------
 
-export function Navbar() {
+interface NavbarProps {
+  onOpenSidebar?: () => void;
+}
+
+export function Navbar({ onOpenSidebar }: NavbarProps = {}) {
   const { user, logout } = useAuth();
   const pathname = usePathname();
   const [scrolled, setScrolled] = React.useState(false);
@@ -239,14 +243,26 @@ export function Navbar() {
         aria-label="Main navigation"
       >
         <div className="max-w-7xl mx-auto h-full flex items-center justify-between px-3 sm:px-6 lg:px-12">
-          {/* Logo */}
-          <Link
-            href="/"
-            className="flex items-center shrink-0"
-            aria-label="fuega.ai home"
-          >
-            <FlameLogo size="sm" />
-          </Link>
+          {/* Left: Menu + Logo */}
+          <div className="flex items-center gap-1">
+            {/* Sidebar trigger */}
+            <button
+              onClick={onOpenSidebar}
+              className="p-2 text-ash hover:text-lava-hot transition-colors"
+              aria-label="Open navigation"
+            >
+              <Menu className="h-5 w-5" />
+            </button>
+
+            {/* Logo */}
+            <Link
+              href="/"
+              className="flex items-center shrink-0"
+              aria-label="fuega.ai home"
+            >
+              <FlameLogo size="sm" />
+            </Link>
+          </div>
 
           {/* Desktop search */}
           <div className="hidden md:flex relative flex-1 max-w-md mx-6">
@@ -255,7 +271,7 @@ export function Navbar() {
               type="text"
               data-search-input
               className="w-full bg-coal border border-lava-hot/20 pl-10 pr-4 py-1.5 text-sm text-foreground placeholder:text-smoke focus:border-lava-hot focus:ring-0 focus:outline-none transition-colors"
-              placeholder="Search... ( / )"
+              placeholder="Search…  /"
               aria-label="Search campfires, posts, and users"
             />
           </div>
@@ -267,7 +283,7 @@ export function Navbar() {
                 key={link.href}
                 href={link.href}
                 className={cn(
-                  "px-3 py-1.5 text-sm transition-colors",
+                  "px-3 py-1.5 text-sm font-mono transition-colors",
                   pathname === link.href || pathname?.startsWith(link.href + "/")
                     ? "text-lava-hot"
                     : "text-ash hover:text-lava-hot",
@@ -303,10 +319,10 @@ export function Navbar() {
                     <button className="flex items-center gap-2 px-2 py-1 transition-colors hover:bg-charcoal/50" aria-label="User menu">
                       <UserAvatar username={user.username} size="sm" />
                       <div className="hidden lg:block text-left">
-                        <div className="text-xs font-medium text-foreground">
+                        <div className="text-xs font-medium font-mono text-foreground">
                           {user.username}
                         </div>
-                        <div className="text-[10px] text-lava-hot">
+                        <div className="text-[10px] font-mono text-lava-hot">
                           {user.glow} glow
                         </div>
                       </div>
@@ -362,13 +378,13 @@ export function Navbar() {
               </Link>
             )}
 
-            {/* Mobile hamburger */}
+            {/* Mobile nav sheet trigger */}
             <button
               onClick={() => setMobileOpen(true)}
               className="md:hidden p-2 text-ash hover:text-lava-hot transition-colors"
-              aria-label="Open menu"
+              aria-label="Open mobile menu"
             >
-              <Menu className="h-5 w-5" />
+              <Menu className="h-4 w-4" />
             </button>
           </div>
         </div>
@@ -408,7 +424,7 @@ export function Navbar() {
                   href={link.href}
                   onClick={() => setMobileOpen(false)}
                   className={cn(
-                    "flex items-center gap-3 py-2 text-sm tracking-wide truncate transition-colors",
+                    "flex items-center gap-3 py-2 text-sm font-mono tracking-wide truncate transition-colors",
                     active
                       ? "text-lava-hot font-medium"
                       : "text-ash hover:text-lava-hot",
