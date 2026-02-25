@@ -26,17 +26,7 @@ import { usePost } from "@/lib/hooks/usePosts";
 import { useComments, useCreateComment } from "@/lib/hooks/useComments";
 import { useVoting } from "@/lib/hooks/useVoting";
 import { toPostCardData, flattenCommentsForDisplay } from "@/lib/adapters/post-adapter";
-
-function timeAgo(dateStr: string): string {
-  const now = Date.now();
-  const then = new Date(dateStr).getTime();
-  const diff = Math.floor((now - then) / 1000);
-  if (diff < 60) return "just now";
-  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
-  if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
-  if (diff < 604800) return `${Math.floor(diff / 86400)}d ago`;
-  return `${Math.floor(diff / 604800)}w ago`;
-}
+import { timeAgo } from "@/lib/utils/time-ago";
 
 export default function PostDetailPage() {
   const params = useParams();
@@ -151,7 +141,7 @@ export default function PostDetailPage() {
   const adjustedSparkCount = post.sparkCount + postSparkDelta;
 
   return (
-    <div>
+    <div className="max-w-5xl">
       {/* Back link */}
       <Link
         href={`/f/${campfireSlug}`}
@@ -218,21 +208,29 @@ export default function PostDetailPage() {
             <MessageSquare className="h-3.5 w-3.5" />
             {post.commentCount}
           </span>
-          <button className="flex items-center gap-1.5 transition-colors hover:text-foreground" aria-label="Share post">
+          <button
+            onClick={() => { navigator.clipboard.writeText(window.location.href); }}
+            className="flex items-center gap-1.5 transition-colors hover:text-foreground"
+            aria-label="Share post"
+          >
             <Share2 className="h-3.5 w-3.5" />
             Share
           </button>
-          <button className="flex items-center gap-1.5 transition-colors hover:text-foreground" aria-label="Report post">
+          <button
+            onClick={() => { alert("Reporting is coming soon."); }}
+            className="flex items-center gap-1.5 transition-colors hover:text-foreground"
+            aria-label="Report post"
+          >
             <Flag className="h-3.5 w-3.5" />
             Report
           </button>
           {isOwner && (
             <>
-              <button className="flex items-center gap-1.5 transition-colors hover:text-foreground" aria-label="Edit post">
+              <button className="flex items-center gap-1.5 text-smoke/50 cursor-not-allowed" aria-label="Edit post" disabled title="Editing coming soon">
                 <Edit3 className="h-3.5 w-3.5" />
                 Edit
               </button>
-              <button className="flex items-center gap-1.5 transition-colors hover:text-red-400" aria-label="Delete post">
+              <button className="flex items-center gap-1.5 text-smoke/50 cursor-not-allowed" aria-label="Delete post" disabled title="Deleting coming soon">
                 <Trash2 className="h-3.5 w-3.5" />
                 Delete
               </button>

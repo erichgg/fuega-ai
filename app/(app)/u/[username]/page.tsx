@@ -19,9 +19,10 @@ import { UserAvatar } from "@/components/fuega/user-avatar";
 import { ProfileSkeleton } from "@/components/fuega/page-skeleton";
 import { useAuth } from "@/lib/contexts/auth-context";
 import { usePosts } from "@/lib/hooks/usePosts";
-import { useVoting } from "@/lib/hooks/useVoting";
+import { useOptimisticVoting } from "@/lib/hooks/useOptimisticVoting";
 import { toPostCardData } from "@/lib/adapters/post-adapter";
 import { api } from "@/lib/api/client";
+import { timeAgo } from "@/lib/utils/time-ago";
 
 interface UserProfile {
   username: string;
@@ -50,17 +51,6 @@ const SOCIAL_ICONS: Record<string, string> = {
   twitch: "TW",
   linkedin: "LI",
 };
-
-function timeAgo(dateStr: string): string {
-  const now = Date.now();
-  const then = new Date(dateStr).getTime();
-  const diff = Math.floor((now - then) / 1000);
-  if (diff < 60) return "just now";
-  if (diff < 3600) return `${Math.floor(diff / 60)}m`;
-  if (diff < 86400) return `${Math.floor(diff / 3600)}h`;
-  if (diff < 604800) return `${Math.floor(diff / 86400)}d`;
-  return `${Math.floor(diff / 604800)}w`;
-}
 
 export default function UserProfilePage() {
   const params = useParams();
@@ -106,42 +96,14 @@ export default function UserProfilePage() {
   } = usePosts({ author: username, sort: "new" });
 
   // Voting
-  const { vote } = useVoting();
-  const [votes, setVotes] = React.useState<
-    Record<string, "sparked" | "doused" | null>
-  >({});
-  const [sparkDeltas, setSparkDeltas] = React.useState<Record<string, number>>(
-    {},
-  );
-
-  const handleVote = async (postId: string, voteType: "spark" | "douse") => {
-    const current = votes[postId] ?? null;
-    const newState = voteType === "spark" ? "sparked" : "doused";
-
-    if (current === newState) {
-      setVotes((prev) => ({ ...prev, [postId]: null }));
-      setSparkDeltas((prev) => ({ ...prev, [postId]: 0 }));
-    } else {
-      setVotes((prev) => ({ ...prev, [postId]: newState }));
-      setSparkDeltas((prev) => ({
-        ...prev,
-        [postId]: voteType === "spark" ? 1 : -1,
-      }));
-    }
-
-    try {
-      await vote("post", postId, voteType);
-    } catch {
-      setVotes((prev) => ({ ...prev, [postId]: current }));
-      setSparkDeltas((prev) => ({ ...prev, [postId]: 0 }));
-    }
-  };
+  const { handleVote, getVote, getDelta } = useOptimisticVoting();
 
   // Convert posts to card shape
   const postCards = rawPosts.map((p) => {
     const card = toPostCardData(p);
-    if (sparkDeltas[p.id] !== undefined) {
-      card.sparkCount += sparkDeltas[p.id] ?? 0;
+    const delta = getDelta(p.id);
+    if (delta !== 0) {
+      card.sparkCount += delta;
     }
     return card;
   });
@@ -173,7 +135,7 @@ export default function UserProfilePage() {
   );
 
   return (
-    <div>
+    <div className="max-w-5xl">
       {/* Profile header */}
       <div className="rounded-lg border border-charcoal bg-charcoal/50 p-4 sm:p-6">
         <div className="flex items-start gap-4">
@@ -321,7 +283,7 @@ export default function UserProfilePage() {
                 <Link key={post.id} href={`/f/${post.campfire}/${post.id}`}>
                   <PostCard
                     post={post}
-                    userVote={votes[post.id] ?? null}
+                    userVote={getVote(post.id)}
                     onVote={(v) => handleVote(post.id, v)}
                   />
                 </Link>

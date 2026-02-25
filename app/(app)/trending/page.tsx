@@ -8,54 +8,25 @@ import { PostCard } from "@/components/fuega/post-card";
 import { FeedSkeleton } from "@/components/fuega/page-skeleton";
 import { useAuth } from "@/lib/contexts/auth-context";
 import { usePosts } from "@/lib/hooks/usePosts";
-import { useVoting } from "@/lib/hooks/useVoting";
+import { useOptimisticVoting } from "@/lib/hooks/useOptimisticVoting";
 import { toPostCardData } from "@/lib/adapters/post-adapter";
 
 export default function TrendingPage() {
   const { user } = useAuth();
   const { posts, loading, error, hasMore, loadMore } = usePosts({ sort: "hot" });
-  const { vote } = useVoting();
-
-  const [votes, setVotes] = React.useState<
-    Record<string, "sparked" | "doused" | null>
-  >({});
-  const [sparkDeltas, setSparkDeltas] = React.useState<Record<string, number>>(
-    {},
-  );
-
-  const handleVote = async (postId: string, voteType: "spark" | "douse") => {
-    const current = votes[postId] ?? null;
-    const newState = voteType === "spark" ? "sparked" : "doused";
-
-    if (current === newState) {
-      setVotes((prev) => ({ ...prev, [postId]: null }));
-      setSparkDeltas((prev) => ({ ...prev, [postId]: 0 }));
-    } else {
-      setVotes((prev) => ({ ...prev, [postId]: newState }));
-      setSparkDeltas((prev) => ({
-        ...prev,
-        [postId]: voteType === "spark" ? 1 : -1,
-      }));
-    }
-
-    try {
-      await vote("post", postId, voteType);
-    } catch {
-      setVotes((prev) => ({ ...prev, [postId]: current }));
-      setSparkDeltas((prev) => ({ ...prev, [postId]: 0 }));
-    }
-  };
+  const { handleVote, getVote, getDelta } = useOptimisticVoting();
 
   const postCards = posts.map((p) => {
     const card = toPostCardData(p);
-    if (sparkDeltas[p.id] !== undefined) {
-      card.sparkCount += sparkDeltas[p.id] ?? 0;
+    const delta = getDelta(p.id);
+    if (delta !== 0) {
+      card.sparkCount += delta;
     }
     return card;
   });
 
   return (
-    <div>
+    <div className="max-w-5xl">
       <div className="flex items-center justify-between gap-4">
         <div className="flex items-center gap-2">
           <TrendingUp className="h-5 w-5 text-flame-400" />
@@ -103,7 +74,7 @@ export default function TrendingPage() {
               <Link key={post.id} href={`/f/${post.campfire}/${post.id}`}>
                 <PostCard
                   post={post}
-                  userVote={votes[post.id] ?? null}
+                  userVote={getVote(post.id)}
                   onVote={(v) => handleVote(post.id, v)}
                 />
               </Link>

@@ -45,7 +45,7 @@ export default function NotificationsPage() {
   }
 
   return (
-    <div className="py-4 sm:py-6 lg:py-8">
+    <div className="max-w-5xl py-4 sm:py-6 lg:py-8">
       <NotificationInbox />
     </div>
   );

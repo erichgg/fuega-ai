@@ -5,6 +5,7 @@ import { SparkButton } from "@/components/fuega/spark-button";
 import { UserAvatar } from "@/components/fuega/user-avatar";
 import { ModBadge } from "@/components/fuega/mod-badge";
 import { cn } from "@/lib/utils";
+import { timeAgo } from "@/lib/utils/time-ago";
 
 interface PostCardProps {
   post: {
@@ -28,18 +29,6 @@ interface PostCardProps {
   onReport?: () => void;
   compact?: boolean;
   className?: string;
-}
-
-function timeAgo(dateStr: string): string {
-  const now = Date.now();
-  const then = new Date(dateStr).getTime();
-  const diff = Math.floor((now - then) / 1000);
-
-  if (diff < 60) return "just now";
-  if (diff < 3600) return `${Math.floor(diff / 60)}m`;
-  if (diff < 86400) return `${Math.floor(diff / 3600)}h`;
-  if (diff < 604800) return `${Math.floor(diff / 86400)}d`;
-  return `${Math.floor(diff / 604800)}w`;
 }
 
 export function PostCard({
@@ -111,7 +100,7 @@ export function PostCard({
 
         {/* Comments */}
         <button
-          onClick={onClickComments}
+          onClick={(e) => { e.stopPropagation(); e.preventDefault(); onClickComments?.(); }}
           className="flex items-center gap-1.5 rounded-md px-2 py-1 text-ash transition-colors hover:bg-charcoal/50 hover:text-foreground"
           aria-label={`${post.commentCount} comments`}
         >
@@ -121,7 +110,7 @@ export function PostCard({
 
         {/* Share */}
         <button
-          onClick={onShare}
+          onClick={(e) => { e.stopPropagation(); e.preventDefault(); onShare?.(); }}
           className="flex items-center gap-1.5 rounded-md px-2 py-1 text-ash transition-colors hover:bg-charcoal/50 hover:text-foreground"
           aria-label="Share post"
         >
@@ -131,7 +120,7 @@ export function PostCard({
 
         {/* Report */}
         <button
-          onClick={onReport}
+          onClick={(e) => { e.stopPropagation(); e.preventDefault(); onReport?.(); }}
           className="flex items-center gap-1.5 rounded-md px-2 py-1 text-ash transition-colors hover:bg-charcoal/50 hover:text-foreground ml-auto"
           aria-label="Report post"
         >

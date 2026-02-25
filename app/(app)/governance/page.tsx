@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import {
   Plus,
   Vote,
@@ -11,6 +11,7 @@ import {
   XCircle,
   Filter,
   MessageSquare,
+  Flame,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -101,14 +102,34 @@ export default function GovernancePage() {
 function GovernancePageInner() {
   const { user } = useAuth();
   const searchParams = useSearchParams();
+  const router = useRouter();
   const campfireFilter = searchParams.get("campfire");
 
   const [proposals, setProposals] = React.useState<Proposal[]>([]);
+  const [campfires, setCampfires] = React.useState<{ id: string; name: string }[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
   const [statusFilter, setStatusFilter] = React.useState<
     ProposalStatus | "all"
   >("all");
+
+  // Fetch campfires for the picker when no filter is set
+  React.useEffect(() => {
+    if (campfireFilter) return;
+    let cancelled = false;
+    async function fetchCampfires() {
+      try {
+        const res = await api.get<{ campfires: Campfire[] }>("/api/campfires", { limit: 100 });
+        if (!cancelled) {
+          setCampfires(res.campfires.map((c) => ({ id: c.id, name: c.name })));
+        }
+      } catch {
+        // Silently fail — picker just shows empty
+      }
+    }
+    fetchCampfires();
+    return () => { cancelled = true; };
+  }, [campfireFilter]);
 
   React.useEffect(() => {
     let cancelled = false;
@@ -189,7 +210,7 @@ function GovernancePageInner() {
       : proposals.filter((p) => p.status === statusFilter);
 
   return (
-    <div>
+    <div className="max-w-5xl">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold text-foreground">Governance</h1>
@@ -199,16 +220,18 @@ function GovernancePageInner() {
               : "Active proposals across all campfires"}
           </p>
         </div>
-        {user && (
-          <Button variant="spark" size="sm" className="gap-1.5 self-start">
-            <Plus className="h-4 w-4" />
-            Create Proposal
-          </Button>
+        {user && campfireFilter && (
+          <Link href={`/governance/create?campfire=${campfireFilter}`}>
+            <Button variant="spark" size="sm" className="gap-1.5 self-start">
+              <Plus className="h-4 w-4" />
+              Create Proposal
+            </Button>
+          </Link>
         )}
       </div>
 
       {/* Filters */}
-      <div className="mt-4 flex flex-wrap items-center gap-2">
+      <div className="mt-4 flex flex-wrap items-center gap-2" role="group" aria-label="Filter by status">
         <Filter className="h-4 w-4 text-smoke" />
         {(
           ["all", "discussion", "voting", "passed", "rejected", "executed"] as const
@@ -238,9 +261,26 @@ function GovernancePageInner() {
             <p className="mt-4 text-ash">{error}</p>
           </div>
         ) : !campfireFilter ? (
-          <div className="py-16 text-center">
-            <Vote className="mx-auto h-12 w-12 text-smoke/60" />
-            <p className="mt-4 text-ash">Select a campfire to view its proposals</p>
+          <div className="py-8">
+            <p className="text-sm text-ash mb-4">Select a campfire to view its proposals:</p>
+            {campfires.length === 0 ? (
+              <p className="text-xs text-smoke">No campfires found.</p>
+            ) : (
+              <div className="space-y-1">
+                {campfires.map((c) => (
+                  <button
+                    key={c.id}
+                    onClick={() => router.push(`/governance?campfire=${c.name}`)}
+                    className="flex items-center gap-2 w-full rounded-md px-3 py-2 text-sm font-mono text-ash hover:bg-charcoal/50 hover:text-foreground transition-colors"
+                  >
+                    <Flame className="h-3.5 w-3.5 text-flame-400 shrink-0" />
+                    <span className="text-flame-400">f</span>
+                    <span className="text-smoke mx-0.5">|</span>
+                    <span>{c.name}</span>
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         ) : filteredProposals.length === 0 ? (
           <div className="py-16 text-center">

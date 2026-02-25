@@ -13,7 +13,7 @@ import { CampfireSkeleton } from "@/components/fuega/page-skeleton";
 import { useAuth } from "@/lib/contexts/auth-context";
 import { useCampfire, useCampfireMembership } from "@/lib/hooks/useCampfires";
 import { usePosts } from "@/lib/hooks/usePosts";
-import { useVoting } from "@/lib/hooks/useVoting";
+import { useOptimisticVoting } from "@/lib/hooks/useOptimisticVoting";
 import { toPostCardData } from "@/lib/adapters/post-adapter";
 
 type SortOption = "hot" | "new" | "top" | "rising";
@@ -43,13 +43,7 @@ export default function CampfirePage() {
   } = usePosts({ campfire: campfireSlug, sort });
 
   // Voting
-  const { vote } = useVoting();
-  const [votes, setVotes] = React.useState<
-    Record<string, "sparked" | "doused" | null>
-  >({});
-  const [sparkDeltas, setSparkDeltas] = React.useState<Record<string, number>>(
-    {},
-  );
+  const { handleVote, getVote, getDelta } = useOptimisticVoting();
 
   // View mode (posts vs chat)
   const [viewMode, setViewMode] = React.useState<ViewMode>("posts");
@@ -57,29 +51,6 @@ export default function CampfirePage() {
   // Membership
   const { join, leave, loading: membershipLoading, error: membershipError } = useCampfireMembership();
   const [joined, setJoined] = React.useState(false);
-
-  const handleVote = async (postId: string, voteType: "spark" | "douse") => {
-    const current = votes[postId] ?? null;
-    const newState = voteType === "spark" ? "sparked" : "doused";
-
-    if (current === newState) {
-      setVotes((prev) => ({ ...prev, [postId]: null }));
-      setSparkDeltas((prev) => ({ ...prev, [postId]: 0 }));
-    } else {
-      setVotes((prev) => ({ ...prev, [postId]: newState }));
-      setSparkDeltas((prev) => ({
-        ...prev,
-        [postId]: voteType === "spark" ? 1 : -1,
-      }));
-    }
-
-    try {
-      await vote("post", postId, voteType);
-    } catch {
-      setVotes((prev) => ({ ...prev, [postId]: current }));
-      setSparkDeltas((prev) => ({ ...prev, [postId]: 0 }));
-    }
-  };
 
   const handleToggleMembership = async () => {
     if (!campfire) return;
@@ -100,8 +71,9 @@ export default function CampfirePage() {
   // Convert API posts to PostCard shape
   const postCards = posts.map((p) => {
     const card = toPostCardData(p);
-    if (sparkDeltas[p.id] !== undefined) {
-      card.sparkCount += sparkDeltas[p.id] ?? 0;
+    const delta = getDelta(p.id);
+    if (delta !== 0) {
+      card.sparkCount += delta;
     }
     return card;
   });
@@ -217,7 +189,7 @@ export default function CampfirePage() {
               Mod Log
             </Link>
             <Link
-              href={`/f/${campfire.name}/settings`}
+              href={`/governance?campfire=${campfire.name}`}
               className="inline-flex items-center gap-1 rounded-md border border-charcoal bg-coal/50 px-2.5 py-1 text-[10px] font-mono text-ash transition-colors hover:border-lava-hot/30 hover:text-flame-400"
             >
               <Vote className="h-3 w-3" />
@@ -238,9 +210,13 @@ export default function CampfirePage() {
         </div>
       </div>
 
+      {/* Content below banner constrained */}
+      <div className="max-w-5xl">
       {/* View mode tabs */}
-      <div className="mt-4 flex items-center gap-1 rounded-lg border border-charcoal bg-charcoal/50 p-1">
+      <div className="mt-4 flex items-center gap-1 rounded-lg border border-charcoal bg-charcoal/50 p-1" role="tablist">
         <button
+          role="tab"
+          aria-selected={viewMode === "posts"}
           onClick={() => setViewMode("posts")}
           className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
             viewMode === "posts"
@@ -252,6 +228,8 @@ export default function CampfirePage() {
           Posts
         </button>
         <button
+          role="tab"
+          aria-selected={viewMode === "chat"}
           onClick={() => setViewMode("chat")}
           className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
             viewMode === "chat"
@@ -311,7 +289,7 @@ export default function CampfirePage() {
                   <Link key={post.id} href={`/f/${campfire.name}/${post.id}`}>
                     <PostCard
                       post={post}
-                      userVote={votes[post.id] ?? null}
+                      userVote={getVote(post.id)}
                       onVote={(v) => handleVote(post.id, v)}
                     />
                   </Link>
@@ -338,6 +316,7 @@ export default function CampfirePage() {
           />
         </div>
       )}
+      </div>{/* end max-w-5xl */}
     </div>
   );
 }

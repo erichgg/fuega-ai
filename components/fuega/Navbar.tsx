@@ -15,6 +15,8 @@ import {
   Settings,
   User,
   LogOut,
+  Award,
+  Info,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FlameLogo } from "@/components/fuega/flame-logo";
@@ -42,9 +44,7 @@ import { cn } from "@/lib/utils";
 // ---------------------------------------------------------------------------
 
 const navLinks = [
-  { href: "/home", label: "Feed" },
-  { href: "/campfires", label: "Campfires" },
-  { href: "/governance", label: "Governance" },
+  { href: "/home", label: "Home" },
   { href: "/about", label: "About" },
 ] as const;
 
@@ -53,7 +53,8 @@ const mobileNavLinks = [
   { href: "/campfires", label: "Campfires", icon: Users },
   { href: "/governance", label: "Governance", icon: Vote },
   { href: "/mod-log", label: "Mod Log", icon: Bot },
-  { href: "/about", label: "About", icon: Users },
+  { href: "/badges", label: "Badges", icon: Award },
+  { href: "/about", label: "About", icon: Info },
 ] as const;
 
 // ---------------------------------------------------------------------------
@@ -88,7 +89,7 @@ function useKeyboardShortcuts() {
 
       // "c" -> create post
       if (e.key === "c" && !e.metaKey && !e.ctrlKey) {
-        // Navigate to create post (future)
+        window.location.href = "/submit";
         return;
       }
 

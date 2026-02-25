@@ -9,7 +9,7 @@ import { FeedSort } from "@/components/fuega/feed-sort";
 import { FeedSkeleton } from "@/components/fuega/page-skeleton";
 import { useAuth } from "@/lib/contexts/auth-context";
 import { usePosts } from "@/lib/hooks/usePosts";
-import { useVoting } from "@/lib/hooks/useVoting";
+import { useOptimisticVoting } from "@/lib/hooks/useOptimisticVoting";
 import { toPostCardData } from "@/lib/adapters/post-adapter";
 import { api } from "@/lib/api/client";
 import type { Campfire, Proposal } from "@/lib/api/client";
@@ -21,15 +21,7 @@ export default function HomeFeedPage() {
   const { user } = useAuth();
   const [sort, setSort] = React.useState<SortOption>("hot");
   const { posts, loading, error, hasMore, loadMore } = usePosts({ sort });
-  const { vote } = useVoting();
-
-  // Track local vote state for optimistic UI
-  const [votes, setVotes] = React.useState<
-    Record<string, "sparked" | "doused" | null>
-  >({});
-  const [sparkDeltas, setSparkDeltas] = React.useState<Record<string, number>>(
-    {},
-  );
+  const { handleVote, getVote, getDelta } = useOptimisticVoting();
 
   // Right-rail data
   const [trendingCampfires, setTrendingCampfires] = React.useState<Campfire[]>([]);
@@ -49,39 +41,17 @@ export default function HomeFeedPage() {
       .catch(() => {});
   }, []);
 
-  const handleVote = async (postId: string, voteType: "spark" | "douse") => {
-    const current = votes[postId] ?? null;
-    const newState = voteType === "spark" ? "sparked" : "doused";
-
-    if (current === newState) {
-      setVotes((prev) => ({ ...prev, [postId]: null }));
-      setSparkDeltas((prev) => ({ ...prev, [postId]: 0 }));
-    } else {
-      setVotes((prev) => ({ ...prev, [postId]: newState }));
-      setSparkDeltas((prev) => ({
-        ...prev,
-        [postId]: voteType === "spark" ? 1 : -1,
-      }));
-    }
-
-    try {
-      await vote("post", postId, voteType);
-    } catch {
-      setVotes((prev) => ({ ...prev, [postId]: current }));
-      setSparkDeltas((prev) => ({ ...prev, [postId]: 0 }));
-    }
-  };
-
   const postCards = posts.map((p) => {
     const card = toPostCardData(p);
-    if (sparkDeltas[p.id] !== undefined) {
-      card.sparkCount += sparkDeltas[p.id] ?? 0;
+    const delta = getDelta(p.id);
+    if (delta !== 0) {
+      card.sparkCount += delta;
     }
     return card;
   });
 
   return (
-    <div className="flex gap-6">
+    <div className="max-w-6xl flex gap-6">
       {/* Main feed */}
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between gap-4">
@@ -131,7 +101,7 @@ export default function HomeFeedPage() {
                 <Link key={post.id} href={`/f/${post.campfire}/${post.id}`}>
                   <PostCard
                     post={post}
-                    userVote={votes[post.id] ?? null}
+                    userVote={getVote(post.id)}
                     onVote={(v) => handleVote(post.id, v)}
                   />
                 </Link>

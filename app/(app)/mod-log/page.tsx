@@ -15,6 +15,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { ModLogSkeleton } from "@/components/fuega/page-skeleton";
 import { cn } from "@/lib/utils";
+import { timeAgo } from "@/lib/utils/time-ago";
 
 type Decision = "approved" | "flagged" | "removed";
 type Tier = "campfire" | "platform";
@@ -58,16 +59,6 @@ const tierLabels: Record<Tier, string> = {
 };
 
 
-function timeAgo(dateStr: string): string {
-  const now = Date.now();
-  const then = new Date(dateStr).getTime();
-  const diff = Math.floor((now - then) / 1000);
-  if (diff < 60) return "just now";
-  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
-  if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
-  return `${Math.floor(diff / 86400)}d ago`;
-}
-
 export default function ModLogPage() {
   const [entries, setEntries] = React.useState<ModLogEntry[]>([]);
   const [loading, setLoading] = React.useState(true);
@@ -106,7 +97,7 @@ export default function ModLogPage() {
   });
 
   return (
-    <div>
+    <div className="max-w-5xl">
       <div>
         <div className="flex items-center gap-3">
           <Bot className="h-6 w-6 text-flame-400" />
@@ -121,7 +112,7 @@ export default function ModLogPage() {
       </div>
 
       {/* Filters */}
-      <div className="mt-6 space-y-3">
+      <div className="mt-6 space-y-3 opacity-50 pointer-events-none">
         <div className="flex flex-col gap-3 sm:flex-row">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-smoke" />
@@ -142,7 +133,7 @@ export default function ModLogPage() {
           />
         </div>
 
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Filter by decision">
           <Filter className="h-4 w-4 text-smoke" />
           {(["all", "approved", "flagged", "removed"] as const).map((d) => (
             <button
@@ -167,8 +158,12 @@ export default function ModLogPage() {
           <ModLogSkeleton />
         ) : filteredEntries.length === 0 ? (
           <div className="py-16 text-center">
-            <Shield className="mx-auto h-12 w-12 text-smoke/60" />
-            <p className="mt-4 text-ash">No moderation entries found</p>
+            <Shield className="mx-auto h-12 w-12 text-smoke/40" />
+            <h3 className="mt-4 text-lg font-medium text-ash">Mod Log — Coming Soon</h3>
+            <p className="mt-2 text-sm text-smoke max-w-md mx-auto">
+              Every AI moderation decision will be logged here publicly.
+              This feature is under development.
+            </p>
           </div>
         ) : (
           filteredEntries.map((entry) => {

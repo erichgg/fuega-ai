@@ -6,6 +6,7 @@ import { useSearchParams } from "next/navigation";
 import { Search, Flame, User, FileText, Loader2 } from "lucide-react";
 import { api, ApiError } from "@/lib/api/client";
 import { cn } from "@/lib/utils";
+import { timeAgo } from "@/lib/utils/time-ago";
 
 // ─── Types ───────────────────────────────────────────────────
 
@@ -37,22 +38,6 @@ const tabs: { key: SearchTab; label: string }[] = [
   { key: "campfires", label: "Campfires" },
   { key: "users", label: "Users" },
 ];
-
-// ─── Time-ago helper ─────────────────────────────────────────
-
-function timeAgo(dateStr: string): string {
-  const diff = Date.now() - new Date(dateStr).getTime();
-  const seconds = Math.floor(diff / 1000);
-  if (seconds < 60) return "just now";
-  const minutes = Math.floor(seconds / 60);
-  if (minutes < 60) return `${minutes}m ago`;
-  const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `${hours}h ago`;
-  const days = Math.floor(hours / 24);
-  if (days < 30) return `${days}d ago`;
-  const months = Math.floor(days / 30);
-  return `${months}mo ago`;
-}
 
 // ─── Page ────────────────────────────────────────────────────
 
@@ -167,7 +152,7 @@ function SearchPageInner() {
   }, [q, activeTab]);
 
   return (
-    <div>
+    <div className="max-w-5xl">
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-foreground">Search</h1>
@@ -184,10 +169,12 @@ function SearchPageInner() {
 
       {/* Tabs */}
       {q.trim() && (
-        <div className="mt-4 flex flex-wrap items-center gap-2">
+        <div className="mt-4 flex flex-wrap items-center gap-2" role="tablist">
           {tabs.map((tab) => (
             <button
               key={tab.key}
+              role="tab"
+              aria-selected={activeTab === tab.key}
               onClick={() => setActiveTab(tab.key)}
               className={cn(
                 "rounded-full px-3 py-1 text-xs font-medium transition-colors",

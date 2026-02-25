@@ -21,6 +21,7 @@ import { UserAvatar } from "@/components/fuega/user-avatar";
 import { GovernanceSkeleton } from "@/components/fuega/page-skeleton";
 import { useAuth } from "@/lib/contexts/auth-context";
 import { cn } from "@/lib/utils";
+import { timeAgo } from "@/lib/utils/time-ago";
 import { api, ApiError } from "@/lib/api/client";
 
 type ProposalStatus = "discussion" | "voting" | "passed" | "rejected" | "executed";
@@ -58,16 +59,6 @@ function timeRemaining(dateStr: string): string {
   const hours = Math.floor((diff % 86400000) / 3600000);
   if (days > 0) return `${days}d ${hours}h remaining`;
   return `${hours}h remaining`;
-}
-
-function timeAgo(dateStr: string): string {
-  const now = Date.now();
-  const then = new Date(dateStr).getTime();
-  const diff = Math.floor((now - then) / 1000);
-  if (diff < 60) return "just now";
-  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
-  if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
-  return `${Math.floor(diff / 86400)}d ago`;
 }
 
 export default function ProposalDetailPage() {

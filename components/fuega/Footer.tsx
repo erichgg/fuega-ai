@@ -28,7 +28,7 @@ const footerSections = [
     ],
   },
   {
-    title: "Campfire",
+    title: "Connect",
     links: [
       { href: "https://github.com/fuega", label: "GitHub" },
       { href: "/join", label: "Join" },

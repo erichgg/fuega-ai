@@ -4,12 +4,14 @@ import * as React from "react";
 import Link from "next/link";
 import { Flame, Users, Search, ChevronRight } from "lucide-react";
 import { api, type Campfire, ApiError } from "@/lib/api/client";
+import { cn } from "@/lib/utils";
 
 export default function CampfiresPage() {
   const [campfires, setCampfires] = React.useState<Campfire[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
   const [search, setSearch] = React.useState("");
+  const [sort, setSort] = React.useState<"members" | "newest" | "name">("members");
 
   React.useEffect(() => {
     let cancelled = false;
@@ -42,8 +44,14 @@ export default function CampfiresPage() {
       )
     : campfires;
 
+  const sorted = [...filtered].sort((a, b) => {
+    if (sort === "members") return (b.member_count ?? 0) - (a.member_count ?? 0);
+    if (sort === "newest") return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+    return a.name.localeCompare(b.name);
+  });
+
   return (
-    <div>
+    <div className="max-w-5xl">
       <div className="flex items-center justify-between gap-4">
         <div>
           <h1 className="text-xl font-bold text-foreground">Browse Campfires</h1>
@@ -64,6 +72,24 @@ export default function CampfiresPage() {
           aria-label="Search campfires"
           className="w-full rounded-lg border border-charcoal bg-charcoal/50 py-2.5 pl-10 pr-4 text-sm text-foreground placeholder:text-smoke focus:border-flame-500/50 focus:outline-none focus:ring-1 focus:ring-flame-500/30"
         />
+      </div>
+
+      {/* Sort */}
+      <div className="mt-3 flex items-center gap-2">
+        {(["members", "newest", "name"] as const).map((s) => (
+          <button
+            key={s}
+            onClick={() => setSort(s)}
+            className={cn(
+              "rounded-full px-3 py-1 text-xs font-medium transition-colors",
+              sort === s
+                ? "bg-flame-500/20 text-flame-400"
+                : "text-smoke hover:text-ash",
+            )}
+          >
+            {s === "members" ? "Most Members" : s === "newest" ? "Newest" : "A-Z"}
+          </button>
+        ))}
       </div>
 
       {/* Grid */}
@@ -87,7 +113,7 @@ export default function CampfiresPage() {
               Try again
             </button>
           </div>
-        ) : filtered.length === 0 ? (
+        ) : sorted.length === 0 ? (
           <div className="py-16 text-center">
             <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-coal border border-charcoal">
               <Flame className="h-7 w-7 text-smoke" />
@@ -114,7 +140,7 @@ export default function CampfiresPage() {
           </div>
         ) : (
           <div className="space-y-0.5">
-            {filtered.map((c) => (
+            {sorted.map((c) => (
               <Link
                 key={c.id}
                 href={`/f/${c.name}`}
