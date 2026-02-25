@@ -57,110 +57,6 @@ const tierLabels: Record<Tier, string> = {
   platform: "Platform",
 };
 
-// TEST_DATA - DELETE BEFORE PRODUCTION
-const MOCK_LOG_ENTRIES: ModLogEntry[] = [
-  {
-    id: "ml1",
-    contentSnippet:
-      "Welcome to fuega.ai — the future of campfire discussion...",
-    contentType: "post",
-    campfire: "meta",
-    decision: "approved",
-    confidence: 0.98,
-    reasoning:
-      "Content is constructive, introduces platform features, and encourages campfire participation. No violations detected.",
-    tier: "campfire",
-    createdAt: new Date(Date.now() - 1800000).toISOString(),
-  },
-  {
-    id: "ml2",
-    contentSnippet:
-      "You're an idiot if you think this approach will work. Absolute garbage...",
-    contentType: "comment",
-    campfire: "tech",
-    decision: "flagged",
-    confidence: 0.74,
-    reasoning:
-      "Contains potentially hostile language ('idiot', 'garbage'). However, may be heated technical debate. Flagged for campfire review due to low confidence.",
-    tier: "campfire",
-    createdAt: new Date(Date.now() - 3600000).toISOString(),
-  },
-  {
-    id: "ml3",
-    contentSnippet: "Buy cheap followers at [spam link]...",
-    contentType: "post",
-    campfire: "general",
-    decision: "removed",
-    confidence: 0.99,
-    reasoning:
-      "Clear spam content with commercial link. Violates campfire and platform guidelines.",
-    tier: "platform",
-    createdAt: new Date(Date.now() - 5400000).toISOString(),
-  },
-  {
-    id: "ml4",
-    contentSnippet:
-      "New study shows promising results in quantum computing error correction...",
-    contentType: "post",
-    campfire: "science",
-    decision: "approved",
-    confidence: 0.96,
-    reasoning:
-      "Scientific discussion with reference to published research. Content is factual and relevant to the campfire.",
-    tier: "campfire",
-    createdAt: new Date(Date.now() - 7200000).toISOString(),
-  },
-  {
-    id: "ml5",
-    contentSnippet:
-      "I think the moderation prompt should be updated to...",
-    contentType: "comment",
-    campfire: "meta",
-    decision: "approved",
-    confidence: 0.95,
-    reasoning:
-      "Meta-discussion about moderation is encouraged on this campfire. No personal attacks or violations.",
-    tier: "campfire",
-    createdAt: new Date(Date.now() - 10800000).toISOString(),
-  },
-  {
-    id: "ml6",
-    contentSnippet:
-      "This political party is full of corrupt criminals who should all be...",
-    contentType: "comment",
-    campfire: "politics",
-    decision: "flagged",
-    confidence: 0.68,
-    reasoning:
-      "Strong political opinion that borders on generalized hate speech. Low confidence — flagged for campfire review as political expression vs. hate speech is context-dependent.",
-    tier: "campfire",
-    createdAt: new Date(Date.now() - 14400000).toISOString(),
-  },
-  {
-    id: "ml7",
-    contentSnippet: "Great analysis! I completely agree with your points...",
-    contentType: "comment",
-    campfire: "tech",
-    decision: "approved",
-    confidence: 0.99,
-    reasoning: "Positive, constructive comment. No violations.",
-    tier: "campfire",
-    createdAt: new Date(Date.now() - 18000000).toISOString(),
-  },
-  {
-    id: "ml8",
-    contentSnippet:
-      "[Graphic violent content describing harm to specific individuals]",
-    contentType: "post",
-    campfire: "general",
-    decision: "removed",
-    confidence: 0.99,
-    reasoning:
-      "Content describes graphic violence targeting individuals. Violates platform-level safety guidelines. Auto-removed.",
-    tier: "platform",
-    createdAt: new Date(Date.now() - 21600000).toISOString(),
-  },
-];
 
 function timeAgo(dateStr: string): string {
   const now = Date.now();
@@ -182,11 +78,10 @@ export default function ModLogPage() {
   const [searchQuery, setSearchQuery] = React.useState("");
 
   React.useEffect(() => {
-    const timer = setTimeout(() => {
-      setEntries(MOCK_LOG_ENTRIES);
-      setLoading(false);
-    }, 300);
-    return () => clearTimeout(timer);
+    // No mod-log API endpoint yet — show empty state.
+    // Once /api/campfires/:id/moderation is built, fetch real entries here.
+    setEntries([]);
+    setLoading(false);
   }, []);
 
   const filteredEntries = entries.filter((entry) => {

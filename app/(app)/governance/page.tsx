@@ -141,7 +141,11 @@ function GovernancePageInner() {
           return;
         }
 
-        const res = await api.get<{ proposals: ApiProposal[] }>(
+        interface ApiProposalWithJoins extends ApiProposal {
+          creator_username?: string;
+          campfire_name?: string;
+        }
+        const res = await api.get<{ proposals: ApiProposalWithJoins[] }>(
           "/api/proposals",
           { campfire_id: campfire.id },
         );
@@ -158,7 +162,7 @@ function GovernancePageInner() {
               votesFor: p.votes_for,
               votesAgainst: p.votes_against,
               commentCount: 0,
-              author: (p as Record<string, unknown>).creator_username as string ?? "unknown",
+              author: p.creator_username ?? "unknown",
               createdAt: p.created_at,
               endsAt: p.voting_ends_at ?? p.created_at,
             })),
