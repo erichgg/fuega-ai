@@ -63,12 +63,10 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         {/* Main content — fills remaining space */}
         <main
           id="main-content"
-          className="flex-1 min-w-0 px-3 py-4 sm:px-6"
+          className="flex-1 min-w-0 px-3 py-4 sm:px-6 lg:px-8"
           role="main"
         >
-          <div className="mx-auto max-w-4xl">
-            <ErrorBoundary>{children}</ErrorBoundary>
-          </div>
+          <ErrorBoundary>{children}</ErrorBoundary>
         </main>
       </div>
 
