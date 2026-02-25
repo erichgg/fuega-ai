@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { FlameLogo } from "@/components/fuega/flame-logo";
+import { Heart, Shield, Zap, Star } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Supporters",
@@ -13,27 +13,107 @@ export const metadata: Metadata = {
   },
 };
 
+const tiers = [
+  {
+    icon: Heart,
+    name: "Kindling",
+    price: "Free",
+    description: "Everyone starts here. Full access to all features.",
+    features: [
+      "Join unlimited campfires",
+      "Create posts and comments",
+      "Vote on governance proposals",
+      "Full moderation transparency",
+    ],
+  },
+  {
+    icon: Zap,
+    name: "Ember",
+    price: "Coming Soon",
+    description: "Support the platform and get cosmetic perks.",
+    features: [
+      "Everything in Kindling",
+      "Exclusive profile cosmetics",
+      "Custom brand colors",
+      "Supporter badge",
+    ],
+  },
+  {
+    icon: Star,
+    name: "Blaze",
+    price: "Coming Soon",
+    description: "For power users who want to fuel the fire.",
+    features: [
+      "Everything in Ember",
+      "Early access to new features",
+      "Priority support",
+      "Name in the supporters wall",
+    ],
+  },
+];
+
 export default function SupportersPage() {
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center px-4">
-      <div className="w-full max-w-md text-center">
-        <FlameLogo size="md" />
-        <div className="terminal-card mt-8 p-8">
-          <h1 className="text-2xl font-bold text-foreground glow-text-subtle mb-3">
-            <span className="text-lava-hot font-bold">$ </span>
-            supporters
+    <div className="min-h-screen bg-background">
+      <div className="mx-auto max-w-4xl px-4 py-16">
+        <div className="text-center">
+          <h1 className="text-3xl font-bold text-foreground sm:text-4xl">
+            Support{" "}
+            <span className="text-flame-400 font-semibold">fuega</span>.ai
           </h1>
-          <p className="text-sm text-ash mb-6">
-            Supporters keep{" "}
-            <span className="text-flame-400 font-semibold">fuega</span>
-            <span>.ai</span> ad-free and independent. The supporters
-            page is coming soon.
+          <p className="mt-4 text-lg text-ash leading-relaxed max-w-2xl mx-auto">
+            fuega.ai is ad-free and always will be. Supporters help keep the
+            servers running and the platform independent.
           </p>
+        </div>
+
+        <div className="mt-12 grid gap-6 sm:grid-cols-3">
+          {tiers.map((tier) => {
+            const Icon = tier.icon;
+            return (
+              <div
+                key={tier.name}
+                className="rounded-lg border border-ash-800 bg-ash-900/30 p-6 flex flex-col"
+              >
+                <div className="flex items-center gap-2">
+                  <Icon className="h-5 w-5 text-flame-400" />
+                  <h2 className="text-lg font-semibold text-ash-100">
+                    {tier.name}
+                  </h2>
+                </div>
+                <p className="mt-1 text-xl font-bold text-flame-400">
+                  {tier.price}
+                </p>
+                <p className="mt-2 text-sm text-ash-400">{tier.description}</p>
+                <ul className="mt-4 flex-1 space-y-2">
+                  {tier.features.map((f) => (
+                    <li
+                      key={f}
+                      className="flex items-start gap-2 text-sm text-ash-300"
+                    >
+                      <Shield className="mt-0.5 h-3.5 w-3.5 text-flame-400/60 shrink-0" />
+                      {f}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            );
+          })}
+        </div>
+
+        <div className="mt-12 rounded-lg border border-ash-800 bg-ash-950/50 p-6 text-center">
+          <p className="text-sm text-ash-400">
+            Supporter tiers are coming soon. In the meantime, the best way to
+            support fuega.ai is to use it, create communities, and invite others.
+          </p>
+        </div>
+
+        <div className="mt-8 text-center">
           <Link
             href="/"
-            className="text-xs text-smoke hover:text-flame-400 transition-colors"
+            className="text-sm text-ash-500 hover:text-flame-400 transition-colors"
           >
-            ← Back to home
+            Back to home
           </Link>
         </div>
       </div>
