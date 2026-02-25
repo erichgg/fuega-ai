@@ -11,6 +11,7 @@ import {
   moderateContentWithAI,
   type CampfireContext,
 } from "@/lib/ai/moderation.service";
+import { compileTender } from "@/lib/ai/tender-compiler";
 import { sanitizeText } from "@/lib/sanitize";
 
 export interface ModerationDecision {
@@ -45,10 +46,21 @@ export interface ModerationInput {
 export async function moderateContent(
   input: ModerationInput
 ): Promise<ModerationDecision> {
+  // Compile Tender from governance variables (replaces raw ai_prompt)
+  const campfireName = input.campfire_name ?? "unknown";
+  let tenderPrompt: string;
+  try {
+    const tender = await compileTender(input.campfire_id, campfireName);
+    tenderPrompt = tender.prompt;
+  } catch {
+    // Fallback if Tender compilation fails
+    tenderPrompt = input.campfire_ai_prompt ?? "Be respectful and follow common sense.";
+  }
+
   const campfireContext: CampfireContext = {
     id: input.campfire_id,
-    name: input.campfire_name ?? "unknown",
-    ai_prompt: input.campfire_ai_prompt ?? "Be respectful and follow common sense.",
+    name: campfireName,
+    ai_prompt: tenderPrompt,
     ai_prompt_version: input.campfire_ai_prompt_version ?? 1,
   };
 

@@ -300,14 +300,20 @@ export default function PostDetailPage() {
           <p className="mt-2 text-xs text-red-400">{commentsError}</p>
         )}
         <div className="mt-3 space-y-0.5">
-          {displayComments.map((comment) => (
-            <CommentCard
-              key={comment.id}
-              comment={comment}
-              userVote={commentVotes[comment.id] ?? null}
-              onVote={(v) => handleCommentVote(comment.id, v)}
-            />
-          ))}
+          {displayComments.length === 0 && !commentsError ? (
+            <div className="py-10 text-center">
+              <p className="text-sm text-ash-500">No comments yet. Be the first to share your thoughts.</p>
+            </div>
+          ) : (
+            displayComments.map((comment) => (
+              <CommentCard
+                key={comment.id}
+                comment={comment}
+                userVote={commentVotes[comment.id] ?? null}
+                onVote={(v) => handleCommentVote(comment.id, v)}
+              />
+            ))
+          )}
         </div>
       </div>
     </div>

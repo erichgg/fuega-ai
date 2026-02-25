@@ -15,11 +15,11 @@ import { FlameLogo } from "@/components/fuega/flame-logo";
 export const metadata: Metadata = {
   title: "About",
   description:
-    "Learn about fuega.ai — an AI-moderated discussion platform with transparent campfire governance.",
+    "Learn about fuega.ai — an AI-moderated discussion platform with transparent community governance.",
   openGraph: {
     title: "About fuega.ai",
     description:
-      "Learn about fuega.ai — an AI-moderated discussion platform with transparent campfire governance.",
+      "Learn about fuega.ai — an AI-moderated discussion platform with transparent community governance.",
   },
 };
 
@@ -35,7 +35,7 @@ const comparisonRows: {
   fuega: CellValue;
 }[] = [
   {
-    feature: "Campfire-written rules",
+    feature: "Community-written rules",
     reddit: "partial",
     discord: "partial",
     x: "no",
@@ -140,7 +140,7 @@ const comparisonRows: {
     fuega: "yes",
   },
   {
-    feature: "Campfire chooses AI model",
+    feature: "Community chooses AI model",
     reddit: "no",
     discord: "no",
     x: "no",
@@ -233,7 +233,7 @@ export default function AboutPage() {
             These platforms don&apos;t work for you. They work on you.
           </p>
           <p className="mt-4 text-base leading-relaxed text-ash-400">
-            <F /> is the opposite. Campfires write their own rules, vote on
+            <F /> is the opposite. Communities write their own rules, vote on
             them, and AI enforces exactly what was decided — nothing more. The
             whole thing is tip-supported: help keep the lights on and you get a
             badge and some cosmetics. That&apos;s it. No ads, no data
@@ -305,7 +305,7 @@ export default function AboutPage() {
           </p>
         </section>
 
-        {/* Open Source Social Media */}
+        {/* Open Source & Get Involved */}
         <section className="mt-12">
           <h2 className="text-2xl font-bold text-ash-100 sm:text-3xl">
             Open source social media
@@ -314,17 +314,7 @@ export default function AboutPage() {
             <F /> isn&apos;t a product — it&apos;s a project. The code is
             public, the moderation prompts are readable, and if you don&apos;t
             like how something works you can propose a change, rally votes, and
-            actually fix it. Try doing that on a platform owned by a billionaire
-            who changes the rules whenever he feels like it because some files
-            got released.
-          </p>
-          <p className="mt-4 text-ash-400 leading-relaxed">
-            Most platforms optimize for engagement because that&apos;s what
-            sells ads. Outrage gets clicks, clicks get impressions, impressions
-            get revenue. That&apos;s why your feed is full of rage bait instead
-            of things you actually care about. <F /> doesn&apos;t have that
-            incentive — there are no ads to sell, so there&apos;s no reason to
-            keep you angry.
+            actually fix it.
           </p>
 
           <div className="mt-6 grid gap-4 sm:grid-cols-3">
@@ -354,67 +344,37 @@ export default function AboutPage() {
                 Built on feedback
               </p>
               <p className="mt-1 text-xs text-ash-500">
-                Features come from campfire proposals and votes, not product
+                Features come from community proposals and votes, not product
                 managers chasing quarterly metrics.
               </p>
             </div>
           </div>
         </section>
 
-        {/* How It Works teaser */}
-        <section className="mt-12">
-          <h2 className="text-2xl font-bold text-ash-100 sm:text-3xl">
-            How it works
-          </h2>
-          <p className="mt-4 text-ash-300 leading-relaxed">
-            Each campfire on <F /> governs itself. Members vote on governance
-            settings — toxicity thresholds, spam sensitivity, content rules —
-            and the system compiles those settings into a
-            <span className="font-medium text-ash-200">Tender</span>. No
-            human writes moderation rules directly. Campfires turn dials; the
-            Tender enforces what was decided.
-          </p>
-          <p className="mt-4 text-ash-400 leading-relaxed">
-            Platform-wide Principles (no CSAM, no doxxing, no violence
-            incitement) apply everywhere and can&apos;t be overridden. Beyond
-            that, each campfire is sovereign. You also choose which AI model
-            does the moderating — campfires vote on the provider, starting with
-            Anthropic.
-          </p>
-          <Link
-            href="/how-it-works"
-            className="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-flame-400 transition-colors hover:text-flame-300"
-          >
-            See the full governance system
-            <span aria-hidden="true">&rarr;</span>
-          </Link>
-        </section>
-
         {/* Get Involved */}
         <section className="mt-12 pb-12">
-          <h2 className="text-2xl font-bold text-ash-100 sm:text-3xl">
-            Get involved
-          </h2>
-          <p className="mt-4 text-ash-300 leading-relaxed">
-            <F /> is built in the open and shaped by the people who use it.
+          <p className="text-ash-300 leading-relaxed">
             Have a suggestion? Create a governance proposal. Found a bug?
             Post in{" "}
             <span className="text-flame-400 font-semibold">f</span>
             <span className="text-ash-500 mx-0.5">|</span>
             <span className="text-flame-400 font-semibold">fuega</span>.
-            Want to contribute code? The repo is public. Security concern?
-            See our{" "}
-            <Link href="/security" className="text-flame-400 hover:underline">
-              security page
-            </Link>{" "}
-            for responsible disclosure.
+            Want to contribute code? The repo is public.
           </p>
-          <p className="mt-4 text-ash-500 leading-relaxed">
-            We don&apos;t have a marketing team, a sales team, or a PR
-            department. We have a campfire, a codebase, and a belief that
-            common sense still works when you put the right people in charge of
-            their own spaces.
-          </p>
+          <div className="mt-4 flex flex-wrap items-center gap-4">
+            <Link
+              href="/how-it-works"
+              className="inline-flex items-center gap-1.5 text-sm font-medium text-flame-400 transition-colors hover:text-flame-300"
+            >
+              See how governance works <span aria-hidden="true">&rarr;</span>
+            </Link>
+            <Link
+              href="/security"
+              className="inline-flex items-center gap-1.5 text-sm font-medium text-ash-400 transition-colors hover:text-ash-200"
+            >
+              Security & privacy <span aria-hidden="true">&rarr;</span>
+            </Link>
+          </div>
         </section>
       </main>
     </div>

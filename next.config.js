@@ -1,56 +1,62 @@
 /** @type {import('next').NextConfig} */
+const isDev = process.env.NODE_ENV !== "production";
+
 const nextConfig = {
   poweredByHeader: false,
   async headers() {
+    /** @type {import('next/dist/lib/load-custom-routes').Header['headers']} */
+    const securityHeaders = [
+      {
+        key: "X-Content-Type-Options",
+        value: "nosniff",
+      },
+      {
+        key: "Referrer-Policy",
+        value: "strict-origin-when-cross-origin",
+      },
+      {
+        key: "X-XSS-Protection",
+        value: "1; mode=block",
+      },
+      {
+        key: "Permissions-Policy",
+        value:
+          "camera=(), microphone=(), geolocation=(), interest-cohort=()",
+      },
+      {
+        key: "Content-Security-Policy",
+        value: [
+          "default-src 'self'",
+          // 'unsafe-inline' is required by Next.js for inline styles/scripts.
+          "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://static.cloudflareinsights.com",
+          "style-src 'self' 'unsafe-inline'",
+          "img-src 'self' data: blob:",
+          "font-src 'self'",
+          "connect-src 'self' https://cloudflareinsights.com",
+          // Allow iframes in dev for preview tools; deny in production
+          isDev ? "frame-ancestors *" : "frame-ancestors 'none'",
+          "base-uri 'self'",
+          "form-action 'self'",
+          "report-uri /api/csp-report",
+        ].join("; "),
+      },
+    ];
+
+    // Iframe and HSTS headers only in production
+    if (!isDev) {
+      securityHeaders.push(
+        { key: "X-Frame-Options", value: "DENY" },
+        {
+          key: "Strict-Transport-Security",
+          value: "max-age=31536000; includeSubDomains; preload",
+        },
+      );
+    }
+
     return [
       {
         source: "/(.*)",
-        headers: [
-          {
-            key: "X-Frame-Options",
-            value: "DENY",
-          },
-          {
-            key: "X-Content-Type-Options",
-            value: "nosniff",
-          },
-          {
-            key: "Referrer-Policy",
-            value: "strict-origin-when-cross-origin",
-          },
-          {
-            key: "X-XSS-Protection",
-            value: "1; mode=block",
-          },
-          {
-            key: "Permissions-Policy",
-            value:
-              "camera=(), microphone=(), geolocation=(), interest-cohort=()",
-          },
-          {
-            key: "Content-Security-Policy",
-            value: [
-              "default-src 'self'",
-              // 'unsafe-inline' is required by Next.js for inline styles/scripts.
-              // 'strict-dynamic' removed: without nonce injection it would block
-              // dynamically-loaded scripts in CSP Level 3 browsers.
-              // TODO: wire up Next.js nonce middleware to re-enable strict-dynamic safely.
-              "script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com",
-              "style-src 'self' 'unsafe-inline'",
-              "img-src 'self' data: blob:",
-              "font-src 'self'",
-              "connect-src 'self' https://cloudflareinsights.com",
-              "frame-ancestors 'none'",
-              "base-uri 'self'",
-              "form-action 'self'",
-              "report-uri /api/csp-report",
-            ].join("; "),
-          },
-          {
-            key: "Strict-Transport-Security",
-            value: "max-age=31536000; includeSubDomains; preload",
-          },
-        ],
+        headers: securityHeaders,
       },
     ];
   },

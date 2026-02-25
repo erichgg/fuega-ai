@@ -64,7 +64,7 @@ const howItWorks = [
   },
   {
     step: "02",
-    title: "Find or build your community",
+    title: "Find or build your campfire",
     description: "CAMPFIRE_LINKS",
   },
   {

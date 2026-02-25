@@ -83,7 +83,7 @@ export default function HomeFeedPage() {
       </div>
 
       <div className="mt-4 space-y-2">
-        {loading || authLoading ? (
+        {loading ? (
           <FeedSkeleton />
         ) : error ? (
           <div className="py-16 text-center">
@@ -97,15 +97,17 @@ export default function HomeFeedPage() {
           </div>
         ) : postCards.length === 0 ? (
           <div className="py-16 text-center">
-            <p className="text-ash-400">No posts yet. Be the first!</p>
-            {user && (
-              <Link
-                href="/submit"
-                className="mt-2 inline-block text-xs text-flame-400 hover:underline"
-              >
-                Create a post →
-              </Link>
-            )}
+            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-ash-900 border border-ash-800">
+              <Plus className="h-7 w-7 text-ash-500" />
+            </div>
+            <p className="text-lg font-medium text-ash-300">No posts yet</p>
+            <p className="mt-1 text-sm text-ash-500">Be the first to start a conversation.</p>
+            <Link
+              href={user ? "/submit" : "/signup"}
+              className="mt-4 inline-flex items-center gap-1.5 bg-flame-500 px-5 py-2 text-sm font-medium text-white transition-colors hover:bg-flame-600"
+            >
+              {user ? "Create a post" : "Sign up to post"}
+            </Link>
           </div>
         ) : (
           <>

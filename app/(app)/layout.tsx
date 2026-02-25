@@ -6,18 +6,36 @@ import { Sidebar } from "@/components/fuega/sidebar";
 import { Footer } from "@/components/fuega/Footer";
 import { ErrorBoundary } from "@/components/fuega/error-boundary";
 import { useAuth } from "@/lib/contexts/auth-context";
-
-const DEMO_CAMPFIRES = [
-  { name: "tech", memberCount: 12400 },
-  { name: "science", memberCount: 8900 },
-  { name: "gaming", memberCount: 15200 },
-  { name: "music", memberCount: 6700 },
-  { name: "philosophy", memberCount: 3200 },
-];
+import { api, type Campfire } from "@/lib/api/client";
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const { user } = useAuth();
   const [sidebarOpen, setSidebarOpen] = React.useState(false);
+  const [popularCampfires, setPopularCampfires] = React.useState<
+    { name: string; memberCount: number }[]
+  >([]);
+
+  // Fetch real campfires for sidebar
+  React.useEffect(() => {
+    let cancelled = false;
+    async function load() {
+      try {
+        const data = await api.get<{ campfires: Campfire[] }>("/api/campfires");
+        if (!cancelled) {
+          setPopularCampfires(
+            data.campfires
+              .sort((a, b) => (b.member_count ?? 0) - (a.member_count ?? 0))
+              .slice(0, 8)
+              .map((c) => ({ name: c.name, memberCount: c.member_count ?? 0 })),
+          );
+        }
+      } catch {
+        // Sidebar falls back to defaults in component
+      }
+    }
+    load();
+    return () => { cancelled = true; };
+  }, []);
 
   return (
     <div className="min-h-screen bg-void flex flex-col">
@@ -28,7 +46,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
       <div className="flex flex-1">
         <Sidebar
-          campfires={user ? DEMO_CAMPFIRES : []}
+          popularCampfires={popularCampfires.length > 0 ? popularCampfires : undefined}
           open={sidebarOpen}
           onClose={() => setSidebarOpen(false)}
         />

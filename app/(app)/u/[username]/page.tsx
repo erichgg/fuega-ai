@@ -309,9 +309,12 @@ export default function UserProfilePage() {
 
         <TabsContent value="posts" className="mt-4 space-y-2">
           {postCards.length === 0 ? (
-            <p className="py-8 text-center text-sm text-ash-500">
-              No posts yet
-            </p>
+            <div className="py-12 text-center">
+              <p className="text-sm font-medium text-ash-400">No posts yet</p>
+              <p className="mt-1 text-xs text-ash-600">
+                When {profile.username} creates posts, they&apos;ll show up here.
+              </p>
+            </div>
           ) : (
             <>
               {postCards.map((post) => (

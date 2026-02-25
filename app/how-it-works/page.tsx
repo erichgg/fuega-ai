@@ -16,11 +16,11 @@ import { FlameLogo } from "@/components/fuega/flame-logo";
 export const metadata: Metadata = {
   title: "How It Works",
   description:
-    "How fuega.ai governance works — campfire-driven moderation, governance variables, and the Principles that keep everyone safe.",
+    "How fuega.ai governance works — community-driven moderation, governance variables, and the Principles that keep everyone safe.",
   openGraph: {
     title: "How It Works | fuega.ai",
     description:
-      "How fuega.ai governance works — campfire-driven moderation, governance variables, and the Principles that keep everyone safe.",
+      "How fuega.ai governance works — community-driven moderation, governance variables, and the Principles that keep everyone safe.",
   },
 };
 
@@ -59,7 +59,7 @@ function ArchitectureDiagram() {
           </p>
         </div>
         <p className="mt-1 text-xs text-ash-400">
-          Structured settings voted on by campfire members: toxicity threshold,
+          Structured settings voted on by community members: toxicity threshold,
           spam sensitivity, content rules, voting quorum, and more.
         </p>
       </div>
@@ -143,7 +143,7 @@ function SecuritySandwich() {
             </p>
           </div>
           <p className="text-xs text-ash-400 mt-0.5">
-            Campfire descriptions, custom rule text. Treated as untrusted user
+            Community descriptions, custom rule text. Treated as untrusted user
             input — sanitized and sandboxed.
           </p>
         </div>
@@ -168,7 +168,7 @@ const proposalSteps = [
   {
     step: "1",
     title: "Draft",
-    desc: "A campfire member proposes changing a governance variable — for example, raising the toxicity threshold from 3 to 5.",
+    desc: "Any member proposes changing a governance variable — for example, raising the toxicity threshold from 3 to 5.",
   },
   {
     step: "2",
@@ -178,7 +178,7 @@ const proposalSteps = [
   {
     step: "3",
     title: "Voting",
-    desc: "Configurable voting window (default: 7 days). Threshold set by the campfire — simple majority, supermajority, or custom quorum.",
+    desc: "Configurable voting window (default: 7 days). Threshold set by the community — simple majority, supermajority, or custom quorum.",
   },
   {
     step: "4",
@@ -232,7 +232,7 @@ export default function HowItWorksPage() {
             How <F /> works
           </h1>
           <p className="mt-4 max-w-2xl text-base leading-relaxed text-ash-300">
-            Every campfire on <F /> governs itself. Members vote on structured
+            Every community on <F /> governs itself. Members vote on structured
             settings — not raw AI prompts — and the system compiles those
             settings into a{" "}
             <span className="font-medium text-ash-200">Tender</span>.
@@ -247,7 +247,7 @@ export default function HowItWorksPage() {
           </h2>
           <p className="mt-3 text-ash-400 leading-relaxed">
             Two layers. Platform Principles are immutable and apply everywhere.
-            Below that, each campfire is sovereign — it sets its own governance
+            Below that, each community is sovereign — it sets its own governance
             variables, and the Tender compiler turns those into an AI prompt.
           </p>
 
@@ -260,9 +260,9 @@ export default function HowItWorksPage() {
             Campfires
           </h2>
           <p className="mt-3 text-ash-400 leading-relaxed">
-            A campfire is a self-governing community — like a subreddit,
-            but with transparent AI moderation and democratic governance. Each
-            campfire has its own Tender (compiled AI governance prompt), its own rules, and its
+            A campfire is a self-governing community with transparent AI
+            moderation and democratic governance. Each
+            one has its own rules, its own AI moderator, and its
             own public mod log.
           </p>
 
@@ -282,7 +282,7 @@ export default function HowItWorksPage() {
                 Self-governing
               </p>
               <p className="mt-1 text-xs text-ash-400">
-                Members vote on governance variables. The campfire&apos;s Tender
+                Members vote on governance variables. The AI prompt
                 is recompiled automatically when settings change.
               </p>
             </div>
@@ -300,7 +300,7 @@ export default function HowItWorksPage() {
                 Choose your AI
               </p>
               <p className="mt-1 text-xs text-ash-400">
-                Campfires vote on which AI provider moderates their space.
+                Communities vote on which AI provider moderates their space.
                 Don&apos;t trust a model? Vote it out.
               </p>
             </div>
@@ -314,7 +314,7 @@ export default function HowItWorksPage() {
           </h2>
           <p className="mt-3 text-ash-400 leading-relaxed">
             Instead of writing raw AI prompts (which opens the door to prompt
-            injection), campfires configure structured variables. Each variable
+            injection), communities configure structured variables. Each variable
             has a type, bounds, and a default value. The Tender compiler reads
             them all and produces the AI instruction set.
           </p>
@@ -365,7 +365,7 @@ export default function HowItWorksPage() {
                   <td className="px-4 py-3 text-ash-400">boolean</td>
                   <td className="px-4 py-3 text-ash-400">true / false</td>
                   <td className="py-3 pl-4 text-ash-400">
-                    Whether NSFW content is permitted in the campfire
+                    Whether NSFW content is permitted in the community
                   </td>
                 </tr>
                 <tr className="border-b border-ash-800/50">
@@ -387,7 +387,7 @@ export default function HowItWorksPage() {
                   <td className="px-4 py-3 text-ash-400">text</td>
                   <td className="px-4 py-3 text-ash-400">max 2000 chars</td>
                   <td className="py-3 pl-4 text-ash-400">
-                    Free-text campfire rules (treated as untrusted input in the
+                    Free-text community rules (treated as untrusted input in the
                     Tender)
                   </td>
                 </tr>
@@ -426,7 +426,7 @@ export default function HowItWorksPage() {
             </h2>
           </div>
           <p className="mt-3 text-ash-400 leading-relaxed">
-            Want to change how your campfire is moderated? Create a governance
+            Want to change how your community is moderated? Create a governance
             proposal. Here&apos;s the flow:
           </p>
 
@@ -541,7 +541,7 @@ export default function HowItWorksPage() {
               Ready to see it in action?
             </h2>
             <p className="mt-2 text-sm text-ash-400">
-              Create an account, join a campfire, and watch governance happen in
+              Create an account, join a community, and watch governance happen in
               real-time.
             </p>
             <div className="mt-4 flex items-center justify-center gap-4">

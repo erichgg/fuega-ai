@@ -1,10 +1,14 @@
 import { Pool, type QueryResult, type QueryResultRow } from "pg";
 
+const connStr = process.env.DATABASE_URL ?? "";
+const isRemote = connStr.includes("rlwy.net") || connStr.includes("railway") || process.env.NODE_ENV === "production";
+
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
+  connectionString: connStr,
   max: 20,
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 5000,
+  ssl: isRemote ? { rejectUnauthorized: false } : undefined,
 });
 
 /**

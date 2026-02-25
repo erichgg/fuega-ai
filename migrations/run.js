@@ -5,12 +5,11 @@ const { Pool } = require("pg");
 const MIGRATIONS_DIR = path.join(__dirname);
 
 async function getPool() {
+  const connStr = process.env.DATABASE_URL || "";
+  const isRemote = connStr.includes("rlwy.net") || connStr.includes("railway") || process.env.NODE_ENV === "production";
   const pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
-    ssl:
-      process.env.NODE_ENV === "production"
-        ? { rejectUnauthorized: false }
-        : undefined,
+    connectionString: connStr,
+    ssl: isRemote ? { rejectUnauthorized: false } : undefined,
   });
 
   // Verify connection
@@ -119,17 +118,31 @@ async function resetAll(pool) {
 
   await pool.query("BEGIN");
   try {
-    // Drop all tables in reverse dependency order
+    // Drop all tables — both old and new names to handle any state
     const tables = [
+      // New names (post-migration 011)
+      "chat_messages",
+      "campfire_settings_history",
+      "campfire_settings",
+      "governance_variables",
       "council_members",
       "ai_prompt_history",
       "moderation_appeals",
-      "moderation_log",
+      "campfire_mod_logs",
       "proposal_votes",
       "proposals",
+      "user_badges",
+      "badges",
+      "referrals",
+      "user_push_subscriptions",
+      "notifications",
       "votes",
       "comments",
       "posts",
+      "campfire_members",
+      "campfires",
+      // Old names (pre-migration 011)
+      "moderation_log",
       "community_memberships",
       "communities",
       "users",

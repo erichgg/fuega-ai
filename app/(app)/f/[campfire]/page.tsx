@@ -3,11 +3,12 @@
 import * as React from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { Users, Bot, Plus, Shield, Clock, Settings, AlertCircle } from "lucide-react";
+import { Users, Bot, Plus, Shield, Clock, Settings, AlertCircle, MessageSquare, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { PostCard } from "@/components/fuega/post-card";
 import { FeedSort } from "@/components/fuega/feed-sort";
+import { ChatPanel } from "@/components/fuega/chat-panel";
 import { CampfireSkeleton } from "@/components/fuega/page-skeleton";
 import { useAuth } from "@/lib/contexts/auth-context";
 import { useCampfire, useCampfireMembership } from "@/lib/hooks/useCampfires";
@@ -16,6 +17,7 @@ import { useVoting } from "@/lib/hooks/useVoting";
 import { toPostCardData } from "@/lib/adapters/post-adapter";
 
 type SortOption = "hot" | "new" | "top" | "rising";
+type ViewMode = "posts" | "chat";
 
 export default function CampfirePage() {
   const params = useParams();
@@ -48,6 +50,9 @@ export default function CampfirePage() {
   const [sparkDeltas, setSparkDeltas] = React.useState<Record<string, number>>(
     {},
   );
+
+  // View mode (posts vs chat)
+  const [viewMode, setViewMode] = React.useState<ViewMode>("posts");
 
   // Membership
   const { join, leave, loading: membershipLoading, error: membershipError } = useCampfireMembership();
@@ -206,10 +211,32 @@ export default function CampfirePage() {
         </div>
       </div>
 
-      {/* Feed controls */}
-      <div className="mt-4 flex items-center justify-between gap-4">
-        <FeedSort active={sort} onChange={setSort} />
-        {user && (
+      {/* View mode tabs */}
+      <div className="mt-4 flex items-center gap-1 rounded-lg border border-ash-800 bg-ash-900/50 p-1">
+        <button
+          onClick={() => setViewMode("posts")}
+          className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
+            viewMode === "posts"
+              ? "bg-flame-500/20 text-flame-400"
+              : "text-ash-400 hover:text-ash-200 hover:bg-ash-800/50"
+          }`}
+        >
+          <FileText className="h-4 w-4" />
+          Posts
+        </button>
+        <button
+          onClick={() => setViewMode("chat")}
+          className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
+            viewMode === "chat"
+              ? "bg-flame-500/20 text-flame-400"
+              : "text-ash-400 hover:text-ash-200 hover:bg-ash-800/50"
+          }`}
+        >
+          <MessageSquare className="h-4 w-4" />
+          Chat
+        </button>
+        <div className="flex-1" />
+        {viewMode === "posts" && user && (
           <Link href={`/submit?campfire=${campfire.name}`}>
             <Button variant="spark" size="sm" className="gap-1.5">
               <Plus className="h-4 w-4" />
@@ -219,43 +246,71 @@ export default function CampfirePage() {
         )}
       </div>
 
-      {/* Posts */}
-      <div className="mt-4 space-y-2">
-        {postsError ? (
-          <div className="py-16 text-center">
-            <p className="text-red-400">{postsError}</p>
+      {/* Posts view */}
+      {viewMode === "posts" && (
+        <>
+          <div className="mt-3">
+            <FeedSort active={sort} onChange={setSort} />
           </div>
-        ) : postCards.length === 0 ? (
-          <div className="py-16 text-center">
-            <p className="text-ash-400">
-              No posts in{" "}
-              <span className="text-lava-hot">f</span>
-              <span className="text-smoke mx-1">|</span>
-              <span>{campfire.name}</span> yet. Be the first!
-            </p>
-          </div>
-        ) : (
-          <>
-            {postCards.map((post) => (
-              <Link key={post.id} href={`/f/${campfire.name}/${post.id}`}>
-                <PostCard
-                  post={post}
-                  userVote={votes[post.id] ?? null}
-                  onVote={(v) => handleVote(post.id, v)}
-                />
-              </Link>
-            ))}
-            {hasMore && (
-              <button
-                onClick={loadMore}
-                className="w-full py-3 text-center text-xs text-ash-400 hover:text-flame-400 transition-colors"
-              >
-                Load more posts
-              </button>
+          <div className="mt-3 space-y-2">
+            {postsError ? (
+              <div className="py-16 text-center">
+                <p className="text-red-400">{postsError}</p>
+              </div>
+            ) : postCards.length === 0 ? (
+              <div className="py-16 text-center">
+                <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-ash-900 border border-ash-800">
+                  <FileText className="h-7 w-7 text-ash-500" />
+                </div>
+                <p className="text-lg font-medium text-ash-300">
+                  No posts in{" "}
+                  <span className="text-flame-400">f</span>
+                  <span className="text-ash-600 mx-0.5">|</span>
+                  <span className="text-flame-400">{campfire.name}</span>
+                </p>
+                <p className="mt-1 text-sm text-ash-500">Be the first to start a conversation here.</p>
+                {user && (
+                  <Link
+                    href="/submit"
+                    className="mt-4 inline-flex items-center gap-1.5 bg-flame-500 px-5 py-2 text-sm font-medium text-white transition-colors hover:bg-flame-600"
+                  >
+                    Create a post
+                  </Link>
+                )}
+              </div>
+            ) : (
+              <>
+                {postCards.map((post) => (
+                  <Link key={post.id} href={`/f/${campfire.name}/${post.id}`}>
+                    <PostCard
+                      post={post}
+                      userVote={votes[post.id] ?? null}
+                      onVote={(v) => handleVote(post.id, v)}
+                    />
+                  </Link>
+                ))}
+                {hasMore && (
+                  <button
+                    onClick={loadMore}
+                    className="w-full py-3 text-center text-xs text-ash-400 hover:text-flame-400 transition-colors"
+                  >
+                    Load more posts
+                  </button>
+                )}
+              </>
             )}
-          </>
-        )}
-      </div>
+          </div>
+        </>
+      )}
+
+      {/* Chat view */}
+      {viewMode === "chat" && (
+        <div className="mt-3">
+          <ChatPanel
+            campfireId={campfire.id}
+          />
+        </div>
+      )}
     </div>
   );
 }
