@@ -32,7 +32,7 @@ interface SidebarLink {
   href: string;
 }
 
-interface SidebarCampfire {
+export interface SidebarCampfire {
   name: string;
   memberCount: number;
 }
@@ -61,7 +61,141 @@ const discoverLinks: SidebarLink[] = [
 ];
 
 // ---------------------------------------------------------------------------
-// Sidebar (Sheet overlay)
+// SidebarContent — shared inner content for desktop and mobile
+// ---------------------------------------------------------------------------
+
+export function SidebarContent({
+  campfires = [],
+  popularCampfires = [],
+  onNavigate,
+}: {
+  campfires?: SidebarCampfire[];
+  popularCampfires?: SidebarCampfire[];
+  onNavigate?: () => void;
+}) {
+  const pathname = usePathname();
+  const [myExpanded, setMyExpanded] = React.useState(true);
+  const [popularExpanded, setPopularExpanded] = React.useState(true);
+
+  return (
+    <div className="flex flex-col h-full">
+      {/* Scrollable nav */}
+      <nav className="flex-1 overflow-y-auto p-3">
+        {/* Main navigation */}
+        <div className="space-y-0.5">
+          {mainLinks.map((link) => (
+            <SidebarItem
+              key={link.href}
+              link={link}
+              active={pathname === link.href}
+              onClick={onNavigate}
+            />
+          ))}
+        </div>
+
+        <div className="lava-rule my-3" />
+
+        {/* Discover */}
+        <div className="space-y-0.5">
+          <span className="px-3 text-[10px] font-semibold font-mono uppercase tracking-wider text-smoke">
+            Discover
+          </span>
+          {discoverLinks.map((link) => (
+            <SidebarItem
+              key={link.href}
+              link={link}
+              active={pathname === link.href}
+              onClick={onNavigate}
+            />
+          ))}
+        </div>
+
+        {/* My Campfires */}
+        {campfires.length > 0 && (
+          <>
+            <div className="lava-rule my-3" />
+            <button
+              onClick={() => setMyExpanded(!myExpanded)}
+              aria-expanded={myExpanded}
+              aria-label="My Campfires"
+              className="flex w-full items-center justify-between px-3 py-1"
+            >
+              <span className="text-[10px] font-semibold font-mono uppercase tracking-wider text-smoke">
+                My Campfires
+              </span>
+              {myExpanded ? (
+                <ChevronDown className="h-3 w-3 text-smoke" />
+              ) : (
+                <ChevronRight className="h-3 w-3 text-smoke" />
+              )}
+            </button>
+            {myExpanded && (
+              <div className="mt-1 space-y-0.5">
+                {campfires.map((c) => (
+                  <CampfireLink
+                    key={c.name}
+                    campfire={c}
+                    active={pathname === `/f/${c.name}`}
+                    onClick={onNavigate}
+                  />
+                ))}
+              </div>
+            )}
+          </>
+        )}
+
+        {/* Popular Campfires */}
+        {popularCampfires.length > 0 && (
+          <>
+            <div className="lava-rule my-3" />
+            <button
+              onClick={() => setPopularExpanded(!popularExpanded)}
+              aria-expanded={popularExpanded}
+              aria-label="Popular Campfires"
+              className="flex w-full items-center justify-between px-3 py-1"
+            >
+              <span className="text-[10px] font-semibold font-mono uppercase tracking-wider text-smoke">
+                Popular
+              </span>
+              {popularExpanded ? (
+                <ChevronDown className="h-3 w-3 text-smoke" />
+              ) : (
+                <ChevronRight className="h-3 w-3 text-smoke" />
+              )}
+            </button>
+            {popularExpanded && (
+              <div className="mt-1 space-y-0.5">
+                {popularCampfires.map((c) => (
+                  <CampfireLink
+                    key={c.name}
+                    campfire={c}
+                    active={pathname === `/f/${c.name}`}
+                    onClick={onNavigate}
+                  />
+                ))}
+              </div>
+            )}
+          </>
+        )}
+      </nav>
+
+      {/* Create campfire button */}
+      <div className="border-t border-lava-hot/10 p-3">
+        <Link
+          href="/create-campfire"
+          onClick={onNavigate}
+          className="flex w-full items-center justify-center gap-2 rounded-md border border-lava-hot bg-transparent px-4 py-2 text-sm font-medium font-mono uppercase tracking-wider text-lava-hot transition-all hover:bg-lava-hot hover:text-black"
+        >
+          <Plus className="h-4 w-4" />
+          Create Campfire
+        </Link>
+      </div>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Sidebar — Sheet overlay (mobile + menu button trigger)
 // ---------------------------------------------------------------------------
 
 export function Sidebar({
@@ -70,10 +204,6 @@ export function Sidebar({
   open,
   onClose,
 }: SidebarProps) {
-  const pathname = usePathname();
-  const [myExpanded, setMyExpanded] = React.useState(true);
-  const [popularExpanded, setPopularExpanded] = React.useState(true);
-
   return (
     <Sheet open={open} onOpenChange={(v) => !v && onClose()}>
       <SheetContent
@@ -89,117 +219,11 @@ export function Sidebar({
           </SheetTitle>
         </div>
 
-        {/* Scrollable nav */}
-        <nav className="flex-1 overflow-y-auto p-3" style={{ maxHeight: "calc(100vh - 8rem)" }}>
-          {/* Main navigation */}
-          <div className="space-y-0.5">
-            {mainLinks.map((link) => (
-              <SidebarItem
-                key={link.href}
-                link={link}
-                active={pathname === link.href}
-                onClick={onClose}
-              />
-            ))}
-          </div>
-
-          <div className="lava-rule my-3" />
-
-          {/* Discover */}
-          <div className="space-y-0.5">
-            <span className="px-3 text-[10px] font-semibold font-mono uppercase tracking-wider text-smoke">
-              Discover
-            </span>
-            {discoverLinks.map((link) => (
-              <SidebarItem
-                key={link.href}
-                link={link}
-                active={pathname === link.href}
-                onClick={onClose}
-              />
-            ))}
-          </div>
-
-          {/* My Campfires */}
-          {campfires.length > 0 && (
-            <>
-              <div className="lava-rule my-3" />
-              <button
-                onClick={() => setMyExpanded(!myExpanded)}
-                aria-expanded={myExpanded}
-                aria-label="My Campfires"
-                className="flex w-full items-center justify-between px-3 py-1"
-              >
-                <span className="text-[10px] font-semibold font-mono uppercase tracking-wider text-smoke">
-                  My Campfires
-                </span>
-                {myExpanded ? (
-                  <ChevronDown className="h-3 w-3 text-smoke" />
-                ) : (
-                  <ChevronRight className="h-3 w-3 text-smoke" />
-                )}
-              </button>
-              {myExpanded && (
-                <div className="mt-1 space-y-0.5">
-                  {campfires.map((c) => (
-                    <CampfireLink
-                      key={c.name}
-                      campfire={c}
-                      active={pathname === `/f/${c.name}`}
-                      onClick={onClose}
-                    />
-                  ))}
-                </div>
-              )}
-            </>
-          )}
-
-          {/* Popular Campfires */}
-          {popularCampfires.length > 0 && (
-            <>
-              <div className="lava-rule my-3" />
-              <button
-                onClick={() => setPopularExpanded(!popularExpanded)}
-                aria-expanded={popularExpanded}
-                aria-label="Popular Campfires"
-                className="flex w-full items-center justify-between px-3 py-1"
-              >
-                <span className="text-[10px] font-semibold font-mono uppercase tracking-wider text-smoke">
-                  Popular
-                </span>
-                {popularExpanded ? (
-                  <ChevronDown className="h-3 w-3 text-smoke" />
-                ) : (
-                  <ChevronRight className="h-3 w-3 text-smoke" />
-                )}
-              </button>
-              {popularExpanded && (
-                <div className="mt-1 space-y-0.5">
-                  {popularCampfires.map((c) => (
-                    <CampfireLink
-                      key={c.name}
-                      campfire={c}
-                      active={pathname === `/f/${c.name}`}
-                      onClick={onClose}
-                    />
-                  ))}
-                </div>
-              )}
-            </>
-          )}
-        </nav>
-
-        {/* Create campfire button */}
-        <div className="border-t border-lava-hot/10 p-3">
-          <Link
-            href="/create-campfire"
-            onClick={onClose}
-            className="flex w-full items-center justify-center gap-2 rounded-md border border-lava-hot bg-transparent px-4 py-2 text-sm font-medium font-mono uppercase tracking-wider text-lava-hot transition-all hover:bg-lava-hot hover:text-black"
-          >
-            <Plus className="h-4 w-4" />
-            Create Campfire
-          </Link>
-        </div>
+        <SidebarContent
+          campfires={campfires}
+          popularCampfires={popularCampfires}
+          onNavigate={onClose}
+        />
       </SheetContent>
     </Sheet>
   );

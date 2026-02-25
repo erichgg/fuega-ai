@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { Navbar } from "@/components/fuega/Navbar";
-import { Sidebar } from "@/components/fuega/sidebar";
+import { Sidebar, SidebarContent } from "@/components/fuega/sidebar";
 import { Footer } from "@/components/fuega/Footer";
 import { ErrorBoundary } from "@/components/fuega/error-boundary";
 import { useAuth } from "@/lib/contexts/auth-context";
@@ -41,7 +41,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     <div className="min-h-screen bg-void flex flex-col">
       <Navbar onOpenSidebar={() => setSidebarOpen(true)} />
 
-      {/* Sidebar drawer */}
+      {/* Sidebar drawer (mobile + menu button) */}
       <Sidebar
         popularCampfires={popularCampfires.length > 0 ? popularCampfires : undefined}
         open={sidebarOpen}
@@ -51,16 +51,26 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       {/* Spacer for fixed navbar */}
       <div className="h-14" />
 
-      {/* Centered main content — no persistent sidebar */}
-      <main
-        id="main-content"
-        className="flex-1 w-full px-3 py-4 sm:px-6"
-        role="main"
-      >
-        <div className="mx-auto max-w-4xl">
-          <ErrorBoundary>{children}</ErrorBoundary>
-        </div>
-      </main>
+      {/* Desktop: persistent sidebar + main content */}
+      <div className="flex-1 flex">
+        {/* Persistent sidebar — visible on lg+ */}
+        <aside className="hidden lg:flex lg:w-60 xl:w-64 shrink-0 flex-col border-r border-lava-hot/10 bg-coal/50 sticky top-14 h-[calc(100vh-3.5rem)] overflow-hidden">
+          <SidebarContent
+            popularCampfires={popularCampfires.length > 0 ? popularCampfires : undefined}
+          />
+        </aside>
+
+        {/* Main content — fills remaining space */}
+        <main
+          id="main-content"
+          className="flex-1 min-w-0 px-3 py-4 sm:px-6"
+          role="main"
+        >
+          <div className="mx-auto max-w-4xl">
+            <ErrorBoundary>{children}</ErrorBoundary>
+          </div>
+        </main>
+      </div>
 
       <Footer />
     </div>

@@ -55,7 +55,7 @@ export function PostCard({
   return (
     <article
       className={cn(
-        "group rounded-md border border-transparent bg-coal p-4 transition-all hover:border-lava-hot/20 hover:bg-coal/80",
+        "group rounded-md border border-transparent bg-coal p-3 transition-all hover:border-lava-hot/20 hover:bg-coal/80",
         "border-l-2 border-l-transparent hover:border-l-lava-hot/40",
         className,
       )}
@@ -86,19 +86,19 @@ export function PostCard({
       </div>
 
       {/* Title */}
-      <h3 className="mt-2 text-base font-medium leading-snug text-foreground group-hover:text-lava-hot cursor-pointer transition-colors">
+      <h3 className={cn("mt-1.5 font-medium leading-snug text-foreground group-hover:text-lava-hot cursor-pointer transition-colors", compact ? "text-sm" : "text-base")}>
         {post.title}
       </h3>
 
       {/* Body preview */}
       {!compact && post.body && (
-        <p className="mt-1.5 text-sm text-ash line-clamp-3 leading-relaxed">
+        <p className="mt-1 text-sm text-ash line-clamp-3 leading-relaxed">
           {post.body}
         </p>
       )}
 
       {/* Action bar — inline voting + actions */}
-      <div className="mt-3 flex items-center gap-1 text-xs">
+      <div className="mt-2 flex items-center gap-1 text-xs">
         {/* Spark/Douse */}
         <SparkButton
           sparkCount={post.sparkCount}

@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { Flame, Users, Search } from "lucide-react";
+import { Flame, Users, Search, ChevronRight } from "lucide-react";
 import { api, type Campfire, ApiError } from "@/lib/api/client";
 
 export default function CampfiresPage() {
@@ -69,17 +69,12 @@ export default function CampfiresPage() {
       {/* Grid */}
       <div className="mt-6">
         {loading ? (
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="space-y-0.5">
             {Array.from({ length: 6 }).map((_, i) => (
               <div
                 key={i}
-                className="animate-pulse rounded-lg border border-charcoal bg-charcoal/30 p-5"
-              >
-                <div className="h-5 w-24 rounded bg-charcoal" />
-                <div className="mt-3 h-3 w-full rounded bg-charcoal" />
-                <div className="mt-2 h-3 w-2/3 rounded bg-charcoal" />
-                <div className="mt-4 h-3 w-16 rounded bg-charcoal" />
-              </div>
+                className="animate-pulse h-10 rounded bg-charcoal/30"
+              />
             ))}
           </div>
         ) : error ? (
@@ -118,36 +113,26 @@ export default function CampfiresPage() {
             )}
           </div>
         ) : (
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="space-y-0.5">
             {filtered.map((c) => (
               <Link
                 key={c.id}
                 href={`/f/${c.name}`}
-                className="group rounded-lg border border-charcoal bg-charcoal/30 p-5 transition-all hover:border-flame-500/30 hover:bg-charcoal/50"
+                className="flex items-center gap-3 rounded-md px-3 py-2.5 border border-transparent hover:border-lava-hot/20 hover:bg-coal/80 transition-all"
               >
-                <div className="flex items-center gap-2">
-                  <Flame className="h-4 w-4 text-flame-400" />
-                  <h3 className="text-sm font-semibold text-foreground group-hover:text-flame-400 transition-colors">
-                    <span className="text-flame-400">f</span>
-                    <span className="text-smoke mx-0.5">|</span>
-                    {c.name}
-                  </h3>
-                </div>
-                {c.display_name && c.display_name !== c.name && (
-                  <p className="mt-0.5 text-xs text-smoke">
-                    {c.display_name}
-                  </p>
-                )}
-                <p className="mt-2 text-xs text-ash line-clamp-2 leading-relaxed">
+                <Flame className="h-4 w-4 shrink-0 text-flame-400" />
+                <span className="text-sm font-mono text-foreground whitespace-nowrap">
+                  <span className="text-flame-400">f</span>
+                  <span className="text-smoke mx-0.5">|</span>
+                  {c.name}
+                </span>
+                <span className="flex-1 truncate text-xs text-ash">
                   {c.description}
-                </p>
-                <div className="mt-3 flex items-center gap-1 text-xs text-smoke">
-                  <Users className="h-3 w-3" />
-                  <span>
-                    {c.member_count}{" "}
-                    {c.member_count === 1 ? "member" : "members"}
-                  </span>
-                </div>
+                </span>
+                <span className="shrink-0 text-xs text-smoke">
+                  {c.member_count} {c.member_count === 1 ? "member" : "members"}
+                </span>
+                <ChevronRight className="h-4 w-4 shrink-0 text-smoke" />
               </Link>
             ))}
           </div>

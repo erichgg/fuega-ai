@@ -34,7 +34,7 @@ const principles = [
   },
   {
     icon: Users,
-    title: "Community Sovereignty",
+    title: "Campfire Sovereignty",
     description:
       "Each campfire governs itself through governance variables and campfire voting. The platform sets the floor — campfires set the ceiling.",
   },

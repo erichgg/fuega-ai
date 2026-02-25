@@ -152,7 +152,7 @@ export default function LandingPage() {
               <span className="text-smoke/60">:</span>
               <span className="text-flame-500/70">~</span>
               <span className="text-smoke">$</span>
-              <span className="text-ash ml-1">init --governance community</span>
+              <span className="text-ash ml-1">init --governance campfire</span>
             </div>
 
             <h1 className="text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl 2xl:text-7xl">
@@ -427,7 +427,7 @@ export default function LandingPage() {
             &copy; {new Date().getFullYear()}{" "}
             <span className="text-flame-400 font-bold">fuega</span>
             <span className="text-smoke">.ai</span>
-            {" "}— Built for the community, by the community.
+            {" "}— Built for the campfire, by the campfire.
           </div>
         </div>
       </footer>

@@ -454,17 +454,17 @@ hr.lava-rule,
   --ash-900: #F5F5F5;
   --ash-950: #FAFAFA;
 
-  /* Crimson-red flame scale for light backgrounds */
-  --flame-50: #7F1D1D;
-  --flame-100: #991B1B;
-  --flame-200: #B91C1C;
-  --flame-300: #DC2626;
-  --flame-400: #B91C1C;
-  --flame-500: #A31800;
-  --flame-600: #8B1500;
-  --flame-700: #7F1D1D;
-  --flame-800: #FEE2E2;
-  --flame-900: #FEF2F2;
+  /* Warm burnt-orange flame scale for light backgrounds */
+  --flame-50: #BF360C;
+  --flame-100: #D84315;
+  --flame-200: #E64A19;
+  --flame-300: #F4511E;
+  --flame-400: #D84315;
+  --flame-500: #BF360C;
+  --flame-600: #A63000;
+  --flame-700: #8D2A0E;
+  --flame-800: #FBE9E7;
+  --flame-900: #FFF3E0;
 
   --void: #FAF9F7;
   --coal: #FFFFFF;
@@ -473,9 +473,9 @@ hr.lava-rule,
   --smoke: #78716C;
   --foreground: #1C1917;
 
-  --lava-hot: #B91C1C;
-  --lava-mid: #A31800;
-  --ember: #7F1D1D;
+  --lava-hot: #D84315;
+  --lava-mid: #BF360C;
+  --ember: #8D2A0E;
   --teal: #0D9488;
   --destructive: #DC2626;
 
@@ -484,37 +484,37 @@ hr.lava-rule,
   --card-foreground: #1C1917;
   --popover: #FFFFFF;
   --popover-foreground: #1C1917;
-  --primary: #B91C1C;
+  --primary: #D84315;
   --primary-foreground: #FFFFFF;
   --secondary: #0D9488;
   --secondary-foreground: #FFFFFF;
-  --muted: #F0ECE6;
+  --muted: #FFF8E1;
   --muted-foreground: #78716C;
-  --accent: #FEF3C7;
-  --accent-foreground: #92400E;
-  --border: #E8E3DB;
-  --input: #E8E3DB;
-  --ring: #B91C1C;
+  --accent: #FFF3E0;
+  --accent-foreground: #E65100;
+  --border: #E0D5C5;
+  --input: #E0D5C5;
+  --ring: #D84315;
   --foreground-muted: #666666;
 
-  --spark: #B91C1C;
+  --spark: #D84315;
   --douse: #2E7AD6;
   --success: #0D9488;
-  --warning: #A31800;
+  --warning: #BF360C;
 
-  --lava-glow: rgba(185, 28, 28, 0.3);
+  --lava-glow: rgba(216, 67, 21, 0.3);
   --void-shadow: rgba(0, 0, 0, 0.1);
   --douse-glow: rgba(46, 122, 214, 0.3);
 
-  --ai-badge: #7C3AED;
+  --ai-badge: #7B1FA2;
   --ai-badge-foreground: #FFFFFF;
 
   /* Chart colors (light mode) */
-  --chart-1: #B91C1C;
+  --chart-1: #D84315;
   --chart-2: #0D9488;
-  --chart-3: #A31800;
+  --chart-3: #BF360C;
   --chart-4: #0F766E;
-  --chart-5: #7F1D1D;
+  --chart-5: #8D2A0E;
 
   /* Badge animation glow tokens (light mode) */
   --badge-shimmer: rgba(59, 130, 246, 0.3);
@@ -523,9 +523,9 @@ hr.lava-rule,
   --badge-radiance: rgba(139, 92, 246, 0.3);
   --badge-radiance-subtle: rgba(139, 92, 246, 0.15);
   --badge-radiance-faint: rgba(139, 92, 246, 0.1);
-  --badge-fire-glow: rgba(185, 28, 28, 0.35);
-  --badge-fire-glow-subtle: rgba(185, 28, 28, 0.2);
-  --badge-fire-glow-faint: rgba(185, 28, 28, 0.1);
+  --badge-fire-glow: rgba(216, 67, 21, 0.35);
+  --badge-fire-glow-subtle: rgba(216, 67, 21, 0.2);
+  --badge-fire-glow-faint: rgba(216, 67, 21, 0.1);
 }
 
 /* Light mode: softer CRT scanlines */

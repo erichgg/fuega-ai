@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   Search,
   Menu,
@@ -201,8 +201,11 @@ interface NavbarProps {
 export function Navbar({ onOpenSidebar }: NavbarProps = {}) {
   const { user, logout } = useAuth();
   const pathname = usePathname();
+  const router = useRouter();
   const [scrolled, setScrolled] = React.useState(false);
   const [mobileOpen, setMobileOpen] = React.useState(false);
+  const [searchValue, setSearchValue] = React.useState("");
+  const [mobileSearchValue, setMobileSearchValue] = React.useState("");
   const { shortcutsOpen, setShortcutsOpen } = useKeyboardShortcuts();
 
   // Scroll detection at 50px threshold
@@ -245,10 +248,10 @@ export function Navbar({ onOpenSidebar }: NavbarProps = {}) {
         <div className="max-w-7xl mx-auto h-full flex items-center justify-between px-3 sm:px-6 lg:px-12">
           {/* Left: Menu + Logo */}
           <div className="flex items-center gap-1">
-            {/* Sidebar trigger — hidden on mobile (mobile nav sheet handles it) */}
+            {/* Sidebar trigger — hidden on mobile (nav sheet) and lg+ (persistent sidebar) */}
             <button
               onClick={onOpenSidebar}
-              className="hidden md:inline-flex p-2 text-ash hover:text-lava-hot transition-colors"
+              className="hidden md:inline-flex lg:hidden p-2 text-ash hover:text-lava-hot transition-colors"
               aria-label="Open sidebar"
             >
               <Menu className="h-5 w-5" />
@@ -270,6 +273,13 @@ export function Navbar({ onOpenSidebar }: NavbarProps = {}) {
             <input
               type="text"
               data-search-input
+              value={searchValue}
+              onChange={(e) => setSearchValue(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && searchValue.trim()) {
+                  router.push(`/search?q=${encodeURIComponent(searchValue.trim())}`);
+                }
+              }}
               className="w-full bg-coal border border-lava-hot/20 pl-10 pr-4 py-1.5 text-sm text-foreground placeholder:text-smoke focus:border-lava-hot focus:ring-0 focus:outline-none transition-colors"
               placeholder="Search…  /"
               aria-label="Search campfires, posts, and users"
@@ -406,6 +416,14 @@ export function Navbar({ onOpenSidebar }: NavbarProps = {}) {
             <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-4 h-4 text-smoke" />
             <input
               type="text"
+              value={mobileSearchValue}
+              onChange={(e) => setMobileSearchValue(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && mobileSearchValue.trim()) {
+                  setMobileOpen(false);
+                  router.push(`/search?q=${encodeURIComponent(mobileSearchValue.trim())}`);
+                }
+              }}
               className="w-full bg-coal border border-lava-hot/20 pl-8 pr-3 py-1.5 text-sm text-foreground placeholder:text-smoke focus:border-lava-hot focus:ring-0 focus:outline-none transition-colors"
               placeholder="Search..."
               aria-label="Search"
