@@ -16,7 +16,7 @@ Spark/douse voting. Glow reputation. Tender = compiled AI governance prompt.
 ## Terminology — ALWAYS USE THESE
 | Concept | fuega.ai Term | NEVER Say |
 |---------|---------------|-----------|
-| Community | Campfire | subreddit, community, sub |
+| Community | Campfire | subreddit, sub |
 | Community home | Hearth | front page, homepage |
 | Upvote | Spark | upvote, like |
 | Downvote | Douse | downvote, dislike |
@@ -25,6 +25,12 @@ Spark/douse voting. Glow reputation. Tender = compiled AI governance prompt.
 | User flair | Brand | flair, tag |
 | Platform rules | Principles | site rules, TOS |
 | AI moderator | (community-named) | mod, moderator, AutoMod |
+
+**IMPORTANT:** "Campfire" is the product name for the entity (used in code, routes, DB tables,
+and in-app UI labels like "Join this campfire"). The word "community" is still valid in
+public-facing copy, marketing text, landing pages, and natural English prose (e.g. "Built for
+the community" or "Community Sovereignty"). Do NOT blindly replace "community" → "campfire"
+in user-facing prose — only use "campfire" when referring to the specific in-app entity.
 
 **Routing:** Flat — `f/[name]`. No tiers, no categories, no nesting.
 URL: `/f/[campfire-name]`. Hearth = campfire's main page.
