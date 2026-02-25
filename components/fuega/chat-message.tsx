@@ -25,7 +25,7 @@ export function ChatMessage({ message, isOwn, className }: ChatMessageProps) {
   return (
     <div
       className={cn(
-        "group flex items-start gap-2.5 px-3 py-1.5 hover:bg-ash-900/30 transition-colors",
+        "group flex items-start gap-2.5 px-3 py-1.5 hover:bg-charcoal/50 transition-colors",
         className
       )}
     >
@@ -35,16 +35,16 @@ export function ChatMessage({ message, isOwn, className }: ChatMessageProps) {
           <span
             className={cn(
               "text-xs font-semibold",
-              isOwn ? "text-flame-400" : "text-ash-200"
+              isOwn ? "text-flame-400" : "text-foreground"
             )}
           >
             {username}
           </span>
-          <span className="text-[10px] text-ash-600 opacity-0 group-hover:opacity-100 transition-opacity">
+          <span className="text-[10px] text-smoke/60 opacity-0 group-hover:opacity-100 transition-opacity">
             {formatTime(message.created_at)}
           </span>
         </div>
-        <p className="text-sm text-ash-300 break-words leading-relaxed">
+        <p className="text-sm text-ash break-words leading-relaxed">
           {message.body}
         </p>
       </div>

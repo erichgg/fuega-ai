@@ -51,7 +51,7 @@ export function CommentCard({
       style={{ marginLeft: `${indent * 1.5}rem` }}
     >
       {comment.depth > 0 && (
-        <div className="absolute -left-3 top-0 bottom-0 w-px bg-ash-800" />
+        <div className="absolute -left-3 top-0 bottom-0 w-px bg-charcoal" />
       )}
 
       <div className="flex gap-2 py-2">
@@ -62,7 +62,7 @@ export function CommentCard({
         />
 
         <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2 text-xs text-ash-400">
+          <div className="flex items-center gap-2 text-xs text-ash">
             <UserAvatar username={comment.author} size="sm" />
             <span className="font-medium hover:underline cursor-pointer">
               {comment.author}
@@ -80,11 +80,11 @@ export function CommentCard({
             )}
           </div>
 
-          <p className="mt-1 text-sm text-ash-200 leading-relaxed">
+          <p className="mt-1 text-sm text-foreground leading-relaxed">
             {comment.body}
           </p>
 
-          <div className="mt-1.5 flex items-center gap-3 text-xs text-ash-500">
+          <div className="mt-1.5 flex items-center gap-3 text-xs text-smoke">
             <button disabled className="flex items-center gap-1 opacity-50 cursor-not-allowed">
               <MessageSquare className="h-3 w-3" />
               Reply

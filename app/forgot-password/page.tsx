@@ -78,7 +78,7 @@ export default function ForgotPasswordPage() {
                     required
                     autoComplete="email"
                     autoFocus
-                    className="border-ash-800 bg-ash-900 placeholder:text-ash-600 focus-visible:ring-flame-500/50"
+                    className="border-charcoal bg-coal placeholder:text-smoke focus-visible:ring-flame-500/50"
                   />
                 </div>
 

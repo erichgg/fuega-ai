@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { getAllFeatureFlags } from "@/lib/feature-flags";
 
+export const dynamic = "force-dynamic";
+
 /**
  * GET /api/features
  * Public endpoint — returns current feature flag states.

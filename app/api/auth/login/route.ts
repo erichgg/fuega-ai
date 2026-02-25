@@ -7,6 +7,8 @@ import { checkLoginRateLimit } from "@/lib/auth/rate-limit";
 import { ensureCsrfCookie } from "@/lib/auth/csrf";
 import { queryOne } from "@/lib/db";
 
+export const dynamic = "force-dynamic";
+
 export async function POST(req: Request) {
   try {
     // Parse and validate input

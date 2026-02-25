@@ -5,6 +5,8 @@ import { setPrimaryBadgeSchema } from "@/lib/validation/badges";
 import { setPrimaryBadge } from "@/lib/services/badges.service";
 import { ServiceError } from "@/lib/services/posts.service";
 
+export const dynamic = "force-dynamic";
+
 /**
  * PUT /api/users/:id/primary-badge
  * Set a user's primary display badge. Auth required (own user only).

@@ -16,11 +16,11 @@ import { FlameLogo } from "@/components/fuega/flame-logo";
 export const metadata: Metadata = {
   title: "How It Works",
   description:
-    "How fuega.ai governance works — community-driven moderation, governance variables, and the Principles that keep everyone safe.",
+    "How fuega.ai governance works — campfire-driven moderation, governance variables, and the Principles that keep everyone safe.",
   openGraph: {
     title: "How It Works | fuega.ai",
     description:
-      "How fuega.ai governance works — community-driven moderation, governance variables, and the Principles that keep everyone safe.",
+      "How fuega.ai governance works — campfire-driven moderation, governance variables, and the Principles that keep everyone safe.",
   },
 };
 
@@ -38,7 +38,7 @@ function ArchitectureDiagram() {
             Platform Principles
           </p>
         </div>
-        <p className="mt-1 text-xs text-ash-400">
+        <p className="mt-1 text-xs text-ash">
           Immutable. No CSAM, no doxxing, no violence incitement, no spam.
           Applies everywhere. Can&apos;t be overridden.
         </p>
@@ -51,34 +51,34 @@ function ArchitectureDiagram() {
       </div>
 
       {/* Governance variables */}
-      <div className="w-full max-w-md border border-ash-700 bg-ash-900/50 px-6 py-4 text-center">
+      <div className="w-full max-w-md border border-charcoal bg-charcoal/50 px-6 py-4 text-center">
         <div className="flex items-center justify-center gap-2">
-          <Settings2 className="h-5 w-5 text-ash-300" />
-          <p className="text-sm font-bold text-ash-200">
+          <Settings2 className="h-5 w-5 text-ash" />
+          <p className="text-sm font-bold text-foreground">
             Governance Variables
           </p>
         </div>
-        <p className="mt-1 text-xs text-ash-400">
-          Structured settings voted on by community members: toxicity threshold,
+        <p className="mt-1 text-xs text-ash">
+          Structured settings voted on by campfire members: toxicity threshold,
           spam sensitivity, content rules, voting quorum, and more.
         </p>
       </div>
 
       {/* Arrow down */}
       <div className="flex flex-col items-center py-1">
-        <div className="h-6 w-px bg-ash-600/40" />
-        <ChevronRight className="h-4 w-4 rotate-90 text-ash-600/60" />
+        <div className="h-6 w-px bg-charcoal/40" />
+        <ChevronRight className="h-4 w-4 rotate-90 text-smoke/60" />
       </div>
 
       {/* Tender compiler */}
       <div className="w-full max-w-md border border-flame-500/40 bg-flame-500/5 px-6 py-4 text-center">
         <div className="flex items-center justify-center gap-2">
           <Bot className="h-5 w-5 text-flame-400" />
-          <p className="text-sm font-bold text-ash-200">
+          <p className="text-sm font-bold text-foreground">
             Tender Compiler
           </p>
         </div>
-        <p className="mt-1 text-xs text-ash-400">
+        <p className="mt-1 text-xs text-ash">
           Combines Principles + variable values + security wrapper into an AI
           prompt. No human writes moderation instructions directly.
         </p>
@@ -86,19 +86,19 @@ function ArchitectureDiagram() {
 
       {/* Arrow down */}
       <div className="flex flex-col items-center py-1">
-        <div className="h-6 w-px bg-ash-600/40" />
-        <ChevronRight className="h-4 w-4 rotate-90 text-ash-600/60" />
+        <div className="h-6 w-px bg-charcoal/40" />
+        <ChevronRight className="h-4 w-4 rotate-90 text-smoke/60" />
       </div>
 
       {/* Moderation decisions */}
-      <div className="w-full max-w-md border border-ash-700 bg-ash-900/30 px-6 py-4 text-center">
+      <div className="w-full max-w-md border border-charcoal bg-charcoal/30 px-6 py-4 text-center">
         <div className="flex items-center justify-center gap-2">
           <Eye className="h-5 w-5 text-green-400" />
-          <p className="text-sm font-bold text-ash-200">
+          <p className="text-sm font-bold text-foreground">
             Per-Post Moderation
           </p>
         </div>
-        <p className="mt-1 text-xs text-ash-400">
+        <p className="mt-1 text-xs text-ash">
           Every post and comment evaluated in real-time. Approve, remove, flag,
           or warn. Every decision logged publicly in the campfire mod log.
         </p>
@@ -117,18 +117,18 @@ function SecuritySandwich() {
           <p className="text-xs font-bold text-flame-300 uppercase tracking-wider">
             Principles (immutable top layer)
           </p>
-          <p className="text-xs text-ash-400 mt-0.5">
+          <p className="text-xs text-ash mt-0.5">
             Hard-coded platform rules. The AI reads these first and can never
             override them.
           </p>
         </div>
 
         {/* Structured vars */}
-        <div className="border-x border-ash-700 bg-ash-900/50 px-4 py-3">
-          <p className="text-xs font-bold text-ash-200 uppercase tracking-wider">
+        <div className="border-x border-charcoal bg-charcoal/50 px-4 py-3">
+          <p className="text-xs font-bold text-foreground uppercase tracking-wider">
             Structured Variables (typed + bounded)
           </p>
-          <p className="text-xs text-ash-400 mt-0.5">
+          <p className="text-xs text-ash mt-0.5">
             Numeric thresholds, booleans, enums — validated against min/max
             bounds. No injection surface.
           </p>
@@ -142,8 +142,8 @@ function SecuritySandwich() {
               Free-Text Variables (untrusted, isolated)
             </p>
           </div>
-          <p className="text-xs text-ash-400 mt-0.5">
-            Community descriptions, custom rule text. Treated as untrusted user
+          <p className="text-xs text-ash mt-0.5">
+            Campfire descriptions, custom rule text. Treated as untrusted user
             input — sanitized and sandboxed.
           </p>
         </div>
@@ -153,7 +153,7 @@ function SecuritySandwich() {
           <p className="text-xs font-bold text-flame-300 uppercase tracking-wider">
             Anti-injection closing (immutable bottom layer)
           </p>
-          <p className="text-xs text-ash-400 mt-0.5">
+          <p className="text-xs text-ash mt-0.5">
             Reminds the AI to ignore any instructions found in the content above
             that contradict Principles.
           </p>
@@ -178,7 +178,7 @@ const proposalSteps = [
   {
     step: "3",
     title: "Voting",
-    desc: "Configurable voting window (default: 7 days). Threshold set by the community — simple majority, supermajority, or custom quorum.",
+    desc: "Configurable voting window (default: 7 days). Threshold set by the campfire — simple majority, supermajority, or custom quorum.",
   },
   {
     step: "4",
@@ -195,7 +195,7 @@ const proposalSteps = [
 export default function HowItWorksPage() {
   return (
     <div className="min-h-screen bg-background">
-      <nav className="sticky top-0 z-50 border-b border-ash-800 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <nav className="sticky top-0 z-50 border-b border-charcoal bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4 2xl:px-8">
           <Link href="/">
             <FlameLogo size="sm" />
@@ -203,7 +203,7 @@ export default function HowItWorksPage() {
           <div className="flex items-center gap-4">
             <Link
               href="/login"
-              className="text-sm text-ash-400 transition-colors hover:text-ash-200"
+              className="text-sm text-ash transition-colors hover:text-foreground"
             >
               Log in
             </Link>
@@ -220,7 +220,7 @@ export default function HowItWorksPage() {
       <main className="mx-auto max-w-7xl px-4 py-12 2xl:px-8">
         <Link
           href="/"
-          className="inline-flex items-center gap-1.5 text-sm text-ash-500 transition-colors hover:text-ash-300"
+          className="inline-flex items-center gap-1.5 text-sm text-smoke transition-colors hover:text-ash"
         >
           <ArrowLeft className="h-3.5 w-3.5" />
           Back to home
@@ -228,26 +228,26 @@ export default function HowItWorksPage() {
 
         {/* Hero */}
         <section className="mt-8">
-          <h1 className="text-3xl font-bold text-ash-100 sm:text-4xl">
+          <h1 className="text-3xl font-bold text-foreground sm:text-4xl">
             How <F /> works
           </h1>
-          <p className="mt-4 max-w-2xl text-base leading-relaxed text-ash-300">
-            Every community on <F /> governs itself. Members vote on structured
+          <p className="mt-4 max-w-2xl text-base leading-relaxed text-ash">
+            Every campfire on <F /> governs itself. Members vote on structured
             settings — not raw AI prompts — and the system compiles those
             settings into a{" "}
-            <span className="font-medium text-ash-200">Tender</span>.
+            <span className="font-medium text-foreground">Tender</span>.
             Injection-proof by design.
           </p>
         </section>
 
         {/* Architecture */}
         <section className="mt-12">
-          <h2 className="text-2xl font-bold text-ash-100 sm:text-3xl">
+          <h2 className="text-2xl font-bold text-foreground sm:text-3xl">
             Architecture
           </h2>
-          <p className="mt-3 text-ash-400 leading-relaxed">
+          <p className="mt-3 text-ash leading-relaxed">
             Two layers. Platform Principles are immutable and apply everywhere.
-            Below that, each community is sovereign — it sets its own governance
+            Below that, each campfire is sovereign — it sets its own governance
             variables, and the Tender compiler turns those into an AI prompt.
           </p>
 
@@ -256,10 +256,10 @@ export default function HowItWorksPage() {
 
         {/* Campfires */}
         <section className="mt-12">
-          <h2 className="text-2xl font-bold text-ash-100 sm:text-3xl">
+          <h2 className="text-2xl font-bold text-foreground sm:text-3xl">
             Campfires
           </h2>
-          <p className="mt-3 text-ash-400 leading-relaxed">
+          <p className="mt-3 text-ash leading-relaxed">
             A campfire is a self-governing community with transparent AI
             moderation and democratic governance. Each
             one has its own rules, its own AI moderator, and its
@@ -267,40 +267,40 @@ export default function HowItWorksPage() {
           </p>
 
           <div className="mt-6 grid gap-4 sm:grid-cols-2">
-            <div className="border border-ash-800 bg-ash-900/30 p-4">
-              <p className="text-sm font-semibold text-ash-200">
+            <div className="border border-charcoal bg-charcoal/30 p-4">
+              <p className="text-sm font-semibold text-foreground">
                 Flat structure
               </p>
-              <p className="mt-1 text-xs text-ash-400">
+              <p className="mt-1 text-xs text-ash">
                 No categories, no nesting. Every campfire is a direct child of
                 the platform. Route:{" "}
                 <code className="text-flame-400 text-xs">/f/campfire-name</code>
               </p>
             </div>
-            <div className="border border-ash-800 bg-ash-900/30 p-4">
-              <p className="text-sm font-semibold text-ash-200">
+            <div className="border border-charcoal bg-charcoal/30 p-4">
+              <p className="text-sm font-semibold text-foreground">
                 Self-governing
               </p>
-              <p className="mt-1 text-xs text-ash-400">
+              <p className="mt-1 text-xs text-ash">
                 Members vote on governance variables. The AI prompt
                 is recompiled automatically when settings change.
               </p>
             </div>
-            <div className="border border-ash-800 bg-ash-900/30 p-4">
-              <p className="text-sm font-semibold text-ash-200">
+            <div className="border border-charcoal bg-charcoal/30 p-4">
+              <p className="text-sm font-semibold text-foreground">
                 Public mod log
               </p>
-              <p className="mt-1 text-xs text-ash-400">
+              <p className="mt-1 text-xs text-ash">
                 Every AI moderation decision is logged with reasoning, confidence
                 score, and the Tender version used. Anyone can audit it.
               </p>
             </div>
-            <div className="border border-ash-800 bg-ash-900/30 p-4">
-              <p className="text-sm font-semibold text-ash-200">
+            <div className="border border-charcoal bg-charcoal/30 p-4">
+              <p className="text-sm font-semibold text-foreground">
                 Choose your AI
               </p>
-              <p className="mt-1 text-xs text-ash-400">
-                Communities vote on which AI provider moderates their space.
+              <p className="mt-1 text-xs text-ash">
+                Campfires vote on which AI provider moderates their space.
                 Don&apos;t trust a model? Vote it out.
               </p>
             </div>
@@ -309,12 +309,12 @@ export default function HowItWorksPage() {
 
         {/* Governance Variables */}
         <section className="mt-12">
-          <h2 className="text-2xl font-bold text-ash-100 sm:text-3xl">
+          <h2 className="text-2xl font-bold text-foreground sm:text-3xl">
             Governance variables
           </h2>
-          <p className="mt-3 text-ash-400 leading-relaxed">
+          <p className="mt-3 text-ash leading-relaxed">
             Instead of writing raw AI prompts (which opens the door to prompt
-            injection), communities configure structured variables. Each variable
+            injection), campfires configure structured variables. Each variable
             has a type, bounds, and a default value. The Tender compiler reads
             them all and produces the AI instruction set.
           </p>
@@ -322,72 +322,72 @@ export default function HowItWorksPage() {
           <div className="mt-6 overflow-x-auto">
             <table className="w-full border-collapse text-sm">
               <thead>
-                <tr className="border-b border-ash-800">
-                  <th className="py-3 pr-4 text-left text-xs font-semibold uppercase tracking-wider text-ash-500">
+                <tr className="border-b border-charcoal">
+                  <th className="py-3 pr-4 text-left text-xs font-semibold uppercase tracking-wider text-smoke">
                     Example Variable
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-ash-500">
+                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-smoke">
                     Type
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-ash-500">
+                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-smoke">
                     Bounds
                   </th>
-                  <th className="py-3 pl-4 text-left text-xs font-semibold uppercase tracking-wider text-ash-500">
+                  <th className="py-3 pl-4 text-left text-xs font-semibold uppercase tracking-wider text-smoke">
                     What it controls
                   </th>
                 </tr>
               </thead>
               <tbody>
-                <tr className="border-b border-ash-800/50">
-                  <td className="py-3 pr-4 text-ash-200 font-medium font-mono text-xs">
+                <tr className="border-b border-charcoal/50">
+                  <td className="py-3 pr-4 text-foreground font-medium font-mono text-xs">
                     toxicity_threshold
                   </td>
-                  <td className="px-4 py-3 text-ash-400">integer</td>
-                  <td className="px-4 py-3 text-ash-400">1 – 10</td>
-                  <td className="py-3 pl-4 text-ash-400">
+                  <td className="px-4 py-3 text-ash">integer</td>
+                  <td className="px-4 py-3 text-ash">1 – 10</td>
+                  <td className="py-3 pl-4 text-ash">
                     How aggressive the AI is at flagging toxic content
                   </td>
                 </tr>
-                <tr className="border-b border-ash-800/50">
-                  <td className="py-3 pr-4 text-ash-200 font-medium font-mono text-xs">
+                <tr className="border-b border-charcoal/50">
+                  <td className="py-3 pr-4 text-foreground font-medium font-mono text-xs">
                     spam_sensitivity
                   </td>
-                  <td className="px-4 py-3 text-ash-400">integer</td>
-                  <td className="px-4 py-3 text-ash-400">1 – 10</td>
-                  <td className="py-3 pl-4 text-ash-400">
+                  <td className="px-4 py-3 text-ash">integer</td>
+                  <td className="px-4 py-3 text-ash">1 – 10</td>
+                  <td className="py-3 pl-4 text-ash">
                     How strictly spam detection is enforced
                   </td>
                 </tr>
-                <tr className="border-b border-ash-800/50">
-                  <td className="py-3 pr-4 text-ash-200 font-medium font-mono text-xs">
+                <tr className="border-b border-charcoal/50">
+                  <td className="py-3 pr-4 text-foreground font-medium font-mono text-xs">
                     allow_nsfw
                   </td>
-                  <td className="px-4 py-3 text-ash-400">boolean</td>
-                  <td className="px-4 py-3 text-ash-400">true / false</td>
-                  <td className="py-3 pl-4 text-ash-400">
-                    Whether NSFW content is permitted in the community
+                  <td className="px-4 py-3 text-ash">boolean</td>
+                  <td className="px-4 py-3 text-ash">true / false</td>
+                  <td className="py-3 pl-4 text-ash">
+                    Whether NSFW content is permitted in the campfire
                   </td>
                 </tr>
-                <tr className="border-b border-ash-800/50">
-                  <td className="py-3 pr-4 text-ash-200 font-medium font-mono text-xs">
+                <tr className="border-b border-charcoal/50">
+                  <td className="py-3 pr-4 text-foreground font-medium font-mono text-xs">
                     voting_threshold
                   </td>
-                  <td className="px-4 py-3 text-ash-400">enum</td>
-                  <td className="px-4 py-3 text-ash-400">
+                  <td className="px-4 py-3 text-ash">enum</td>
+                  <td className="px-4 py-3 text-ash">
                     simple_majority, supermajority_66, supermajority_75
                   </td>
-                  <td className="py-3 pl-4 text-ash-400">
+                  <td className="py-3 pl-4 text-ash">
                     How much agreement is needed to pass a proposal
                   </td>
                 </tr>
-                <tr className="border-b border-ash-800/50">
-                  <td className="py-3 pr-4 text-ash-200 font-medium font-mono text-xs">
+                <tr className="border-b border-charcoal/50">
+                  <td className="py-3 pr-4 text-foreground font-medium font-mono text-xs">
                     custom_rules
                   </td>
-                  <td className="px-4 py-3 text-ash-400">text</td>
-                  <td className="px-4 py-3 text-ash-400">max 2000 chars</td>
-                  <td className="py-3 pl-4 text-ash-400">
-                    Free-text community rules (treated as untrusted input in the
+                  <td className="px-4 py-3 text-ash">text</td>
+                  <td className="px-4 py-3 text-ash">max 2000 chars</td>
+                  <td className="py-3 pl-4 text-ash">
+                    Free-text campfire rules (treated as untrusted input in the
                     Tender)
                   </td>
                 </tr>
@@ -395,7 +395,7 @@ export default function HowItWorksPage() {
             </table>
           </div>
 
-          <p className="mt-4 text-xs text-ash-500">
+          <p className="mt-4 text-xs text-smoke">
             Variables are stored in a registry (database, not code). Adding a new
             governance knob is a DB insert, not a code deploy.
           </p>
@@ -403,10 +403,10 @@ export default function HowItWorksPage() {
 
         {/* Security Sandwich */}
         <section className="mt-12">
-          <h2 className="text-2xl font-bold text-ash-100 sm:text-3xl">
+          <h2 className="text-2xl font-bold text-foreground sm:text-3xl">
             The security sandwich
           </h2>
-          <p className="mt-3 text-ash-400 leading-relaxed">
+          <p className="mt-3 text-ash leading-relaxed">
             The Tender compiler assembles the AI prompt in a strict order.
             Principles and anti-injection layers are immutable — they wrap the
             campfire&apos;s settings like bread around a sandwich. Even if
@@ -421,12 +421,12 @@ export default function HowItWorksPage() {
         <section className="mt-12">
           <div className="flex items-center gap-2">
             <Vote className="h-6 w-6 text-flame-400" />
-            <h2 className="text-2xl font-bold text-ash-100 sm:text-3xl">
+            <h2 className="text-2xl font-bold text-foreground sm:text-3xl">
               Proposal lifecycle
             </h2>
           </div>
-          <p className="mt-3 text-ash-400 leading-relaxed">
-            Want to change how your community is moderated? Create a governance
+          <p className="mt-3 text-ash leading-relaxed">
+            Want to change how your campfire is moderated? Create a governance
             proposal. Here&apos;s the flow:
           </p>
 
@@ -439,15 +439,15 @@ export default function HowItWorksPage() {
                     {s.step}
                   </div>
                   {i < proposalSteps.length - 1 && (
-                    <div className="h-full w-px bg-ash-700/50" />
+                    <div className="h-full w-px bg-charcoal/50" />
                   )}
                 </div>
                 {/* Content */}
                 <div className="pb-6">
-                  <p className="text-sm font-semibold text-ash-200">
+                  <p className="text-sm font-semibold text-foreground">
                     {s.title}
                   </p>
-                  <p className="mt-1 text-sm text-ash-400 leading-relaxed">
+                  <p className="mt-1 text-sm text-ash leading-relaxed">
                     {s.desc}
                   </p>
                 </div>
@@ -458,10 +458,10 @@ export default function HowItWorksPage() {
 
         {/* Principles */}
         <section className="mt-12">
-          <h2 className="text-2xl font-bold text-ash-100 sm:text-3xl">
+          <h2 className="text-2xl font-bold text-foreground sm:text-3xl">
             Platform Principles
           </h2>
-          <p className="mt-3 text-ash-400 leading-relaxed">
+          <p className="mt-3 text-ash leading-relaxed">
             These are non-negotiable and enforced everywhere, regardless of
             campfire settings. No campfire can vote to override them.
           </p>
@@ -482,50 +482,50 @@ export default function HowItWorksPage() {
             ].map((p) => (
               <div key={p.text} className="flex items-start gap-3">
                 <Shield className="mt-0.5 h-4 w-4 shrink-0 text-flame-400" />
-                <p className="text-sm text-ash-300">{p.text}</p>
+                <p className="text-sm text-ash">{p.text}</p>
               </div>
             ))}
           </div>
 
-          <p className="mt-4 text-sm text-ash-500">
+          <p className="mt-4 text-sm text-smoke">
             Platform-level actions (banning a campfire, suspending a user) are
             logged in a separate{" "}
-            <span className="text-ash-300">site mod log</span> — public and
+            <span className="text-ash">site mod log</span> — public and
             permanent.
           </p>
         </section>
 
         {/* Mod Logs */}
         <section className="mt-12">
-          <h2 className="text-2xl font-bold text-ash-100 sm:text-3xl">
+          <h2 className="text-2xl font-bold text-foreground sm:text-3xl">
             Mod logs
           </h2>
-          <p className="mt-3 text-ash-400 leading-relaxed">
+          <p className="mt-3 text-ash leading-relaxed">
             Transparency is the point. Every AI decision is logged publicly.
           </p>
 
           <div className="mt-6 grid gap-4 sm:grid-cols-2">
-            <div className="border border-ash-800 bg-ash-900/30 p-5">
+            <div className="border border-charcoal bg-charcoal/30 p-5">
               <div className="flex items-center gap-2">
                 <Flame className="h-4 w-4 text-flame-400" />
-                <p className="text-sm font-semibold text-ash-200">
+                <p className="text-sm font-semibold text-foreground">
                   Campfire mod log
                 </p>
               </div>
-              <p className="mt-2 text-xs text-ash-400 leading-relaxed">
+              <p className="mt-2 text-xs text-ash leading-relaxed">
                 Per-campfire. Logs every AI moderation decision: what was
                 flagged, the reason, confidence score, Tender version, and
                 whether it was appealed. Visible to all campfire members.
               </p>
             </div>
-            <div className="border border-ash-800 bg-ash-900/30 p-5">
+            <div className="border border-charcoal bg-charcoal/30 p-5">
               <div className="flex items-center gap-2">
                 <Shield className="h-4 w-4 text-flame-400" />
-                <p className="text-sm font-semibold text-ash-200">
+                <p className="text-sm font-semibold text-foreground">
                   Site mod log
                 </p>
               </div>
-              <p className="mt-2 text-xs text-ash-400 leading-relaxed">
+              <p className="mt-2 text-xs text-ash leading-relaxed">
                 Platform-wide. Logs actions taken by the platform team: campfire
                 bans, user suspensions, Principle enforcement. Visible to all
                 users. Reasoning required for every action.
@@ -537,11 +537,11 @@ export default function HowItWorksPage() {
         {/* CTA */}
         <section className="mt-12 pb-12">
           <div className="border border-flame-500/20 bg-flame-500/5 p-6 text-center">
-            <h2 className="text-xl font-bold text-ash-100">
+            <h2 className="text-xl font-bold text-foreground">
               Ready to see it in action?
             </h2>
-            <p className="mt-2 text-sm text-ash-400">
-              Create an account, join a community, and watch governance happen in
+            <p className="mt-2 text-sm text-ash">
+              Create an account, join a campfire, and watch governance happen in
               real-time.
             </p>
             <div className="mt-4 flex items-center justify-center gap-4">
@@ -553,7 +553,7 @@ export default function HowItWorksPage() {
               </Link>
               <Link
                 href="/about"
-                className="text-sm text-ash-400 transition-colors hover:text-ash-200"
+                className="text-sm text-ash transition-colors hover:text-foreground"
               >
                 Learn more about us
               </Link>

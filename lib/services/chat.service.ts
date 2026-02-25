@@ -134,12 +134,12 @@ export async function createRoom(
   description?: string
 ): Promise<ChatRoom> {
   // Validate name
-  const trimmedName = name.trim().toLowerCase().replace(/[^a-z0-9-_]/g, "-").slice(0, 64);
+  const trimmedName = name.trim().toLowerCase().replace(/[^a-z0-9-_]/g, "-").replace(/-{2,}/g, "-").replace(/^-|-$/g, "").slice(0, 64);
   if (trimmedName.length < 2) {
     throw new ServiceError("Room name must be at least 2 characters", "VALIDATION_ERROR", 400);
   }
 
-  // Check room count limit (default 5 per campfire)
+  // Check room count limit (default 10 per campfire)
   const countResult = await queryOne<{ count: string }>(
     `SELECT COUNT(*) as count FROM chat_rooms
      WHERE campfire_id = $1 AND deleted_at IS NULL`,
@@ -150,11 +150,19 @@ export async function createRoom(
     throw new ServiceError("Maximum rooms reached for this campfire", "ROOM_LIMIT", 400);
   }
 
+  // Get next position from MAX(position) to avoid collisions after deletions
+  const posResult = await queryOne<{ next_pos: string }>(
+    `SELECT COALESCE(MAX(position), -1) + 1 AS next_pos FROM chat_rooms
+     WHERE campfire_id = $1 AND deleted_at IS NULL`,
+    [campfireId]
+  );
+  const nextPosition = parseInt(posResult?.next_pos ?? "0", 10);
+
   const room = await queryOne<ChatRoom>(
     `INSERT INTO chat_rooms (campfire_id, name, description, position, created_by)
      VALUES ($1, $2, $3, $4, $5)
      RETURNING *`,
-    [campfireId, trimmedName, description?.trim() || null, roomCount, creatorId]
+    [campfireId, trimmedName, description?.trim() || null, nextPosition, creatorId]
   );
 
   if (!room) throw new ServiceError("Failed to create room", "INTERNAL_ERROR", 500);

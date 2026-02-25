@@ -91,7 +91,7 @@ export default function SignupPage() {
           <Link href="/">
             <FlameLogo size="lg" />
           </Link>
-          <p className="mt-2 text-sm text-ash-400">
+          <p className="mt-2 text-sm text-ash">
             Create your account and join the conversation
           </p>
         </div>
@@ -118,7 +118,7 @@ export default function SignupPage() {
 
           {/* Username */}
           <div className="space-y-2">
-            <Label htmlFor="username" className="text-ash-300">
+            <Label htmlFor="username" className="text-ash">
               Username
             </Label>
             <Input
@@ -132,7 +132,7 @@ export default function SignupPage() {
               autoFocus
               maxLength={20}
               className={cn(
-                "border-ash-800 bg-ash-900 placeholder:text-ash-600 focus-visible:ring-flame-500/50",
+                "border-charcoal bg-coal placeholder:text-smoke focus-visible:ring-flame-500/50",
                 usernameError && "border-red-500/50 focus-visible:ring-red-500/50",
               )}
               aria-describedby="username-help"
@@ -148,7 +148,7 @@ export default function SignupPage() {
                 Username looks good
               </p>
             ) : (
-              <p id="username-help" className="text-xs text-ash-600">
+              <p id="username-help" className="text-xs text-smoke">
                 3-20 characters, letters, numbers, and underscores
               </p>
             )}
@@ -156,7 +156,7 @@ export default function SignupPage() {
 
           {/* Password */}
           <div className="space-y-2">
-            <Label htmlFor="password" className="text-ash-300">
+            <Label htmlFor="password" className="text-ash">
               Password
             </Label>
             <Input
@@ -167,7 +167,7 @@ export default function SignupPage() {
               onChange={(e) => setPassword(e.target.value)}
               required
               autoComplete="new-password"
-              className="border-ash-800 bg-ash-900 placeholder:text-ash-600 focus-visible:ring-flame-500/50"
+              className="border-charcoal bg-coal placeholder:text-smoke focus-visible:ring-flame-500/50"
               aria-describedby="password-strength"
             />
             {passwordStrength && (
@@ -180,7 +180,7 @@ export default function SignupPage() {
                         "h-1 flex-1 rounded-full transition-colors",
                         i < passwordStrength.score
                           ? passwordStrength.color
-                          : "bg-ash-800",
+                          : "bg-charcoal",
                       )}
                     />
                   ))}
@@ -203,9 +203,9 @@ export default function SignupPage() {
 
           {/* Email (optional) */}
           <div className="space-y-2">
-            <Label htmlFor="email" className="text-ash-300">
+            <Label htmlFor="email" className="text-ash">
               Email{" "}
-              <span className="text-ash-600">(optional, for recovery only)</span>
+              <span className="text-smoke">(optional, for recovery only)</span>
             </Label>
             <Input
               id="email"
@@ -214,7 +214,7 @@ export default function SignupPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               autoComplete="email"
-              className="border-ash-800 bg-ash-900 placeholder:text-ash-600 focus-visible:ring-flame-500/50"
+              className="border-charcoal bg-coal placeholder:text-smoke focus-visible:ring-flame-500/50"
             />
           </div>
 
@@ -225,10 +225,10 @@ export default function SignupPage() {
               type="checkbox"
               checked={termsAccepted}
               onChange={(e) => setTermsAccepted(e.target.checked)}
-              className="mt-1 h-4 w-4 rounded border-ash-700 bg-ash-900 text-flame-500 focus:ring-flame-500/50"
+              className="mt-1 h-4 w-4 rounded border-charcoal bg-coal text-flame-500 focus:ring-flame-500/50"
               required
             />
-            <Label htmlFor="terms" className="text-xs text-ash-400 leading-relaxed">
+            <Label htmlFor="terms" className="text-xs text-ash leading-relaxed">
               I agree to the{" "}
               <Link href="/terms" className="text-flame-400 hover:underline">
                 Terms of Service
@@ -255,7 +255,7 @@ export default function SignupPage() {
           </Button>
         </form>
 
-        <p className="mt-6 text-center text-sm text-ash-500">
+        <p className="mt-6 text-center text-sm text-smoke">
           Already have an account?{" "}
           <Link href="/login" className="text-flame-400 hover:underline">
             Log in

@@ -215,11 +215,11 @@ export default function ModLogPage() {
       <div>
         <div className="flex items-center gap-3">
           <Bot className="h-6 w-6 text-flame-400" />
-          <h1 className="text-2xl font-bold text-ash-100">
+          <h1 className="text-2xl font-bold text-foreground">
             Public Moderation Log
           </h1>
         </div>
-        <p className="mt-1 text-sm text-ash-400">
+        <p className="mt-1 text-sm text-ash">
           Every AI moderation decision is logged here with full transparency.
           See exactly what was moderated, why, and at what tier.
         </p>
@@ -229,24 +229,26 @@ export default function ModLogPage() {
       <div className="mt-6 space-y-3">
         <div className="flex flex-col gap-3 sm:flex-row">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ash-500" />
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-smoke" />
             <Input
               placeholder="Search content or reasoning..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="h-9 border-ash-800 bg-ash-900 pl-9 text-sm placeholder:text-ash-600 focus-visible:ring-flame-500/50"
+              aria-label="Search moderation log content or reasoning"
+              className="h-9 border-charcoal bg-coal pl-9 text-sm placeholder:text-smoke focus-visible:ring-flame-500/50"
             />
           </div>
           <Input
             placeholder="Filter by campfire..."
             value={campfireFilter}
             onChange={(e) => setCampfireFilter(e.target.value)}
-            className="h-9 w-full border-ash-800 bg-ash-900 text-sm placeholder:text-ash-600 focus-visible:ring-flame-500/50 sm:w-48"
+            aria-label="Filter by campfire name"
+            className="h-9 w-full border-charcoal bg-coal text-sm placeholder:text-smoke focus-visible:ring-flame-500/50 sm:w-48"
           />
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          <Filter className="h-4 w-4 text-ash-500" />
+          <Filter className="h-4 w-4 text-smoke" />
           {(["all", "approved", "flagged", "removed"] as const).map((d) => (
             <button
               key={d}
@@ -255,7 +257,7 @@ export default function ModLogPage() {
                 "rounded-full px-3 py-1 text-xs font-medium transition-colors",
                 decisionFilter === d
                   ? "bg-flame-500/20 text-flame-400"
-                  : "text-ash-500 hover:text-ash-300",
+                  : "text-smoke hover:text-ash",
               )}
             >
               {d === "all" ? "All" : decisionConfig[d].label}
@@ -270,8 +272,8 @@ export default function ModLogPage() {
           <ModLogSkeleton />
         ) : filteredEntries.length === 0 ? (
           <div className="py-16 text-center">
-            <Shield className="mx-auto h-12 w-12 text-ash-700" />
-            <p className="mt-4 text-ash-400">No moderation entries found</p>
+            <Shield className="mx-auto h-12 w-12 text-smoke/60" />
+            <p className="mt-4 text-ash">No moderation entries found</p>
           </div>
         ) : (
           filteredEntries.map((entry) => {
@@ -281,17 +283,17 @@ export default function ModLogPage() {
             return (
               <details
                 key={entry.id}
-                className="group rounded-lg border border-ash-800 bg-ash-900/50 transition-colors hover:border-ash-700"
+                className="group rounded-lg border border-charcoal bg-charcoal/50 transition-colors hover:border-charcoal"
               >
                 <summary className="flex cursor-pointer items-center gap-3 p-3 [&::-webkit-details-marker]:hidden">
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-ash-800">
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-charcoal">
                     <Icon className="h-4 w-4" />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm text-ash-200">
+                    <p className="truncate text-sm text-foreground">
                       {entry.contentSnippet}
                     </p>
-                    <div className="flex items-center gap-2 text-[10px] text-ash-500">
+                    <div className="flex items-center gap-2 text-[10px] text-smoke">
                       <span className="text-flame-400">
                         <span className="text-lava-hot">f</span><span className="text-smoke mx-1">|</span><span>{entry.campfire}</span>
                       </span>
@@ -314,26 +316,26 @@ export default function ModLogPage() {
                     >
                       {config.label}
                     </Badge>
-                    <span className="text-[10px] tabular-nums text-ash-500">
+                    <span className="text-[10px] tabular-nums text-smoke">
                       {Math.round(entry.confidence * 100)}%
                     </span>
                   </div>
                 </summary>
 
-                <div className="border-t border-ash-800 px-3 pb-3 pt-3">
+                <div className="border-t border-charcoal px-3 pb-3 pt-3">
                   <div className="space-y-2">
                     <div>
-                      <span className="text-[10px] font-semibold uppercase tracking-wider text-ash-600">
+                      <span className="text-[10px] font-semibold uppercase tracking-wider text-smoke">
                         AI Reasoning
                       </span>
-                      <p className="mt-1 text-sm leading-relaxed text-ash-300">
+                      <p className="mt-1 text-sm leading-relaxed text-ash">
                         {entry.reasoning}
                       </p>
                     </div>
-                    <div className="flex items-center gap-3 text-xs text-ash-500">
+                    <div className="flex items-center gap-3 text-xs text-smoke">
                       <span>
                         Tier:{" "}
-                        <span className="text-ash-400">
+                        <span className="text-ash">
                           {tierLabels[entry.tier]}
                         </span>
                       </span>

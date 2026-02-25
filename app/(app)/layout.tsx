@@ -57,7 +57,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         className="flex-1 w-full px-3 py-4 sm:px-6"
         role="main"
       >
-        <div className="mx-auto max-w-2xl">
+        <div className="mx-auto max-w-4xl">
           <ErrorBoundary>{children}</ErrorBoundary>
         </div>
       </main>

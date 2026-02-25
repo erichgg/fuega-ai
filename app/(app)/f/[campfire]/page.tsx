@@ -113,7 +113,7 @@ export default function CampfirePage() {
   if (campfireError || !campfire) {
     return (
       <div className="py-16 text-center">
-        <p className="text-ash-400">
+        <p className="text-ash">
           {campfireError ?? "Campfire not found"}
         </p>
         <Link
@@ -129,7 +129,7 @@ export default function CampfirePage() {
   return (
     <div>
       {/* Campfire Header */}
-      <div className="rounded-lg border border-ash-800 bg-ash-900/50 p-6">
+      <div className="rounded-lg border border-charcoal bg-charcoal/50 p-6">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <h1 className="text-2xl font-bold text-flame-400">
@@ -137,10 +137,10 @@ export default function CampfirePage() {
               <span className="text-smoke mx-1">|</span>
               <span>{campfire.name}</span>
             </h1>
-            <p className="mt-1 text-sm text-ash-400">
+            <p className="mt-1 text-sm text-ash">
               {campfire.description}
             </p>
-            <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-ash-500">
+            <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-smoke">
               <span className="flex items-center gap-1">
                 <Users className="h-3.5 w-3.5" />
                 {(campfire.member_count ?? 0).toLocaleString()} members
@@ -164,7 +164,7 @@ export default function CampfirePage() {
                 disabled={membershipLoading}
                 className={
                   joined
-                    ? "border-ash-700 text-ash-400 hover:border-red-500/50 hover:text-red-400"
+                    ? "border-charcoal text-ash hover:border-red-500/50 hover:text-red-400"
                     : ""
                 }
               >
@@ -185,8 +185,8 @@ export default function CampfirePage() {
         </div>
 
         {/* Tender info (public) */}
-        <div className="mt-4 rounded-lg border border-ash-800/50 bg-ash-950/50 p-3">
-          <div className="flex items-center gap-2 text-xs text-ash-500">
+        <div className="mt-4 rounded-lg border border-charcoal/50 bg-coal/50 p-3">
+          <div className="flex items-center gap-2 text-xs text-smoke">
             <Bot className="h-3.5 w-3.5" />
             <span className="font-medium">Tender</span>
             <Badge
@@ -197,7 +197,7 @@ export default function CampfirePage() {
               Active
             </Badge>
           </div>
-          <p className="mt-2 text-xs text-ash-400 leading-relaxed">
+          <p className="mt-2 text-xs text-ash leading-relaxed">
             Tender compiled from this campfire&apos;s governance variables.
             All decisions logged publicly.
           </p>
@@ -212,13 +212,13 @@ export default function CampfirePage() {
       </div>
 
       {/* View mode tabs */}
-      <div className="mt-4 flex items-center gap-1 rounded-lg border border-ash-800 bg-ash-900/50 p-1">
+      <div className="mt-4 flex items-center gap-1 rounded-lg border border-charcoal bg-charcoal/50 p-1">
         <button
           onClick={() => setViewMode("posts")}
           className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
             viewMode === "posts"
               ? "bg-flame-500/20 text-flame-400"
-              : "text-ash-400 hover:text-ash-200 hover:bg-ash-800/50"
+              : "text-ash hover:text-foreground hover:bg-charcoal/50"
           }`}
         >
           <FileText className="h-4 w-4" />
@@ -229,7 +229,7 @@ export default function CampfirePage() {
           className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
             viewMode === "chat"
               ? "bg-flame-500/20 text-flame-400"
-              : "text-ash-400 hover:text-ash-200 hover:bg-ash-800/50"
+              : "text-ash hover:text-foreground hover:bg-charcoal/50"
           }`}
         >
           <MessageSquare className="h-4 w-4" />
@@ -259,16 +259,16 @@ export default function CampfirePage() {
               </div>
             ) : postCards.length === 0 ? (
               <div className="py-16 text-center">
-                <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-ash-900 border border-ash-800">
-                  <FileText className="h-7 w-7 text-ash-500" />
+                <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-coal border border-charcoal">
+                  <FileText className="h-7 w-7 text-smoke" />
                 </div>
-                <p className="text-lg font-medium text-ash-300">
+                <p className="text-lg font-medium text-ash">
                   No posts in{" "}
                   <span className="text-flame-400">f</span>
-                  <span className="text-ash-600 mx-0.5">|</span>
+                  <span className="text-smoke mx-0.5">|</span>
                   <span className="text-flame-400">{campfire.name}</span>
                 </p>
-                <p className="mt-1 text-sm text-ash-500">Be the first to start a conversation here.</p>
+                <p className="mt-1 text-sm text-smoke">Be the first to start a conversation here.</p>
                 {user && (
                   <Link
                     href="/submit"
@@ -292,7 +292,7 @@ export default function CampfirePage() {
                 {hasMore && (
                   <button
                     onClick={loadMore}
-                    className="w-full py-3 text-center text-xs text-ash-400 hover:text-flame-400 transition-colors"
+                    className="w-full py-3 text-center text-xs text-ash hover:text-flame-400 transition-colors"
                   >
                     Load more posts
                   </button>

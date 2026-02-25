@@ -15,7 +15,7 @@ export default function SubmitPage() {
   return (
     <React.Suspense
       fallback={
-        <div className="mx-auto max-w-2xl py-16 text-center text-ash-400">
+        <div className="mx-auto max-w-2xl py-16 text-center text-ash">
           Loading...
         </div>
       }
@@ -98,7 +98,7 @@ function SubmitPageInner() {
   if (!authLoading && !user) {
     return (
       <div className="mx-auto max-w-2xl py-16 text-center">
-        <p className="text-ash-400">
+        <p className="text-ash">
           You need to{" "}
           <Link href="/login" className="text-flame-400 hover:underline">
             log in
@@ -113,14 +113,14 @@ function SubmitPageInner() {
     <div className="mx-auto max-w-2xl">
       <Link
         href="/home"
-        className="inline-flex items-center gap-1.5 text-sm text-ash-500 transition-colors hover:text-ash-300"
+        className="inline-flex items-center gap-1.5 text-sm text-smoke transition-colors hover:text-ash"
       >
         <ArrowLeft className="h-3.5 w-3.5" />
         Back to feed
       </Link>
 
-      <h1 className="mt-4 text-xl font-bold text-ash-100">Create a Post</h1>
-      <p className="mt-1 text-sm text-ash-400">
+      <h1 className="mt-4 text-xl font-bold text-foreground">Create a Post</h1>
+      <p className="mt-1 text-sm text-ash">
         Your post will be reviewed by the campfire&apos;s AI Tender in
         real-time.
       </p>
@@ -141,7 +141,7 @@ function SubmitPageInner() {
             ) : (
               <AlertCircle className="h-4 w-4 text-yellow-400" />
             )}
-            <span className="text-sm font-medium text-ash-200">
+            <span className="text-sm font-medium text-foreground">
               {moderationResult.decision === "approve"
                 ? "Post approved — redirecting..."
                 : moderationResult.decision === "remove"
@@ -149,7 +149,7 @@ function SubmitPageInner() {
                   : "Post flagged for review"}
             </span>
           </div>
-          <p className="mt-1 text-xs text-ash-400">
+          <p className="mt-1 text-xs text-ash">
             {moderationResult.reasoning}
           </p>
         </div>
@@ -160,7 +160,7 @@ function SubmitPageInner() {
         <div>
           <label
             htmlFor="campfire"
-            className="mb-1.5 block text-sm font-medium text-ash-300"
+            className="mb-1.5 block text-sm font-medium text-ash"
           >
             Campfire
           </label>
@@ -168,7 +168,7 @@ function SubmitPageInner() {
             id="campfire"
             value={selectedCampfireId}
             onChange={(e) => setSelectedCampfireId(e.target.value)}
-            className="w-full rounded-md border border-ash-800 bg-ash-950 px-3 py-2 text-sm text-ash-200 focus:outline-none focus:ring-2 focus:ring-flame-500/50"
+            className="w-full rounded-md border border-charcoal bg-coal px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-flame-500/50"
             disabled={campfiresLoading}
           >
             <option value="">
@@ -188,7 +188,7 @@ function SubmitPageInner() {
         <div>
           <label
             htmlFor="title"
-            className="mb-1.5 block text-sm font-medium text-ash-300"
+            className="mb-1.5 block text-sm font-medium text-ash"
           >
             Title
           </label>
@@ -198,9 +198,9 @@ function SubmitPageInner() {
             onChange={(e) => setTitle(e.target.value)}
             placeholder="What's on your mind?"
             maxLength={300}
-            className="border-ash-800 bg-ash-950 placeholder:text-ash-600 focus-visible:ring-flame-500/50"
+            className="border-charcoal bg-coal placeholder:text-smoke focus-visible:ring-flame-500/50"
           />
-          <p className="mt-1 text-xs text-ash-500">
+          <p className="mt-1 text-xs text-smoke">
             {title.length}/300 characters
           </p>
         </div>
@@ -209,10 +209,10 @@ function SubmitPageInner() {
         <div>
           <label
             htmlFor="body"
-            className="mb-1.5 block text-sm font-medium text-ash-300"
+            className="mb-1.5 block text-sm font-medium text-ash"
           >
             Body{" "}
-            <span className="font-normal text-ash-500">(optional)</span>
+            <span className="font-normal text-smoke">(optional)</span>
           </label>
           <Textarea
             id="body"
@@ -221,7 +221,7 @@ function SubmitPageInner() {
             placeholder="Add more details..."
             rows={8}
             maxLength={40000}
-            className="min-h-[160px] resize-y border-ash-800 bg-ash-950 placeholder:text-ash-600 focus-visible:ring-flame-500/50"
+            className="min-h-[160px] resize-y border-charcoal bg-coal placeholder:text-smoke focus-visible:ring-flame-500/50"
           />
         </div>
 

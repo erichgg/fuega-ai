@@ -5,6 +5,8 @@ import { updateCommentSchema } from "@/lib/validation/comments";
 import { updateComment, deleteComment } from "@/lib/services/comments.service";
 import { ServiceError } from "@/lib/services/posts.service";
 
+export const dynamic = "force-dynamic";
+
 interface RouteContext {
   params: Promise<{ id: string }>;
 }

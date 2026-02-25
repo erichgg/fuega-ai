@@ -245,11 +245,11 @@ export function Navbar({ onOpenSidebar }: NavbarProps = {}) {
         <div className="max-w-7xl mx-auto h-full flex items-center justify-between px-3 sm:px-6 lg:px-12">
           {/* Left: Menu + Logo */}
           <div className="flex items-center gap-1">
-            {/* Sidebar trigger */}
+            {/* Sidebar trigger — hidden on mobile (mobile nav sheet handles it) */}
             <button
               onClick={onOpenSidebar}
-              className="p-2 text-ash hover:text-lava-hot transition-colors"
-              aria-label="Open navigation"
+              className="hidden md:inline-flex p-2 text-ash hover:text-lava-hot transition-colors"
+              aria-label="Open sidebar"
             >
               <Menu className="h-5 w-5" />
             </button>
@@ -435,6 +435,20 @@ export function Navbar({ onOpenSidebar }: NavbarProps = {}) {
                 </Link>
               );
             })}
+
+            {/* Browse campfires (opens sidebar) */}
+            {onOpenSidebar && (
+              <button
+                onClick={() => {
+                  setMobileOpen(false);
+                  onOpenSidebar();
+                }}
+                className="flex items-center gap-3 py-2 text-sm font-mono tracking-wide truncate transition-colors text-ash hover:text-lava-hot mt-2 pt-3 border-t border-lava-hot/10"
+              >
+                <Menu className="h-4 w-4 shrink-0" />
+                Browse campfires
+              </button>
+            )}
 
             <div className="pt-3 border-t border-lava-hot/10 mt-2">
               <kbd className="text-xs text-smoke border border-lava-hot/20 px-1.5 py-0.5 font-mono">

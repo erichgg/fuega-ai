@@ -50,7 +50,7 @@ export default function LoginPage() {
           <Link href="/">
             <FlameLogo size="lg" />
           </Link>
-          <p className="mt-2 text-sm text-ash-400">
+          <p className="mt-2 text-sm text-ash">
             Log in to continue the conversation
           </p>
         </div>
@@ -67,7 +67,7 @@ export default function LoginPage() {
           )}
 
           <div className="space-y-2">
-            <Label htmlFor="username" className="text-ash-300">
+            <Label htmlFor="username" className="text-ash">
               Username
             </Label>
             <Input
@@ -79,13 +79,13 @@ export default function LoginPage() {
               required
               autoComplete="username"
               autoFocus
-              className="border-ash-800 bg-ash-900 placeholder:text-ash-600 focus-visible:ring-flame-500/50"
+              className="border-charcoal bg-coal placeholder:text-smoke focus-visible:ring-flame-500/50"
             />
           </div>
 
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <Label htmlFor="password" className="text-ash-300">
+              <Label htmlFor="password" className="text-ash">
                 Password
               </Label>
               <Link
@@ -103,7 +103,7 @@ export default function LoginPage() {
               onChange={(e) => setPassword(e.target.value)}
               required
               autoComplete="current-password"
-              className="border-ash-800 bg-ash-900 placeholder:text-ash-600 focus-visible:ring-flame-500/50"
+              className="border-charcoal bg-coal placeholder:text-smoke focus-visible:ring-flame-500/50"
             />
           </div>
 
@@ -122,7 +122,7 @@ export default function LoginPage() {
           </Button>
         </form>
 
-        <p className="mt-6 text-center text-sm text-ash-500">
+        <p className="mt-6 text-center text-sm text-smoke">
           Don&apos;t have an account?{" "}
           <Link href="/signup" className="text-flame-400 hover:underline">
             Sign up

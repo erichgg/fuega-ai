@@ -69,7 +69,7 @@ export default function SettingsLayout({
                   className={`flex items-center gap-2 px-3 py-2 text-sm whitespace-nowrap transition-colors ${
                     isActive
                       ? "text-flame-400 bg-flame-400/10 border border-flame-400/20"
-                      : "text-ash-400 hover:text-ash-200 hover:bg-ash-800/50 border border-transparent"
+                      : "text-ash hover:text-foreground hover:bg-charcoal/50 border border-transparent"
                   }`}
                 >
                   <Icon className="h-4 w-4 shrink-0" />

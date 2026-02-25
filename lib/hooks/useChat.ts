@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { api, ApiError } from "@/lib/api/client";
 
 export interface ChatMessage {
@@ -98,10 +98,13 @@ export function useChat({ campfireId, roomId, enabled = true }: UseChatOptions):
   const [connected, setConnected] = useState(false);
   const eventSourceRef = useRef<EventSource | null>(null);
 
-  // Build the API base path
-  const basePath = roomId
-    ? `/api/campfires/${campfireId}/chat/rooms/${roomId}/messages`
-    : `/api/campfires/${campfireId}/chat`;
+  // Build the API base path (memoized to prevent unnecessary re-renders)
+  const basePath = useMemo(
+    () => roomId
+      ? `/api/campfires/${campfireId}/chat/rooms/${roomId}/messages`
+      : `/api/campfires/${campfireId}/chat`,
+    [campfireId, roomId]
+  );
 
   // Fetch initial messages
   useEffect(() => {

@@ -14,7 +14,7 @@ const buttonVariants = cva(
         outline:
           "border border-input bg-background hover:bg-accent hover:text-accent-foreground",
         secondary:
-          "bg-ash-800 text-ash-200 hover:bg-ash-700",
+          "bg-charcoal text-foreground hover:bg-charcoal",
         ghost: "hover:bg-accent hover:text-accent-foreground",
         link: "text-flame-400 underline-offset-4 hover:underline",
         spark:

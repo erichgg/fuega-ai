@@ -63,6 +63,11 @@ Fuega.ai is an AI-moderated, community-governed discussion platform. Communities
   - Tender name + version shown
   - Member count
   - Sidebar with info
+- **Real-Time Chat** (per campfire, multi-room)
+  - SSE-based real-time messaging
+  - Multiple rooms per campfire (default #general created automatically)
+  - Room creation by campfire members
+  - 2000 character message limit
 
 #### User Features
 - **Profiles** (anonymous by default, customizable by choice)
@@ -198,10 +203,10 @@ No tiers. No categories. No nesting. Each campfire is sovereign within Principle
 - Search (basic)
 - Mobile-responsive web interface
 - Badges, cosmetics shop, notifications, referrals, tips
+- Multi-room real-time chat (SSE-based, per-campfire rooms, default #general room)
 
 ### OUT OF SCOPE (Post-V1)
 - Direct messaging
-- Chat/real-time features
 - Native mobile apps
 - Media hosting (video/audio)
 - Cryptocurrency integration

@@ -142,7 +142,7 @@ const securityRows: SecurityRow[] = [
 export default function SecurityPage() {
   return (
     <div className="min-h-screen bg-background">
-      <nav className="sticky top-0 z-50 border-b border-ash-800 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <nav className="sticky top-0 z-50 border-b border-charcoal bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4 2xl:px-8">
           <Link href="/">
             <FlameLogo size="sm" />
@@ -150,7 +150,7 @@ export default function SecurityPage() {
           <div className="flex items-center gap-4">
             <Link
               href="/login"
-              className="text-sm text-ash-400 transition-colors hover:text-ash-200"
+              className="text-sm text-ash transition-colors hover:text-foreground"
             >
               Log in
             </Link>
@@ -167,42 +167,42 @@ export default function SecurityPage() {
       <main className="mx-auto max-w-7xl px-4 py-12 2xl:px-8">
         <Link
           href="/"
-          className="inline-flex items-center gap-1.5 text-sm text-ash-500 transition-colors hover:text-ash-300"
+          className="inline-flex items-center gap-1.5 text-sm text-smoke transition-colors hover:text-ash"
         >
           <ArrowLeft className="h-3.5 w-3.5" />
           Back to home
         </Link>
 
-        <h1 className="mt-8 text-3xl font-bold text-ash-100 sm:text-4xl">
+        <h1 className="mt-8 text-3xl font-bold text-foreground sm:text-4xl">
           Security & Privacy
         </h1>
-        <p className="mt-3 text-base text-ash-400">
+        <p className="mt-3 text-base text-ash">
           Most platforms bury what they collect in a 12,000-word privacy policy.
           Here&apos;s ours in two tables.
         </p>
 
         {/* Data collection table */}
         <section className="mt-10">
-          <h2 className="text-2xl font-bold text-ash-100 sm:text-3xl">
+          <h2 className="text-2xl font-bold text-foreground sm:text-3xl">
             What <F /> knows about you
           </h2>
-          <p className="mt-2 text-sm text-ash-500">
+          <p className="mt-2 text-sm text-smoke">
             <Check className="mr-1 inline h-3 w-3 text-green-400" /> = we store this
-            <span className="mx-2 text-ash-700">·</span>
+            <span className="mx-2 text-smoke/60">·</span>
             <X className="mr-1 inline h-3 w-3 text-ember-500" /> = we don&apos;t and never will
           </p>
 
           <div className="mt-6 overflow-x-auto">
             <table className="w-full border-collapse text-sm">
               <thead>
-                <tr className="border-b border-ash-800">
-                  <th className="py-3 pr-4 text-left text-xs font-semibold uppercase tracking-wider text-ash-500">
+                <tr className="border-b border-charcoal">
+                  <th className="py-3 pr-4 text-left text-xs font-semibold uppercase tracking-wider text-smoke">
                     Data
                   </th>
-                  <th className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider text-ash-500">
+                  <th className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider text-smoke">
                     Collected?
                   </th>
-                  <th className="py-3 pl-4 text-left text-xs font-semibold uppercase tracking-wider text-ash-500">
+                  <th className="py-3 pl-4 text-left text-xs font-semibold uppercase tracking-wider text-smoke">
                     Details
                   </th>
                 </tr>
@@ -211,9 +211,9 @@ export default function SecurityPage() {
                 {dataRows.map((row) => (
                   <tr
                     key={row.item}
-                    className="border-b border-ash-800/50 transition-colors hover:bg-ash-900/30"
+                    className="border-b border-charcoal/50 transition-colors hover:bg-charcoal/30"
                   >
-                    <td className="py-3 pr-4 text-ash-200 font-medium whitespace-nowrap">
+                    <td className="py-3 pr-4 text-foreground font-medium whitespace-nowrap">
                       {row.item}
                     </td>
                     <td className="px-4 py-3 text-center">
@@ -223,7 +223,7 @@ export default function SecurityPage() {
                         <X className="mx-auto h-4 w-4 text-ember-500" />
                       )}
                     </td>
-                    <td className="py-3 pl-4 text-ash-400">
+                    <td className="py-3 pl-4 text-ash">
                       {row.detail}
                     </td>
                   </tr>
@@ -235,24 +235,24 @@ export default function SecurityPage() {
 
         {/* Security architecture table */}
         <section className="mt-12">
-          <h2 className="text-2xl font-bold text-ash-100 sm:text-3xl">
+          <h2 className="text-2xl font-bold text-foreground sm:text-3xl">
             8-layer security architecture
           </h2>
-          <p className="mt-2 text-sm text-ash-500">
+          <p className="mt-2 text-sm text-smoke">
             Defense in depth — every layer independently protects your data.
           </p>
 
           <div className="mt-6 overflow-x-auto">
             <table className="w-full border-collapse text-sm">
               <thead>
-                <tr className="border-b border-ash-800">
-                  <th className="py-3 pr-4 text-left text-xs font-semibold uppercase tracking-wider text-ash-500">
+                <tr className="border-b border-charcoal">
+                  <th className="py-3 pr-4 text-left text-xs font-semibold uppercase tracking-wider text-smoke">
                     Layer
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-ash-500">
+                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-smoke">
                     Protects against
                   </th>
-                  <th className="py-3 pl-4 text-left text-xs font-semibold uppercase tracking-wider text-ash-500">
+                  <th className="py-3 pl-4 text-left text-xs font-semibold uppercase tracking-wider text-smoke">
                     How
                   </th>
                 </tr>
@@ -261,15 +261,15 @@ export default function SecurityPage() {
                 {securityRows.map((row) => (
                   <tr
                     key={row.layer}
-                    className="border-b border-ash-800/50 transition-colors hover:bg-ash-900/30"
+                    className="border-b border-charcoal/50 transition-colors hover:bg-charcoal/30"
                   >
-                    <td className="py-3 pr-4 text-ash-200 font-medium whitespace-nowrap">
+                    <td className="py-3 pr-4 text-foreground font-medium whitespace-nowrap">
                       {row.layer}
                     </td>
-                    <td className="px-4 py-3 text-ash-400">
+                    <td className="px-4 py-3 text-ash">
                       {row.what}
                     </td>
-                    <td className="py-3 pl-4 text-ash-400">
+                    <td className="py-3 pl-4 text-ash">
                       {row.how}
                     </td>
                   </tr>
@@ -281,10 +281,10 @@ export default function SecurityPage() {
 
         {/* Transparency + disclosure */}
         <section className="mt-12 pb-12">
-          <h2 className="text-2xl font-bold text-ash-100 sm:text-3xl">
+          <h2 className="text-2xl font-bold text-foreground sm:text-3xl">
             Transparency & disclosure
           </h2>
-          <p className="mt-4 text-ash-300 leading-relaxed">
+          <p className="mt-4 text-ash leading-relaxed">
             Every AI moderation decision is logged publicly in your
             campfire&apos;s{" "}
             <Link
@@ -299,13 +299,13 @@ export default function SecurityPage() {
             statistics, governance outcomes, and any security incidents.
           </p>
           <div className="mt-6 border border-flame-500/20 bg-flame-500/5 p-5">
-            <p className="text-sm font-medium text-ash-200">
+            <p className="text-sm font-medium text-foreground">
               Found a vulnerability?
             </p>
-            <p className="mt-2 text-sm text-ash-400">
+            <p className="mt-2 text-sm text-ash">
               Report security issues through{" "}
               <span className="text-flame-400 font-semibold">f</span>
-              <span className="text-ash-500 mx-0.5">|</span>
+              <span className="text-smoke mx-0.5">|</span>
               <span className="text-flame-400 font-semibold">security</span>
               {" "}on the platform or through our contact channels. We
               acknowledge reports within 24 hours and provide updates within 72.

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { z } from "zod";
 import { authenticate } from "@/lib/auth/jwt";
 import { checkVoteRateLimit } from "@/lib/auth/rate-limit";
 import { query, queryOne } from "@/lib/db";
@@ -8,6 +9,12 @@ import {
   buildPromptFromConfig,
   type CampfireAIConfig,
 } from "@/lib/ai/structured-config";
+
+const proposalVoteSchema = z.object({
+  vote: z.enum(["for", "against", "abstain"]),
+});
+
+export const dynamic = "force-dynamic";
 
 interface RouteParams {
   params: Promise<{ id: string; proposalId: string }>;
@@ -33,8 +40,6 @@ interface CampfireRow {
 }
 
 type VoteValue = "for" | "against" | "abstain";
-
-const validVotes: VoteValue[] = ["for", "against", "abstain"];
 
 /**
  * POST /api/campfires/:id/config-proposals/:proposalId/vote
@@ -63,14 +68,14 @@ export async function POST(req: Request, { params }: RouteParams) {
 
     // Parse vote
     const body = await req.json();
-    const { vote } = body;
-
-    if (!vote || !validVotes.includes(vote as VoteValue)) {
+    const parsed = proposalVoteSchema.safeParse(body);
+    if (!parsed.success) {
       return NextResponse.json(
-        { error: "Vote must be 'for', 'against', or 'abstain'", code: "VALIDATION_ERROR" },
+        { error: parsed.error.errors[0]?.message ?? "Vote must be 'for', 'against', or 'abstain'", code: "VALIDATION_ERROR" },
         { status: 400 }
       );
     }
+    const { vote } = parsed.data;
 
     // Check membership
     const membership = await queryOne<{ role: string }>(

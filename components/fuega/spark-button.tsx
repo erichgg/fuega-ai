@@ -119,7 +119,7 @@ export function SparkButton({
         className={cn(
           "group relative flex h-8 w-8 items-center justify-center rounded-md transition-all hover:bg-flame-500/10",
           userVote === "sparked" && "text-flame-400",
-          userVote !== "sparked" && "text-ash-500 hover:text-flame-400",
+          userVote !== "sparked" && "text-smoke hover:text-flame-400",
           disabled && "cursor-not-allowed opacity-50",
         )}
         aria-label="Spark"
@@ -144,7 +144,7 @@ export function SparkButton({
           "text-xs font-semibold font-mono tabular-nums min-w-[2ch] text-center",
           userVote === "sparked" && "text-flame-400",
           userVote === "doused" && "text-blue-400",
-          userVote === null && "text-ash-400",
+          userVote === null && "text-ash",
         )}
       >
         {sparkCount}
@@ -156,7 +156,7 @@ export function SparkButton({
         className={cn(
           "group relative flex h-8 w-8 items-center justify-center rounded-md transition-all hover:bg-blue-500/10",
           userVote === "doused" && "text-blue-400",
-          userVote !== "doused" && "text-ash-500 hover:text-blue-400",
+          userVote !== "doused" && "text-smoke hover:text-blue-400",
           disabled && "cursor-not-allowed opacity-50",
         )}
         aria-label="Douse"

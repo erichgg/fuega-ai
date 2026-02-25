@@ -43,7 +43,7 @@ export default function PrivacySettingsPage() {
   if (!authLoading && !user) {
     return (
       <div className="py-16 text-center">
-        <p className="text-ash-400">
+        <p className="text-ash">
           You need to{" "}
           <Link href="/login" className="text-flame-400 hover:underline">log in</Link>
           {" "}to access this page.
@@ -92,16 +92,16 @@ export default function PrivacySettingsPage() {
       {/* Profile visibility */}
       <div className="terminal-card p-4 sm:p-6 space-y-4">
         <div className="flex items-center gap-2">
-          <Shield className="h-4 w-4 text-ash-400" />
-          <h2 className="text-sm font-bold text-ash-200 uppercase tracking-wider">
+          <Shield className="h-4 w-4 text-ash" />
+          <h2 className="text-sm font-bold text-foreground uppercase tracking-wider">
             Profile Visibility
           </h2>
         </div>
 
         <div className="flex items-start justify-between gap-4">
           <div>
-            <p className="text-sm text-ash-300">Public Profile</p>
-            <p className="text-[10px] text-ash-500 mt-1">
+            <p className="text-sm text-ash">Public Profile</p>
+            <p className="text-[10px] text-smoke mt-1">
               When hidden, visitors to your profile will only see your username,
               glow, and account age. Bio, location, website, social links, and
               Brand will be hidden.
@@ -117,7 +117,7 @@ export default function PrivacySettingsPage() {
             className={`relative shrink-0 w-11 h-6 rounded-full transition-colors ${
               profileVisible
                 ? "bg-flame-500"
-                : "bg-ash-700"
+                : "bg-charcoal"
             } ${saving ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
             aria-label={profileVisible ? "Profile visible" : "Profile hidden"}
           >
@@ -129,19 +129,19 @@ export default function PrivacySettingsPage() {
           </button>
         </div>
 
-        <div className="flex items-center gap-2 p-2 bg-ash-900/80 border border-ash-700 text-xs">
+        <div className="flex items-center gap-2 p-2 bg-charcoal/80 border border-charcoal text-xs">
           {profileVisible ? (
             <>
               <Eye className="h-3.5 w-3.5 text-flame-400" />
-              <span className="text-ash-300">
+              <span className="text-ash">
                 Your profile is <span className="text-flame-400 font-medium">visible</span> to everyone
               </span>
             </>
           ) : (
             <>
-              <EyeOff className="h-3.5 w-3.5 text-ash-500" />
-              <span className="text-ash-300">
-                Your profile is <span className="text-ash-400 font-medium">hidden</span> from public view
+              <EyeOff className="h-3.5 w-3.5 text-smoke" />
+              <span className="text-ash">
+                Your profile is <span className="text-ash font-medium">hidden</span> from public view
               </span>
             </>
           )}
@@ -150,10 +150,10 @@ export default function PrivacySettingsPage() {
 
       {/* Anonymity reminder */}
       <div className="terminal-card p-4 sm:p-6 space-y-3">
-        <h2 className="text-sm font-bold text-ash-200 uppercase tracking-wider">
+        <h2 className="text-sm font-bold text-foreground uppercase tracking-wider">
           Anonymity
         </h2>
-        <div className="text-xs text-ash-400 space-y-2">
+        <div className="text-xs text-ash space-y-2">
           <p>
             <span className="text-flame-400 font-semibold">fuega</span> never
             asks for your real name, photo, phone number, or email address.

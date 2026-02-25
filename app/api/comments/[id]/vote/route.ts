@@ -5,6 +5,8 @@ import { voteOnComment, removeVoteOnComment } from "@/lib/services/votes.service
 import { ServiceError } from "@/lib/services/posts.service";
 import { checkVoteRateLimit } from "@/lib/auth/rate-limit";
 
+export const dynamic = "force-dynamic";
+
 interface RouteContext {
   params: Promise<{ id: string }>;
 }
@@ -76,6 +78,14 @@ export async function DELETE(req: Request, context: RouteContext) {
       return NextResponse.json(
         { error: "Authentication required", code: "UNAUTHORIZED" },
         { status: 401 }
+      );
+    }
+
+    const rateLimit = await checkVoteRateLimit(user.userId);
+    if (!rateLimit.allowed) {
+      return NextResponse.json(
+        { error: "Too many votes. Try again later.", code: "RATE_LIMITED" },
+        { status: 429, headers: { "Retry-After": String(rateLimit.retryAfterSeconds) } }
       );
     }
 

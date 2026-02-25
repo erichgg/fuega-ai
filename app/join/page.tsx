@@ -81,7 +81,7 @@ function JoinContent() {
             </h1>
 
             <p className="text-sm text-ash mb-6">
-              Open source social media with community-governed discussions and
+              Open source social media with campfire-governed discussions and
               transparent AI moderation. No ads, no tracking, no corporate
               influence.
             </p>
@@ -111,7 +111,7 @@ function JoinContent() {
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="text-teal">&#x2713;</span>
-                  <span>Communities set their own rules via democratic governance</span>
+                  <span>Campfires set their own rules via democratic governance</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="text-teal">&#x2713;</span>

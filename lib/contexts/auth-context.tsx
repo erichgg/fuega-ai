@@ -6,7 +6,7 @@ export interface AuthUser {
   id: string;
   username: string;
   glow: number;
-  founderBadge: boolean;
+  founderBadgeNumber: number | null;
   createdAt: string;
 }
 
@@ -91,6 +91,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       credentials: "include",
     });
     setUser(null);
+    window.location.href = "/";
   }, []);
 
   const value = React.useMemo(

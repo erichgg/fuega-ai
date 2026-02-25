@@ -18,7 +18,7 @@ export default function ReferralDashboardPage() {
   if (!authLoading && !user) {
     return (
       <div className="py-16 text-center">
-        <p className="text-ash-400">
+        <p className="text-ash">
           You need to{" "}
           <Link href="/login" className="text-flame-400 hover:underline">log in</Link>
           {" "}to access this page.

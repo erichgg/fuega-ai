@@ -4,6 +4,8 @@ import { checkGeneralRateLimit } from "@/lib/auth/rate-limit";
 import { isFeatureEnabled } from "@/lib/feature-flags";
 import { markAsRead } from "@/lib/services/notifications.service";
 
+export const dynamic = "force-dynamic";
+
 /**
  * PUT /api/notifications/:id/read
  * Mark a single notification as read. Auth required (own notifications only).

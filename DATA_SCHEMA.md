@@ -25,7 +25,7 @@
 
 ---
 
-## TABLE OVERVIEW (22 Total)
+## TABLE OVERVIEW (24 Total)
 
 ### Core Tables (9)
 1. users
@@ -54,8 +54,12 @@
 20. user_cosmetics
 21. tips
 
+### Chat Tables (2)
+22. chat_rooms
+23. chat_messages
+
 ### Moderation Tables (1)
-22. moderation_appeals
+24. moderation_appeals
 
 ---
 
@@ -680,7 +684,59 @@ CREATE INDEX idx_tips_stripe ON tips(stripe_payment_id);
 CREATE INDEX idx_tips_created ON tips(created_at DESC);
 ```
 
-### 22. Moderation Appeals Table
+---
+
+## CHAT TABLES
+
+### 22. Chat Rooms Table
+```sql
+CREATE TABLE chat_rooms (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    campfire_id UUID NOT NULL REFERENCES campfires(id) ON DELETE CASCADE,
+    name VARCHAR(64) NOT NULL,
+    description TEXT,
+    is_default BOOLEAN DEFAULT FALSE,
+    position INTEGER DEFAULT 0,
+    created_by UUID NOT NULL REFERENCES users(id),
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    deleted_at TIMESTAMPTZ
+);
+
+-- Partial unique index: only enforce uniqueness on non-deleted rooms
+CREATE UNIQUE INDEX idx_chat_rooms_unique_name
+    ON chat_rooms(campfire_id, name) WHERE deleted_at IS NULL;
+
+CREATE INDEX idx_chat_rooms_campfire ON chat_rooms(campfire_id) WHERE deleted_at IS NULL;
+```
+
+### 23. Chat Messages Table
+```sql
+CREATE TABLE chat_messages (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    campfire_id UUID NOT NULL REFERENCES campfires(id),
+    room_id UUID REFERENCES chat_rooms(id),
+    author_id UUID NOT NULL REFERENCES users(id),
+    body TEXT NOT NULL,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    edited_at TIMESTAMPTZ,
+    deleted_at TIMESTAMPTZ,
+
+    -- Moderation
+    is_approved BOOLEAN DEFAULT TRUE,
+    is_removed BOOLEAN DEFAULT FALSE,
+    removal_reason TEXT,
+
+    CONSTRAINT chat_body_length CHECK (char_length(body) >= 1 AND char_length(body) <= 2000)
+);
+
+CREATE INDEX idx_chat_campfire_time ON chat_messages(campfire_id, created_at DESC);
+CREATE INDEX idx_chat_author ON chat_messages(author_id);
+CREATE INDEX idx_chat_messages_room ON chat_messages(room_id, created_at DESC) WHERE deleted_at IS NULL;
+```
+
+---
+
+### 24. Moderation Appeals Table
 ```sql
 CREATE TABLE moderation_appeals (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -751,6 +807,19 @@ CREATE POLICY campfire_settings_select_all ON campfire_settings FOR SELECT USING
 
 ALTER TABLE campfire_settings_history ENABLE ROW LEVEL SECURITY;
 CREATE POLICY settings_history_select_all ON campfire_settings_history FOR SELECT USING (true);
+```
+
+### Chat (public read, authenticated write)
+```sql
+ALTER TABLE chat_messages ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY chat_select_all ON chat_messages
+    FOR SELECT USING (true);
+
+CREATE POLICY chat_insert_auth ON chat_messages
+    FOR INSERT WITH CHECK (
+        author_id = current_setting('app.current_user_id', true)::uuid
+    );
 ```
 
 ### Badges (public catalog, public awards)
@@ -988,7 +1057,7 @@ INSERT INTO badges (badge_id, name, description, category, rarity, earn_criteria
 ---
 
 **Schema Version:** 3.0
-**Total Tables:** 22
+**Total Tables:** 24
 **Total Indexes:** 50+
 **Total Triggers:** 6
 **Total RLS Policies:** 20+

@@ -153,7 +153,7 @@ export default function UserProfilePage() {
   if (profileError || !profile) {
     return (
       <div className="py-16 text-center">
-        <p className="text-ash-400">
+        <p className="text-ash">
           {profileError ?? "User not found"}
         </p>
         <Link
@@ -175,16 +175,16 @@ export default function UserProfilePage() {
   return (
     <div>
       {/* Profile header */}
-      <div className="rounded-lg border border-ash-800 bg-ash-900/50 p-4 sm:p-6">
+      <div className="rounded-lg border border-charcoal bg-charcoal/50 p-4 sm:p-6">
         <div className="flex items-start gap-4">
           <UserAvatar username={profile.username} size="lg" />
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2 flex-wrap">
-              <h1 className="text-xl font-bold text-ash-100">
+              <h1 className="text-xl font-bold text-foreground">
                 {profile.username}
               </h1>
               {profile.displayName && profile.profileVisible && (
-                <span className="text-sm text-ash-400">
+                <span className="text-sm text-ash">
                   {profile.displayName}
                 </span>
               )}
@@ -203,7 +203,7 @@ export default function UserProfilePage() {
                 <Link
                   href="/settings/profile"
                   aria-label="Edit profile"
-                  className="ml-auto text-ash-500 hover:text-ash-300 transition-colors"
+                  className="ml-auto text-smoke hover:text-ash transition-colors"
                 >
                   <Settings className="h-4 w-4" />
                 </Link>
@@ -211,17 +211,17 @@ export default function UserProfilePage() {
             </div>
 
             {isHidden && (
-              <div className="mt-2 flex items-center gap-1.5 text-xs text-ash-500">
+              <div className="mt-2 flex items-center gap-1.5 text-xs text-smoke">
                 <EyeOff className="h-3.5 w-3.5" />
                 This user&apos;s profile is hidden
               </div>
             )}
 
             {profile.bio && profile.profileVisible && (
-              <p className="mt-1.5 text-sm text-ash-400">{profile.bio}</p>
+              <p className="mt-1.5 text-sm text-ash">{profile.bio}</p>
             )}
 
-            <div className="mt-3 flex flex-wrap items-center gap-3 sm:gap-4 text-xs text-ash-500">
+            <div className="mt-3 flex flex-wrap items-center gap-3 sm:gap-4 text-xs text-smoke">
               <span className="flex items-center gap-1.5">
                 <Flame className="h-3.5 w-3.5 text-flame-400" />
                 <span className="font-semibold text-flame-400">
@@ -268,9 +268,9 @@ export default function UserProfilePage() {
                 {filledSocials.map(([platform, handle]) => (
                   <span
                     key={platform}
-                    className="inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 bg-ash-800/50 border border-ash-700 text-ash-400"
+                    className="inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 bg-charcoal/50 border border-charcoal text-ash"
                   >
-                    <span className="text-ash-500 font-bold">
+                    <span className="text-smoke font-bold">
                       {SOCIAL_ICONS[platform] ?? platform}
                     </span>
                     {handle}
@@ -281,7 +281,7 @@ export default function UserProfilePage() {
 
             {/* Glow breakdown */}
             {profile.profileVisible && (
-              <div className="mt-2 flex items-center gap-3 text-[10px] text-ash-600">
+              <div className="mt-2 flex items-center gap-3 text-[10px] text-smoke">
                 <span>Post glow: {(profile.postGlow ?? 0).toLocaleString()}</span>
                 <span>Comment glow: {(profile.commentGlow ?? 0).toLocaleString()}</span>
               </div>
@@ -292,16 +292,16 @@ export default function UserProfilePage() {
 
       {/* Tabs */}
       <Tabs defaultValue="posts" className="mt-4">
-        <TabsList className="w-full justify-start border-b border-ash-800 bg-transparent p-0">
+        <TabsList className="w-full justify-start border-b border-charcoal bg-transparent p-0">
           <TabsTrigger
             value="posts"
-            className="rounded-none border-b-2 border-transparent px-4 pb-2 pt-2 text-ash-400 data-[state=active]:border-flame-400 data-[state=active]:text-flame-400 data-[state=active]:bg-transparent"
+            className="rounded-none border-b-2 border-transparent px-4 pb-2 pt-2 text-ash data-[state=active]:border-flame-400 data-[state=active]:text-flame-400 data-[state=active]:bg-transparent"
           >
             Posts ({postCards.length})
           </TabsTrigger>
           <Link
             href={`/u/${profile.username}/badges`}
-            className="ml-auto self-end pb-2 text-xs text-ash-500 hover:text-flame-400 transition-colors"
+            className="ml-auto self-end pb-2 text-xs text-smoke hover:text-flame-400 transition-colors"
           >
             View badges &rarr;
           </Link>
@@ -310,8 +310,8 @@ export default function UserProfilePage() {
         <TabsContent value="posts" className="mt-4 space-y-2">
           {postCards.length === 0 ? (
             <div className="py-12 text-center">
-              <p className="text-sm font-medium text-ash-400">No posts yet</p>
-              <p className="mt-1 text-xs text-ash-600">
+              <p className="text-sm font-medium text-ash">No posts yet</p>
+              <p className="mt-1 text-xs text-smoke">
                 When {profile.username} creates posts, they&apos;ll show up here.
               </p>
             </div>
@@ -329,7 +329,7 @@ export default function UserProfilePage() {
               {hasMore && (
                 <button
                   onClick={loadMore}
-                  className="w-full py-3 text-center text-xs text-ash-400 hover:text-flame-400 transition-colors"
+                  className="w-full py-3 text-center text-xs text-ash hover:text-flame-400 transition-colors"
                 >
                   Load more posts
                 </button>

@@ -26,7 +26,7 @@ interface ProfileForm {
 }
 
 export default function ProfileSettingsPage() {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const [form, setForm] = React.useState<ProfileForm>({
     displayName: "",
     bio: "",
@@ -113,31 +113,39 @@ export default function ProfileSettingsPage() {
     );
   }
 
+  if (!authLoading && !user) {
+    return (
+      <div className="py-12 text-center text-sm text-smoke">
+        Please <a href="/login" className="text-lava-hot hover:underline">log in</a> to access settings.
+      </div>
+    );
+  }
+
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       {/* Identity */}
       <div className="terminal-card p-4 sm:p-6 space-y-4">
-        <h2 className="text-sm font-bold text-ash-200 uppercase tracking-wider">
+        <h2 className="text-sm font-bold text-foreground uppercase tracking-wider">
           Identity
         </h2>
 
         <div>
-          <Label htmlFor="username" className="text-xs text-ash-400">
+          <Label htmlFor="username" className="text-xs text-ash">
             Username (permanent)
           </Label>
           <Input
             id="username"
             value={user?.username ?? ""}
             disabled
-            className="mt-1 bg-ash-900/50 text-ash-500 border-ash-700 cursor-not-allowed"
+            className="mt-1 bg-charcoal/50 text-smoke border-charcoal cursor-not-allowed"
           />
-          <p className="text-[10px] text-ash-600 mt-1">
+          <p className="text-[10px] text-smoke mt-1">
             Usernames cannot be changed
           </p>
         </div>
 
         <div>
-          <Label htmlFor="displayName" className="text-xs text-ash-400">
+          <Label htmlFor="displayName" className="text-xs text-ash">
             Display Name
           </Label>
           <Input
@@ -146,15 +154,15 @@ export default function ProfileSettingsPage() {
             onChange={(e) => setForm((f) => ({ ...f, displayName: e.target.value }))}
             maxLength={50}
             placeholder="Optional display name"
-            className="mt-1 bg-ash-900/50 border-ash-700 text-ash-200 placeholder:text-ash-600"
+            className="mt-1 bg-charcoal/50 border-charcoal text-foreground placeholder:text-smoke"
           />
-          <p className="text-[10px] text-ash-600 mt-1">
+          <p className="text-[10px] text-smoke mt-1">
             Shown alongside your username · {form.displayName.length}/50
           </p>
         </div>
 
         <div>
-          <Label htmlFor="bio" className="text-xs text-ash-400">
+          <Label htmlFor="bio" className="text-xs text-ash">
             Bio
           </Label>
           <Textarea
@@ -164,15 +172,15 @@ export default function ProfileSettingsPage() {
             maxLength={500}
             rows={3}
             placeholder="Tell the campfire about yourself..."
-            className="mt-1 bg-ash-900/50 border-ash-700 text-ash-200 placeholder:text-ash-600 resize-none"
+            className="mt-1 bg-charcoal/50 border-charcoal text-foreground placeholder:text-smoke resize-none"
           />
-          <p className="text-[10px] text-ash-600 mt-1">
+          <p className="text-[10px] text-smoke mt-1">
             {form.bio.length}/500
           </p>
         </div>
 
         <div>
-          <Label htmlFor="location" className="text-xs text-ash-400">
+          <Label htmlFor="location" className="text-xs text-ash">
             Location
           </Label>
           <Input
@@ -181,12 +189,12 @@ export default function ProfileSettingsPage() {
             onChange={(e) => setForm((f) => ({ ...f, location: e.target.value }))}
             maxLength={100}
             placeholder="The internet, probably"
-            className="mt-1 bg-ash-900/50 border-ash-700 text-ash-200 placeholder:text-ash-600"
+            className="mt-1 bg-charcoal/50 border-charcoal text-foreground placeholder:text-smoke"
           />
         </div>
 
         <div>
-          <Label htmlFor="website" className="text-xs text-ash-400">
+          <Label htmlFor="website" className="text-xs text-ash">
             Website
           </Label>
           <div className="relative mt-1">
@@ -197,10 +205,10 @@ export default function ProfileSettingsPage() {
               onChange={(e) => setForm((f) => ({ ...f, website: e.target.value }))}
               maxLength={255}
               placeholder="https://example.com"
-              className="bg-ash-900/50 border-ash-700 text-ash-200 placeholder:text-ash-600 pr-8"
+              className="bg-charcoal/50 border-charcoal text-foreground placeholder:text-smoke pr-8"
             />
             {form.website && (
-              <ExternalLink className="absolute right-2.5 top-2.5 h-4 w-4 text-ash-500" />
+              <ExternalLink className="absolute right-2.5 top-2.5 h-4 w-4 text-smoke" />
             )}
           </div>
         </div>
@@ -208,15 +216,15 @@ export default function ProfileSettingsPage() {
 
       {/* Brand (flair) */}
       <div className="terminal-card p-4 sm:p-6 space-y-4">
-        <h2 className="text-sm font-bold text-ash-200 uppercase tracking-wider">
+        <h2 className="text-sm font-bold text-foreground uppercase tracking-wider">
           Brand
         </h2>
-        <p className="text-[10px] text-ash-500">
+        <p className="text-[10px] text-smoke">
           Your Brand is shown next to your username in posts and comments
         </p>
 
         <div>
-          <Label htmlFor="brandText" className="text-xs text-ash-400">
+          <Label htmlFor="brandText" className="text-xs text-ash">
             Brand Text
           </Label>
           <Input
@@ -225,16 +233,16 @@ export default function ProfileSettingsPage() {
             onChange={(e) => setForm((f) => ({ ...f, brandText: e.target.value }))}
             maxLength={50}
             placeholder="Custom brand text"
-            className="mt-1 bg-ash-900/50 border-ash-700 text-ash-200 placeholder:text-ash-600"
+            className="mt-1 bg-charcoal/50 border-charcoal text-foreground placeholder:text-smoke"
           />
-          <p className="text-[10px] text-ash-600 mt-1">
+          <p className="text-[10px] text-smoke mt-1">
             {form.brandText.length}/50
           </p>
         </div>
 
         {form.brandText && (
-          <div className="flex items-center gap-2 p-2 bg-ash-900/80 border border-ash-700">
-            <span className="text-xs text-ash-300">{user?.username}</span>
+          <div className="flex items-center gap-2 p-2 bg-charcoal/80 border border-charcoal">
+            <span className="text-xs text-ash">{user?.username}</span>
             <span className="text-[10px] px-1.5 py-0.5 bg-flame-400/10 text-flame-400 border border-flame-400/20">
               {form.brandText}
             </span>
@@ -244,17 +252,17 @@ export default function ProfileSettingsPage() {
 
       {/* Social Links */}
       <div className="terminal-card p-4 sm:p-6 space-y-4">
-        <h2 className="text-sm font-bold text-ash-200 uppercase tracking-wider">
+        <h2 className="text-sm font-bold text-foreground uppercase tracking-wider">
           Social Links
         </h2>
-        <p className="text-[10px] text-ash-500">
+        <p className="text-[10px] text-smoke">
           All fields are optional. Only filled fields appear on your profile.
         </p>
 
         <div className="space-y-3">
           {SOCIAL_PLATFORMS.map(({ key, label, placeholder }) => (
             <div key={key}>
-              <Label htmlFor={`social-${key}`} className="text-xs text-ash-400">
+              <Label htmlFor={`social-${key}`} className="text-xs text-ash">
                 {label}
               </Label>
               <Input
@@ -263,7 +271,7 @@ export default function ProfileSettingsPage() {
                 onChange={(e) => updateSocialLink(key, e.target.value)}
                 maxLength={100}
                 placeholder={placeholder}
-                className="mt-1 bg-ash-900/50 border-ash-700 text-ash-200 placeholder:text-ash-600"
+                className="mt-1 bg-charcoal/50 border-charcoal text-foreground placeholder:text-smoke"
               />
             </div>
           ))}

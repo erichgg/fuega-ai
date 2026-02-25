@@ -59,7 +59,7 @@ export default function NewPostsPage() {
       <div className="flex items-center justify-between gap-4">
         <div className="flex items-center gap-2">
           <Clock className="h-5 w-5 text-flame-400" />
-          <h1 className="text-xl font-bold text-ash-100">New</h1>
+          <h1 className="text-xl font-bold text-foreground">New</h1>
         </div>
         {user && (
           <Link href="/submit">
@@ -70,7 +70,7 @@ export default function NewPostsPage() {
           </Link>
         )}
       </div>
-      <p className="mt-1 text-sm text-ash-500">
+      <p className="mt-1 text-sm text-smoke">
         The latest posts from every campfire, newest first.
       </p>
 
@@ -89,11 +89,11 @@ export default function NewPostsPage() {
           </div>
         ) : postCards.length === 0 ? (
           <div className="py-16 text-center">
-            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-ash-900 border border-ash-800">
-              <Clock className="h-7 w-7 text-ash-500" />
+            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-coal border border-charcoal">
+              <Clock className="h-7 w-7 text-smoke" />
             </div>
-            <p className="text-lg font-medium text-ash-300">No posts yet</p>
-            <p className="mt-1 text-sm text-ash-500">
+            <p className="text-lg font-medium text-ash">No posts yet</p>
+            <p className="mt-1 text-sm text-smoke">
               Be the first to start a conversation.
             </p>
             <Link
@@ -117,7 +117,7 @@ export default function NewPostsPage() {
             {hasMore && (
               <button
                 onClick={loadMore}
-                className="w-full py-3 text-center text-xs text-ash-400 hover:text-flame-400 transition-colors"
+                className="w-full py-3 text-center text-xs text-ash hover:text-flame-400 transition-colors"
               >
                 Load more posts
               </button>

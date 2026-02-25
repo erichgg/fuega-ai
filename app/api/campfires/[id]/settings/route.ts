@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
+import { z } from "zod";
 import { authenticate } from "@/lib/auth/jwt";
+import { checkGeneralRateLimit } from "@/lib/auth/rate-limit";
 import {
   getResolvedSettings,
   updateSetting,
@@ -7,6 +9,12 @@ import {
 } from "@/lib/services/governance-variables.service";
 import { isAdmin } from "@/lib/services/campfires.service";
 import { ServiceError } from "@/lib/services/posts.service";
+
+const updateSettingSchema = z.object({
+  key: z.string().min(1).max(100),
+  value: z.string(),
+  reason: z.string().max(500).optional(),
+});
 
 export const dynamic = "force-dynamic";
 
@@ -44,6 +52,14 @@ export async function PUT(req: Request, context: RouteContext) {
       return NextResponse.json({ error: "Authentication required", code: "UNAUTHORIZED" }, { status: 401 });
     }
 
+    const rateLimit = await checkGeneralRateLimit(user.userId);
+    if (!rateLimit.allowed) {
+      return NextResponse.json(
+        { error: "Too many requests. Try again later.", code: "RATE_LIMITED" },
+        { status: 429, headers: { "Retry-After": String(rateLimit.retryAfterSeconds) } }
+      );
+    }
+
     const { id: campfireId } = await context.params;
 
     // Check admin
@@ -53,11 +69,15 @@ export async function PUT(req: Request, context: RouteContext) {
     }
 
     const body = await req.json();
-    const { key, value, reason } = body as { key: string; value: string; reason?: string };
-
-    if (!key || value === undefined) {
-      return NextResponse.json({ error: "key and value are required", code: "VALIDATION_ERROR" }, { status: 400 });
+    const parsed = updateSettingSchema.safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: parsed.error.errors[0]?.message ?? "Invalid input", code: "VALIDATION_ERROR" },
+        { status: 400 }
+      );
     }
+
+    const { key, value, reason } = parsed.data;
 
     const setting = await updateSetting(campfireId, key, String(value), user.userId, "manual", undefined, reason);
 

@@ -17,13 +17,13 @@ export default function TermsPage() {
         <h1 className="text-3xl font-bold text-foreground sm:text-4xl">
           Terms of Service
         </h1>
-        <p className="mt-2 text-sm text-ash-500">
+        <p className="mt-2 text-sm text-smoke">
           Last updated: February 2026
         </p>
 
-        <div className="mt-8 space-y-8 text-sm leading-relaxed text-ash-300">
+        <div className="mt-8 space-y-8 text-sm leading-relaxed text-ash">
           <section>
-            <h2 className="text-lg font-semibold text-ash-100">1. Acceptance</h2>
+            <h2 className="text-lg font-semibold text-foreground">1. Acceptance</h2>
             <p className="mt-2">
               By using <span className="text-flame-400 font-semibold">fuega</span>.ai, you agree to these terms.
               If you don&apos;t agree, don&apos;t use the platform.
@@ -31,7 +31,7 @@ export default function TermsPage() {
           </section>
 
           <section>
-            <h2 className="text-lg font-semibold text-ash-100">2. Your Account</h2>
+            <h2 className="text-lg font-semibold text-foreground">2. Your Account</h2>
             <p className="mt-2">
               You&apos;re responsible for your account and everything posted under it.
               Keep your password secure. You must be at least 13 years old to use fuega.ai.
@@ -39,7 +39,7 @@ export default function TermsPage() {
           </section>
 
           <section>
-            <h2 className="text-lg font-semibold text-ash-100">3. Content</h2>
+            <h2 className="text-lg font-semibold text-foreground">3. Content</h2>
             <p className="mt-2">
               You own the content you post. By posting, you grant fuega.ai a license to
               display it on the platform. You can delete your content at any time
@@ -55,7 +55,7 @@ export default function TermsPage() {
           </section>
 
           <section>
-            <h2 className="text-lg font-semibold text-ash-100">4. Prohibited Conduct</h2>
+            <h2 className="text-lg font-semibold text-foreground">4. Prohibited Conduct</h2>
             <ul className="mt-2 list-disc pl-5 space-y-1">
               <li>Harassment, threats, or incitement of violence</li>
               <li>Spam, bots, or coordinated manipulation</li>
@@ -67,7 +67,7 @@ export default function TermsPage() {
           </section>
 
           <section>
-            <h2 className="text-lg font-semibold text-ash-100">5. AI Moderation</h2>
+            <h2 className="text-lg font-semibold text-foreground">5. AI Moderation</h2>
             <p className="mt-2">
               Content is moderated by AI systems configured through community governance.
               All moderation decisions are logged publicly. You have the right to appeal
@@ -76,7 +76,7 @@ export default function TermsPage() {
           </section>
 
           <section>
-            <h2 className="text-lg font-semibold text-ash-100">6. Privacy</h2>
+            <h2 className="text-lg font-semibold text-foreground">6. Privacy</h2>
             <p className="mt-2">
               See our{" "}
               <Link href="/privacy" className="text-flame-400 hover:underline">
@@ -88,7 +88,7 @@ export default function TermsPage() {
           </section>
 
           <section>
-            <h2 className="text-lg font-semibold text-ash-100">7. Termination</h2>
+            <h2 className="text-lg font-semibold text-foreground">7. Termination</h2>
             <p className="mt-2">
               We may suspend or terminate accounts that violate these terms or the
               Principles. You can delete your account at any time through settings.
@@ -96,7 +96,7 @@ export default function TermsPage() {
           </section>
 
           <section>
-            <h2 className="text-lg font-semibold text-ash-100">8. Changes</h2>
+            <h2 className="text-lg font-semibold text-foreground">8. Changes</h2>
             <p className="mt-2">
               We may update these terms. Significant changes will be announced on the
               platform. Continued use after changes means you accept the updated terms.
@@ -104,7 +104,7 @@ export default function TermsPage() {
           </section>
 
           <section>
-            <h2 className="text-lg font-semibold text-ash-100">9. Disclaimer</h2>
+            <h2 className="text-lg font-semibold text-foreground">9. Disclaimer</h2>
             <p className="mt-2">
               fuega.ai is provided &ldquo;as is&rdquo; without warranties.
               We&apos;re not liable for user-generated content or AI moderation decisions.
@@ -112,10 +112,10 @@ export default function TermsPage() {
           </section>
         </div>
 
-        <div className="mt-12 border-t border-ash-800 pt-6 text-center">
+        <div className="mt-12 border-t border-charcoal pt-6 text-center">
           <Link
             href="/"
-            className="text-sm text-ash-500 hover:text-flame-400 transition-colors"
+            className="text-sm text-smoke hover:text-flame-400 transition-colors"
           >
             Back to home
           </Link>

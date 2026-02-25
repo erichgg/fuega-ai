@@ -6,7 +6,7 @@ export function FeedSkeleton() {
       {Array.from({ length: 5 }).map((_, i) => (
         <div
           key={i}
-          className="flex gap-3 rounded-lg border border-ash-800 bg-ash-900/50 p-3"
+          className="flex gap-3 rounded-lg border border-charcoal bg-charcoal/50 p-3"
         >
           <div className="flex flex-col items-center gap-1">
             <Skeleton className="h-8 w-8 rounded-md" />
@@ -31,7 +31,7 @@ export function FeedSkeleton() {
 export function PostDetailSkeleton() {
   return (
     <div className="space-y-4">
-      <div className="rounded-lg border border-ash-800 bg-ash-900/50 p-4">
+      <div className="rounded-lg border border-charcoal bg-charcoal/50 p-4">
         <Skeleton className="h-3 w-40" />
         <Skeleton className="mt-2 h-6 w-3/4" />
         <Skeleton className="mt-3 h-20 w-full" />
@@ -57,7 +57,7 @@ export function PostDetailSkeleton() {
 export function CampfireSkeleton() {
   return (
     <div className="space-y-4">
-      <div className="rounded-lg border border-ash-800 bg-ash-900/50 p-6">
+      <div className="rounded-lg border border-charcoal bg-charcoal/50 p-6">
         <Skeleton className="h-8 w-48" />
         <Skeleton className="mt-2 h-4 w-72" />
         <div className="mt-3 flex gap-3">
@@ -73,7 +73,7 @@ export function CampfireSkeleton() {
 export function ProfileSkeleton() {
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-4 rounded-lg border border-ash-800 bg-ash-900/50 p-6">
+      <div className="flex items-center gap-4 rounded-lg border border-charcoal bg-charcoal/50 p-6">
         <Skeleton className="h-16 w-16 rounded-full" />
         <div className="space-y-2">
           <Skeleton className="h-6 w-32" />
@@ -91,7 +91,7 @@ export function GovernanceSkeleton() {
       {Array.from({ length: 4 }).map((_, i) => (
         <div
           key={i}
-          className="rounded-lg border border-ash-800 bg-ash-900/50 p-4"
+          className="rounded-lg border border-charcoal bg-charcoal/50 p-4"
         >
           <div className="flex items-start justify-between">
             <div className="space-y-2">
@@ -116,7 +116,7 @@ export function ModLogSkeleton() {
       {Array.from({ length: 8 }).map((_, i) => (
         <div
           key={i}
-          className="flex items-center gap-3 rounded-lg border border-ash-800 bg-ash-900/50 p-3"
+          className="flex items-center gap-3 rounded-lg border border-charcoal bg-charcoal/50 p-3"
         >
           <Skeleton className="h-8 w-8 rounded-full" />
           <div className="flex-1 space-y-1">

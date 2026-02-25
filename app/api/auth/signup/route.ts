@@ -8,6 +8,8 @@ import { ensureCsrfCookie } from "@/lib/auth/csrf";
 import { queryOne } from "@/lib/db";
 import { handleReferralOnSignup } from "@/lib/middleware/referral-tracking";
 
+export const dynamic = "force-dynamic";
+
 const FOUNDER_BADGE_LIMIT = 5000;
 
 export async function POST(req: Request) {

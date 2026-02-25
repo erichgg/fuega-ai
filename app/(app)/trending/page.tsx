@@ -59,7 +59,7 @@ export default function TrendingPage() {
       <div className="flex items-center justify-between gap-4">
         <div className="flex items-center gap-2">
           <TrendingUp className="h-5 w-5 text-flame-400" />
-          <h1 className="text-xl font-bold text-ash-100">Trending</h1>
+          <h1 className="text-xl font-bold text-foreground">Trending</h1>
         </div>
         {user && (
           <Link href="/submit">
@@ -70,7 +70,7 @@ export default function TrendingPage() {
           </Link>
         )}
       </div>
-      <p className="mt-1 text-sm text-ash-500">
+      <p className="mt-1 text-sm text-smoke">
         The hottest posts across all campfires right now.
       </p>
 
@@ -89,11 +89,11 @@ export default function TrendingPage() {
           </div>
         ) : postCards.length === 0 ? (
           <div className="py-16 text-center">
-            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-ash-900 border border-ash-800">
-              <TrendingUp className="h-7 w-7 text-ash-500" />
+            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-coal border border-charcoal">
+              <TrendingUp className="h-7 w-7 text-smoke" />
             </div>
-            <p className="text-lg font-medium text-ash-300">Nothing trending yet</p>
-            <p className="mt-1 text-sm text-ash-500">
+            <p className="text-lg font-medium text-ash">Nothing trending yet</p>
+            <p className="mt-1 text-sm text-smoke">
               Posts will show up here as they gain sparks.
             </p>
           </div>
@@ -111,7 +111,7 @@ export default function TrendingPage() {
             {hasMore && (
               <button
                 onClick={loadMore}
-                className="w-full py-3 text-center text-xs text-ash-400 hover:text-flame-400 transition-colors"
+                className="w-full py-3 text-center text-xs text-ash hover:text-flame-400 transition-colors"
               >
                 Load more posts
               </button>

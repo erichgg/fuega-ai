@@ -113,6 +113,7 @@ export function PostCard({
         <button
           onClick={onClickComments}
           className="flex items-center gap-1.5 rounded-md px-2 py-1 text-ash transition-colors hover:bg-charcoal/50 hover:text-foreground"
+          aria-label={`${post.commentCount} comments`}
         >
           <MessageSquare className="h-4 w-4" />
           <span className="font-mono">{post.commentCount}</span>
@@ -122,6 +123,7 @@ export function PostCard({
         <button
           onClick={onShare}
           className="flex items-center gap-1.5 rounded-md px-2 py-1 text-ash transition-colors hover:bg-charcoal/50 hover:text-foreground"
+          aria-label="Share post"
         >
           <Share2 className="h-3.5 w-3.5" />
           <span className="hidden sm:inline">Share</span>
@@ -131,6 +133,7 @@ export function PostCard({
         <button
           onClick={onReport}
           className="flex items-center gap-1.5 rounded-md px-2 py-1 text-ash transition-colors hover:bg-charcoal/50 hover:text-foreground ml-auto"
+          aria-label="Report post"
         >
           <Flag className="h-3.5 w-3.5" />
         </button>

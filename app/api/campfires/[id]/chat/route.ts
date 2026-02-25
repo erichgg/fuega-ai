@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { z } from "zod";
 import { authenticate } from "@/lib/auth/jwt";
 import {
   sendMessage,
@@ -8,6 +9,10 @@ import {
 } from "@/lib/services/chat.service";
 import { ServiceError } from "@/lib/services/posts.service";
 import { checkPostRateLimit } from "@/lib/auth/rate-limit";
+
+const chatMessageSchema = z.object({
+  body: z.string().min(1).max(2000),
+});
 
 export const dynamic = "force-dynamic";
 
@@ -104,12 +109,15 @@ export async function POST(req: Request, context: RouteContext) {
 
     const { id: campfireId } = await context.params;
     const body = await req.json();
-
-    if (!body.body || typeof body.body !== "string") {
-      return NextResponse.json({ error: "Message body is required", code: "VALIDATION_ERROR" }, { status: 400 });
+    const parsed = chatMessageSchema.safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: parsed.error.errors[0]?.message ?? "Invalid input", code: "VALIDATION_ERROR" },
+        { status: 400 }
+      );
     }
 
-    const message = await sendMessage(campfireId, user.userId, body.body);
+    const message = await sendMessage(campfireId, user.userId, parsed.data.body);
 
     return NextResponse.json({ message }, { status: 201 });
   } catch (err) {

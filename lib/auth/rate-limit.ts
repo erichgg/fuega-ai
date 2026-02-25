@@ -63,6 +63,12 @@ const generalActionLimiter = new RateLimiterMemory({
   keyPrefix: "general_action",
 });
 
+const cspReportLimiter = new RateLimiterMemory({
+  points: 30,
+  duration: 60, // 1 minute
+  keyPrefix: "csp_report",
+});
+
 export interface RateLimitResult {
   allowed: boolean;
   retryAfterSeconds: number;
@@ -214,6 +220,25 @@ export async function checkGeneralRateLimit(
 }
 
 /**
+ * Check CSP report rate limit for an IP hash.
+ * IP-based since CSP reports are unauthenticated.
+ */
+export async function checkCspReportRateLimit(
+  ipHash: string
+): Promise<RateLimitResult> {
+  try {
+    await cspReportLimiter.consume(ipHash);
+    return { allowed: true, retryAfterSeconds: 0 };
+  } catch (err: unknown) {
+    const rlErr = err as { msBeforeNext?: number };
+    return {
+      allowed: false,
+      retryAfterSeconds: Math.ceil((rlErr.msBeforeNext ?? 60000) / 1000),
+    };
+  }
+}
+
+/**
  * Reset rate limiters — for testing only.
  */
 export async function resetRateLimiters(): Promise<void> {
@@ -225,6 +250,7 @@ export async function resetRateLimiters(): Promise<void> {
   await moderationLimiter.delete("*");
   await passwordChangeLimiter.delete("*");
   await generalActionLimiter.delete("*");
+  await cspReportLimiter.delete("*");
 }
 
 export {
@@ -236,4 +262,5 @@ export {
   moderationLimiter,
   passwordChangeLimiter,
   generalActionLimiter,
+  cspReportLimiter,
 };

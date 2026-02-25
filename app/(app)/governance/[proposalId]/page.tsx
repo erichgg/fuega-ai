@@ -21,56 +21,34 @@ import { UserAvatar } from "@/components/fuega/user-avatar";
 import { GovernanceSkeleton } from "@/components/fuega/page-skeleton";
 import { useAuth } from "@/lib/contexts/auth-context";
 import { cn } from "@/lib/utils";
+import { api, ApiError } from "@/lib/api/client";
 
 type ProposalStatus = "discussion" | "voting" | "passed" | "rejected" | "executed";
 
-// TEST_DATA - DELETE BEFORE PRODUCTION
-function getMockProposal(id: string) {
-  return {
-    id,
-    title: "Update f | tech moderation to allow more technical debates",
-    description:
-      "The current AI moderation prompt for f | tech is too aggressive when it comes to flagging technical disagreements and debates. Technical discussions often involve strong opinions and pointed critiques — this is healthy and should be encouraged.\n\nProposed changes:\n1. Recognize technical debates as constructive discourse\n2. Only flag personal attacks, not technical criticism\n3. Allow stronger language when discussing technical trade-offs\n4. Keep existing protections against harassment\n\nThis change would make f | tech a better place for genuine technical discussion while maintaining our standards against personal attacks.",
-    campfire: "tech",
-    proposalType: "modify_prompt" as const,
-    status: "voting" as ProposalStatus,
-    votesFor: 156,
-    votesAgainst: 34,
-    commentCount: 12,
-    quorum: 100,
-    author: "tech_advocate",
-    createdAt: new Date(Date.now() - 172800000).toISOString(),
-    discussionEndsAt: new Date(Date.now() - 86400000).toISOString(),
-    votingEndsAt: new Date(Date.now() + 432000000).toISOString(),
-    currentPrompt:
-      "Moderate content for quality and relevance. Remove personal attacks and harassment. Flag misinformation.",
-    proposedPrompt:
-      "Moderate content for quality and relevance. Recognize technical debates as constructive — only flag personal attacks, not technical criticism. Allow strong language when discussing technical trade-offs. Remove harassment. Flag misinformation.",
-  };
+interface ProposalDetail {
+  id: string;
+  title: string;
+  description: string;
+  campfire: string;
+  proposalType: string;
+  status: ProposalStatus;
+  votesFor: number;
+  votesAgainst: number;
+  commentCount: number;
+  quorum: number;
+  author: string;
+  createdAt: string;
+  discussionEndsAt: string;
+  votingEndsAt: string;
+  currentPrompt: string | null;
+  proposedPrompt: string | null;
 }
 
-// TEST_DATA - DELETE BEFORE PRODUCTION
-function getMockDiscussion() {
-  return [
-    {
-      id: "gd1",
-      body: "Strong support for this. The current prompt flags too many legitimate technical debates.",
-      author: "dev_daily",
-      createdAt: new Date(Date.now() - 100000000).toISOString(),
-    },
-    {
-      id: "gd2",
-      body: "I worry this might open the door to toxic behavior disguised as 'technical criticism'. How do we draw the line?",
-      author: "safety_first",
-      createdAt: new Date(Date.now() - 80000000).toISOString(),
-    },
-    {
-      id: "gd3",
-      body: "Good point. The proposed prompt still keeps protections against personal attacks. The key distinction is: criticize the code/architecture, not the person.",
-      author: "tech_advocate",
-      createdAt: new Date(Date.now() - 60000000).toISOString(),
-    },
-  ];
+interface DiscussionComment {
+  id: string;
+  body: string;
+  author: string;
+  createdAt: string;
 }
 
 function timeRemaining(dateStr: string): string {
@@ -97,32 +75,101 @@ export default function ProposalDetailPage() {
   const { user } = useAuth();
   const proposalId = params.proposalId as string;
 
-  const [proposal, setProposal] = React.useState<ReturnType<
-    typeof getMockProposal
-  > | null>(null);
-  const [discussion, setDiscussion] = React.useState<
-    ReturnType<typeof getMockDiscussion>
-  >([]);
+  const [proposal, setProposal] = React.useState<ProposalDetail | null>(null);
+  const [discussion, setDiscussion] = React.useState<DiscussionComment[]>([]);
   const [loading, setLoading] = React.useState(true);
+  const [error, setError] = React.useState<string | null>(null);
   const [userVote, setUserVote] = React.useState<"for" | "against" | null>(
     null,
   );
   const [commentText, setCommentText] = React.useState("");
 
   React.useEffect(() => {
-    const timer = setTimeout(() => {
-      setProposal(getMockProposal(proposalId));
-      setDiscussion(getMockDiscussion());
-      setLoading(false);
-    }, 300);
-    return () => clearTimeout(timer);
+    let cancelled = false;
+
+    async function fetchProposal() {
+      setLoading(true);
+      setError(null);
+      try {
+        interface ApiProposalDetail {
+          id: string;
+          campfire_id: string;
+          proposal_type: string;
+          title: string;
+          description: string;
+          proposed_changes: Record<string, unknown>;
+          status: string;
+          votes_for: number;
+          votes_against: number;
+          votes_abstain: number;
+          discussion_ends_at: string;
+          voting_ends_at: string;
+          created_at: string;
+          creator_username?: string;
+          campfire_name?: string;
+        }
+
+        const res = await api.get<{ proposal: ApiProposalDetail }>(
+          `/api/proposals/${proposalId}`,
+        );
+        if (!cancelled) {
+          const p = res.proposal;
+          const statusMap: Record<string, ProposalStatus> = {
+            failed: "rejected",
+            implemented: "executed",
+          };
+          setProposal({
+            id: p.id,
+            title: p.title,
+            description: p.description,
+            campfire: p.campfire_name ?? "unknown",
+            proposalType: p.proposal_type,
+            status: (statusMap[p.status] ?? p.status) as ProposalStatus,
+            votesFor: p.votes_for,
+            votesAgainst: p.votes_against,
+            commentCount: 0,
+            quorum: 100,
+            author: p.creator_username ?? "unknown",
+            createdAt: p.created_at,
+            discussionEndsAt: p.discussion_ends_at,
+            votingEndsAt: p.voting_ends_at,
+            currentPrompt: (p.proposed_changes?.current_prompt as string) ?? null,
+            proposedPrompt: (p.proposed_changes?.proposed_prompt as string) ?? null,
+          });
+          // API does not return discussion comments yet
+          setDiscussion([]);
+        }
+      } catch (err) {
+        if (!cancelled) {
+          if (err instanceof ApiError && err.status === 404) {
+            setProposal(null);
+          } else {
+            setError(
+              err instanceof ApiError ? err.message : "Failed to load proposal",
+            );
+          }
+        }
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+
+    fetchProposal();
+    return () => { cancelled = true; };
   }, [proposalId]);
 
   if (loading) return <GovernanceSkeleton />;
+  if (error)
+    return (
+      <div className="py-16 text-center">
+        <XCircle className="mx-auto h-12 w-12 text-red-400/60" />
+        <p className="mt-4 text-ash">{error}</p>
+      </div>
+    );
   if (!proposal)
     return (
       <div className="py-16 text-center">
-        <p className="text-ash-400">Proposal not found</p>
+        <p className="text-ash">Proposal not found</p>
       </div>
     );
 
@@ -138,15 +185,15 @@ export default function ProposalDetailPage() {
     <div>
       <Link
         href="/governance"
-        className="inline-flex items-center gap-1.5 text-sm text-ash-500 transition-colors hover:text-ash-300"
+        className="inline-flex items-center gap-1.5 text-sm text-smoke transition-colors hover:text-ash"
       >
         <ArrowLeft className="h-3.5 w-3.5" />
         All proposals
       </Link>
 
       {/* Proposal header */}
-      <div className="mt-4 rounded-lg border border-ash-800 bg-ash-900/50 p-5">
-        <div className="flex items-center gap-2 text-xs text-ash-500">
+      <div className="mt-4 rounded-lg border border-charcoal bg-charcoal/50 p-5">
+        <div className="flex items-center gap-2 text-xs text-smoke">
           <Link
             href={`/f/${proposal.campfire}`}
             className="font-medium text-flame-400 hover:underline"
@@ -176,18 +223,18 @@ export default function ProposalDetailPage() {
           </Badge>
         </div>
 
-        <h1 className="mt-2 text-xl font-bold text-ash-100">
+        <h1 className="mt-2 text-xl font-bold text-foreground">
           {proposal.title}
         </h1>
 
-        <div className="mt-4 whitespace-pre-wrap text-sm leading-relaxed text-ash-300">
+        <div className="mt-4 whitespace-pre-wrap text-sm leading-relaxed text-ash">
           {proposal.description}
         </div>
 
         {/* Prompt diff */}
         {proposal.currentPrompt && proposal.proposedPrompt && (
           <div className="mt-6 space-y-3">
-            <h3 className="flex items-center gap-2 text-sm font-medium text-ash-300">
+            <h3 className="flex items-center gap-2 text-sm font-medium text-ash">
               <Bot className="h-4 w-4" />
               Prompt Changes
             </h3>
@@ -195,7 +242,7 @@ export default function ProposalDetailPage() {
               <span className="text-[10px] font-semibold uppercase tracking-wider text-red-400/70">
                 Current Prompt
               </span>
-              <p className="mt-1 text-xs text-ash-400 italic">
+              <p className="mt-1 text-xs text-ash italic">
                 &quot;{proposal.currentPrompt}&quot;
               </p>
             </div>
@@ -203,7 +250,7 @@ export default function ProposalDetailPage() {
               <span className="text-[10px] font-semibold uppercase tracking-wider text-green-400/70">
                 Proposed Prompt
               </span>
-              <p className="mt-1 text-xs text-ash-300 italic">
+              <p className="mt-1 text-xs text-ash italic">
                 &quot;{proposal.proposedPrompt}&quot;
               </p>
             </div>
@@ -211,7 +258,7 @@ export default function ProposalDetailPage() {
         )}
 
         {/* Time remaining */}
-        <div className="mt-4 flex items-center gap-2 text-xs text-ash-500">
+        <div className="mt-4 flex items-center gap-2 text-xs text-smoke">
           <Clock className="h-3.5 w-3.5" />
           {proposal.status === "voting"
             ? `Voting ends: ${timeRemaining(proposal.votingEndsAt)}`
@@ -222,12 +269,12 @@ export default function ProposalDetailPage() {
       </div>
 
       {/* Vote section */}
-      <div className="mt-4 rounded-lg border border-ash-800 bg-ash-900/50 p-5">
-        <h2 className="text-sm font-medium text-ash-300">Votes</h2>
+      <div className="mt-4 rounded-lg border border-charcoal bg-charcoal/50 p-5">
+        <h2 className="text-sm font-medium text-ash">Votes</h2>
 
         {/* Vote bar */}
         <div className="mt-3">
-          <div className="flex h-3 overflow-hidden rounded-full bg-ash-800">
+          <div className="flex h-3 overflow-hidden rounded-full bg-charcoal">
             {totalVotes > 0 && (
               <>
                 <div
@@ -245,12 +292,12 @@ export default function ProposalDetailPage() {
             <span className="text-green-400">
               {proposal.votesFor} for ({forPercent}%)
             </span>
-            <span className="text-ash-500">
+            <span className="text-smoke">
               {totalVotes} total · Quorum: {proposal.quorum}
               {quorumReached ? (
                 <CheckCircle2 className="ml-1 inline h-3 w-3 text-green-400" />
               ) : (
-                <XCircle className="ml-1 inline h-3 w-3 text-ash-600" />
+                <XCircle className="ml-1 inline h-3 w-3 text-smoke" />
               )}
             </span>
             <span className="text-red-400">
@@ -269,7 +316,7 @@ export default function ProposalDetailPage() {
                 "flex-1 gap-1.5",
                 userVote === "for"
                   ? "bg-green-500 text-white hover:bg-green-600"
-                  : "border-ash-700 text-ash-400 hover:border-green-500/50 hover:text-green-400",
+                  : "border-charcoal text-ash hover:border-green-500/50 hover:text-green-400",
               )}
               onClick={() => setUserVote(userVote === "for" ? null : "for")}
             >
@@ -283,7 +330,7 @@ export default function ProposalDetailPage() {
                 "flex-1 gap-1.5",
                 userVote === "against"
                   ? "bg-red-500 text-white hover:bg-red-600"
-                  : "border-ash-700 text-ash-400 hover:border-red-500/50 hover:text-red-400",
+                  : "border-charcoal text-ash hover:border-red-500/50 hover:text-red-400",
               )}
               onClick={() =>
                 setUserVote(userVote === "against" ? null : "against")
@@ -296,7 +343,7 @@ export default function ProposalDetailPage() {
         )}
 
         {!user && proposal.status === "voting" && (
-          <p className="mt-4 text-center text-xs text-ash-500">
+          <p className="mt-4 text-center text-xs text-smoke">
             <Link href="/login" className="text-flame-400 hover:underline">
               Log in
             </Link>{" "}
@@ -307,12 +354,12 @@ export default function ProposalDetailPage() {
 
       {/* Discussion */}
       <div className="mt-4">
-        <h2 className="text-sm font-medium text-ash-300">
+        <h2 className="text-sm font-medium text-ash">
           Discussion ({discussion.length})
         </h2>
 
         {user && (
-          <div className="mt-3 flex gap-3 rounded-lg border border-ash-800 bg-ash-900/50 p-3">
+          <div className="mt-3 flex gap-3 rounded-lg border border-charcoal bg-charcoal/50 p-3">
             <UserAvatar username={user.username} size="sm" />
             <div className="flex-1">
               <Textarea
@@ -320,7 +367,7 @@ export default function ProposalDetailPage() {
                 value={commentText}
                 onChange={(e) => setCommentText(e.target.value)}
                 rows={2}
-                className="min-h-[60px] resize-y border-ash-800 bg-ash-950 text-sm placeholder:text-ash-600 focus-visible:ring-flame-500/50"
+                className="min-h-[60px] resize-y border-charcoal bg-coal text-sm placeholder:text-smoke focus-visible:ring-flame-500/50"
               />
               <div className="mt-2 flex justify-end">
                 <Button
@@ -350,20 +397,25 @@ export default function ProposalDetailPage() {
         )}
 
         <div className="mt-3 space-y-2">
+          {discussion.length === 0 && (
+            <div className="py-8 text-center">
+              <p className="text-sm text-smoke">No discussion yet</p>
+            </div>
+          )}
           {discussion.map((comment) => (
             <div
               key={comment.id}
-              className="rounded-lg border border-ash-800/50 bg-ash-900/30 p-3"
+              className="rounded-lg border border-charcoal/50 bg-charcoal/30 p-3"
             >
-              <div className="flex items-center gap-2 text-xs text-ash-500">
+              <div className="flex items-center gap-2 text-xs text-smoke">
                 <UserAvatar username={comment.author} size="sm" />
-                <span className="font-medium text-ash-300">
+                <span className="font-medium text-ash">
                   {comment.author}
                 </span>
                 <span>·</span>
                 <span>{timeAgo(comment.createdAt)}</span>
               </div>
-              <p className="mt-1.5 text-sm text-ash-300 leading-relaxed">
+              <p className="mt-1.5 text-sm text-ash leading-relaxed">
                 {comment.body}
               </p>
             </div>

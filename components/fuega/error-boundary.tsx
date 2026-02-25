@@ -34,16 +34,16 @@ export class ErrorBoundary extends React.Component<
       return (
         <div className="flex min-h-[400px] flex-col items-center justify-center gap-4 p-8 text-center">
           <AlertTriangle className="h-12 w-12 text-amber-400" />
-          <h2 className="text-xl font-semibold text-ash-200">
+          <h2 className="text-xl font-semibold text-foreground">
             Something went wrong
           </h2>
-          <p className="max-w-md text-sm text-ash-400">
+          <p className="max-w-md text-sm text-ash">
             An unexpected error occurred. Please try refreshing the page.
           </p>
           <Button
             variant="outline"
             onClick={() => this.setState({ hasError: false, error: null })}
-            className="mt-2 gap-2 border-ash-700 text-ash-300"
+            className="mt-2 gap-2 border-charcoal text-ash"
           >
             <RefreshCw className="h-4 w-4" />
             Try again

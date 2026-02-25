@@ -10,7 +10,7 @@ import { api } from "@/lib/api/client";
 
 export default function AccountSettingsPage() {
   const router = useRouter();
-  const { user, logout } = useAuth();
+  const { user, logout, loading: authLoading } = useAuth();
 
   // Password form
   const [currentPassword, setCurrentPassword] = React.useState("");
@@ -74,19 +74,27 @@ export default function AccountSettingsPage() {
     }
   };
 
+  if (!authLoading && !user) {
+    return (
+      <div className="py-12 text-center text-sm text-smoke">
+        Please <a href="/login" className="text-lava-hot hover:underline">log in</a> to access account settings.
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       {/* Change password */}
       <form onSubmit={handlePasswordChange} className="terminal-card p-4 sm:p-6 space-y-4">
         <div className="flex items-center gap-2">
-          <Lock className="h-4 w-4 text-ash-400" />
-          <h2 className="text-sm font-bold text-ash-200 uppercase tracking-wider">
+          <Lock className="h-4 w-4 text-ash" />
+          <h2 className="text-sm font-bold text-foreground uppercase tracking-wider">
             Change Password
           </h2>
         </div>
 
         <div>
-          <Label htmlFor="currentPassword" className="text-xs text-ash-400">
+          <Label htmlFor="currentPassword" className="text-xs text-ash">
             Current Password
           </Label>
           <Input
@@ -94,13 +102,13 @@ export default function AccountSettingsPage() {
             type="password"
             value={currentPassword}
             onChange={(e) => setCurrentPassword(e.target.value)}
-            className="mt-1 bg-ash-900/50 border-ash-700 text-ash-200"
+            className="mt-1 bg-charcoal/50 border-charcoal text-foreground"
             autoComplete="current-password"
           />
         </div>
 
         <div>
-          <Label htmlFor="newPassword" className="text-xs text-ash-400">
+          <Label htmlFor="newPassword" className="text-xs text-ash">
             New Password
           </Label>
           <Input
@@ -108,14 +116,14 @@ export default function AccountSettingsPage() {
             type="password"
             value={newPassword}
             onChange={(e) => setNewPassword(e.target.value)}
-            className="mt-1 bg-ash-900/50 border-ash-700 text-ash-200"
+            className="mt-1 bg-charcoal/50 border-charcoal text-foreground"
             autoComplete="new-password"
           />
-          <p className="text-[10px] text-ash-600 mt-1">Minimum 8 characters</p>
+          <p className="text-[10px] text-smoke mt-1">Minimum 8 characters</p>
         </div>
 
         <div>
-          <Label htmlFor="confirmPassword" className="text-xs text-ash-400">
+          <Label htmlFor="confirmPassword" className="text-xs text-ash">
             Confirm New Password
           </Label>
           <Input
@@ -123,7 +131,7 @@ export default function AccountSettingsPage() {
             type="password"
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
-            className="mt-1 bg-ash-900/50 border-ash-700 text-ash-200"
+            className="mt-1 bg-charcoal/50 border-charcoal text-foreground"
             autoComplete="new-password"
           />
         </div>
@@ -165,14 +173,14 @@ export default function AccountSettingsPage() {
           </h2>
         </div>
 
-        <p className="text-xs text-ash-400">
+        <p className="text-xs text-ash">
           Deleting your account is permanent. Your posts and comments will show{" "}
-          <span className="text-ash-300">[deleted]</span> but cannot be
+          <span className="text-ash">[deleted]</span> but cannot be
           attributed back to you.
         </p>
 
         <div>
-          <Label htmlFor="deleteConfirm" className="text-xs text-ash-400">
+          <Label htmlFor="deleteConfirm" className="text-xs text-ash">
             Type your username to confirm:{" "}
             <span className="text-ember-400 font-medium">{user?.username}</span>
           </Label>
@@ -181,7 +189,7 @@ export default function AccountSettingsPage() {
             value={deleteConfirm}
             onChange={(e) => setDeleteConfirm(e.target.value)}
             placeholder={user?.username}
-            className="mt-1 bg-ash-900/50 border-ash-700 text-ash-200 placeholder:text-ash-600"
+            className="mt-1 bg-charcoal/50 border-charcoal text-foreground placeholder:text-smoke"
           />
         </div>
 

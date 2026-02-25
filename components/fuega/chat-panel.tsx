@@ -25,6 +25,7 @@ export function ChatPanel({ campfireId, className }: ChatPanelProps) {
   const [showCreateRoom, setShowCreateRoom] = React.useState(false);
   const [newRoomName, setNewRoomName] = React.useState("");
   const [creating, setCreating] = React.useState(false);
+  const [roomError, setRoomError] = React.useState<string | null>(null);
 
   // Auto-select default room
   React.useEffect(() => {
@@ -69,13 +70,14 @@ export function ChatPanel({ campfireId, className }: ChatPanelProps) {
     if (!name || creating) return;
 
     setCreating(true);
+    setRoomError(null);
     try {
       const room = await createRoom(name);
       setActiveRoomId(room.id);
       setNewRoomName("");
       setShowCreateRoom(false);
-    } catch {
-      // Error handled silently
+    } catch (err) {
+      setRoomError(err instanceof Error ? err.message : "Failed to create room");
     } finally {
       setCreating(false);
     }
@@ -146,18 +148,26 @@ export function ChatPanel({ campfireId, className }: ChatPanelProps) {
             maxLength={64}
             className="flex-1 bg-transparent text-xs font-mono text-foreground placeholder:text-smoke focus:outline-none"
             autoFocus
+            aria-label="New room name"
           />
           <Button type="submit" variant="spark" size="sm" disabled={!newRoomName.trim() || creating} className="h-6 px-2 text-[10px]">
             Create
           </Button>
-          <button type="button" onClick={() => { setShowCreateRoom(false); setNewRoomName(""); }} className="text-smoke hover:text-foreground">
+          <button type="button" onClick={() => { setShowCreateRoom(false); setNewRoomName(""); setRoomError(null); }} className="text-smoke hover:text-foreground" aria-label="Cancel room creation">
             <X className="h-3 w-3" />
           </button>
         </form>
       )}
 
+      {/* Room creation error */}
+      {roomError && (
+        <div className="px-3 py-1.5 text-xs text-red-400 bg-red-400/5 border-b border-lava-hot/10">
+          {roomError}
+        </div>
+      )}
+
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto min-h-[300px] max-h-[500px] py-2">
+      <div className="flex-1 overflow-y-auto min-h-[200px] max-h-[60vh] py-2" aria-live="polite" aria-label="Chat messages">
         {loading ? (
           <div className="flex items-center justify-center h-full">
             <span className="text-xs text-smoke animate-pulse">Loading messages...</span>
@@ -203,6 +213,7 @@ export function ChatPanel({ campfireId, className }: ChatPanelProps) {
               maxLength={2000}
               className="flex-1 rounded-md border border-lava-hot/10 bg-charcoal/30 px-3 py-2 text-sm text-foreground placeholder:text-smoke focus:outline-none focus:border-lava-hot/30 transition-colors"
               disabled={sending}
+              aria-label={`Message #${activeRoom?.name ?? "general"}`}
             />
             <Button
               type="submit"
@@ -210,6 +221,7 @@ export function ChatPanel({ campfireId, className }: ChatPanelProps) {
               size="sm"
               disabled={!input.trim() || sending}
               className="h-9 w-9 p-0"
+              aria-label="Send message"
             >
               <Send className="h-4 w-4" />
             </Button>

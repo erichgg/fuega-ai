@@ -136,7 +136,7 @@ export default function PostDetailPage() {
   if (postError || !post) {
     return (
       <div className="py-16 text-center">
-        <p className="text-ash-400">{postError ?? "Post not found"}</p>
+        <p className="text-ash">{postError ?? "Post not found"}</p>
         <Link
           href={`/f/${campfireSlug}`}
           className="mt-2 inline-block text-xs text-flame-400 hover:underline"
@@ -155,7 +155,7 @@ export default function PostDetailPage() {
       {/* Back link */}
       <Link
         href={`/f/${campfireSlug}`}
-        className="inline-flex items-center gap-1.5 text-sm text-ash-500 transition-colors hover:text-ash-300"
+        className="inline-flex items-center gap-1.5 text-sm text-smoke transition-colors hover:text-ash"
       >
         <ArrowLeft className="h-3.5 w-3.5" />
         <span className="text-lava-hot">f</span>
@@ -164,82 +164,80 @@ export default function PostDetailPage() {
       </Link>
 
       {/* Post */}
-      <article className="mt-4 rounded-lg border border-ash-800 bg-ash-900/50 p-4">
-        <div className="flex gap-3">
+      <article className="mt-4 rounded-md border border-charcoal bg-coal p-4">
+        {/* Meta */}
+        <div className="flex items-center gap-2 text-xs font-mono text-smoke">
+          <Link
+            href={`/f/${post.campfire}`}
+            className="font-medium text-flame-400 hover:underline"
+          >
+            <span className="text-lava-hot">f</span>
+            <span className="text-smoke mx-1">|</span>
+            <span>{post.campfire}</span>
+          </Link>
+          <span>·</span>
+          <UserAvatar username={post.author} size="sm" />
+          <Link href={`/u/${post.author}`} className="hover:underline">
+            {post.author}
+          </Link>
+          <span>·</span>
+          <span className="flex items-center gap-1">
+            <Clock className="h-3 w-3" />
+            {timeAgo(post.createdAt)}
+          </span>
+          {rawPost?.edited_at && (
+            <span className="text-smoke/60">(edited)</span>
+          )}
+          {post.moderation && (
+            <ModBadge
+              action={post.moderation.action}
+              confidence={post.moderation.confidence}
+            />
+          )}
+        </div>
+
+        <h1 className="mt-2 text-xl font-bold text-foreground">
+          {post.title}
+        </h1>
+
+        {post.body && (
+          <div className="mt-3 whitespace-pre-wrap text-sm leading-relaxed text-ash">
+            {post.body}
+          </div>
+        )}
+
+        {/* Action bar — inline voting */}
+        <div className="mt-4 flex items-center gap-4 text-xs text-smoke">
           <SparkButton
             sparkCount={adjustedSparkCount}
             userVote={postVote}
             onVote={handlePostVote}
+            variant="horizontal"
           />
-          <div className="min-w-0 flex-1">
-            {/* Meta */}
-            <div className="flex items-center gap-2 text-xs text-ash-400">
-              <Link
-                href={`/f/${post.campfire}`}
-                className="font-medium text-flame-400 hover:underline"
-              >
-                <span className="text-lava-hot">f</span>
-                <span className="text-smoke mx-1">|</span>
-                <span>{post.campfire}</span>
-              </Link>
-              <span>·</span>
-              <UserAvatar username={post.author} size="sm" />
-              <Link href={`/u/${post.author}`} className="hover:underline">
-                {post.author}
-              </Link>
-              <span>·</span>
-              <span className="flex items-center gap-1">
-                <Clock className="h-3 w-3" />
-                {timeAgo(post.createdAt)}
-              </span>
-              {rawPost?.edited_at && (
-                <span className="text-ash-600">(edited)</span>
-              )}
-              {post.moderation && (
-                <ModBadge
-                  action={post.moderation.action}
-                  confidence={post.moderation.confidence}
-                />
-              )}
-            </div>
-
-            <h1 className="mt-2 text-xl font-bold text-ash-100">
-              {post.title}
-            </h1>
-
-            {post.body && (
-              <div className="mt-3 whitespace-pre-wrap text-sm leading-relaxed text-ash-300">
-                {post.body}
-              </div>
-            )}
-
-            <div className="mt-4 flex items-center gap-4 text-xs text-ash-500">
-              <span className="flex items-center gap-1.5">
-                <MessageSquare className="h-3.5 w-3.5" />
-                {post.commentCount} comments
-              </span>
-              <button className="flex items-center gap-1.5 transition-colors hover:text-ash-300">
-                <Share2 className="h-3.5 w-3.5" />
-                Share
+          <span className="flex items-center gap-1.5 font-mono" aria-label={`${post.commentCount} comments`}>
+            <MessageSquare className="h-3.5 w-3.5" />
+            {post.commentCount}
+          </span>
+          <button className="flex items-center gap-1.5 transition-colors hover:text-foreground" aria-label="Share post">
+            <Share2 className="h-3.5 w-3.5" />
+            Share
+          </button>
+          <button className="flex items-center gap-1.5 transition-colors hover:text-foreground" aria-label="Report post">
+            <Flag className="h-3.5 w-3.5" />
+            Report
+          </button>
+          {isOwner && (
+            <>
+              <button className="flex items-center gap-1.5 transition-colors hover:text-foreground" aria-label="Edit post">
+                <Edit3 className="h-3.5 w-3.5" />
+                Edit
               </button>
-              <button className="flex items-center gap-1.5 transition-colors hover:text-ash-300">
-                <Flag className="h-3.5 w-3.5" />
-                Report
+              <button className="flex items-center gap-1.5 transition-colors hover:text-red-400" aria-label="Delete post">
+                <Trash2 className="h-3.5 w-3.5" />
+                Delete
               </button>
-              {isOwner && (
-                <>
-                  <button className="flex items-center gap-1.5 transition-colors hover:text-ash-300">
-                    <Edit3 className="h-3.5 w-3.5" />
-                    Edit
-                  </button>
-                  <button className="flex items-center gap-1.5 transition-colors hover:text-red-400">
-                    <Trash2 className="h-3.5 w-3.5" />
-                    Delete
-                  </button>
-                </>
-              )}
-            </div>
-          </div>
+            </>
+          )}
         </div>
       </article>
 
@@ -247,7 +245,7 @@ export default function PostDetailPage() {
       {user ? (
         <form
           onSubmit={handleSubmitComment}
-          className="mt-4 rounded-lg border border-ash-800 bg-ash-900/50 p-4"
+          className="mt-4 rounded-lg border border-charcoal bg-charcoal/50 p-4"
         >
           <div className="flex items-start gap-3">
             <UserAvatar username={user.username} size="sm" />
@@ -258,7 +256,7 @@ export default function PostDetailPage() {
                 value={commentText}
                 onChange={(e) => setCommentText(e.target.value)}
                 rows={3}
-                className="min-h-[80px] resize-y border-ash-800 bg-ash-950 placeholder:text-ash-600 focus-visible:ring-flame-500/50"
+                className="min-h-[80px] resize-y border-charcoal bg-coal placeholder:text-smoke focus-visible:ring-flame-500/50"
               />
               {commentError && (
                 <div className="mt-2 flex items-center gap-2 text-sm text-red-400">
@@ -282,7 +280,7 @@ export default function PostDetailPage() {
           </div>
         </form>
       ) : (
-        <div className="mt-4 rounded-lg border border-ash-800 bg-ash-900/50 p-4 text-center text-sm text-ash-400">
+        <div className="mt-4 rounded-lg border border-charcoal bg-charcoal/50 p-4 text-center text-sm text-ash">
           <Link href="/login" className="text-flame-400 hover:underline">
             Log in
           </Link>{" "}
@@ -292,7 +290,7 @@ export default function PostDetailPage() {
 
       {/* Comments */}
       <div className="mt-4">
-        <h2 className="text-sm font-medium text-ash-300">
+        <h2 className="text-sm font-medium text-ash">
           {displayComments.length}{" "}
           {displayComments.length === 1 ? "Comment" : "Comments"}
         </h2>
@@ -302,7 +300,7 @@ export default function PostDetailPage() {
         <div className="mt-3 space-y-0.5">
           {displayComments.length === 0 && !commentsError ? (
             <div className="py-10 text-center">
-              <p className="text-sm text-ash-500">No comments yet. Be the first to share your thoughts.</p>
+              <p className="text-sm text-smoke">No comments yet. Be the first to share your thoughts.</p>
             </div>
           ) : (
             displayComments.map((comment) => (

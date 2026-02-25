@@ -33,13 +33,13 @@ const principles = [
     icon: Vote,
     title: "Flat governance, fully democratic",
     description:
-      "Platform Principles are immutable. Beyond that, each community governs itself through structured variables and votes. No hierarchy, no gatekeepers — just your community, your rules.",
+      "Platform Principles are immutable. Beyond that, each campfire governs itself through structured variables and votes. No hierarchy, no gatekeepers — just your campfire, your rules.",
   },
   {
     icon: FileCode2,
     title: "You choose the AI",
     description:
-      "Communities vote on which AI model drives their moderation. Don't trust a provider's training data? Vote it out. Your community controls the knowledge behind every decision.",
+      "Campfires vote on which AI model drives their moderation. Don't trust a provider's training data? Vote it out. Your campfire controls the knowledge behind every decision.",
   },
   {
     icon: Scale,
@@ -71,7 +71,7 @@ const howItWorks = [
     step: "03",
     title: "Speak freely, governed fairly",
     description:
-      "Post and discuss. AI moderation runs in real-time using rules your community wrote and voted on.",
+      "Post and discuss. AI moderation runs in real-time using rules your campfire wrote and voted on.",
   },
   {
     step: "04",
@@ -88,38 +88,38 @@ export default function LandingPage() {
       <AuthRedirect />
 
       {/* Navigation */}
-      <nav aria-label="Main navigation" className="sticky top-0 z-50 border-b border-ash-800 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <nav aria-label="Main navigation" className="sticky top-0 z-50 border-b border-charcoal bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4 2xl:px-8">
           <FlameLogo size="sm" />
           <div className="flex items-center gap-6">
             <Link
               href="/how-it-works"
-              className="hidden text-sm text-ash-400 transition-colors hover:text-ash-200 sm:block"
+              className="hidden text-sm text-ash transition-colors hover:text-foreground sm:block"
             >
               How It Works
             </Link>
             <Link
               href="/about"
-              className="hidden text-sm text-ash-400 transition-colors hover:text-ash-200 sm:block"
+              className="hidden text-sm text-ash transition-colors hover:text-foreground sm:block"
             >
               About
             </Link>
             <Link
               href="/security"
-              className="hidden text-sm text-ash-400 transition-colors hover:text-ash-200 sm:block"
+              className="hidden text-sm text-ash transition-colors hover:text-foreground sm:block"
             >
               Security
             </Link>
             <Link
               href="/mod-log"
-              className="hidden text-sm text-ash-400 transition-colors hover:text-ash-200 sm:block"
+              className="hidden text-sm text-ash transition-colors hover:text-foreground sm:block"
             >
               Mod Log
             </Link>
             <ThemeToggle />
             <Link
               href="/login"
-              className="text-sm text-ash-400 transition-colors hover:text-ash-200"
+              className="text-sm text-ash transition-colors hover:text-foreground"
             >
               Log in
             </Link>
@@ -146,40 +146,40 @@ export default function LandingPage() {
         <div className="mx-auto flex w-full max-w-7xl flex-1 flex-col justify-center">
           <div className="mx-auto max-w-7xl">
             {/* Terminal-style manifesto */}
-            <div className="mb-6 inline-flex items-center gap-2 border border-ash-800 bg-ash-900/60 px-3 py-1.5 text-xs text-ash-500">
+            <div className="mb-6 inline-flex items-center gap-2 border border-charcoal bg-charcoal/60 px-3 py-1.5 text-xs text-smoke">
               <span className="h-2 w-2 rounded-full bg-flame-500 animate-flame-flicker" />
-              <span className="text-ash-600">root@fuega</span>
-              <span className="text-ash-700">:</span>
+              <span className="text-smoke">root@fuega</span>
+              <span className="text-smoke/60">:</span>
               <span className="text-flame-500/70">~</span>
-              <span className="text-ash-600">$</span>
-              <span className="text-ash-400 ml-1">init --governance community</span>
+              <span className="text-smoke">$</span>
+              <span className="text-ash ml-1">init --governance community</span>
             </div>
 
             <h1 className="text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl 2xl:text-7xl">
-              <span className="text-ash-200">Your community.</span>
+              <span className="text-foreground">Your campfire.</span>
               <br />
-              <span className="text-ash-200">Your standards.</span>
+              <span className="text-foreground">Your standards.</span>
               <br />
               <span className="text-gradient-fire">You govern.</span>
               <span className="text-flame-500 cursor-blink ml-1">_</span>
             </h1>
 
-            <div className="mt-6 space-y-1 text-sm text-ash-500 sm:text-base lg:text-lg">
+            <div className="mt-6 space-y-1 text-sm text-smoke sm:text-base lg:text-lg">
               <p>
                 <span className="text-flame-500/70 mr-2">&gt;</span>
-                <span className="text-ash-300">Communities write their own rules and vote on them.</span>
+                <span className="text-ash">Campfires write their own rules and vote on them.</span>
               </p>
               <p>
                 <span className="text-flame-500/70 mr-2">&gt;</span>
-                <span className="text-ash-400">AI enforces what you decided. Nothing more.</span>
+                <span className="text-ash">AI enforces what you decided. Nothing more.</span>
               </p>
               <p>
                 <span className="text-flame-500/70 mr-2">&gt;</span>
-                <span className="text-ash-500">Every moderation decision is public and auditable.</span>
+                <span className="text-smoke">Every moderation decision is public and auditable.</span>
               </p>
               <p>
                 <span className="text-flame-500/70 mr-2">&gt;</span>
-                <span className="text-ash-600">No ads. No influence. Tip-supported.</span>
+                <span className="text-smoke">No ads. No influence. Tip-supported.</span>
               </p>
             </div>
 
@@ -193,13 +193,13 @@ export default function LandingPage() {
               </Link>
               <Link
                 href="/how-it-works"
-                className="inline-flex items-center gap-2 border border-ash-700 px-8 py-3 text-base font-medium text-ash-300 transition-colors hover:border-ash-600 hover:text-ash-100"
+                className="inline-flex items-center gap-2 border border-charcoal px-8 py-3 text-base font-medium text-ash transition-colors hover:border-charcoal hover:text-foreground"
               >
                 Read the architecture
               </Link>
             </div>
 
-            <div className="mt-6 flex flex-wrap items-center gap-4 text-xs text-ash-600 sm:gap-6">
+            <div className="mt-6 flex flex-wrap items-center gap-4 text-xs text-smoke sm:gap-6">
               <span className="font-mono">
                 <span className="text-flame-500/50">[</span>
                 no email
@@ -237,16 +237,16 @@ export default function LandingPage() {
       </section>
 
       {/* Trust bar */}
-      <section className="border-y border-ash-800/50 bg-ash-900/20 px-4 py-4 2xl:px-8">
-        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-center gap-x-8 gap-y-2 text-xs tracking-wide text-ash-500 uppercase">
+      <section className="border-y border-charcoal/50 bg-charcoal/20 px-4 py-4 2xl:px-8">
+        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-center gap-x-8 gap-y-2 text-xs tracking-wide text-smoke uppercase">
           <span>SHA-256 hashed IPs</span>
-          <span className="text-ash-700">·</span>
+          <span className="text-smoke/60">·</span>
           <span>Rotating salt — 30-day purge</span>
-          <span className="text-ash-700">·</span>
+          <span className="text-smoke/60">·</span>
           <span>Parameterized queries only</span>
-          <span className="text-ash-700">·</span>
+          <span className="text-smoke/60">·</span>
           <span>CSP + CSRF + rate limiting</span>
-          <span className="text-ash-700">·</span>
+          <span className="text-smoke/60">·</span>
           <span>Prompt injection defenses</span>
         </div>
       </section>
@@ -255,11 +255,11 @@ export default function LandingPage() {
       <section className="px-4 py-12 lg:py-10 2xl:px-8">
         <div className="mx-auto max-w-7xl">
           <div className="text-center">
-            <h2 className="text-2xl font-bold text-ash-100 sm:text-3xl">
+            <h2 className="text-2xl font-bold text-foreground sm:text-3xl">
               Built for people who don&apos;t trust platforms
             </h2>
-            <p className="mt-2 text-sm text-ash-500">
-              Every design decision answers the same question: does the community control this, or does someone else?
+            <p className="mt-2 text-sm text-smoke">
+              Every design decision answers the same question: does the campfire control this, or does someone else?
             </p>
           </div>
 
@@ -269,17 +269,17 @@ export default function LandingPage() {
               return (
                 <div
                   key={feature.title}
-                  className="border border-ash-800 bg-ash-900/30 p-5 transition-colors hover:border-flame-500/30"
+                  className="border border-charcoal bg-charcoal/30 p-5 transition-colors hover:border-flame-500/30"
                 >
                   <div className="flex items-center gap-3">
                     <div className="flex h-8 w-8 shrink-0 items-center justify-center bg-flame-500/10">
                       <Icon className="h-4 w-4 text-flame-400" />
                     </div>
-                    <h3 className="text-sm font-semibold text-ash-100">
+                    <h3 className="text-sm font-semibold text-foreground">
                       {feature.title}
                     </h3>
                   </div>
-                  <p className="mt-3 text-xs leading-relaxed text-ash-400">
+                  <p className="mt-3 text-xs leading-relaxed text-ash">
                     {feature.description}
                   </p>
                 </div>
@@ -290,23 +290,23 @@ export default function LandingPage() {
       </section>
 
       {/* How it works — horizontal on desktop */}
-      <section className="border-t border-ash-800/50 px-4 py-12 lg:py-10 2xl:px-8">
+      <section className="border-t border-charcoal/50 px-4 py-12 lg:py-10 2xl:px-8">
         <div className="mx-auto max-w-7xl">
-          <h2 className="text-center text-2xl font-bold text-ash-100 sm:text-3xl">
+          <h2 className="text-center text-2xl font-bold text-foreground sm:text-3xl">
             How it works
           </h2>
 
           <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:mt-8 lg:grid-cols-4 lg:gap-6">
             {howItWorks.map((item) => (
-              <div key={item.step} className="relative border border-ash-800 bg-ash-900/20 p-5 transition-colors hover:border-flame-500/20">
+              <div key={item.step} className="relative border border-charcoal bg-charcoal/20 p-5 transition-colors hover:border-flame-500/20">
                 <span className="text-2xl font-bold text-flame-500/20">
                   {item.step}
                 </span>
-                <h3 className="mt-2 text-sm font-semibold text-ash-100">
+                <h3 className="mt-2 text-sm font-semibold text-foreground">
                   {item.title}
                 </h3>
                 {item.description === "CAMPFIRE_LINKS" ? (
-                  <p className="mt-1 text-xs text-ash-400">
+                  <p className="mt-1 text-xs text-ash">
                     Join{" "}
                     <CampfirePrefix name="tech" linked />,{" "}
                     <CampfirePrefix name="privacy" linked />,{" "}
@@ -314,7 +314,7 @@ export default function LandingPage() {
                     — or create your own space with your own rules.
                   </p>
                 ) : (
-                  <p className="mt-1 text-xs text-ash-400">
+                  <p className="mt-1 text-xs text-ash">
                     {item.description}
                   </p>
                 )}
@@ -325,14 +325,14 @@ export default function LandingPage() {
       </section>
 
       {/* CTA */}
-      <section className="border-t border-ash-800/50 px-4 py-12 lg:py-10 2xl:px-8">
+      <section className="border-t border-charcoal/50 px-4 py-12 lg:py-10 2xl:px-8">
         <div className="mx-auto max-w-7xl text-center">
           <MessageSquare className="mx-auto h-10 w-10 text-flame-400" />
-          <h2 className="mt-4 text-2xl font-bold text-ash-100 sm:text-3xl">
+          <h2 className="mt-4 text-2xl font-bold text-foreground sm:text-3xl">
             Find your people. Set your standards.
           </h2>
-          <p className="mt-3 text-sm text-ash-400">
-            Communities that write their own rules, vote on their AI, and hold every decision accountable.
+          <p className="mt-3 text-sm text-ash">
+            Campfires that write their own rules, vote on their AI, and hold every decision accountable.
             No black boxes. No corporate overlords. Just people who share your standards.
           </p>
           <Link
@@ -348,85 +348,85 @@ export default function LandingPage() {
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-ash-800 px-4 py-8 2xl:px-8">
+      <footer className="border-t border-charcoal px-4 py-8 2xl:px-8">
         <div className="mx-auto max-w-7xl">
           <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
             <div>
               <FlameLogo size="sm" />
-              <p className="mt-2 text-xs text-ash-500">
-                AI-moderated discussion with transparent community governance.
+              <p className="mt-2 text-xs text-smoke">
+                AI-moderated discussion with transparent campfire governance.
               </p>
             </div>
             <div>
-              <h4 className="text-xs font-semibold text-ash-300 uppercase tracking-wider">Platform</h4>
+              <h4 className="text-xs font-semibold text-ash uppercase tracking-wider">Platform</h4>
               <ul className="mt-2 space-y-1">
                 <li>
-                  <Link href="/home" className="text-xs text-ash-500 hover:text-ash-300">
+                  <Link href="/home" className="text-xs text-smoke hover:text-ash">
                     Browse
                   </Link>
                 </li>
                 <li>
-                  <Link href="/governance" className="text-xs text-ash-500 hover:text-ash-300">
+                  <Link href="/governance" className="text-xs text-smoke hover:text-ash">
                     Governance
                   </Link>
                 </li>
                 <li>
-                  <Link href="/mod-log" className="text-xs text-ash-500 hover:text-ash-300">
+                  <Link href="/mod-log" className="text-xs text-smoke hover:text-ash">
                     Mod Log
                   </Link>
                 </li>
               </ul>
             </div>
             <div>
-              <h4 className="text-xs font-semibold text-ash-300 uppercase tracking-wider">Company</h4>
+              <h4 className="text-xs font-semibold text-ash uppercase tracking-wider">Company</h4>
               <ul className="mt-2 space-y-1">
                 <li>
-                  <Link href="/how-it-works" className="text-xs text-ash-500 hover:text-ash-300">
+                  <Link href="/how-it-works" className="text-xs text-smoke hover:text-ash">
                     How It Works
                   </Link>
                 </li>
                 <li>
-                  <Link href="/about" className="text-xs text-ash-500 hover:text-ash-300">
+                  <Link href="/about" className="text-xs text-smoke hover:text-ash">
                     About
                   </Link>
                 </li>
                 <li>
-                  <Link href="/security" className="text-xs text-ash-500 hover:text-ash-300">
+                  <Link href="/security" className="text-xs text-smoke hover:text-ash">
                     Security
                   </Link>
                 </li>
                 <li>
-                  <Link href="/principles" className="text-xs text-ash-500 hover:text-ash-300">
+                  <Link href="/principles" className="text-xs text-smoke hover:text-ash">
                     Principles
                   </Link>
                 </li>
                 <li>
-                  <Link href="/supporters" className="text-xs text-ash-500 hover:text-ash-300">
+                  <Link href="/supporters" className="text-xs text-smoke hover:text-ash">
                     Supporters
                   </Link>
                 </li>
               </ul>
             </div>
             <div>
-              <h4 className="text-xs font-semibold text-ash-300 uppercase tracking-wider">Legal</h4>
+              <h4 className="text-xs font-semibold text-ash uppercase tracking-wider">Legal</h4>
               <ul className="mt-2 space-y-1">
                 <li>
-                  <Link href="/terms" className="text-xs text-ash-500 hover:text-ash-300">
+                  <Link href="/terms" className="text-xs text-smoke hover:text-ash">
                     Terms of Service
                   </Link>
                 </li>
                 <li>
-                  <Link href="/privacy" className="text-xs text-ash-500 hover:text-ash-300">
+                  <Link href="/privacy" className="text-xs text-smoke hover:text-ash">
                     Privacy Policy
                   </Link>
                 </li>
               </ul>
             </div>
           </div>
-          <div className="mt-6 border-t border-ash-800 pt-4 text-center text-xs text-ash-600">
+          <div className="mt-6 border-t border-charcoal pt-4 text-center text-xs text-smoke">
             &copy; {new Date().getFullYear()}{" "}
             <span className="text-flame-400 font-bold">fuega</span>
-            <span className="text-ash-500">.ai</span>
+            <span className="text-smoke">.ai</span>
             {" "}— Built for the community, by the community.
           </div>
         </div>

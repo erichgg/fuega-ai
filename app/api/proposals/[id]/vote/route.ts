@@ -7,6 +7,8 @@ import {
   GovernanceError,
 } from "@/lib/services/governance.service";
 
+export const dynamic = "force-dynamic";
+
 interface RouteParams {
   params: Promise<{ id: string }>;
 }

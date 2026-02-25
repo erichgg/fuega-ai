@@ -65,7 +65,7 @@ export default function CreateCampfirePage() {
   if (!authLoading && !user) {
     return (
       <div className="mx-auto max-w-md py-16 text-center">
-        <p className="text-ash-400">
+        <p className="text-ash">
           You need to{" "}
           <Link href="/login" className="text-flame-400 hover:underline">
             log in
@@ -80,16 +80,16 @@ export default function CreateCampfirePage() {
     <div className="mx-auto max-w-lg">
       <Link
         href="/home"
-        className="inline-flex items-center gap-1.5 text-sm text-ash-500 transition-colors hover:text-ash-300"
+        className="inline-flex items-center gap-1.5 text-sm text-smoke transition-colors hover:text-ash"
       >
         <ArrowLeft className="h-3.5 w-3.5" />
         Back to feed
       </Link>
 
-      <h1 className="mt-4 text-xl font-bold text-ash-100">
+      <h1 className="mt-4 text-xl font-bold text-foreground">
         Create a Campfire
       </h1>
-      <p className="mt-1 text-sm text-ash-400">
+      <p className="mt-1 text-sm text-ash">
         Start a new campfire with transparent AI moderation. You&apos;ll be the
         first admin.
       </p>
@@ -98,7 +98,7 @@ export default function CreateCampfirePage() {
         <div className="mt-4 rounded-lg border border-green-500/30 bg-green-500/10 p-4">
           <div className="flex items-center gap-2">
             <CheckCircle2 className="h-4 w-4 text-green-400" />
-            <span className="text-sm font-medium text-ash-200">
+            <span className="text-sm font-medium text-foreground">
               Campfire created — redirecting...
             </span>
           </div>
@@ -110,7 +110,7 @@ export default function CreateCampfirePage() {
         <div>
           <label
             htmlFor="displayName"
-            className="mb-1.5 block text-sm font-medium text-ash-300"
+            className="mb-1.5 block text-sm font-medium text-ash"
           >
             Display Name
           </label>
@@ -120,7 +120,7 @@ export default function CreateCampfirePage() {
             onChange={(e) => setDisplayName(e.target.value)}
             placeholder="e.g. Science & Discovery"
             maxLength={100}
-            className="border-ash-800 bg-ash-950 placeholder:text-ash-600 focus-visible:ring-flame-500/50"
+            className="border-charcoal bg-coal placeholder:text-smoke focus-visible:ring-flame-500/50"
           />
         </div>
 
@@ -128,12 +128,12 @@ export default function CreateCampfirePage() {
         <div>
           <label
             htmlFor="name"
-            className="mb-1.5 block text-sm font-medium text-ash-300"
+            className="mb-1.5 block text-sm font-medium text-ash"
           >
             URL slug
           </label>
           <div className="flex items-center gap-2">
-            <span className="text-sm text-ash-500 whitespace-nowrap">
+            <span className="text-sm text-smoke whitespace-nowrap">
               <span className="text-lava-hot">f</span>
               <span className="text-smoke mx-0.5">|</span>
             </span>
@@ -143,10 +143,10 @@ export default function CreateCampfirePage() {
               onChange={(e) => handleNameChange(e.target.value)}
               placeholder="science_discovery"
               maxLength={21}
-              className="border-ash-800 bg-ash-950 placeholder:text-ash-600 focus-visible:ring-flame-500/50 font-mono text-sm"
+              className="border-charcoal bg-coal placeholder:text-smoke focus-visible:ring-flame-500/50 font-mono text-sm"
             />
           </div>
-          <p className="mt-1 text-xs text-ash-500">
+          <p className="mt-1 text-xs text-smoke">
             3-21 characters, lowercase letters, numbers, and underscores only
           </p>
         </div>
@@ -155,7 +155,7 @@ export default function CreateCampfirePage() {
         <div>
           <label
             htmlFor="description"
-            className="mb-1.5 block text-sm font-medium text-ash-300"
+            className="mb-1.5 block text-sm font-medium text-ash"
           >
             Description
           </label>
@@ -166,9 +166,9 @@ export default function CreateCampfirePage() {
             placeholder="What is this campfire about?"
             rows={4}
             maxLength={500}
-            className="min-h-[100px] resize-y border-ash-800 bg-ash-950 placeholder:text-ash-600 focus-visible:ring-flame-500/50"
+            className="min-h-[100px] resize-y border-charcoal bg-coal placeholder:text-smoke focus-visible:ring-flame-500/50"
           />
-          <p className="mt-1 text-xs text-ash-500">
+          <p className="mt-1 text-xs text-smoke">
             {description.length}/500 characters
           </p>
         </div>

@@ -20,14 +20,14 @@ export function FlameLogo({
   return (
     <span
       className={cn(
-        "font-bold tracking-tight select-none",
+        "font-mono font-bold tracking-tight select-none",
         sizeMap[size],
         animated && "animate-flame-flicker",
         className,
       )}
     >
       <span className="text-flame-400 font-semibold">fuega</span>
-      <span className="text-ash-400">.ai</span>
+      <span className="text-ash">.ai</span>
     </span>
   );
 }

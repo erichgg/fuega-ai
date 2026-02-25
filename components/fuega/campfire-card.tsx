@@ -28,7 +28,7 @@ export function CampfireCard({
   return (
     <Card
       className={cn(
-        "border-ash-800 bg-ash-900/50 transition-colors hover:border-ash-700",
+        "border-charcoal bg-charcoal/50 transition-colors hover:border-charcoal",
         className,
       )}
     >
@@ -46,7 +46,7 @@ export function CampfireCard({
               variant="outline"
               size="sm"
               onClick={onLeave}
-              className="border-ash-700 text-ash-400 hover:border-red-500/50 hover:text-red-400"
+              className="border-charcoal text-ash hover:border-red-500/50 hover:text-red-400"
             >
               Joined
             </Button>
@@ -58,10 +58,10 @@ export function CampfireCard({
         </div>
       </CardHeader>
       <CardContent>
-        <p className="text-xs text-ash-400 line-clamp-2">
+        <p className="text-xs text-ash line-clamp-2">
           {campfire.description}
         </p>
-        <div className="mt-3 flex items-center gap-4 text-xs text-ash-500">
+        <div className="mt-3 flex items-center gap-4 text-xs text-smoke">
           <span className="flex items-center gap-1">
             <Users className="h-3.5 w-3.5" />
             {campfire.memberCount.toLocaleString()} members

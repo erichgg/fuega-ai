@@ -13,9 +13,12 @@ CREATE TABLE IF NOT EXISTS chat_rooms (
     position INTEGER DEFAULT 0,
     created_by UUID NOT NULL REFERENCES users(id),
     created_at TIMESTAMPTZ DEFAULT NOW(),
-    deleted_at TIMESTAMPTZ,
-    UNIQUE (campfire_id, name)
+    deleted_at TIMESTAMPTZ
 );
+
+-- Partial unique index: only enforce uniqueness on non-deleted rooms
+CREATE UNIQUE INDEX IF NOT EXISTS idx_chat_rooms_unique_name
+    ON chat_rooms(campfire_id, name) WHERE deleted_at IS NULL;
 
 -- Add room_id to chat_messages (nullable initially for backfill)
 ALTER TABLE chat_messages ADD COLUMN IF NOT EXISTS room_id UUID REFERENCES chat_rooms(id);

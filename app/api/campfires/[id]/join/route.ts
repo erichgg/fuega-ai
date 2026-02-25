@@ -6,6 +6,8 @@ import {
   ServiceError,
 } from "@/lib/services/campfires.service";
 
+export const dynamic = "force-dynamic";
+
 interface RouteParams {
   params: Promise<{ id: string }>;
 }

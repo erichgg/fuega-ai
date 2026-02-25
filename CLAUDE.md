@@ -50,7 +50,7 @@ URL: `/f/[campfire-name]`. Hearth = campfire's main page.
 /lib/moderation -> AI moderation engine
 /lib/services   -> Service layer (votes, comments, badges, etc.)
 /lib/validation -> Zod schemas for API input validation
-/lib/hooks      -> Client-side React hooks
+/lib/hooks      -> Client-side React hooks (useChat, etc.)
 /lib/api        -> Typed API client for frontend
 /lib/monitoring -> Logging, metrics, alerts, cron jobs
 /lib/contexts   -> React context providers (auth, etc.)
@@ -74,13 +74,15 @@ campfire_mod_logs, site_mod_logs, governance_variables, campfire_settings,
 campfire_settings_history, reports, ip_hashes,
 proposals, proposal_votes, moderation_appeals,
 badges, user_badges, cosmetics, user_cosmetics, tips, notifications,
-user_push_subscriptions, referrals
+user_push_subscriptions, referrals,
+chat_rooms, chat_messages (with room_id FK to chat_rooms)
 
 **Current Migrations (pre-redesign, actual DB):**
 users, communities (→ campfires), community_memberships (→ campfire_members),
 posts, comments, votes, moderation_log (→ campfire_mod_logs),
 moderation_appeals, ai_prompt_history, proposals, proposal_votes, council_members, categories,
-badges, user_badges, notifications, user_push_subscriptions, referrals
+badges, user_badges, notifications, user_push_subscriptions, referrals,
+chat_messages, chat_rooms
 (Note: migration 005 is missing from the sequence — 004 → 006.)
 
 ## Security Rules — NON-NEGOTIABLE

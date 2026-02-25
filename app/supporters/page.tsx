@@ -73,23 +73,23 @@ export default function SupportersPage() {
             return (
               <div
                 key={tier.name}
-                className="rounded-lg border border-ash-800 bg-ash-900/30 p-6 flex flex-col"
+                className="rounded-lg border border-charcoal bg-charcoal/30 p-6 flex flex-col"
               >
                 <div className="flex items-center gap-2">
                   <Icon className="h-5 w-5 text-flame-400" />
-                  <h2 className="text-lg font-semibold text-ash-100">
+                  <h2 className="text-lg font-semibold text-foreground">
                     {tier.name}
                   </h2>
                 </div>
                 <p className="mt-1 text-xl font-bold text-flame-400">
                   {tier.price}
                 </p>
-                <p className="mt-2 text-sm text-ash-400">{tier.description}</p>
+                <p className="mt-2 text-sm text-ash">{tier.description}</p>
                 <ul className="mt-4 flex-1 space-y-2">
                   {tier.features.map((f) => (
                     <li
                       key={f}
-                      className="flex items-start gap-2 text-sm text-ash-300"
+                      className="flex items-start gap-2 text-sm text-ash"
                     >
                       <Shield className="mt-0.5 h-3.5 w-3.5 text-flame-400/60 shrink-0" />
                       {f}
@@ -101,8 +101,8 @@ export default function SupportersPage() {
           })}
         </div>
 
-        <div className="mt-12 rounded-lg border border-ash-800 bg-ash-950/50 p-6 text-center">
-          <p className="text-sm text-ash-400">
+        <div className="mt-12 rounded-lg border border-charcoal bg-coal/50 p-6 text-center">
+          <p className="text-sm text-ash">
             Supporter tiers are coming soon. In the meantime, the best way to
             support fuega.ai is to use it, create communities, and invite others.
           </p>
@@ -111,7 +111,7 @@ export default function SupportersPage() {
         <div className="mt-8 text-center">
           <Link
             href="/"
-            className="text-sm text-ash-500 hover:text-flame-400 transition-colors"
+            className="text-sm text-smoke hover:text-flame-400 transition-colors"
           >
             Back to home
           </Link>

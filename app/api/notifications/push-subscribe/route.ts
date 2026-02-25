@@ -8,6 +8,8 @@ import {
   unsubscribePush,
 } from "@/lib/services/push-notifications";
 
+export const dynamic = "force-dynamic";
+
 const pushSubscribeSchema = z.object({
   subscription: z.object({
     endpoint: z.string().url("Invalid endpoint URL"),

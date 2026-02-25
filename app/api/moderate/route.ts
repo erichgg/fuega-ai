@@ -22,6 +22,8 @@ import { checkModerationRateLimit } from "@/lib/auth/rate-limit";
 import { hashIp, getClientIp } from "@/lib/auth/ip-hash";
 import { query, queryOne } from "@/lib/db";
 
+export const dynamic = "force-dynamic";
+
 const moderateRequestSchema = z.object({
   content_type: z.enum(["post", "comment"]),
   content_id: z.string().uuid("Invalid content ID"),

@@ -46,8 +46,8 @@ export default function CampfiresPage() {
     <div>
       <div className="flex items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl font-bold text-ash-100">Browse Campfires</h1>
-          <p className="mt-1 text-sm text-ash-500">
+          <h1 className="text-xl font-bold text-foreground">Browse Campfires</h1>
+          <p className="mt-1 text-sm text-smoke">
             Find your people. Each campfire governs itself.
           </p>
         </div>
@@ -55,13 +55,14 @@ export default function CampfiresPage() {
 
       {/* Search */}
       <div className="relative mt-4">
-        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ash-500" />
+        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-smoke" />
         <input
           type="text"
           placeholder="Search campfires..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full rounded-lg border border-ash-800 bg-ash-900/50 py-2.5 pl-10 pr-4 text-sm text-ash-200 placeholder:text-ash-600 focus:border-flame-500/50 focus:outline-none focus:ring-1 focus:ring-flame-500/30"
+          aria-label="Search campfires"
+          className="w-full rounded-lg border border-charcoal bg-charcoal/50 py-2.5 pl-10 pr-4 text-sm text-foreground placeholder:text-smoke focus:border-flame-500/50 focus:outline-none focus:ring-1 focus:ring-flame-500/30"
         />
       </div>
 
@@ -72,12 +73,12 @@ export default function CampfiresPage() {
             {Array.from({ length: 6 }).map((_, i) => (
               <div
                 key={i}
-                className="animate-pulse rounded-lg border border-ash-800 bg-ash-900/30 p-5"
+                className="animate-pulse rounded-lg border border-charcoal bg-charcoal/30 p-5"
               >
-                <div className="h-5 w-24 rounded bg-ash-800" />
-                <div className="mt-3 h-3 w-full rounded bg-ash-800" />
-                <div className="mt-2 h-3 w-2/3 rounded bg-ash-800" />
-                <div className="mt-4 h-3 w-16 rounded bg-ash-800" />
+                <div className="h-5 w-24 rounded bg-charcoal" />
+                <div className="mt-3 h-3 w-full rounded bg-charcoal" />
+                <div className="mt-2 h-3 w-2/3 rounded bg-charcoal" />
+                <div className="mt-4 h-3 w-16 rounded bg-charcoal" />
               </div>
             ))}
           </div>
@@ -93,24 +94,24 @@ export default function CampfiresPage() {
           </div>
         ) : filtered.length === 0 ? (
           <div className="py-16 text-center">
-            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-ash-900 border border-ash-800">
-              <Flame className="h-7 w-7 text-ash-500" />
+            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-coal border border-charcoal">
+              <Flame className="h-7 w-7 text-smoke" />
             </div>
             {search.trim() ? (
               <>
-                <p className="text-lg font-medium text-ash-300">
+                <p className="text-lg font-medium text-ash">
                   No campfires match &ldquo;{search}&rdquo;
                 </p>
-                <p className="mt-1 text-sm text-ash-500">
+                <p className="mt-1 text-sm text-smoke">
                   Try a different search term.
                 </p>
               </>
             ) : (
               <>
-                <p className="text-lg font-medium text-ash-300">
+                <p className="text-lg font-medium text-ash">
                   No campfires yet
                 </p>
-                <p className="mt-1 text-sm text-ash-500">
+                <p className="mt-1 text-sm text-smoke">
                   Be the first to create one.
                 </p>
               </>
@@ -122,25 +123,25 @@ export default function CampfiresPage() {
               <Link
                 key={c.id}
                 href={`/f/${c.name}`}
-                className="group rounded-lg border border-ash-800 bg-ash-900/30 p-5 transition-all hover:border-flame-500/30 hover:bg-ash-900/50"
+                className="group rounded-lg border border-charcoal bg-charcoal/30 p-5 transition-all hover:border-flame-500/30 hover:bg-charcoal/50"
               >
                 <div className="flex items-center gap-2">
                   <Flame className="h-4 w-4 text-flame-400" />
-                  <h3 className="text-sm font-semibold text-ash-100 group-hover:text-flame-400 transition-colors">
+                  <h3 className="text-sm font-semibold text-foreground group-hover:text-flame-400 transition-colors">
                     <span className="text-flame-400">f</span>
-                    <span className="text-ash-600 mx-0.5">|</span>
+                    <span className="text-smoke mx-0.5">|</span>
                     {c.name}
                   </h3>
                 </div>
                 {c.display_name && c.display_name !== c.name && (
-                  <p className="mt-0.5 text-xs text-ash-500">
+                  <p className="mt-0.5 text-xs text-smoke">
                     {c.display_name}
                   </p>
                 )}
-                <p className="mt-2 text-xs text-ash-400 line-clamp-2 leading-relaxed">
+                <p className="mt-2 text-xs text-ash line-clamp-2 leading-relaxed">
                   {c.description}
                 </p>
-                <div className="mt-3 flex items-center gap-1 text-xs text-ash-600">
+                <div className="mt-3 flex items-center gap-1 text-xs text-smoke">
                   <Users className="h-3 w-3" />
                   <span>
                     {c.member_count}{" "}

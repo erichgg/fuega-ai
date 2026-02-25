@@ -4,6 +4,8 @@ import { checkGeneralRateLimit } from "@/lib/auth/rate-limit";
 import { isFeatureEnabled } from "@/lib/feature-flags";
 import { queryOne } from "@/lib/db";
 
+export const dynamic = "force-dynamic";
+
 interface RouteContext {
   params: Promise<{ id: string }>;
 }

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { z } from "zod";
 import { authenticate } from "@/lib/auth/jwt";
 import { checkGeneralRateLimit } from "@/lib/auth/rate-limit";
 import {
@@ -7,6 +8,11 @@ import {
   getOrCreateDefaultRoom,
 } from "@/lib/services/chat.service";
 import { ServiceError } from "@/lib/services/posts.service";
+
+const createRoomSchema = z.object({
+  name: z.string().min(2).max(64),
+  description: z.string().max(500).optional(),
+});
 
 export const dynamic = "force-dynamic";
 
@@ -61,16 +67,19 @@ export async function POST(req: Request, context: RouteContext) {
 
     const { id: campfireId } = await context.params;
     const body = await req.json();
-
-    if (!body.name || typeof body.name !== "string") {
-      return NextResponse.json({ error: "Room name is required", code: "VALIDATION_ERROR" }, { status: 400 });
+    const parsed = createRoomSchema.safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: parsed.error.errors[0]?.message ?? "Invalid input", code: "VALIDATION_ERROR" },
+        { status: 400 }
+      );
     }
 
     const room = await createRoom(
       campfireId,
       user.userId,
-      body.name,
-      body.description
+      parsed.data.name,
+      parsed.data.description
     );
 
     return NextResponse.json({ room }, { status: 201 });

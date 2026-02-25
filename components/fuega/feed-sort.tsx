@@ -24,7 +24,7 @@ export function FeedSort({ active, onChange, className }: FeedSortProps) {
       role="group"
       aria-label="Sort posts by"
       className={cn(
-        "flex items-center gap-1 rounded-lg border border-ash-800 bg-ash-900/50 p-1",
+        "flex items-center gap-1 rounded-lg border border-charcoal bg-charcoal/50 p-1",
         className,
       )}
     >
@@ -38,8 +38,8 @@ export function FeedSort({ active, onChange, className }: FeedSortProps) {
             className={cn(
               "flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors",
               active === opt.value
-                ? "bg-ash-800 text-flame-400"
-                : "text-ash-500 hover:text-ash-300",
+                ? "bg-charcoal text-flame-400"
+                : "text-smoke hover:text-ash",
             )}
           >
             <Icon className="h-3.5 w-3.5" />

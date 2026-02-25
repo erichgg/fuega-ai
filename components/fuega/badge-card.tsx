@@ -36,7 +36,7 @@ export const RARITY_CONFIG: Record<
     borderClass: "border-ash-400/30",
     bgClass: "bg-ash-400/10",
     progressClass: "bg-ash-400",
-    textClass: "text-ash-400",
+    textClass: "text-ash",
     glowClass: "",
     label: "Common",
   },

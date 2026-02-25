@@ -5,11 +5,11 @@ import { Shield, Scale, Eye, Users, Lock, BookOpen } from "lucide-react";
 export const metadata: Metadata = {
   title: "Principles",
   description:
-    "The platform-level Principles that apply to every community on fuega.ai — immutable, non-negotiable, enforced in every Tender.",
+    "The platform-level Principles that apply to every campfire on fuega.ai — immutable, non-negotiable, enforced in every Tender.",
   openGraph: {
     title: "Principles — fuega.ai",
     description:
-      "The platform-level Principles that apply to every community on fuega.ai.",
+      "The platform-level Principles that apply to every campfire on fuega.ai.",
   },
 };
 
@@ -18,13 +18,13 @@ const principles = [
     icon: Shield,
     title: "No Harm",
     description:
-      "Content that promotes violence, harassment, or endangers individuals is never allowed. This applies universally — no community can override it.",
+      "Content that promotes violence, harassment, or endangers individuals is never allowed. This applies universally — no campfire can override it.",
   },
   {
     icon: Scale,
     title: "Transparency",
     description:
-      "Every AI moderation decision is logged publicly. Community members can see why content was approved, flagged, or removed — and by what reasoning.",
+      "Every AI moderation decision is logged publicly. Campfire members can see why content was approved, flagged, or removed — and by what reasoning.",
   },
   {
     icon: Eye,
@@ -36,13 +36,13 @@ const principles = [
     icon: Users,
     title: "Community Sovereignty",
     description:
-      "Each campfire governs itself through governance variables and community voting. The platform sets the floor — communities set the ceiling.",
+      "Each campfire governs itself through governance variables and campfire voting. The platform sets the floor — campfires set the ceiling.",
   },
   {
     icon: Lock,
     title: "No Manipulation",
     description:
-      "Vote counts are fuzzed to prevent gaming. Coordinated manipulation, spam, and bot activity are prohibited across all communities.",
+      "Vote counts are fuzzed to prevent gaming. Coordinated manipulation, spam, and bot activity are prohibited across all campfires.",
   },
   {
     icon: BookOpen,
@@ -62,7 +62,7 @@ export default function PrinciplesPage() {
           </h1>
           <p className="mt-4 text-lg text-ash leading-relaxed">
             These are the immutable, platform-level rules enforced in every
-            community&apos;s Tender. No community can override them.
+            campfire&apos;s Tender. No campfire can override them.
             They exist to protect people.
           </p>
         </div>
@@ -73,17 +73,17 @@ export default function PrinciplesPage() {
             return (
               <div
                 key={p.title}
-                className="rounded-lg border border-ash-800 bg-ash-900/30 p-6"
+                className="rounded-lg border border-charcoal bg-charcoal/30 p-6"
               >
                 <div className="flex items-center gap-3">
                   <div className="flex h-10 w-10 items-center justify-center rounded-full bg-flame-500/10 border border-flame-500/20">
                     <Icon className="h-5 w-5 text-flame-400" />
                   </div>
-                  <h2 className="text-lg font-semibold text-ash-100">
+                  <h2 className="text-lg font-semibold text-foreground">
                     {p.title}
                   </h2>
                 </div>
-                <p className="mt-3 text-sm leading-relaxed text-ash-400">
+                <p className="mt-3 text-sm leading-relaxed text-ash">
                   {p.description}
                 </p>
               </div>
@@ -91,11 +91,11 @@ export default function PrinciplesPage() {
           })}
         </div>
 
-        <div className="mt-12 rounded-lg border border-ash-800 bg-ash-950/50 p-6 text-center">
-          <p className="text-sm text-ash-400">
+        <div className="mt-12 rounded-lg border border-charcoal bg-coal/50 p-6 text-center">
+          <p className="text-sm text-ash">
             These Principles are baked into every Tender — the compiled AI
-            governance prompt that moderates each community. They cannot be
-            removed or weakened by community settings.
+            governance prompt that moderates each campfire. They cannot be
+            removed or weakened by campfire settings.
           </p>
           <div className="mt-4 flex flex-wrap items-center justify-center gap-4">
             <Link
@@ -106,7 +106,7 @@ export default function PrinciplesPage() {
             </Link>
             <Link
               href="/home"
-              className="text-sm text-ash-500 hover:text-ash-300"
+              className="text-sm text-smoke hover:text-ash"
             >
               Browse campfires
             </Link>

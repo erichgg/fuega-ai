@@ -4,6 +4,8 @@ import { checkGeneralRateLimit } from "@/lib/auth/rate-limit";
 import { hashIp, getClientIp } from "@/lib/auth/ip-hash";
 import { logger } from "@/lib/monitoring/logger";
 
+export const dynamic = "force-dynamic";
+
 export async function POST(req: Request) {
   try {
     // Rate-limit by IP hash to prevent abuse
