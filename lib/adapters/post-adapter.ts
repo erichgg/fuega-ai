@@ -19,6 +19,9 @@ export interface PostCardData {
   sparkCount: number;
   commentCount: number;
   createdAt: string;
+  post_type?: "text" | "link" | "image";
+  image_url?: string;
+  link_url?: string;
   moderation?: {
     action: "approved" | "flagged" | "removed";
     confidence?: number;
@@ -69,6 +72,9 @@ export function toPostCardData(post: ApiPost): PostCardData {
     sparkCount: (post.sparks ?? post.spark_count ?? 0) - (post.douses ?? post.douse_count ?? 0),
     commentCount: post.comment_count ?? 0,
     createdAt: post.created_at,
+    post_type: post.post_type ?? "text",
+    image_url: post.image_url ?? undefined,
+    link_url: post.url ?? undefined,
     moderation,
   };
 }
