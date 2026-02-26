@@ -20,6 +20,7 @@ import { useAuth } from "@/lib/contexts/auth-context";
 import { useCampfires } from "@/lib/hooks/useCampfires";
 import { useCreatePost } from "@/lib/hooks/usePosts";
 import { MarkdownContent } from "@/components/fuega/markdown-content";
+import { CampfirePicker } from "@/components/fuega/campfire-picker";
 
 type PostType = "text" | "link" | "image";
 
@@ -315,24 +316,12 @@ function SubmitPageInner() {
           >
             Campfire
           </label>
-          <select
-            id="campfire"
-            value={selectedCampfireId}
-            onChange={(e) => setSelectedCampfireId(e.target.value)}
-            className="w-full rounded-md border border-charcoal bg-coal px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-flame-500/50"
-            disabled={campfiresLoading}
-          >
-            <option value="">
-              {campfiresLoading
-                ? "Loading campfires..."
-                : "Select a campfire"}
-            </option>
-            {campfires.map((c) => (
-              <option key={c.id} value={c.id}>
-                f | {c.name}
-              </option>
-            ))}
-          </select>
+          <CampfirePicker
+            campfires={campfires}
+            selectedId={selectedCampfireId}
+            onSelect={setSelectedCampfireId}
+            loading={campfiresLoading}
+          />
         </div>
 
         {/* Title */}

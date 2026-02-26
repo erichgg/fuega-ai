@@ -7,16 +7,24 @@ import { Button } from "@/components/ui/button";
 import { PostCard } from "@/components/fuega/post-card";
 import { ReportDialog } from "@/components/fuega/report-dialog";
 import { FeedSkeleton } from "@/components/fuega/page-skeleton";
+import { FeedSort } from "@/components/fuega/feed-sort";
+import { FeedFilters } from "@/components/fuega/feed-filters";
 import { useAuth } from "@/lib/contexts/auth-context";
 import { usePosts } from "@/lib/hooks/usePosts";
 import { useOptimisticVoting } from "@/lib/hooks/useOptimisticVoting";
+import { useInfiniteScroll } from "@/lib/hooks/useInfiniteScroll";
 import { toPostCardData } from "@/lib/adapters/post-adapter";
 
 export default function TrendingPage() {
   const { user } = useAuth();
-  const { posts, loading, error, hasMore, loadMore } = usePosts({ sort: "hot" });
+  const [sort, setSort] = React.useState<"hot" | "new" | "top" | "rising">("hot");
+  const [timeRange, setTimeRange] = React.useState<"all" | "today" | "week" | "month">("all");
+  const [postType, setPostType] = React.useState<"all" | "text" | "link" | "image">("all");
+
+  const { posts, loading, error, hasMore, loadMore } = usePosts({ sort, timeRange, postType });
   const { handleVote, getVote, getDelta } = useOptimisticVoting();
   const [reportPostId, setReportPostId] = React.useState<string | null>(null);
+  const sentinelRef = useInfiniteScroll({ hasMore, loading, onLoadMore: loadMore });
 
   const postCards = posts.map((p) => {
     const card = toPostCardData(p);
@@ -46,6 +54,17 @@ export default function TrendingPage() {
       <p className="mt-1 text-sm text-smoke">
         The hottest posts across all campfires right now.
       </p>
+
+      <div className="mt-3">
+        <FeedSort active={sort} onChange={setSort} />
+      </div>
+      <FeedFilters
+        timeRange={timeRange}
+        onTimeRangeChange={setTimeRange}
+        postType={postType}
+        onPostTypeChange={setPostType}
+        className="mt-2"
+      />
 
       <div className="mt-4 space-y-2">
         {loading ? (
@@ -83,12 +102,9 @@ export default function TrendingPage() {
               </Link>
             ))}
             {hasMore && (
-              <button
-                onClick={loadMore}
-                className="w-full py-3 text-center text-xs text-ash hover:text-flame-400 transition-colors"
-              >
-                Load more posts
-              </button>
+              <div ref={sentinelRef} className="flex justify-center py-4">
+                <div className="h-6 w-6 animate-spin rounded-full border-2 border-lava-hot border-t-transparent" />
+              </div>
             )}
           </>
         )}

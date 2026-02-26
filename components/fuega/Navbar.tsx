@@ -89,7 +89,9 @@ function useKeyboardShortcuts() {
 
       // "c" -> create post
       if (e.key === "c" && !e.metaKey && !e.ctrlKey) {
-        window.location.href = "/submit";
+        const match = window.location.pathname.match(/^\/f\/([^/]+)/);
+        const cf = match ? match[1] : null;
+        window.location.href = cf ? `/submit?campfire=${cf}` : "/submit";
         return;
       }
 
@@ -207,6 +209,9 @@ export function Navbar({ onOpenSidebar }: NavbarProps = {}) {
   const [mobileOpen, setMobileOpen] = React.useState(false);
   const [searchValue, setSearchValue] = React.useState("");
   const [mobileSearchValue, setMobileSearchValue] = React.useState("");
+  // Derive current campfire from URL for context-aware create button
+  const campfireMatch = pathname?.match(/^\/f\/([^/]+)/);
+  const currentCampfire = campfireMatch ? campfireMatch[1] : null;
   const { shortcutsOpen, setShortcutsOpen } = useKeyboardShortcuts();
 
   // Scroll detection at 50px threshold
@@ -314,7 +319,7 @@ export function Navbar({ onOpenSidebar }: NavbarProps = {}) {
               <>
                 {/* Create post */}
                 <Link
-                  href="/submit"
+                  href={currentCampfire ? `/submit?campfire=${currentCampfire}` : "/submit"}
                   className="hidden sm:flex p-2 text-ash hover:text-lava-hot transition-colors"
                   aria-label="Create post"
                 >

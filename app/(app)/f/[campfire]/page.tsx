@@ -8,8 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { PostCard } from "@/components/fuega/post-card";
 import { ReportDialog } from "@/components/fuega/report-dialog";
-import { FeedSort } from "@/components/fuega/feed-sort";
-import { FeedFilters } from "@/components/fuega/feed-filters";
+import { FeedToolbar } from "@/components/fuega/feed-sort";
 import { ChatPanel } from "@/components/fuega/chat-panel";
 import { CampfireSkeleton } from "@/components/fuega/page-skeleton";
 import { useAuth } from "@/lib/contexts/auth-context";
@@ -296,15 +295,15 @@ export default function CampfirePage() {
       {viewMode === "posts" && (
         <>
           <div className="mt-3">
-            <FeedSort active={sort} onChange={setSort} />
+            <FeedToolbar
+              sort={sort}
+              onSortChange={setSort}
+              timeRange={timeRange}
+              onTimeRangeChange={setTimeRange}
+              postType={postType}
+              onPostTypeChange={setPostType}
+            />
           </div>
-          <FeedFilters
-            timeRange={timeRange}
-            onTimeRangeChange={setTimeRange}
-            postType={postType}
-            onPostTypeChange={setPostType}
-            className="mt-2"
-          />
           <div className="mt-3 space-y-2">
             {postsError ? (
               <div className="py-16 text-center">

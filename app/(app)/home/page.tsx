@@ -6,8 +6,7 @@ import { Plus, Flame, Vote, Award, TrendingUp, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PostCard } from "@/components/fuega/post-card";
 import { ReportDialog } from "@/components/fuega/report-dialog";
-import { FeedSort } from "@/components/fuega/feed-sort";
-import { FeedFilters } from "@/components/fuega/feed-filters";
+import { FeedToolbar } from "@/components/fuega/feed-sort";
 import { FeedSkeleton } from "@/components/fuega/page-skeleton";
 import { useAuth } from "@/lib/contexts/auth-context";
 import { usePosts } from "@/lib/hooks/usePosts";
@@ -68,7 +67,14 @@ export default function HomeFeedPage() {
       {/* Main feed */}
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between gap-4">
-          <FeedSort active={sort} onChange={setSort} />
+          <FeedToolbar
+            sort={sort}
+            onSortChange={setSort}
+            timeRange={timeRange}
+            onTimeRangeChange={setTimeRange}
+            postType={postType}
+            onPostTypeChange={setPostType}
+          />
           {user && (
             <Link href="/submit">
               <Button variant="spark" size="sm" className="gap-1.5">
@@ -78,14 +84,6 @@ export default function HomeFeedPage() {
             </Link>
           )}
         </div>
-
-        <FeedFilters
-          timeRange={timeRange}
-          onTimeRangeChange={setTimeRange}
-          postType={postType}
-          onPostTypeChange={setPostType}
-          className="mt-2"
-        />
 
         <div className="mt-4 space-y-2">
           {loading ? (
