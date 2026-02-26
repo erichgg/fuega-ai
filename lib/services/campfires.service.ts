@@ -25,6 +25,9 @@ export interface Campfire {
   banned_at: string | null;
   deleted_at: string | null;
   creator_username?: string;
+  banner_url?: string | null;
+  theme_color?: string | null;
+  tagline?: string | null;
 }
 
 export interface GovernanceConfig {

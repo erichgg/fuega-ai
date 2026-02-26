@@ -196,6 +196,9 @@ export interface Campfire {
   created_at: string;
   updated_at: string;
   deleted_at: string | null;
+  banner_url?: string | null;
+  theme_color?: string | null;
+  tagline?: string | null;
 }
 
 export interface Proposal {

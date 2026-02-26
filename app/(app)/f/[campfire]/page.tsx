@@ -18,6 +18,7 @@ import { usePosts } from "@/lib/hooks/usePosts";
 import { useOptimisticVoting } from "@/lib/hooks/useOptimisticVoting";
 import { useInfiniteScroll } from "@/lib/hooks/useInfiniteScroll";
 import { toPostCardData } from "@/lib/adapters/post-adapter";
+import { CampfireAbout } from "@/components/fuega/campfire-about";
 
 type SortOption = "hot" | "new" | "top" | "rising";
 type ViewMode = "posts" | "chat";
@@ -112,20 +113,29 @@ export default function CampfirePage() {
   }
 
   return (
-    <div>
+    <div style={campfire.theme_color ? { '--campfire-accent': campfire.theme_color } as React.CSSProperties : undefined}>
       {/* Campfire Hearth — Banner + Header */}
       <div className="rounded-lg border border-charcoal overflow-hidden">
-        {/* Banner gradient (future: campfire.banner_url image) */}
+        {/* Banner — custom image or gradient */}
         <div
           className="h-24 sm:h-32 relative"
           style={{
-            background: `linear-gradient(135deg, var(--lava-hot) 0%, var(--ember) 50%, #1a0a00 100%)`,
+            backgroundImage: campfire.banner_url
+              ? `url(${campfire.banner_url})`
+              : `linear-gradient(135deg, ${campfire.theme_color || 'var(--lava-hot)'} 0%, var(--ember) 50%, #1a0a00 100%)`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
           }}
         >
+          {/* Noise texture overlay */}
+          <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 256 256\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'noise\'%3E%3CfeTurbulence baseFrequency=\'0.65\' numOctaves=\'3\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23noise)\'/%3E%3C/svg%3E")' }} />
           <div className="absolute inset-0 bg-gradient-to-t from-coal/80 to-transparent" />
           <div className="absolute bottom-3 left-4 right-4 flex items-end justify-between">
             <div className="flex items-center gap-3">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-coal border-2 border-lava-hot/40">
+              <div
+                className="flex h-12 w-12 items-center justify-center rounded-full bg-coal border-2"
+                style={{ borderColor: campfire.theme_color || 'rgba(255,69,0,0.4)' }}
+              >
                 <Flame className="h-6 w-6 text-lava-hot" />
               </div>
               <div>
@@ -147,6 +157,11 @@ export default function CampfirePage() {
                     ? "border-white/30 text-white hover:border-red-500/50 hover:text-red-400 bg-black/30 backdrop-blur-sm"
                     : "shadow-lg"
                 }
+                style={
+                  !joined && campfire.theme_color
+                    ? { backgroundColor: campfire.theme_color }
+                    : undefined
+                }
               >
                 {membershipLoading ? "..." : joined ? "Joined" : "Join"}
               </Button>
@@ -157,6 +172,9 @@ export default function CampfirePage() {
         {/* Info section */}
         <div className="bg-charcoal/50 p-4">
           <p className="text-sm text-ash">{campfire.description}</p>
+          {campfire.tagline && (
+            <p className="text-xs italic text-smoke mt-1">{campfire.tagline}</p>
+          )}
           {membershipError && (
             <div className="mt-2 flex items-center gap-1.5 text-xs text-red-400">
               <AlertCircle className="h-3.5 w-3.5" />
@@ -175,6 +193,16 @@ export default function CampfirePage() {
               <TrendingUp className="h-3.5 w-3.5" />
               <span className="text-foreground font-semibold">{postCards.length}</span>
               posts
+            </span>
+            <span className="flex items-center gap-1">
+              <Vote className="h-3.5 w-3.5" />
+              <span className="text-foreground font-semibold">0</span>
+              proposals
+            </span>
+            <span className="flex items-center gap-1">
+              <Flame className="h-3.5 w-3.5" />
+              <span className="text-foreground font-semibold">0</span>
+              glow
             </span>
             <span className="flex items-center gap-1">
               <Clock className="h-3.5 w-3.5" />
@@ -223,8 +251,10 @@ export default function CampfirePage() {
         </div>
       </div>
 
-      {/* Content below banner constrained */}
-      <div className="max-w-5xl">
+      {/* Content + sidebar layout */}
+      <div className="mt-4 flex gap-6">
+      {/* Main content */}
+      <div className="flex-1 min-w-0">
       {/* View mode tabs */}
       <div className="mt-4 flex items-center gap-1 rounded-lg border border-charcoal bg-charcoal/50 p-1" role="tablist">
         <button
@@ -334,7 +364,20 @@ export default function CampfirePage() {
           />
         </div>
       )}
-      </div>{/* end max-w-5xl */}
+      </div>{/* end main content */}
+
+      {/* Right sidebar — about widget (desktop only) */}
+      <aside className="hidden lg:block w-72 shrink-0">
+        <div className="sticky top-[72px]">
+          <CampfireAbout campfire={campfire} />
+        </div>
+      </aside>
+      </div>{/* end flex layout */}
+
+      {/* About widget (mobile — below content) */}
+      <div className="lg:hidden mt-6">
+        <CampfireAbout campfire={campfire} />
+      </div>
 
       {/* Report dialog */}
       <ReportDialog
