@@ -1,5 +1,5 @@
 /**
- * AI Moderation Service — Two-Tier Claude API Integration
+ * AI Moderation Service — Two-Tier AI-Powered Moderation Pipeline
  *
  * Orchestrates the full moderation pipeline:
  * 1. Platform agent checks global Principles (hardcoded, non-negotiable)
@@ -8,7 +8,12 @@
  * Content passes through tiers in order. First removal stops the chain.
  * All decisions are logged to campfire_mod_logs for public transparency.
  *
- * Requires: ANTHROPIC_API_KEY environment variable
+ * Supports multiple AI backends via the provider abstraction:
+ * - Anthropic Claude API (default, requires ANTHROPIC_API_KEY)
+ * - Local Ollama instance (free, private, requires local GPU)
+ * - Ollama-first with Anthropic fallback (best of both worlds)
+ *
+ * Configure via AI_PROVIDER env var: "anthropic" | "ollama" | "ollama-fallback"
  */
 
 import Anthropic from "@anthropic-ai/sdk";
@@ -23,6 +28,8 @@ import {
   buildPromptFromConfig,
   type CampfireAIConfig,
 } from "./structured-config";
+import type { AIProvider } from "./providers/types";
+import { createProviderWithFallback } from "./providers";
 
 /** Full moderation decision with metadata */
 export interface ModerationDecision {
@@ -70,10 +77,9 @@ const TIMEOUT_MS = 5000;
 /**
  * Create an Anthropic client instance.
  * Separated for testability — tests can mock this.
+ * @deprecated Use createProviderWithFallback() instead for new code.
  */
-export function createAnthropicClient(
-  apiKey?: string
-): Anthropic {
+export function createAnthropicClient(apiKey?: string): Anthropic {
   return new Anthropic({
     apiKey: apiKey ?? process.env.ANTHROPIC_API_KEY,
   });
@@ -81,6 +87,7 @@ export function createAnthropicClient(
 
 /**
  * Call Claude API with a built prompt and parse the response.
+ * @deprecated Use AIProvider.callModeration() instead for new code.
  */
 export async function callClaudeForModeration(
   client: Anthropic,
@@ -127,17 +134,17 @@ function mapDecision(
 }
 
 /**
- * Run a single tier of moderation.
+ * Run a single tier of moderation using a provider.
  */
 async function runTier(
-  client: Anthropic,
+  provider: AIProvider,
   prompt: BuiltPrompt,
   promptVersion: number
 ): Promise<ModerationDecision> {
   const start = Date.now();
 
   const injectionDetected =
-    (prompt.content_sanitization.injection_detected) ||
+    prompt.content_sanitization.injection_detected ||
     (prompt.rules_sanitization?.injection_detected ?? false);
 
   const injectionPatterns = [
@@ -146,7 +153,7 @@ async function runTier(
   ];
 
   try {
-    const result = await callClaudeForModeration(client, prompt);
+    const result = await provider.callModeration(prompt);
     const elapsed = Date.now() - start;
 
     // If injection was detected AND AI approved, override to flag
@@ -165,7 +172,7 @@ async function runTier(
       confidence: result.valid ? 0.85 : 0.5,
       reasoning: finalReason,
       agent_level: prompt.tier,
-      ai_model: AI_MODEL,
+      ai_model: provider.model,
       prompt_version: promptVersion,
       injection_detected: injectionDetected,
       injection_patterns: injectionPatterns,
@@ -180,7 +187,7 @@ async function runTier(
       confidence: 0,
       reasoning: `AI moderation error: ${error instanceof Error ? error.message : "Unknown error"}. Content flagged for review.`,
       agent_level: prompt.tier,
-      ai_model: AI_MODEL,
+      ai_model: provider.model,
       prompt_version: promptVersion,
       injection_detected: injectionDetected,
       injection_patterns: injectionPatterns,
@@ -192,12 +199,12 @@ async function runTier(
 /**
  * Run the two-tier moderation pipeline.
  *
- * Order: Platform (Principles) → Campfire (Tender)
+ * Order: Platform (Principles) -> Campfire (Tender)
  * First removal stops the chain.
  * Flagged content continues through remaining tiers.
  */
 export async function runModerationPipeline(
-  client: Anthropic,
+  provider: AIProvider,
   content: ModerationContent,
   campfire: CampfireContext
 ): Promise<ModerationPipelineResult> {
@@ -206,7 +213,7 @@ export async function runModerationPipeline(
 
   // Tier 1: Platform agent (global Principles)
   const platformPrompt = buildPlatformPrompt(campfire.name, content);
-  const platformDecision = await runTier(client, platformPrompt, 1);
+  const platformDecision = await runTier(provider, platformPrompt, 1);
   tierDecisions.push(platformDecision);
 
   if (platformDecision.decision === "removed") {
@@ -229,7 +236,7 @@ export async function runModerationPipeline(
     content
   );
   const campfireDecision = await runTier(
-    client,
+    provider,
     campfirePrompt,
     campfire.ai_prompt_version
   );
@@ -292,7 +299,12 @@ export async function logModerationDecision(
  * High-level moderation function that integrates with the existing codebase.
  *
  * This replaces the Phase 2 auto-approve stub in lib/moderation/moderate.ts.
- * Falls back to basic safety filter if ANTHROPIC_API_KEY is not set.
+ * Falls back to basic safety filter if no AI provider is available.
+ *
+ * Provider selection is controlled by the AI_PROVIDER environment variable:
+ * - "anthropic": Always use Anthropic Claude API (requires ANTHROPIC_API_KEY)
+ * - "ollama": Always use local Ollama instance
+ * - "ollama-fallback": Try Ollama first, fall back to Anthropic if unavailable
  */
 export async function moderateContentWithAI(
   content: ModerationContent,
@@ -300,25 +312,33 @@ export async function moderateContentWithAI(
   apiKey?: string
 ): Promise<ModerationPipelineResult> {
   const key = apiKey ?? process.env.ANTHROPIC_API_KEY;
+  const providerType = process.env.AI_PROVIDER ?? "anthropic";
 
-  if (!key) {
-    // No API key — fall back to basic safety filter
+  // If no API key and not using Ollama, fall back to basic safety filter
+  if (!key && providerType === "anthropic") {
     return runBasicSafetyFilter(content, campfire);
   }
 
-  const client = createAnthropicClient(key);
-
-  // Add timeout to entire pipeline
-  const timeoutPromise = new Promise<never>((_, reject) => {
-    setTimeout(
-      () => reject(new Error("Moderation pipeline timed out")),
-      TIMEOUT_MS
-    );
-  });
-
   try {
+    const { provider, usingFallback } = await createProviderWithFallback();
+
+    if (usingFallback) {
+      console.log(
+        `[moderation] Using fallback provider for content moderation`
+      );
+    }
+
+    // Add timeout to entire pipeline — Ollama needs more time
+    const timeoutMs = providerType.includes("ollama") ? 20000 : TIMEOUT_MS;
+    const timeoutPromise = new Promise<never>((_, reject) => {
+      setTimeout(
+        () => reject(new Error("Moderation pipeline timed out")),
+        timeoutMs
+      );
+    });
+
     return await Promise.race([
-      runModerationPipeline(client, content, campfire),
+      runModerationPipeline(provider, content, campfire),
       timeoutPromise,
     ]);
   } catch (error) {
@@ -331,7 +351,7 @@ export async function moderateContentWithAI(
           confidence: 0,
           reasoning: `Pipeline error: ${error instanceof Error ? error.message : "Unknown error"}`,
           agent_level: "platform",
-          ai_model: AI_MODEL,
+          ai_model: process.env.AI_PROVIDER ?? "unknown",
           prompt_version: 1,
           injection_detected: false,
           injection_patterns: [],

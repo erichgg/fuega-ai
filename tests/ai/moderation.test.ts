@@ -293,101 +293,113 @@ describe("moderation.service", () => {
   });
 
   describe("runModerationPipeline", () => {
-    function createMockClient(responses: string[]) {
+    function createMockProvider(responses: string[]) {
       let callIndex = 0;
+      const callModerationFn = vi.fn().mockImplementation(() => {
+        const text = responses[callIndex] ?? '{"decision": "approve", "reason": "OK"}';
+        callIndex++;
+        // Parse and validate like the real providers do
+        try {
+          const cleaned = text
+            .replace(/^```(?:json)?\s*/i, "")
+            .replace(/\s*```$/i, "")
+            .trim();
+          const parsed = JSON.parse(cleaned);
+          return Promise.resolve({
+            decision: parsed.decision as "approve" | "remove" | "flag",
+            reason: parsed.reason as string,
+            valid: true,
+          });
+        } catch {
+          return Promise.resolve({
+            decision: "flag" as const,
+            reason: "Could not parse response",
+            valid: false,
+          });
+        }
+      });
       return {
-        messages: {
-          create: vi.fn().mockImplementation(() => {
-            const text = responses[callIndex] ?? '{"decision": "approve", "reason": "OK"}';
-            callIndex++;
-            return Promise.resolve({
-              content: [{ type: "text", text }],
-            });
-          }),
-        },
+        name: "mock-provider",
+        model: "mock-model",
+        callModeration: callModerationFn,
+        isAvailable: vi.fn().mockResolvedValue(true),
       };
     }
 
     it("runs platform → campfire pipeline", async () => {
-      const client = createMockClient([
+      const provider = createMockProvider([
         '{"decision": "approve", "reason": "No Principles violation"}',
         '{"decision": "approve", "reason": "On topic"}',
       ]);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const result = await runModerationPipeline(client as any, normalContent, mockCampfire);
+      const result = await runModerationPipeline(provider, normalContent, mockCampfire);
       expect(result.final_decision).toBe("approved");
       expect(result.tier_decisions).toHaveLength(2);
       expect(result.tier_decisions[0]!.agent_level).toBe("platform");
       expect(result.tier_decisions[1]!.agent_level).toBe("campfire");
       expect(result.stopped_at_tier).toBeNull();
-      expect(client.messages.create).toHaveBeenCalledTimes(2);
+      expect(provider.callModeration).toHaveBeenCalledTimes(2);
     });
 
     it("stops at platform tier if platform removes", async () => {
-      const client = createMockClient([
+      const provider = createMockProvider([
         '{"decision": "remove", "reason": "Violates platform ToS"}',
       ]);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const result = await runModerationPipeline(client as any, normalContent, mockCampfire);
+      const result = await runModerationPipeline(provider, normalContent, mockCampfire);
       expect(result.final_decision).toBe("removed");
       expect(result.tier_decisions).toHaveLength(1);
       expect(result.stopped_at_tier).toBe("platform");
-      expect(client.messages.create).toHaveBeenCalledTimes(1);
+      expect(provider.callModeration).toHaveBeenCalledTimes(1);
     });
 
     it("stops at campfire tier if campfire removes", async () => {
-      const client = createMockClient([
+      const provider = createMockProvider([
         '{"decision": "approve", "reason": "OK"}',
         '{"decision": "remove", "reason": "Off-topic for f/technology"}',
       ]);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const result = await runModerationPipeline(client as any, normalContent, mockCampfire);
+      const result = await runModerationPipeline(provider, normalContent, mockCampfire);
       expect(result.final_decision).toBe("removed");
       expect(result.stopped_at_tier).toBe("campfire");
     });
 
     it("returns flagged if any tier flags and none remove", async () => {
-      const client = createMockClient([
+      const provider = createMockProvider([
         '{"decision": "flag", "reason": "Ambiguous content"}',
         '{"decision": "approve", "reason": "OK by campfire rules"}',
       ]);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const result = await runModerationPipeline(client as any, normalContent, mockCampfire);
+      const result = await runModerationPipeline(provider, normalContent, mockCampfire);
       expect(result.final_decision).toBe("flagged");
       expect(result.tier_decisions).toHaveLength(2);
     });
 
     it("overrides approve to flagged when injection is detected", async () => {
-      const client = createMockClient([
+      const provider = createMockProvider([
         '{"decision": "approve", "reason": "OK"}',
         '{"decision": "approve", "reason": "OK"}',
       ]);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const result = await runModerationPipeline(client as any, maliciousContent, mockCampfire);
+      const result = await runModerationPipeline(provider, maliciousContent, mockCampfire);
       expect(result.final_decision).toBe("flagged");
       expect(result.tier_decisions.some((d) => d.injection_detected)).toBe(true);
     });
 
     it("handles API errors gracefully (flags on error)", async () => {
-      const client = {
-        messages: {
-          create: vi.fn().mockRejectedValue(new Error("API rate limited")),
-        },
+      const provider = {
+        name: "mock-provider",
+        model: "mock-model",
+        callModeration: vi.fn().mockRejectedValue(new Error("API rate limited")),
+        isAvailable: vi.fn().mockResolvedValue(true),
       };
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const result = await runModerationPipeline(client as any, normalContent, mockCampfire);
+      const result = await runModerationPipeline(provider, normalContent, mockCampfire);
       // Platform tier fails, returns flagged
       expect(result.tier_decisions[0]!.decision).toBe("flagged");
       expect(result.tier_decisions[0]!.reasoning).toContain("API rate limited");
     });
 
     it("tracks processing time for each tier", async () => {
-      const client = createMockClient([
+      const provider = createMockProvider([
         '{"decision": "approve", "reason": "OK"}',
         '{"decision": "approve", "reason": "OK"}',
       ]);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const result = await runModerationPipeline(client as any, normalContent, mockCampfire);
+      const result = await runModerationPipeline(provider, normalContent, mockCampfire);
       expect(result.total_time_ms).toBeGreaterThanOrEqual(0);
       for (const tier of result.tier_decisions) {
         expect(tier.processing_time_ms).toBeGreaterThanOrEqual(0);
