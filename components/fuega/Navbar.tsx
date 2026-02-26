@@ -138,6 +138,41 @@ function ShortcutsHelp({
   open: boolean;
   onClose: () => void;
 }) {
+  const dialogRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    if (!open) return;
+    const el = dialogRef.current;
+    if (!el) return;
+
+    // Auto-focus the dialog
+    el.focus();
+
+    const focusables = el.querySelectorAll<HTMLElement>(
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+    );
+    const first = focusables[0];
+    const last = focusables[focusables.length - 1];
+
+    function trapFocus(e: KeyboardEvent) {
+      if (e.key !== "Tab") return;
+      if (e.shiftKey) {
+        if (document.activeElement === first) {
+          e.preventDefault();
+          last?.focus();
+        }
+      } else {
+        if (document.activeElement === last) {
+          e.preventDefault();
+          first?.focus();
+        }
+      }
+    }
+
+    el.addEventListener("keydown", trapFocus);
+    return () => el.removeEventListener("keydown", trapFocus);
+  }, [open]);
+
   if (!open) return null;
 
   const shortcuts = [
@@ -157,7 +192,9 @@ function ShortcutsHelp({
       aria-label="Keyboard shortcuts"
     >
       <div
-        className="bg-coal border border-lava-hot/20 w-full max-w-sm mx-4 p-6"
+        ref={dialogRef}
+        tabIndex={-1}
+        className="bg-coal border border-lava-hot/20 w-full max-w-sm mx-4 p-6 outline-none"
         onClick={(e) => e.stopPropagation()}
       >
         <h2 className="text-lg font-semibold text-foreground mb-4">
@@ -294,20 +331,24 @@ export function Navbar({ onOpenSidebar }: NavbarProps = {}) {
 
           {/* Desktop nav links */}
           <div className="hidden md:flex items-center gap-1">
-            {navLinks.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className={cn(
-                  "px-3 py-1.5 text-sm font-mono transition-colors",
-                  pathname === link.href || pathname?.startsWith(link.href + "/")
-                    ? "text-lava-hot"
-                    : "text-ash hover:text-lava-hot",
-                )}
-              >
-                {link.label}
-              </Link>
-            ))}
+            {navLinks.map((link) => {
+              const isActive = pathname === link.href || pathname?.startsWith(link.href + "/");
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  aria-current={isActive ? "page" : undefined}
+                  className={cn(
+                    "px-3 py-1.5 text-sm font-mono transition-colors",
+                    isActive
+                      ? "text-lava-hot"
+                      : "text-ash hover:text-lava-hot",
+                  )}
+                >
+                  {link.label}
+                </Link>
+              );
+            })}
           </div>
 
           {/* Right actions */}
@@ -447,6 +488,7 @@ export function Navbar({ onOpenSidebar }: NavbarProps = {}) {
                   key={link.href}
                   href={link.href}
                   onClick={() => setMobileOpen(false)}
+                  aria-current={active ? "page" : undefined}
                   className={cn(
                     "flex items-center gap-3 py-2 text-sm font-mono tracking-wide truncate transition-colors",
                     active

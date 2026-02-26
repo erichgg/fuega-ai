@@ -9,6 +9,8 @@ import {
   CommandPalette,
   CommandPaletteProvider,
 } from "@/components/fuega/command-palette";
+import { Toaster } from "sonner";
+import { BottomNav } from "@/components/fuega/bottom-nav";
 import { useAuth } from "@/lib/contexts/auth-context";
 import { api, type Campfire } from "@/lib/api/client";
 
@@ -46,6 +48,13 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     <div className="min-h-screen bg-void flex flex-col">
       <Navbar onOpenSidebar={() => setSidebarOpen(true)} />
       <CommandPalette />
+      <Toaster
+        theme="dark"
+        position="bottom-right"
+        toastOptions={{
+          className: "bg-coal border-charcoal text-foreground font-mono text-sm",
+        }}
+      />
 
       {/* Sidebar drawer (mobile + menu button) */}
       <Sidebar
@@ -69,7 +78,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         {/* Main content — fills remaining space */}
         <main
           id="main-content"
-          className="flex-1 min-w-0 px-3 py-4 sm:px-6 lg:px-8"
+          className="flex-1 min-w-0 px-3 py-4 sm:px-6 lg:px-8 pb-20 md:pb-4"
           role="main"
         >
           <ErrorBoundary>{children}</ErrorBoundary>
@@ -77,6 +86,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       </div>
 
       <Footer />
+
+      {/* Mobile bottom navigation */}
+      <BottomNav />
     </div>
     </CommandPaletteProvider>
   );

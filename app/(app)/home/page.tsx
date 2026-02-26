@@ -9,6 +9,8 @@ import { ReportDialog } from "@/components/fuega/report-dialog";
 import { FeedToolbar } from "@/components/fuega/feed-sort";
 import { FeedSkeleton } from "@/components/fuega/page-skeleton";
 import { FeedRightRail } from "@/components/fuega/feed-right-rail";
+import { QuickComposer } from "@/components/fuega/quick-composer";
+import { WelcomeBanner } from "@/components/fuega/welcome-banner";
 import { useAuth } from "@/lib/contexts/auth-context";
 import { usePosts } from "@/lib/hooks/usePosts";
 import { useOptimisticVoting } from "@/lib/hooks/useOptimisticVoting";
@@ -22,7 +24,7 @@ export default function HomeFeedPage() {
   const [sort, setSort] = React.useState<SortOption>("hot");
   const [timeRange, setTimeRange] = React.useState<"all" | "today" | "week" | "month">("all");
   const [postType, setPostType] = React.useState<"all" | "text" | "link" | "image">("all");
-  const { posts, loading, error, hasMore, loadMore } = usePosts({ sort, timeRange, postType });
+  const { posts, loading, error, hasMore, loadMore, refresh } = usePosts({ sort, timeRange, postType });
   const { handleVote, getVote, getDelta } = useOptimisticVoting();
   const sentinelRef = useInfiniteScroll({
     hasMore,
@@ -46,6 +48,8 @@ export default function HomeFeedPage() {
     <div className="flex gap-6">
       {/* Main feed */}
       <div className="flex-1 min-w-0">
+        <WelcomeBanner className="mb-4" />
+        <QuickComposer className="mb-4" />
         <div className="flex items-center justify-between gap-4">
           <FeedToolbar
             sort={sort}
@@ -72,7 +76,7 @@ export default function HomeFeedPage() {
             <div className="py-16 text-center">
               <p className="text-red-400">{error}</p>
               <button
-                onClick={() => window.location.reload()}
+                onClick={() => refresh()}
                 className="mt-2 text-xs text-flame-400 hover:underline"
               >
                 Try again
@@ -80,19 +84,29 @@ export default function HomeFeedPage() {
             </div>
           ) : postCards.length === 0 ? (
             <div className="py-16 text-center">
-              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-coal border border-charcoal">
-                <Plus className="h-7 w-7 text-smoke" />
+              <div className="mx-auto mb-6 text-5xl" aria-hidden="true">
+                🔥
               </div>
-              <p className="text-lg font-medium text-ash">No posts yet</p>
-              <p className="mt-1 text-sm text-smoke">
-                Be the first to start a conversation.
+              <p className="text-lg font-medium text-foreground">
+                The hearth is quiet&hellip;
+              </p>
+              <p className="mt-1 text-sm text-ash">
+                No posts yet. Light the first spark and get the conversation going.
               </p>
               <Link
                 href={user ? "/submit" : "/signup"}
-                className="mt-4 inline-flex items-center gap-1.5 bg-flame-500 px-5 py-2 text-sm font-medium text-white transition-colors hover:bg-flame-600"
+                className="mt-5 inline-flex items-center gap-1.5 bg-flame-500 px-5 py-2 text-sm font-medium text-white transition-colors hover:bg-flame-600 rounded-md"
               >
-                {user ? "Create a post" : "Sign up to post"}
+                <Plus className="h-4 w-4" />
+                {user ? "Start a conversation" : "Sign up to post"}
               </Link>
+              <p className="mt-4 text-xs text-smoke">
+                Or{" "}
+                <Link href="/campfires" className="text-flame-400 hover:underline">
+                  explore campfires
+                </Link>{" "}
+                to find your community.
+              </p>
             </div>
           ) : (
             <>

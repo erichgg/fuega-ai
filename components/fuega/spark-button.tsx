@@ -43,7 +43,7 @@ export function SparkButton({
           onClick={() => handleVote("spark")}
           disabled={disabled}
           className={cn(
-            "group relative flex items-center gap-1 rounded-md px-2 py-1 transition-all hover:bg-flame-500/10",
+            "group relative flex items-center gap-1 rounded-md px-3 py-2 min-h-[44px] min-w-[44px] transition-all hover:bg-flame-500/10",
             userVote === "sparked" && "text-flame-400",
             userVote !== "sparked" && "text-ash hover:text-flame-400",
             disabled && "cursor-not-allowed opacity-50",
@@ -82,7 +82,7 @@ export function SparkButton({
           onClick={() => handleVote("douse")}
           disabled={disabled}
           className={cn(
-            "group relative flex items-center gap-1 rounded-md px-2 py-1 transition-all hover:bg-blue-500/10",
+            "group relative flex items-center gap-1 rounded-md px-3 py-2 min-h-[44px] min-w-[44px] transition-all hover:bg-blue-500/10",
             userVote === "doused" && "text-blue-400",
             userVote !== "doused" && "text-ash hover:text-blue-400",
             disabled && "cursor-not-allowed opacity-50",

@@ -18,6 +18,7 @@ import { useOptimisticVoting } from "@/lib/hooks/useOptimisticVoting";
 import { useInfiniteScroll } from "@/lib/hooks/useInfiniteScroll";
 import { toPostCardData } from "@/lib/adapters/post-adapter";
 import { CampfireAbout } from "@/components/fuega/campfire-about";
+import { QuickComposer } from "@/components/fuega/quick-composer";
 
 type SortOption = "hot" | "new" | "top" | "rising";
 type ViewMode = "posts" | "chat";
@@ -294,6 +295,7 @@ export default function CampfirePage() {
       {/* Posts view */}
       {viewMode === "posts" && (
         <>
+          <QuickComposer campfire={campfire.name} className="mt-3" />
           <div className="mt-3">
             <FeedToolbar
               sort={sort}

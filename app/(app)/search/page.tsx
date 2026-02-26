@@ -225,6 +225,17 @@ function SearchPageInner() {
             <p className="mt-1 text-xs text-smoke">
               Try different keywords or check your spelling.
             </p>
+            <div className="mt-4 flex flex-wrap justify-center gap-2">
+              {["campfires", "governance", "badges"].map((term) => (
+                <Link
+                  key={term}
+                  href={`/search?q=${term}`}
+                  className="rounded-full border border-charcoal px-3 py-1 text-xs text-smoke hover:text-flame-400 hover:border-flame-400/30 transition-colors"
+                >
+                  Try &ldquo;{term}&rdquo;
+                </Link>
+              ))}
+            </div>
           </div>
         ) : (
           results.map((result) => (

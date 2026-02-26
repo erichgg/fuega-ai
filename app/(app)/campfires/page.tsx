@@ -15,9 +15,12 @@ export default function CampfiresPage() {
   const [error, setError] = React.useState<string | null>(null);
   const [search, setSearch] = React.useState("");
   const [sort, setSort] = React.useState<"members" | "newest" | "name">("members");
+  const [retryCount, setRetryCount] = React.useState(0);
 
   React.useEffect(() => {
     let cancelled = false;
+    setLoading(true);
+    setError(null);
     async function load() {
       try {
         const data = await api.get<{ campfires: Campfire[] }>("/api/campfires", { limit: 100 });
@@ -34,7 +37,7 @@ export default function CampfiresPage() {
     }
     load();
     return () => { cancelled = true; };
-  }, []);
+  }, [retryCount]);
 
   const filtered = search.trim()
     ? campfires.filter(
@@ -142,7 +145,7 @@ export default function CampfiresPage() {
           <div className="py-16 text-center">
             <p className="text-red-400">{error}</p>
             <button
-              onClick={() => window.location.reload()}
+              onClick={() => setRetryCount((c) => c + 1)}
               className="mt-2 text-xs text-flame-400 hover:underline"
             >
               Try again

@@ -34,6 +34,7 @@ import { usePost } from "@/lib/hooks/usePosts";
 import { useComments, useCreateComment } from "@/lib/hooks/useComments";
 import { useVoting } from "@/lib/hooks/useVoting";
 import { api, ApiError } from "@/lib/api/client";
+import { toast } from "sonner";
 import { toPostCardData, flattenCommentsForDisplay } from "@/lib/adapters/post-adapter";
 import { timeAgo } from "@/lib/utils/time-ago";
 
@@ -79,6 +80,9 @@ export default function PostDetailPage() {
 
   // Delete state
   const [deleting, setDeleting] = React.useState(false);
+
+  // Share copied state
+  const [shareCopied, setShareCopied] = React.useState(false);
 
   // Report dialog state
   const [reportOpen, setReportOpen] = React.useState(false);
@@ -126,6 +130,7 @@ export default function PostDetailPage() {
         body: editBody || null,
       });
       setEditing(false);
+      toast.success("Post updated");
       await refreshPost();
     } catch (err) {
       setEditError(err instanceof ApiError ? err.message : "Failed to save changes");
@@ -143,9 +148,10 @@ export default function PostDetailPage() {
     setDeleting(true);
     try {
       await api.delete(`/api/posts/${postId}`);
+      toast.success("Post deleted");
       router.push(`/f/${campfireSlug}`);
     } catch (err) {
-      alert(err instanceof ApiError ? err.message : "Failed to delete post");
+      toast.error(err instanceof ApiError ? err.message : "Failed to delete post");
       setDeleting(false);
     }
   };
@@ -167,6 +173,7 @@ export default function PostDetailPage() {
     } catch {
       setPostVote(current);
       setPostSparkDelta(0);
+      toast.error("Failed to vote");
     }
   };
 
@@ -186,6 +193,7 @@ export default function PostDetailPage() {
       await vote("comment", commentId, voteType);
     } catch {
       setCommentVotes((prev) => ({ ...prev, [commentId]: current }));
+      toast.error("Failed to vote");
     }
   };
 
@@ -383,12 +391,18 @@ export default function PostDetailPage() {
             {post.commentCount}
           </span>
           <button
-            onClick={() => { navigator.clipboard.writeText(window.location.href); }}
+            onClick={() => {
+              navigator.clipboard.writeText(window.location.href).then(() => {
+                setShareCopied(true);
+                toast.success("Link copied!");
+                setTimeout(() => setShareCopied(false), 2000);
+              });
+            }}
             className="flex items-center gap-1.5 transition-colors hover:text-foreground"
             aria-label="Share post"
           >
-            <Share2 className="h-3.5 w-3.5" />
-            Share
+            {shareCopied ? <Check className="h-3.5 w-3.5" /> : <Share2 className="h-3.5 w-3.5" />}
+            {shareCopied ? "Copied!" : "Share"}
           </button>
           <button
             onClick={() => setReportOpen(true)}

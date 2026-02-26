@@ -3,6 +3,7 @@ import { Inter, JetBrains_Mono } from "next/font/google";
 import { AuthProvider } from "@/lib/contexts/auth-context";
 import { ThemeProvider } from "@/lib/contexts/theme-context";
 import { NotificationProvider } from "@/lib/contexts/notification-context";
+import { Toaster } from "sonner";
 import "./globals.css";
 
 const inter = Inter({
@@ -66,6 +67,13 @@ export default function RootLayout({
           <AuthProvider>
             <NotificationProvider>{children}</NotificationProvider>
           </AuthProvider>
+          <Toaster
+            theme="dark"
+            position="bottom-right"
+            toastOptions={{
+              className: "bg-coal border-charcoal text-foreground font-mono text-sm",
+            }}
+          />
         </ThemeProvider>
       </body>
     </html>

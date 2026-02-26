@@ -40,7 +40,7 @@ const postTypeOptions: { value: PostType; label: string; icon: typeof Filter }[]
   { value: "image", label: "Images", icon: ImageIcon },
 ];
 
-const pillClass = "flex items-center gap-1 px-2 py-1 text-[11px] font-mono rounded-md transition-colors cursor-pointer whitespace-nowrap";
+const pillClass = "flex items-center gap-1 px-2.5 py-1.5 min-h-[36px] text-[11px] font-mono rounded-md transition-colors cursor-pointer whitespace-nowrap shrink-0";
 const activeClass = "bg-coal text-flame-400";
 const inactiveClass = "text-smoke hover:text-ash";
 
@@ -58,7 +58,7 @@ export function FeedToolbar({
       role="group"
       aria-label="Feed controls"
       className={cn(
-        "flex flex-wrap items-center gap-1 rounded-lg border border-charcoal bg-charcoal/50 p-1",
+        "flex flex-nowrap items-center gap-1 rounded-lg border border-charcoal bg-charcoal/50 p-1 overflow-x-auto scrollbar-hide",
         className,
       )}
     >
@@ -79,7 +79,7 @@ export function FeedToolbar({
       })}
 
       {/* Separator */}
-      <div className="h-4 w-px bg-charcoal/80 mx-1 hidden sm:block" />
+      <div className="h-4 w-px bg-charcoal/80 mx-1 shrink-0 hidden sm:block" />
 
       {/* Time range pills */}
       {timeRangeOptions.map((opt) => (
@@ -94,7 +94,7 @@ export function FeedToolbar({
       ))}
 
       {/* Separator */}
-      <div className="h-4 w-px bg-charcoal/80 mx-1 hidden sm:block" />
+      <div className="h-4 w-px bg-charcoal/80 mx-1 shrink-0 hidden sm:block" />
 
       {/* Post type pills */}
       {postTypeOptions.map((opt) => {
@@ -129,7 +129,7 @@ export function FeedSort({ active, onChange, className }: FeedSortProps) {
       role="group"
       aria-label="Sort posts by"
       className={cn(
-        "flex items-center gap-1 rounded-lg border border-charcoal bg-charcoal/50 p-1",
+        "flex flex-nowrap items-center gap-1 rounded-lg border border-charcoal bg-charcoal/50 p-1 overflow-x-auto scrollbar-hide",
         className,
       )}
     >
@@ -141,7 +141,7 @@ export function FeedSort({ active, onChange, className }: FeedSortProps) {
             onClick={() => onChange(opt.value)}
             aria-pressed={active === opt.value}
             className={cn(
-              "flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors",
+              "flex items-center gap-1.5 rounded-md px-3 py-1.5 min-h-[36px] text-xs font-medium transition-colors shrink-0",
               active === opt.value
                 ? "bg-charcoal text-flame-400"
                 : "text-smoke hover:text-ash",

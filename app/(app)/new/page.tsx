@@ -10,6 +10,7 @@ import { FeedSkeleton } from "@/components/fuega/page-skeleton";
 import { FeedSort } from "@/components/fuega/feed-sort";
 import { FeedFilters } from "@/components/fuega/feed-filters";
 import { FeedRightRail } from "@/components/fuega/feed-right-rail";
+import { QuickComposer } from "@/components/fuega/quick-composer";
 import { useAuth } from "@/lib/contexts/auth-context";
 import { usePosts } from "@/lib/hooks/usePosts";
 import { useOptimisticVoting } from "@/lib/hooks/useOptimisticVoting";
@@ -22,7 +23,7 @@ export default function NewPostsPage() {
   const [timeRange, setTimeRange] = React.useState<"all" | "today" | "week" | "month">("all");
   const [postType, setPostType] = React.useState<"all" | "text" | "link" | "image">("all");
 
-  const { posts, loading, error, hasMore, loadMore } = usePosts({ sort, timeRange, postType });
+  const { posts, loading, error, hasMore, loadMore, refresh } = usePosts({ sort, timeRange, postType });
   const { handleVote, getVote, getDelta } = useOptimisticVoting();
   const [reportPostId, setReportPostId] = React.useState<string | null>(null);
   const sentinelRef = useInfiniteScroll({ hasMore, loading, onLoadMore: loadMore });
@@ -40,6 +41,7 @@ export default function NewPostsPage() {
     <div className="flex gap-6">
       {/* Main feed */}
       <div className="flex-1 min-w-0">
+        <QuickComposer className="mb-4" />
         <div className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-2">
             <Clock className="h-5 w-5 text-flame-400" />
@@ -76,7 +78,7 @@ export default function NewPostsPage() {
             <div className="py-16 text-center">
               <p className="text-red-400">{error}</p>
               <button
-                onClick={() => window.location.reload()}
+                onClick={() => refresh()}
                 className="mt-2 text-xs text-flame-400 hover:underline"
               >
                 Try again
