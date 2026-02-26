@@ -246,6 +246,7 @@ export default function ModLogPage() {
               <details
                 key={entry.id}
                 className="group rounded-lg border border-charcoal bg-charcoal/50 transition-colors hover:border-charcoal"
+                aria-label={`${config.label} — ${entry.content_type} in ${entry.campfire_name}`}
               >
                 <summary className="flex cursor-pointer items-center gap-3 p-3 [&::-webkit-details-marker]:hidden">
                   <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-charcoal">

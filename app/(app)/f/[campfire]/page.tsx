@@ -31,6 +31,7 @@ export default function CampfirePage() {
   // Fetch campfire by name (slug)
   const {
     campfire,
+    isMember,
     loading: campfireLoading,
     error: campfireError,
     refresh: refreshCampfire,
@@ -64,17 +65,14 @@ export default function CampfirePage() {
 
   // Membership
   const { join, leave, loading: membershipLoading, error: membershipError } = useCampfireMembership();
-  const [joined, setJoined] = React.useState(false);
 
   const handleToggleMembership = async () => {
     if (!campfire) return;
     try {
-      if (joined) {
+      if (isMember) {
         await leave(campfire.id);
-        setJoined(false);
       } else {
         await join(campfire.id);
-        setJoined(true);
       }
       refreshCampfire();
     } catch {
@@ -148,22 +146,22 @@ export default function CampfirePage() {
             </div>
             {user && (
               <Button
-                variant={joined ? "outline" : "spark"}
+                variant={isMember ? "outline" : "spark"}
                 size="sm"
                 onClick={handleToggleMembership}
                 disabled={membershipLoading}
                 className={
-                  joined
+                  isMember
                     ? "border-white/30 text-white hover:border-red-500/50 hover:text-red-400 bg-black/30 backdrop-blur-sm"
                     : "shadow-lg"
                 }
                 style={
-                  !joined && campfire.theme_color
+                  !isMember && campfire.theme_color
                     ? { backgroundColor: campfire.theme_color }
                     : undefined
                 }
               >
-                {membershipLoading ? "..." : joined ? "Joined" : "Join"}
+                {membershipLoading ? "..." : isMember ? "Joined" : "Join"}
               </Button>
             )}
           </div>

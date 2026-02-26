@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Heart, Shield, Zap, Star } from "lucide-react";
+import { PublicNav } from "@/components/fuega/public-nav";
 
 export const metadata: Metadata = {
   title: "Supporters",
@@ -54,7 +55,8 @@ const tiers = [
 
 export default function SupportersPage() {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-void">
+      <PublicNav />
       <div className="mx-auto max-w-4xl px-4 py-16">
         <div className="text-center">
           <h1 className="text-3xl font-bold text-foreground sm:text-4xl">
@@ -104,7 +106,7 @@ export default function SupportersPage() {
         <div className="mt-12 rounded-lg border border-charcoal bg-coal/50 p-6 text-center">
           <p className="text-sm text-ash">
             Supporter tiers are coming soon. In the meantime, the best way to
-            support fuega.ai is to use it, create communities, and invite others.
+            support fuega.ai is to use it, create campfires, and invite others.
           </p>
         </div>
 

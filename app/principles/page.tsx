@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Shield, Scale, Eye, Users, Lock, BookOpen } from "lucide-react";
+import { PublicNav } from "@/components/fuega/public-nav";
 
 export const metadata: Metadata = {
   title: "Principles",
@@ -54,7 +55,8 @@ const principles = [
 
 export default function PrinciplesPage() {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-void">
+      <PublicNav />
       <div className="mx-auto max-w-3xl px-4 py-16">
         <div className="text-center">
           <h1 className="text-3xl font-bold text-foreground sm:text-4xl">

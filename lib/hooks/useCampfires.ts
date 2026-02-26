@@ -93,6 +93,7 @@ export function useCampfires(opts: UseCampfiresOptions = {}): UseCampfiresReturn
 
 interface UseCampfireReturn {
   campfire: Campfire | null;
+  isMember: boolean;
   loading: boolean;
   error: string | null;
   refresh: () => Promise<void>;
@@ -100,6 +101,7 @@ interface UseCampfireReturn {
 
 export function useCampfire(campfireId: string | undefined): UseCampfireReturn {
   const [campfire, setCampfire] = useState<Campfire | null>(null);
+  const [isMember, setIsMember] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -108,8 +110,9 @@ export function useCampfire(campfireId: string | undefined): UseCampfireReturn {
     setLoading(true);
     setError(null);
     try {
-      const data = await api.get<{ campfire: Campfire }>(`/api/campfires/${campfireId}`);
+      const data = await api.get<{ campfire: Campfire; is_member?: boolean }>(`/api/campfires/${campfireId}`);
       setCampfire(data.campfire);
+      setIsMember(!!data.is_member);
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "Failed to load campfire");
     } finally {
@@ -122,14 +125,14 @@ export function useCampfire(campfireId: string | undefined): UseCampfireReturn {
     if (!campfireId) return;
     setLoading(true);
     setError(null);
-    api.get<{ campfire: Campfire }>(`/api/campfires/${campfireId}`)
-      .then((data) => { if (!cancelled) setCampfire(data.campfire); })
+    api.get<{ campfire: Campfire; is_member?: boolean }>(`/api/campfires/${campfireId}`)
+      .then((data) => { if (!cancelled) { setCampfire(data.campfire); setIsMember(!!data.is_member); } })
       .catch((err) => { if (!cancelled) setError(err instanceof ApiError ? err.message : "Failed to load campfire"); })
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
   }, [campfireId]);
 
-  return { campfire, loading, error, refresh };
+  return { campfire, isMember, loading, error, refresh };
 }
 
 // ---------------------------------------------------------------------------

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { PublicNav } from "@/components/fuega/public-nav";
 
 export const metadata: Metadata = {
   title: "Terms of Service",
@@ -12,7 +13,8 @@ export const metadata: Metadata = {
 
 export default function TermsPage() {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-void">
+      <PublicNav />
       <div className="mx-auto max-w-3xl px-4 py-16">
         <h1 className="text-3xl font-bold text-foreground sm:text-4xl">
           Terms of Service

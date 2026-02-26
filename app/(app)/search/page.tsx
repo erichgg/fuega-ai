@@ -289,7 +289,7 @@ function PostResult({ result }: { result: SearchResultItem }) {
       </div>
       {typeof result.meta?.sparkCount === "number" && (
         <span className="shrink-0 text-xs text-flame-400 font-mono mt-1">
-          {result.meta.sparkCount} sparks
+          {result.meta.sparkCount} glow
         </span>
       )}
     </Link>

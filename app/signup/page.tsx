@@ -81,7 +81,7 @@ export default function SignupPage() {
   };
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center bg-background px-4 py-12 overflow-hidden">
+    <div className="relative flex min-h-screen items-center justify-center bg-void px-4 py-12 overflow-hidden">
       <div className="absolute top-4 right-4 z-10">
         <ThemeToggle />
       </div>

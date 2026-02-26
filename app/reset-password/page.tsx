@@ -52,7 +52,7 @@ function ResetPasswordInner() {
 
   if (!token) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-background px-4">
+      <div className="flex min-h-screen items-center justify-center bg-void px-4">
         <div className="w-full max-w-sm text-center">
           <Link href="/">
             <FlameLogo size="lg" />
@@ -79,7 +79,7 @@ function ResetPasswordInner() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
+    <div className="flex min-h-screen items-center justify-center bg-void px-4">
       <div className="w-full max-w-sm">
         <div className="text-center">
           <Link href="/">

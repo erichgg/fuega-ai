@@ -6,6 +6,7 @@ import { updateCampfireSchema } from "@/lib/validation/campfires";
 import {
   getCampfireById,
   getCampfireByName,
+  getMembership,
   updateCampfire,
   ServiceError,
 } from "@/lib/services/campfires.service";
@@ -48,7 +49,15 @@ export async function GET(req: Request, { params }: RouteParams) {
       );
     }
 
-    return NextResponse.json({ campfire });
+    // Check if authenticated user is a member
+    let is_member = false;
+    const user = await authenticate(req);
+    if (user) {
+      const membership = await getMembership(user.userId, campfire.id);
+      is_member = !!membership;
+    }
+
+    return NextResponse.json({ campfire, is_member });
   } catch (err) {
     console.error("Get campfire error:", err);
     return NextResponse.json(

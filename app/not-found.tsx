@@ -4,7 +4,7 @@ import { FlameLogo } from "@/components/fuega/flame-logo";
 
 export default function NotFound() {
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-background px-4">
+    <div className="flex min-h-screen flex-col items-center justify-center bg-void px-4">
       <FlameLogo size="lg" />
       <div className="mt-8 text-center">
         <h1 className="text-6xl font-bold text-ash">404</h1>

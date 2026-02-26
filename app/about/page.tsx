@@ -165,8 +165,8 @@ function CellIcon({ value }: { value: CellValue }) {
 
 export default function AboutPage() {
   return (
-    <div className="min-h-screen bg-background">
-      <nav className="sticky top-0 z-50 border-b border-charcoal bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <div className="min-h-screen bg-void">
+      <nav className="sticky top-0 z-50 border-b border-charcoal bg-void/95 backdrop-blur supports-[backdrop-filter]:bg-void/60">
         <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4 2xl:px-8">
           <Link href="/">
             <FlameLogo size="sm" />

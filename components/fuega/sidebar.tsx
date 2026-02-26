@@ -55,9 +55,7 @@ const mainLinks: SidebarLink[] = [
 ];
 
 const discoverLinks: SidebarLink[] = [
-  { icon: Users, label: "Campfires", href: "/campfires" },
   { icon: Bot, label: "Mod Log", href: "/mod-log" },
-  { icon: Vote, label: "Governance", href: "/governance" },
 ];
 
 // ---------------------------------------------------------------------------

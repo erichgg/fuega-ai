@@ -85,11 +85,21 @@ export function CommentCard({
           <MarkdownContent content={comment.body} className="mt-1" />
 
           <div className="mt-1.5 flex items-center gap-3 text-xs text-smoke">
-            <button disabled className="flex items-center gap-1 opacity-50 cursor-not-allowed">
+            <button
+              className="flex items-center gap-1 opacity-50 cursor-not-allowed"
+              title="Reply coming soon"
+              aria-label="Reply — coming soon"
+              disabled
+            >
               <MessageSquare className="h-3 w-3" />
               Reply
             </button>
-            <button disabled className="flex items-center gap-1 opacity-50 cursor-not-allowed">
+            <button
+              className="flex items-center gap-1 opacity-50 cursor-not-allowed"
+              title="Report coming soon"
+              aria-label="Report — coming soon"
+              disabled
+            >
               <Flag className="h-3 w-3" />
               Report
             </button>
