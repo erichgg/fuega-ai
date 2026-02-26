@@ -7,6 +7,7 @@ import { SparkButton } from "@/components/fuega/spark-button";
 import { UserAvatar } from "@/components/fuega/user-avatar";
 import { ModBadge } from "@/components/fuega/mod-badge";
 import { MarkdownContent } from "@/components/fuega/markdown-content";
+import { VideoEmbed, isVideoUrl } from "@/components/fuega/video-embed";
 import { cn } from "@/lib/utils";
 import { timeAgo } from "@/lib/utils/time-ago";
 
@@ -79,6 +80,7 @@ export function PostCard({
   const showBody = !compact && post.body;
   const bodyIsLong = (post.body?.length ?? 0) > 200;
   const linkDomain = post.link_url ? extractDomain(post.link_url) : null;
+  const hasVideo = post.link_url ? isVideoUrl(post.link_url) : false;
 
   return (
     <article
@@ -153,7 +155,9 @@ export function PostCard({
             )}
           </div>
 
-          {post.image_url && (
+          {hasVideo && post.link_url ? (
+            <VideoEmbed url={post.link_url} compact className="h-20 w-32 flex-shrink-0" />
+          ) : post.image_url ? (
             <div className="relative h-20 w-20 flex-shrink-0 overflow-hidden rounded">
               <Image
                 src={post.image_url}
@@ -164,12 +168,15 @@ export function PostCard({
                 unoptimized
               />
             </div>
-          )}
+          ) : null}
         </div>
       )}
 
-      {/* Image thumbnail when body is absent but image exists */}
-      {!showBody && post.image_url && (
+      {/* Video/image thumbnail when body is absent */}
+      {!showBody && hasVideo && post.link_url && (
+        <VideoEmbed url={post.link_url} compact className="mt-1 h-20 w-32" />
+      )}
+      {!showBody && !hasVideo && post.image_url && (
         <div className="relative mt-1 h-20 w-20 overflow-hidden rounded">
           <Image
             src={post.image_url}

@@ -28,6 +28,7 @@ import { ModBadge } from "@/components/fuega/mod-badge";
 import { PostDetailSkeleton } from "@/components/fuega/page-skeleton";
 import { ReportDialog } from "@/components/fuega/report-dialog";
 import { MarkdownContent } from "@/components/fuega/markdown-content";
+import { VideoEmbed, isVideoUrl } from "@/components/fuega/video-embed";
 import { useAuth } from "@/lib/contexts/auth-context";
 import { usePost } from "@/lib/hooks/usePosts";
 import { useComments, useCreateComment } from "@/lib/hooks/useComments";
@@ -335,6 +336,36 @@ export default function PostDetailPage() {
 
             {post.body && (
               <MarkdownContent content={post.body} className="mt-3" />
+            )}
+
+            {/* Video embed for link posts */}
+            {rawPost?.url && isVideoUrl(rawPost.url) && (
+              <VideoEmbed url={rawPost.url} className="mt-3" />
+            )}
+
+            {/* Image display for image posts */}
+            {rawPost?.image_url && (
+              <div className="mt-3 overflow-hidden rounded-md border border-charcoal">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={rawPost.image_url}
+                  alt={post.title}
+                  className="max-h-[600px] w-full object-contain bg-black/20"
+                />
+              </div>
+            )}
+
+            {/* Link domain for link posts (non-video) */}
+            {rawPost?.url && !isVideoUrl(rawPost.url) && (
+              <a
+                href={rawPost.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-3 inline-flex items-center gap-1.5 text-sm text-flame-400 hover:underline font-mono"
+                onClick={(e) => e.stopPropagation()}
+              >
+                ↗ {(() => { try { return new URL(rawPost.url).hostname; } catch { return rawPost.url; } })()}
+              </a>
             )}
           </>
         )}
