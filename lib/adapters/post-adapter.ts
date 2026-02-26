@@ -114,10 +114,12 @@ export function toCommentCardData(comment: ApiComment): CommentCardData {
  */
 export interface CommentDisplayData {
   id: string;
+  parentId: string | null;
   body: string;
   author: string;
   sparkCount: number;
   replyCount: number;
+  totalDescendants: number;
   createdAt: string;
   depth: number;
   moderation?: {
@@ -135,25 +137,35 @@ export function flattenCommentsForDisplay(
   const tree = buildCommentTree(comments);
   const result: CommentDisplayData[] = [];
 
-  function walk(nodes: CommentCardData[], depth: number) {
+  function countDescendants(node: CommentCardData): number {
+    let count = 0;
+    for (const r of node.replies) {
+      count += 1 + countDescendants(r);
+    }
+    return count;
+  }
+
+  function walk(nodes: CommentCardData[], depth: number, parentId: string | null) {
     for (const node of nodes) {
       result.push({
         id: node.id,
+        parentId,
         body: node.body,
         author: node.author,
         sparkCount: node.sparkCount,
         replyCount: node.replies.length,
+        totalDescendants: countDescendants(node),
         createdAt: node.createdAt,
         depth,
         moderation: node.moderation,
       });
       if (node.replies.length > 0) {
-        walk(node.replies, depth + 1);
+        walk(node.replies, depth + 1, node.id);
       }
     }
   }
 
-  walk(tree, 0);
+  walk(tree, 0, null);
   return result;
 }
 

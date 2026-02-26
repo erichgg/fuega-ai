@@ -6,21 +6,31 @@ export function FeedSkeleton() {
       {Array.from({ length: 5 }).map((_, i) => (
         <div
           key={i}
-          className="flex gap-3 rounded-lg border border-charcoal bg-charcoal/50 p-3"
+          className="rounded-lg border border-charcoal bg-charcoal/50 p-3 space-y-2"
         >
-          <div className="flex flex-col items-center gap-1">
-            <Skeleton className="h-8 w-8 rounded-md" />
-            <Skeleton className="h-4 w-6" />
-            <Skeleton className="h-8 w-8 rounded-md" />
+          {/* Header: campfire chip + dot + avatar + username + dot + timestamp */}
+          <div className="flex items-center gap-1.5">
+            <Skeleton className="h-3 w-20 rounded-full" />
+            <Skeleton className="h-1 w-1 rounded-full" />
+            <Skeleton className="h-4 w-4 rounded-full" />
+            <Skeleton className="h-3 w-16" />
+            <Skeleton className="h-1 w-1 rounded-full" />
+            <Skeleton className="h-3 w-12" />
           </div>
-          <div className="flex-1 space-y-2">
-            <Skeleton className="h-3 w-48" />
-            <Skeleton className="h-4 w-full" />
-            <Skeleton className="h-3 w-3/4" />
-            <div className="flex gap-4 pt-1">
-              <Skeleton className="h-3 w-20" />
-              <Skeleton className="h-3 w-16" />
-            </div>
+          {/* Title */}
+          <Skeleton className="h-4 w-3/4" />
+          {/* Body preview */}
+          <div className="space-y-1">
+            <Skeleton className="h-3 w-full" />
+            <Skeleton className="h-3 w-5/6" />
+          </div>
+          {/* Action bar: spark/douse + divider + comments + share + report */}
+          <div className="flex items-center gap-3 pt-1">
+            <Skeleton className="h-3 w-16" />
+            <Skeleton className="h-3 w-px" />
+            <Skeleton className="h-3 w-14" />
+            <Skeleton className="h-3 w-10" />
+            <Skeleton className="h-3 w-10" />
           </div>
         </div>
       ))}

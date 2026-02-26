@@ -5,6 +5,10 @@ import { Navbar } from "@/components/fuega/Navbar";
 import { Sidebar, SidebarContent } from "@/components/fuega/sidebar";
 import { Footer } from "@/components/fuega/Footer";
 import { ErrorBoundary } from "@/components/fuega/error-boundary";
+import {
+  CommandPalette,
+  CommandPaletteProvider,
+} from "@/components/fuega/command-palette";
 import { useAuth } from "@/lib/contexts/auth-context";
 import { api, type Campfire } from "@/lib/api/client";
 
@@ -38,8 +42,10 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   }, []);
 
   return (
+    <CommandPaletteProvider>
     <div className="min-h-screen bg-void flex flex-col">
       <Navbar onOpenSidebar={() => setSidebarOpen(true)} />
+      <CommandPalette />
 
       {/* Sidebar drawer (mobile + menu button) */}
       <Sidebar
@@ -72,5 +78,6 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
       <Footer />
     </div>
+    </CommandPaletteProvider>
   );
 }

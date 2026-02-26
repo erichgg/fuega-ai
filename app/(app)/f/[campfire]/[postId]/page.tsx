@@ -22,10 +22,12 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { SparkButton } from "@/components/fuega/spark-button";
 import { CommentCard } from "@/components/fuega/comment-card";
+import { UserHoverCard } from "@/components/fuega/user-hover-card";
 import { UserAvatar } from "@/components/fuega/user-avatar";
 import { ModBadge } from "@/components/fuega/mod-badge";
 import { PostDetailSkeleton } from "@/components/fuega/page-skeleton";
 import { ReportDialog } from "@/components/fuega/report-dialog";
+import { MarkdownContent } from "@/components/fuega/markdown-content";
 import { useAuth } from "@/lib/contexts/auth-context";
 import { usePost } from "@/lib/hooks/usePosts";
 import { useComments, useCreateComment } from "@/lib/hooks/useComments";
@@ -79,6 +81,21 @@ export default function PostDetailPage() {
 
   // Report dialog state
   const [reportOpen, setReportOpen] = React.useState(false);
+
+  // Thread collapse state
+  const [collapsed, setCollapsed] = React.useState<Set<string>>(new Set());
+
+  const toggleCollapse = (commentId: string) => {
+    setCollapsed((prev) => {
+      const next = new Set(prev);
+      if (next.has(commentId)) {
+        next.delete(commentId);
+      } else {
+        next.add(commentId);
+      }
+      return next;
+    });
+  };
 
   // Convert to UI shapes
   const post = rawPost ? toPostCardData(rawPost) : null;
@@ -317,9 +334,7 @@ export default function PostDetailPage() {
             </h1>
 
             {post.body && (
-              <div className="mt-3 whitespace-pre-wrap text-sm leading-relaxed text-ash">
-                {post.body}
-              </div>
+              <MarkdownContent content={post.body} className="mt-3" />
             )}
           </>
         )}
@@ -442,14 +457,67 @@ export default function PostDetailPage() {
               <p className="text-sm text-smoke">No comments yet. Be the first to share your thoughts.</p>
             </div>
           ) : (
-            displayComments.map((comment) => (
-              <CommentCard
-                key={comment.id}
-                comment={comment}
-                userVote={commentVotes[comment.id] ?? null}
-                onVote={(v) => handleCommentVote(comment.id, v)}
-              />
-            ))
+            (() => {
+              // Build a set of comment IDs whose ancestors are collapsed
+              const hiddenIds = new Set<string>();
+              for (let i = 0; i < displayComments.length; i++) {
+                const c = displayComments[i]!;
+                if (collapsed.has(c.id)) {
+                  // Hide all subsequent comments with greater depth (descendants in flat list)
+                  for (let j = i + 1; j < displayComments.length; j++) {
+                    const next = displayComments[j]!;
+                    if (next.depth > c.depth) {
+                      hiddenIds.add(next.id);
+                    } else {
+                      break;
+                    }
+                  }
+                }
+              }
+
+              return displayComments.map((comment) => {
+                if (hiddenIds.has(comment.id)) return null;
+
+                const isCollapsed = collapsed.has(comment.id);
+
+                return (
+                  <div key={comment.id}>
+                    {isCollapsed ? (
+                      <button
+                        onClick={() => toggleCollapse(comment.id)}
+                        className="flex w-full items-center gap-1.5 py-2 text-left text-xs font-mono text-smoke transition-colors hover:text-ash"
+                        style={{ paddingLeft: `${Math.min(comment.depth, 6) * 1.5}rem` }}
+                      >
+                        <span className="text-smoke hover:text-flame-400">[+]</span>
+                        <span className="font-medium text-ash">{comment.author}</span>
+                        {" \u00b7 "}
+                        {comment.totalDescendants}{" "}
+                        {comment.totalDescendants === 1 ? "reply" : "replies"}
+                        {" \u00b7 click to expand"}
+                      </button>
+                    ) : (
+                      <CommentCard
+                        comment={comment}
+                        userVote={commentVotes[comment.id] ?? null}
+                        onVote={(v) => handleCommentVote(comment.id, v)}
+                        collapseToggle={
+                          comment.totalDescendants > 0 ? (
+                            <button
+                              onClick={() => toggleCollapse(comment.id)}
+                              className="shrink-0 text-xs font-mono text-smoke transition-colors hover:text-flame-400"
+                              aria-label="Collapse thread"
+                              title="Collapse thread"
+                            >
+                              [{"\u2013"}]
+                            </button>
+                          ) : undefined
+                        }
+                      />
+                    )}
+                  </div>
+                );
+              });
+            })()
           )}
         </div>
       </div>
