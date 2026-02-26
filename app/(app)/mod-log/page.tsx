@@ -153,7 +153,7 @@ export default function ModLogPage() {
   const currentPage = Math.floor(offset / PAGE_SIZE) + 1;
 
   return (
-    <div className="max-w-5xl">
+    <div>
       <div>
         <div className="flex items-center gap-3">
           <Bot className="h-6 w-6 text-flame-400" />

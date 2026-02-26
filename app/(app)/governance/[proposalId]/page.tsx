@@ -13,6 +13,8 @@ import {
   Bot,
   MessageSquare,
   Loader2,
+  Settings,
+  AlertTriangle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -22,6 +24,7 @@ import { cn } from "@/lib/utils";
 import { timeAgo } from "@/lib/utils/time-ago";
 import { api, ApiError } from "@/lib/api/client";
 import { useProposalVote } from "@/lib/hooks/useProposals";
+import type { GovernanceVariable } from "@/lib/hooks/useGovernanceVariables";
 
 type ProposalStatus = "discussion" | "voting" | "passed" | "rejected" | "executed";
 
@@ -30,6 +33,7 @@ interface ProposalDetail {
   title: string;
   description: string;
   campfire: string;
+  campfireId: string;
   proposalType: string;
   status: ProposalStatus;
   votesFor: number;
@@ -42,6 +46,8 @@ interface ProposalDetail {
   votingEndsAt: string;
   currentPrompt: string | null;
   proposedPrompt: string | null;
+  variableKey: string | null;
+  proposedValue: string | null;
 }
 
 
@@ -67,6 +73,11 @@ export default function ProposalDetailPage() {
   );
   const [voteError, setVoteError] = React.useState<string | null>(null);
   const { voteOnProposal, voting } = useProposalVote();
+
+  // Governance variable details for change_settings proposals
+  const [variableDetail, setVariableDetail] = React.useState<GovernanceVariable | null>(null);
+  const [currentSettingValue, setCurrentSettingValue] = React.useState<string | null>(null);
+  const [variableLoading, setVariableLoading] = React.useState(false);
 
   interface ApiProposalDetail {
     id: string;
@@ -96,6 +107,7 @@ export default function ProposalDetailPage() {
       title: p.title,
       description: p.description,
       campfire: p.campfire_name ?? "unknown",
+      campfireId: p.campfire_id,
       proposalType: p.proposal_type,
       status: (statusMap[p.status] ?? p.status) as ProposalStatus,
       votesFor: p.votes_for,
@@ -108,6 +120,8 @@ export default function ProposalDetailPage() {
       votingEndsAt: p.voting_ends_at,
       currentPrompt: (p.proposed_changes?.current_prompt as string) ?? null,
       proposedPrompt: (p.proposed_changes?.proposed_prompt as string) ?? null,
+      variableKey: (p.proposed_changes?.variable_key as string) ?? null,
+      proposedValue: (p.proposed_changes?.proposed_value as string) ?? null,
     };
   }, []);
 
@@ -153,6 +167,47 @@ export default function ProposalDetailPage() {
     fetchProposal();
     return () => { cancelled = true; };
   }, [proposalId, mapProposal]);
+
+  // Fetch governance variable details when proposal is a settings change
+  React.useEffect(() => {
+    if (!proposal?.variableKey) return;
+    let cancelled = false;
+    setVariableLoading(true);
+
+    async function fetchVariableDetails() {
+      try {
+        const varsRes = await api.get<{ variables: GovernanceVariable[] }>(
+          "/api/governance-variables",
+        );
+        if (cancelled) return;
+        const match = varsRes.variables.find((v) => v.key === proposal?.variableKey);
+        if (match) setVariableDetail(match);
+
+        // Try to fetch current campfire setting value
+        if (proposal?.campfireId) {
+          try {
+            const settingsRes = await api.get<{
+              settings: Array<{ key: string; value: string }>;
+            }>(`/api/campfires/${proposal.campfireId}/settings`);
+            if (cancelled) return;
+            const setting = settingsRes.settings.find(
+              (s) => s.key === proposal?.variableKey,
+            );
+            if (setting) setCurrentSettingValue(setting.value);
+          } catch {
+            // Fall back to variable default — currentSettingValue stays null
+          }
+        }
+      } catch {
+        // Non-critical — the proposal still renders without variable details
+      } finally {
+        if (!cancelled) setVariableLoading(false);
+      }
+    }
+
+    fetchVariableDetails();
+    return () => { cancelled = true; };
+  }, [proposal?.variableKey, proposal?.campfireId]);
 
   const handleVote = React.useCallback(async (vote: "for" | "against") => {
     if (voting) return;
@@ -231,6 +286,30 @@ export default function ProposalDetailPage() {
           >
             {proposal.status.charAt(0).toUpperCase() + proposal.status.slice(1)}
           </Badge>
+          <span>·</span>
+          <Badge
+            variant="outline"
+            className={cn(
+              "text-[10px] gap-1",
+              proposal.proposalType === "change_settings"
+                ? "bg-flame-400/10 text-flame-400 border-flame-400/30"
+                : proposal.proposalType === "addendum"
+                  ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/30"
+                  : "bg-violet-500/10 text-violet-400 border-violet-500/30",
+            )}
+          >
+            {proposal.proposalType === "change_settings" && (
+              <Settings className="h-2.5 w-2.5" />
+            )}
+            {proposal.proposalType === "modify_prompt" && (
+              <Bot className="h-2.5 w-2.5" />
+            )}
+            {proposal.proposalType === "change_settings"
+              ? "Settings Change"
+              : proposal.proposalType === "addendum"
+                ? "Addendum"
+                : "Modify Prompt"}
+          </Badge>
         </div>
 
         <h1 className="mt-2 text-xl font-bold text-foreground">
@@ -264,6 +343,133 @@ export default function ProposalDetailPage() {
                 &quot;{proposal.proposedPrompt}&quot;
               </p>
             </div>
+          </div>
+        )}
+
+        {/* Settings change */}
+        {proposal.variableKey && proposal.proposedValue !== null && (
+          <div className="mt-6 space-y-3">
+            <h3 className="flex items-center gap-2 text-sm font-medium text-ash">
+              <Settings className="h-4 w-4" />
+              Settings Change
+            </h3>
+
+            {variableLoading ? (
+              <div className="flex items-center gap-2 py-4 text-xs text-smoke">
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                Loading variable details...
+              </div>
+            ) : variableDetail ? (
+              <div className="space-y-3">
+                {/* Variable info */}
+                <div className="rounded-lg border border-charcoal bg-coal/50 p-3">
+                  <p className="text-sm font-medium text-foreground">
+                    {variableDetail.display_name}
+                  </p>
+                  <p className="mt-1 text-xs text-smoke">
+                    {variableDetail.description}
+                  </p>
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    <span className="inline-flex items-center rounded-md bg-charcoal px-2 py-0.5 text-[10px] font-medium text-smoke">
+                      Type: {variableDetail.data_type}
+                    </span>
+                    {variableDetail.min_value !== null && (
+                      <span className="inline-flex items-center rounded-md bg-charcoal px-2 py-0.5 text-[10px] font-medium text-smoke">
+                        Min: {variableDetail.min_value}
+                      </span>
+                    )}
+                    {variableDetail.max_value !== null && (
+                      <span className="inline-flex items-center rounded-md bg-charcoal px-2 py-0.5 text-[10px] font-medium text-smoke">
+                        Max: {variableDetail.max_value}
+                      </span>
+                    )}
+                    {variableDetail.allowed_values && variableDetail.allowed_values.length > 0 && (
+                      <span className="inline-flex items-center rounded-md bg-charcoal px-2 py-0.5 text-[10px] font-medium text-smoke">
+                        Options: {variableDetail.allowed_values.join(", ")}
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Current vs Proposed */}
+                <div className="rounded-lg border border-red-500/20 bg-red-500/5 p-3">
+                  <span className="text-[10px] font-semibold uppercase tracking-wider text-red-400/70">
+                    Current
+                  </span>
+                  <p className="mt-1 text-sm font-mono text-ash">
+                    {currentSettingValue ?? variableDetail.default_value}
+                    {!currentSettingValue && (
+                      <span className="ml-2 text-[10px] font-sans text-smoke">(default)</span>
+                    )}
+                  </p>
+                </div>
+                <div className="rounded-lg border border-green-500/20 bg-green-500/5 p-3">
+                  <span className="text-[10px] font-semibold uppercase tracking-wider text-green-400/70">
+                    Proposed
+                  </span>
+                  <p className="mt-1 text-sm font-mono text-ash">
+                    {proposal.proposedValue}
+                  </p>
+                </div>
+
+                {/* Bounds validation indicator */}
+                {(() => {
+                  const isWithinBounds = (() => {
+                    if (variableDetail.data_type === "integer") {
+                      const num = Number(proposal.proposedValue);
+                      if (isNaN(num)) return false;
+                      if (variableDetail.min_value !== null && num < Number(variableDetail.min_value)) return false;
+                      if (variableDetail.max_value !== null && num > Number(variableDetail.max_value)) return false;
+                      return true;
+                    }
+                    if (variableDetail.data_type === "enum" || variableDetail.data_type === "multi_enum") {
+                      if (!variableDetail.allowed_values) return true;
+                      return variableDetail.allowed_values.includes(proposal.proposedValue ?? "");
+                    }
+                    return true;
+                  })();
+                  return (
+                    <div
+                      className={cn(
+                        "flex items-center gap-2 rounded-md px-3 py-2 text-xs",
+                        isWithinBounds
+                          ? "bg-green-500/10 text-green-400"
+                          : "bg-red-500/10 text-red-400",
+                      )}
+                    >
+                      {isWithinBounds ? (
+                        <>
+                          <CheckCircle2 className="h-3.5 w-3.5" />
+                          Proposed value is within allowed bounds
+                        </>
+                      ) : (
+                        <>
+                          <AlertTriangle className="h-3.5 w-3.5" />
+                          Proposed value is outside allowed bounds
+                        </>
+                      )}
+                    </div>
+                  );
+                })()}
+              </div>
+            ) : (
+              /* Fallback when variable details couldn't be loaded */
+              <div className="space-y-3">
+                <div className="rounded-lg border border-charcoal bg-coal/50 p-3">
+                  <p className="text-sm font-mono text-ash">
+                    {proposal.variableKey}
+                  </p>
+                </div>
+                <div className="rounded-lg border border-green-500/20 bg-green-500/5 p-3">
+                  <span className="text-[10px] font-semibold uppercase tracking-wider text-green-400/70">
+                    Proposed Value
+                  </span>
+                  <p className="mt-1 text-sm font-mono text-ash">
+                    {proposal.proposedValue}
+                  </p>
+                </div>
+              </div>
+            )}
           </div>
         )}
 

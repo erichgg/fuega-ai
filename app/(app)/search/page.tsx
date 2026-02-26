@@ -152,7 +152,7 @@ function SearchPageInner() {
   }, [q, activeTab]);
 
   return (
-    <div className="max-w-5xl">
+    <div>
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-foreground">Search</h1>

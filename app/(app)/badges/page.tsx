@@ -76,7 +76,7 @@ export default function BadgesPage() {
   }
 
   return (
-    <div className="max-w-5xl py-4 sm:py-6 space-y-6">
+    <div className="py-4 sm:py-6 space-y-6">
       {/* Header */}
       <div>
         <h1 className="text-2xl sm:text-3xl font-bold text-foreground glow-text-subtle">

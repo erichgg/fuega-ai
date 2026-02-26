@@ -58,7 +58,7 @@ export default function CampfiresPage() {
   ];
 
   return (
-    <div className="max-w-6xl">
+    <div>
       {/* Header */}
       <div className="flex items-center justify-between gap-4">
         <div>

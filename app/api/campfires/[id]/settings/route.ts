@@ -7,6 +7,7 @@ import {
   updateSetting,
   getSettingsHistory,
 } from "@/lib/services/governance-variables.service";
+import { queryOne } from "@/lib/db";
 import { isAdmin } from "@/lib/services/campfires.service";
 import { ServiceError } from "@/lib/services/posts.service";
 
@@ -14,6 +15,7 @@ const updateSettingSchema = z.object({
   key: z.string().min(1).max(100),
   value: z.string(),
   reason: z.string().max(500).optional(),
+  set_via: z.enum(["manual", "proposal", "system"]).optional().default("manual"),
 });
 
 export const dynamic = "force-dynamic";
@@ -77,9 +79,26 @@ export async function PUT(req: Request, context: RouteContext) {
       );
     }
 
-    const { key, value, reason } = parsed.data;
+    const { key, value, reason, set_via } = parsed.data;
 
-    const setting = await updateSetting(campfireId, key, String(value), user.userId, "manual", undefined, reason);
+    // Enforce requires_proposal: manual changes to proposal-required variables are forbidden
+    if (set_via === "manual") {
+      const variable = await queryOne<{ requires_proposal: boolean }>(
+        `SELECT requires_proposal FROM governance_variables WHERE key = $1 AND is_active = TRUE`,
+        [key]
+      );
+      if (variable?.requires_proposal) {
+        return NextResponse.json(
+          {
+            error: "This setting requires a governance proposal to change. Create a proposal at /governance/create.",
+            code: "REQUIRES_PROPOSAL",
+          },
+          { status: 403 }
+        );
+      }
+    }
+
+    const setting = await updateSetting(campfireId, key, String(value), user.userId, set_via, undefined, reason);
 
     return NextResponse.json({ setting });
   } catch (err) {
