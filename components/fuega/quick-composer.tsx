@@ -15,7 +15,10 @@ export function QuickComposer({ campfire, className }: QuickComposerProps) {
   const { user } = useAuth();
   if (!user) return null;
 
-  const submitHref = campfire ? `/submit?campfire=${campfire}` : "/submit";
+  const baseParams = campfire ? `campfire=${encodeURIComponent(campfire)}` : "";
+  const submitHref = campfire ? `/submit?${baseParams}` : "/submit";
+  const typeHref = (type: string) =>
+    `/submit?${baseParams ? `${baseParams}&` : ""}type=${type}`;
 
   return (
     <div className={cn("rounded-lg border border-charcoal bg-coal p-3", className)}>
@@ -29,13 +32,13 @@ export function QuickComposer({ campfire, className }: QuickComposerProps) {
         </Link>
       </div>
       <div className="mt-2 flex items-center gap-1 border-t border-charcoal/50 pt-2">
-        <Link href={`${submitHref}&type=text`} className="flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs text-smoke hover:bg-charcoal/50 hover:text-ash transition-colors">
+        <Link href={typeHref("text")} className="flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs text-smoke hover:bg-charcoal/50 hover:text-ash transition-colors">
           <Type className="h-3.5 w-3.5" /> Text
         </Link>
-        <Link href={`${submitHref}&type=link`} className="flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs text-smoke hover:bg-charcoal/50 hover:text-ash transition-colors">
+        <Link href={typeHref("link")} className="flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs text-smoke hover:bg-charcoal/50 hover:text-ash transition-colors">
           <Link2 className="h-3.5 w-3.5" /> Link
         </Link>
-        <Link href={`${submitHref}&type=image`} className="flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs text-smoke hover:bg-charcoal/50 hover:text-ash transition-colors">
+        <Link href={typeHref("image")} className="flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs text-smoke hover:bg-charcoal/50 hover:text-ash transition-colors">
           <ImageIcon className="h-3.5 w-3.5" /> Image
         </Link>
       </div>

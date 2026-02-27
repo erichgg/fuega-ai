@@ -8,7 +8,6 @@ import { PostCard } from "@/components/fuega/post-card";
 import { ReportDialog } from "@/components/fuega/report-dialog";
 import { FeedToolbar } from "@/components/fuega/feed-sort";
 import { FeedSkeleton } from "@/components/fuega/page-skeleton";
-import { FeedRightRail } from "@/components/fuega/feed-right-rail";
 import { QuickComposer } from "@/components/fuega/quick-composer";
 import { WelcomeBanner } from "@/components/fuega/welcome-banner";
 import { useAuth } from "@/lib/contexts/auth-context";
@@ -45,10 +44,8 @@ export default function HomeFeedPage() {
   });
 
   return (
-    <div className="flex gap-6">
-      {/* Main feed */}
-      <div className="flex-1 min-w-0">
-        <WelcomeBanner className="mb-4" />
+    <div>
+      <WelcomeBanner className="mb-4" />
         <QuickComposer className="mb-4" />
         <div className="flex items-center justify-between gap-4">
           <FeedToolbar
@@ -128,10 +125,6 @@ export default function HomeFeedPage() {
             </>
           )}
         </div>
-      </div>
-
-      {/* Right rail — desktop only */}
-      <FeedRightRail />
 
       {/* Report dialog */}
       <ReportDialog

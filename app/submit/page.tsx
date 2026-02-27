@@ -381,8 +381,9 @@ function SubmitPageInner() {
   const searchParams = useSearchParams();
   const { user, loading: authLoading } = useAuth();
 
-  // Pre-select campfire from URL param (e.g. /submit?campfire=meta)
+  // Pre-select campfire and post type from URL params
   const preselectedCampfire = searchParams.get("campfire") ?? "";
+  const preselectedType = searchParams.get("type") as PostType | null;
 
   // Fetch campfire list for the dropdown
   const { campfires, loading: campfiresLoading } = useCampfires({
@@ -393,7 +394,10 @@ function SubmitPageInner() {
   const { createPost, creating, error } = useCreatePost();
 
   // Form state
-  const [postType, setPostType] = React.useState<PostType>("text");
+  const validTypes: PostType[] = ["text", "link", "image", "video"];
+  const [postType, setPostType] = React.useState<PostType>(
+    preselectedType && validTypes.includes(preselectedType) ? preselectedType : "text"
+  );
   const [selectedCampfireId, setSelectedCampfireId] = React.useState("");
   const [title, setTitle] = React.useState("");
   const [body, setBody] = React.useState("");

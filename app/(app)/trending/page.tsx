@@ -7,9 +7,7 @@ import { Button } from "@/components/ui/button";
 import { PostCard } from "@/components/fuega/post-card";
 import { ReportDialog } from "@/components/fuega/report-dialog";
 import { FeedSkeleton } from "@/components/fuega/page-skeleton";
-import { FeedSort } from "@/components/fuega/feed-sort";
-import { FeedFilters } from "@/components/fuega/feed-filters";
-import { FeedRightRail } from "@/components/fuega/feed-right-rail";
+import { FeedToolbar } from "@/components/fuega/feed-sort";
 import { QuickComposer } from "@/components/fuega/quick-composer";
 import { useAuth } from "@/lib/contexts/auth-context";
 import { usePosts } from "@/lib/hooks/usePosts";
@@ -38,38 +36,36 @@ export default function TrendingPage() {
   });
 
   return (
-    <div className="flex gap-6">
-      {/* Main feed */}
-      <div className="flex-1 min-w-0">
-        <QuickComposer className="mb-4" />
-        <div className="flex items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <TrendingUp className="h-5 w-5 text-flame-400" />
-            <h1 className="text-xl font-bold text-foreground">Trending</h1>
-          </div>
-          {user && (
-            <Link href="/submit">
-              <Button variant="spark" size="sm" className="gap-1.5">
-                <Plus className="h-4 w-4" />
-                <span className="hidden sm:inline">Create Post</span>
-              </Button>
-            </Link>
-          )}
+    <div>
+      <QuickComposer className="mb-4" />
+      <div className="flex items-center justify-between gap-4">
+        <div className="flex items-center gap-2">
+          <TrendingUp className="h-5 w-5 text-flame-400" />
+          <h1 className="text-xl font-bold text-foreground">Trending</h1>
         </div>
-        <p className="mt-1 text-sm text-smoke">
-          The hottest posts across all campfires right now.
-        </p>
+        {user && (
+          <Link href="/submit">
+            <Button variant="spark" size="sm" className="gap-1.5">
+              <Plus className="h-4 w-4" />
+              <span className="hidden sm:inline">Create Post</span>
+            </Button>
+          </Link>
+        )}
+      </div>
+      <p className="mt-1 text-sm text-smoke">
+        The hottest posts across all campfires right now.
+      </p>
 
-        <div className="mt-3">
-          <FeedSort active={sort} onChange={setSort} />
-        </div>
-        <FeedFilters
+      <div className="mt-3">
+        <FeedToolbar
+          sort={sort}
+          onSortChange={setSort}
           timeRange={timeRange}
           onTimeRangeChange={setTimeRange}
           postType={postType}
           onPostTypeChange={setPostType}
-          className="mt-2"
         />
+      </div>
 
         <div className="mt-4 space-y-2">
           {loading ? (
@@ -114,10 +110,6 @@ export default function TrendingPage() {
             </>
           )}
         </div>
-      </div>
-
-      {/* Right rail — desktop only */}
-      <FeedRightRail />
 
       {/* Report dialog */}
       <ReportDialog
