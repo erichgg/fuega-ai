@@ -33,7 +33,7 @@ const nextConfig = {
           "img-src 'self' data: blob:",
           "media-src 'self' blob:",
           "font-src 'self'",
-          "connect-src 'self' https://cloudflareinsights.com",
+          "connect-src 'self' https://cloudflareinsights.com https://static.cloudflareinsights.com",
           "frame-src 'self' https://www.youtube-nocookie.com https://www.youtube.com https://player.vimeo.com",
           // Allow iframes in dev for preview tools; deny in production
           isDev ? "frame-ancestors *" : "frame-ancestors 'none'",
