@@ -40,8 +40,8 @@ const postTypeOptions: { value: PostType; label: string; icon: typeof Filter }[]
   { value: "image", label: "Images", icon: ImageIcon },
 ];
 
-const pillClass = "flex items-center gap-1 px-2.5 py-1.5 min-h-[36px] text-[11px] font-mono rounded-md transition-colors cursor-pointer whitespace-nowrap shrink-0";
-const activeClass = "bg-coal text-flame-400";
+const pillClass = "flex items-center gap-1 px-2.5 py-1.5 min-h-[36px] text-xs font-mono rounded-md transition-colors cursor-pointer whitespace-nowrap shrink-0";
+const activeClass = "bg-charcoal text-flame-400";
 const inactiveClass = "text-smoke hover:text-ash";
 
 export function FeedToolbar({
@@ -107,47 +107,6 @@ export function FeedToolbar({
             className={cn(pillClass, postType === opt.value ? activeClass : inactiveClass)}
           >
             <Icon className="h-3 w-3" />
-            {opt.label}
-          </button>
-        );
-      })}
-    </div>
-  );
-}
-
-/* ---------- Legacy FeedSort (sort-only) ---------- */
-
-interface FeedSortProps {
-  active: SortOption;
-  onChange: (sort: SortOption) => void;
-  className?: string;
-}
-
-export function FeedSort({ active, onChange, className }: FeedSortProps) {
-  return (
-    <div
-      role="group"
-      aria-label="Sort posts by"
-      className={cn(
-        "flex flex-nowrap items-center gap-1 rounded-lg border border-charcoal bg-charcoal/50 p-1 overflow-x-auto scrollbar-hide",
-        className,
-      )}
-    >
-      {sortOptions.map((opt) => {
-        const Icon = opt.icon;
-        return (
-          <button
-            key={opt.value}
-            onClick={() => onChange(opt.value)}
-            aria-pressed={active === opt.value}
-            className={cn(
-              "flex items-center gap-1.5 rounded-md px-3 py-1.5 min-h-[36px] text-xs font-medium transition-colors shrink-0",
-              active === opt.value
-                ? "bg-charcoal text-flame-400"
-                : "text-smoke hover:text-ash",
-            )}
-          >
-            <Icon className="h-3.5 w-3.5" />
             {opt.label}
           </button>
         );

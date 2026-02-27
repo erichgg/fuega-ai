@@ -1,9 +1,11 @@
 import { z } from "zod";
 
 const PROPOSAL_TYPES = [
-  "modify_prompt",
-  "addendum_prompt",
+  "modify_config",
   "change_settings",
+  "amend_rules",
+  "custom",
+  "rename_agent",
 ] as const;
 
 export const createProposalSchema = z.object({

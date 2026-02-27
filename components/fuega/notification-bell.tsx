@@ -35,18 +35,12 @@ export function NotificationBell({ className }: NotificationBellProps) {
       >
         <Bell className="h-5 w-5" />
         {unreadCount > 0 && (
-          <>
-            <span
-              className="absolute top-0 right-0 w-2 h-2 rounded-full bg-lava-hot notification-dot"
-              aria-hidden="true"
-            />
-            <span
-              className="absolute -top-0.5 -right-0.5 flex h-4 min-w-4 items-center justify-center bg-lava-hot px-1 text-[10px] font-bold text-black"
-              aria-hidden="true"
-            >
-              {unreadCount > 99 ? "99+" : unreadCount}
-            </span>
-          </>
+          <span
+            className="absolute -top-0.5 -right-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-lava-hot px-1 text-[10px] font-bold text-black"
+            aria-hidden="true"
+          >
+            {unreadCount > 99 ? "99+" : unreadCount}
+          </span>
         )}
       </button>
 

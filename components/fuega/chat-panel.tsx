@@ -126,11 +126,11 @@ export function ChatPanel({ campfireId, className }: ChatPanelProps) {
         {/* Connection status */}
         <div className="flex items-center gap-1.5 px-3 border-l border-lava-hot/10">
           {connected ? (
-            <Wifi className="h-3 w-3 text-green-400" />
+            <Wifi className="h-3 w-3 text-flame-400" />
           ) : (
             <WifiOff className="h-3 w-3 text-smoke" />
           )}
-          <span className={cn("text-[10px] font-mono", connected ? "text-green-400" : "text-smoke")}>
+          <span className={cn("text-[10px] font-mono", connected ? "text-flame-400" : "text-smoke")}>
             {connected ? "Live" : "…"}
           </span>
         </div>

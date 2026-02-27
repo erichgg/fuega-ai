@@ -11,6 +11,8 @@ import {
   ExternalLink,
   Settings,
   EyeOff,
+  MessageSquare,
+  FileText,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -22,8 +24,18 @@ import { useAuth } from "@/lib/contexts/auth-context";
 import { usePosts } from "@/lib/hooks/usePosts";
 import { useOptimisticVoting } from "@/lib/hooks/useOptimisticVoting";
 import { toPostCardData } from "@/lib/adapters/post-adapter";
-import { api } from "@/lib/api/client";
+import { api, ApiError } from "@/lib/api/client";
 import { timeAgo } from "@/lib/utils/time-ago";
+
+interface UserComment {
+  id: string;
+  body: string;
+  created_at: string;
+  post_id: string;
+  post_title: string;
+  campfire_name: string;
+  glow: number;
+}
 
 interface UserProfile {
   username: string;
@@ -98,6 +110,37 @@ export default function UserProfilePage() {
 
   // Voting
   const { handleVote, getVote, getDelta } = useOptimisticVoting();
+
+  // Fetch user's comments
+  const [comments, setComments] = React.useState<UserComment[]>([]);
+  const [commentsLoading, setCommentsLoading] = React.useState(true);
+
+  React.useEffect(() => {
+    let cancelled = false;
+    setCommentsLoading(true);
+
+    api
+      .get<{ comments: UserComment[] }>(`/api/users/${encodeURIComponent(username)}/comments`)
+      .then((data) => {
+        if (!cancelled) {
+          setComments(data.comments ?? []);
+          setCommentsLoading(false);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setComments([]);
+          setCommentsLoading(false);
+        }
+      });
+
+    return () => { cancelled = true; };
+  }, [username]);
+
+  // Page title
+  React.useEffect(() => {
+    document.title = `${username} - fuega`;
+  }, [username]);
 
   // Report dialog
   const [reportPostId, setReportPostId] = React.useState<string | null>(null);
@@ -261,9 +304,17 @@ export default function UserProfilePage() {
         <TabsList className="w-full justify-start border-b border-charcoal bg-transparent p-0">
           <TabsTrigger
             value="posts"
-            className="rounded-none border-b-2 border-transparent px-4 pb-2 pt-2 text-ash data-[state=active]:border-flame-400 data-[state=active]:text-flame-400 data-[state=active]:bg-transparent"
+            className="gap-1.5 rounded-none border-b-2 border-transparent px-4 pb-2 pt-2 text-ash data-[state=active]:border-flame-400 data-[state=active]:text-flame-400 data-[state=active]:bg-transparent"
           >
+            <FileText className="h-3.5 w-3.5" />
             Posts ({postCards.length})
+          </TabsTrigger>
+          <TabsTrigger
+            value="comments"
+            className="gap-1.5 rounded-none border-b-2 border-transparent px-4 pb-2 pt-2 text-ash data-[state=active]:border-flame-400 data-[state=active]:text-flame-400 data-[state=active]:bg-transparent"
+          >
+            <MessageSquare className="h-3.5 w-3.5" />
+            Comments ({comments.length})
           </TabsTrigger>
           <Link
             href={`/u/${profile.username}/badges`}
@@ -276,6 +327,9 @@ export default function UserProfilePage() {
         <TabsContent value="posts" className="mt-4 space-y-2">
           {postCards.length === 0 ? (
             <div className="py-12 text-center">
+              <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-coal border border-charcoal">
+                <FileText className="h-6 w-6 text-smoke" />
+              </div>
               <p className="text-sm font-medium text-ash">No posts yet</p>
               <p className="mt-1 text-xs text-smoke">
                 When {profile.username} creates posts, they&apos;ll show up here.
@@ -302,6 +356,51 @@ export default function UserProfilePage() {
                 </button>
               )}
             </>
+          )}
+        </TabsContent>
+
+        <TabsContent value="comments" className="mt-4 space-y-1">
+          {commentsLoading ? (
+            <div className="space-y-2">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <div key={i} className="animate-pulse h-16 rounded-md bg-charcoal/30" />
+              ))}
+            </div>
+          ) : comments.length === 0 ? (
+            <div className="py-12 text-center">
+              <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-coal border border-charcoal">
+                <MessageSquare className="h-6 w-6 text-smoke" />
+              </div>
+              <p className="text-sm font-medium text-ash">No comments yet</p>
+              <p className="mt-1 text-xs text-smoke">
+                When {profile.username} comments on posts, they&apos;ll show up here.
+              </p>
+            </div>
+          ) : (
+            comments.map((comment) => (
+              <Link
+                key={comment.id}
+                href={`/f/${comment.campfire_name}/${comment.post_id}`}
+                className="block rounded-md border border-transparent p-3 hover:border-lava-hot/20 hover:bg-coal/80 transition-all"
+              >
+                <div className="flex items-center gap-2 text-[10px] text-smoke">
+                  <span className="font-mono">
+                    <span className="text-flame-400">f</span>
+                    <span className="text-smoke mx-0.5">|</span>
+                    <span>{comment.campfire_name}</span>
+                  </span>
+                  <span>&middot;</span>
+                  <span className="truncate">{comment.post_title}</span>
+                  <span>&middot;</span>
+                  <span>{timeAgo(comment.created_at)}</span>
+                </div>
+                <p className="mt-1 text-sm text-ash line-clamp-2">{comment.body}</p>
+                <div className="mt-1 flex items-center gap-1 text-[10px] text-smoke">
+                  <Flame className="h-3 w-3 text-flame-400" />
+                  <span>{comment.glow ?? 0} glow</span>
+                </div>
+              </Link>
+            ))
           )}
         </TabsContent>
       </Tabs>

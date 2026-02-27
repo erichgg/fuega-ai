@@ -14,14 +14,14 @@ const sizeMap = {
 } as const;
 
 const colorPalette = [
+  "bg-flame-500",
+  "bg-ember-500",
+  "bg-lava-hot",
   "bg-flame-600",
-  "bg-ember-600",
-  "bg-blue-600",
-  "bg-purple-600",
-  "bg-green-600",
-  "bg-pink-600",
-  "bg-amber-600",
-  "bg-teal-600",
+  "bg-flame-700",
+  "bg-flame-800",
+  "bg-ember-700",
+  "bg-flame-900",
 ] as const;
 
 function hashUsername(username: string): number {

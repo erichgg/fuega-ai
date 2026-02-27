@@ -106,9 +106,9 @@ export function PostCard({
         "hover:-translate-y-0.5 hover:shadow-lg hover:shadow-lava-hot/5",
         "border-l-2 hover:border-l-lava-hot/40",
         post.post_type === "link"
-          ? "border-l-blue-500/50"
+          ? "border-l-flame-400/50"
           : post.post_type === "image"
-            ? "border-l-green-500/50"
+            ? "border-l-ember-500/50"
             : "border-l-transparent",
         className,
       )}
@@ -137,12 +137,12 @@ export function PostCard({
           {timeAgo(post.createdAt)}
         </span>
         {post.post_type === "link" && (
-          <span className="inline-flex items-center gap-1 rounded-full bg-blue-500/10 px-1.5 py-0.5 text-[10px] text-blue-400">
+          <span className="inline-flex items-center gap-1 rounded-full bg-flame-400/10 px-1.5 py-0.5 text-[10px] text-flame-400">
             <Link2 className="h-2.5 w-2.5" /> link
           </span>
         )}
         {post.post_type === "image" && (
-          <span className="inline-flex items-center gap-1 rounded-full bg-green-500/10 px-1.5 py-0.5 text-[10px] text-green-400">
+          <span className="inline-flex items-center gap-1 rounded-full bg-ember-500/10 px-1.5 py-0.5 text-[10px] text-ember-500">
             <ImageIcon className="h-2.5 w-2.5" /> image
           </span>
         )}

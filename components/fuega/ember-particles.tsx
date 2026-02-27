@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { cn } from "@/lib/utils";
 
 interface Ember {
   id: number;
@@ -21,7 +22,7 @@ interface EmberParticlesProps {
  * Uses the ember-rise keyframe from globals.css.
  * Pure CSS animation — no JS animation loop.
  */
-export function EmberParticles({ count = 12, className = "" }: EmberParticlesProps) {
+export function EmberParticles({ count = 12, className }: EmberParticlesProps) {
   const [embers, setEmbers] = React.useState<Ember[]>([]);
 
   React.useEffect(() => {
@@ -40,7 +41,7 @@ export function EmberParticles({ count = 12, className = "" }: EmberParticlesPro
 
   return (
     <div
-      className={`pointer-events-none absolute inset-0 overflow-hidden ${className}`}
+      className={cn("pointer-events-none absolute inset-0 overflow-hidden", className)}
       aria-hidden="true"
     >
       {embers.map((ember) => (

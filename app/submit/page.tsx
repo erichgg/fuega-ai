@@ -491,6 +491,40 @@ function SubmitPageInner() {
 
   const wordCount = body.trim().split(/\s+/).filter(Boolean).length;
 
+  // Page title
+  React.useEffect(() => {
+    document.title = "Create a Post - fuega";
+  }, []);
+
+  // Warn on unsaved changes before leaving
+  const hasUnsavedChanges = Boolean(title.trim() || body.trim() || url.trim() || imageUrl.trim());
+  React.useEffect(() => {
+    const handler = (e: BeforeUnloadEvent) => {
+      if (hasUnsavedChanges && !moderationResult) {
+        e.preventDefault();
+      }
+    };
+    window.addEventListener("beforeunload", handler);
+    return () => window.removeEventListener("beforeunload", handler);
+  }, [hasUnsavedChanges, moderationResult]);
+
+  // HTTPS validation for link/video URLs
+  const [urlError, setUrlError] = React.useState<string | null>(null);
+  const [imageUrlError, setImageUrlError] = React.useState<string | null>(null);
+
+  const validateHttps = (value: string): string | null => {
+    if (!value.trim()) return null;
+    try {
+      const parsed = new URL(value.trim());
+      if (parsed.protocol !== "https:") {
+        return "URL must use HTTPS for security";
+      }
+    } catch {
+      return "Please enter a valid URL";
+    }
+    return null;
+  };
+
   // Resolve effective image URL (upload takes precedence over pasted URL)
   const effectiveImageUrl = uploadedImageFile?.url || imageUrl;
 
@@ -576,13 +610,14 @@ function SubmitPageInner() {
 
   return (
     <div className="mx-auto max-w-2xl">
-      <Link
-        href="/home"
+      <button
+        type="button"
+        onClick={() => router.back()}
         className="inline-flex items-center gap-1.5 text-sm text-smoke transition-colors hover:text-ash"
       >
         <ArrowLeft className="h-3.5 w-3.5" />
-        Back to feed
-      </Link>
+        Back
+      </button>
 
       <h1 className="mt-4 text-xl font-bold text-foreground">Create a Post</h1>
       <p className="mt-1 text-sm text-ash">
@@ -718,11 +753,22 @@ function SubmitPageInner() {
               id="url"
               type="url"
               value={url}
-              onChange={(e) => setUrl(e.target.value)}
+              onChange={(e) => {
+                setUrl(e.target.value);
+                setUrlError(validateHttps(e.target.value));
+              }}
+              onBlur={() => setUrlError(validateHttps(url))}
               placeholder="https://..."
-              className="border-charcoal bg-coal placeholder:text-smoke focus-visible:ring-flame-500/50"
+              className={`border-charcoal bg-coal placeholder:text-smoke focus-visible:ring-flame-500/50 ${urlError ? "border-red-500/50" : ""}`}
             />
-            <p className="mt-1 text-xs text-smoke">Must be HTTPS</p>
+            {urlError ? (
+              <p className="mt-1 flex items-center gap-1 text-xs text-red-400">
+                <AlertCircle className="h-3 w-3" />
+                {urlError}
+              </p>
+            ) : (
+              <p className="mt-1 text-xs text-smoke">Must be HTTPS</p>
+            )}
           </div>
         )}
 
@@ -757,10 +803,20 @@ function SubmitPageInner() {
                   id="imageUrl"
                   type="url"
                   value={imageUrl}
-                  onChange={(e) => setImageUrl(e.target.value)}
+                  onChange={(e) => {
+                    setImageUrl(e.target.value);
+                    setImageUrlError(validateHttps(e.target.value));
+                  }}
+                  onBlur={() => setImageUrlError(validateHttps(imageUrl))}
                   placeholder="https://example.com/image.jpg"
-                  className="border-charcoal bg-coal placeholder:text-smoke focus-visible:ring-flame-500/50"
+                  className={`border-charcoal bg-coal placeholder:text-smoke focus-visible:ring-flame-500/50 ${imageUrlError ? "border-red-500/50" : ""}`}
                 />
+                {imageUrlError && (
+                  <p className="mt-1 flex items-center gap-1 text-xs text-red-400">
+                    <AlertCircle className="h-3 w-3" />
+                    {imageUrlError}
+                  </p>
+                )}
               </div>
             )}
           </div>
@@ -797,10 +853,20 @@ function SubmitPageInner() {
                   id="videoUrl"
                   type="url"
                   value={url}
-                  onChange={(e) => setUrl(e.target.value)}
+                  onChange={(e) => {
+                    setUrl(e.target.value);
+                    setUrlError(validateHttps(e.target.value));
+                  }}
+                  onBlur={() => setUrlError(validateHttps(url))}
                   placeholder="https://youtube.com/watch?v=... or https://example.com/video.mp4"
-                  className="border-charcoal bg-coal placeholder:text-smoke focus-visible:ring-flame-500/50"
+                  className={`border-charcoal bg-coal placeholder:text-smoke focus-visible:ring-flame-500/50 ${urlError ? "border-red-500/50" : ""}`}
                 />
+                {urlError && (
+                  <p className="mt-1 flex items-center gap-1 text-xs text-red-400">
+                    <AlertCircle className="h-3 w-3" />
+                    {urlError}
+                  </p>
+                )}
               </div>
             )}
 
@@ -899,7 +965,7 @@ function SubmitPageInner() {
               <button
                 type="button"
                 onClick={() => setShowPreview(!showPreview)}
-                className="text-[11px] font-medium text-smoke hover:text-ash transition-colors"
+                className="text-xs font-medium text-smoke hover:text-ash transition-colors"
               >
                 {showPreview ? "Write" : "Preview"}
               </button>

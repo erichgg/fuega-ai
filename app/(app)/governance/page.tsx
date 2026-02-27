@@ -26,6 +26,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { GovernanceSkeleton } from "@/components/fuega/page-skeleton";
 import { CampfirePicker } from "@/components/fuega/campfire-picker";
+import { FlameGauge } from "@/components/fuega/flame-gauge";
 import { useAuth } from "@/lib/contexts/auth-context";
 import { cn } from "@/lib/utils";
 import { api, ApiError } from "@/lib/api/client";
@@ -737,7 +738,17 @@ function ProposalCard({ proposal }: { proposal: Proposal }) {
       href={`/governance/${proposal.id}`}
       className="block rounded-lg border border-charcoal bg-charcoal/50 p-4 transition-colors hover:border-flame-500/30 hover:bg-charcoal/70"
     >
-      <div className="flex items-start justify-between gap-3">
+      <div className="flex items-start gap-3">
+        {/* Compact flame gauge */}
+        <FlameGauge
+          sparkVotes={proposal.votesFor}
+          douseVotes={proposal.votesAgainst}
+          quorum={100}
+          totalMembers={200}
+          size="sm"
+          className="shrink-0 mt-1"
+        />
+
         <div className="min-w-0 flex-1">
           {/* Meta row: type badge, campfire, author */}
           <div className="flex items-center gap-2 text-xs text-smoke flex-wrap">
@@ -785,30 +796,6 @@ function ProposalCard({ proposal }: { proposal: Proposal }) {
           {config.label}
         </Badge>
       </div>
-
-      {/* Vote progress bar */}
-      {totalVotes > 0 && (
-        <div className="mt-3">
-          <div className="flex h-1.5 overflow-hidden rounded-full bg-coal">
-            <div
-              className="bg-green-500 transition-all"
-              style={{ width: `${forPercent}%` }}
-            />
-            <div
-              className="bg-red-500 transition-all"
-              style={{ width: `${100 - forPercent}%` }}
-            />
-          </div>
-          <div className="mt-1 flex justify-between text-[10px] text-smoke">
-            <span className="text-green-400">
-              {proposal.votesFor} spark{proposal.votesFor !== 1 ? "s" : ""} ({forPercent}%)
-            </span>
-            <span className="text-red-400">
-              {proposal.votesAgainst} douse{proposal.votesAgainst !== 1 ? "s" : ""}
-            </span>
-          </div>
-        </div>
-      )}
 
       {/* Footer meta */}
       <div className="mt-2 flex items-center gap-4 text-[10px] text-smoke">

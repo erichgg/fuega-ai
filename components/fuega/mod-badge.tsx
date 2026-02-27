@@ -17,17 +17,17 @@ const actionConfig: Record<
   approved: {
     label: "AI Approved",
     icon: Shield,
-    badgeClass: "bg-green-500/20 text-green-400 border-green-500/30",
+    badgeClass: "bg-douse/20 text-douse border-douse/30",
   },
   flagged: {
     label: "AI Flagged",
     icon: Eye,
-    badgeClass: "bg-amber-500/20 text-amber-400 border-amber-500/30",
+    badgeClass: "bg-flame-400/20 text-flame-400 border-flame-400/30",
   },
   removed: {
     label: "AI Removed",
     icon: Bot,
-    badgeClass: "bg-red-500/20 text-red-400 border-red-500/30",
+    badgeClass: "bg-ember-500/20 text-ember-500 border-ember-500/30",
   },
 };
 

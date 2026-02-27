@@ -19,6 +19,9 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { GovernanceSkeleton } from "@/components/fuega/page-skeleton";
+import { FlameGauge } from "@/components/fuega/flame-gauge";
+import { ProposalTimeline } from "@/components/fuega/proposal-timeline";
+import { useSparkStorm, VoteButtonText } from "@/components/fuega/spark-storm";
 import { useAuth } from "@/lib/contexts/auth-context";
 import { cn } from "@/lib/utils";
 import { timeAgo } from "@/lib/utils/time-ago";
@@ -209,19 +212,36 @@ export default function ProposalDetailPage() {
     return () => { cancelled = true; };
   }, [proposal?.variableKey, proposal?.campfireId]);
 
+  const { triggerSpark, triggerDouse, triggerQuorum, SparkStormOverlay } = useSparkStorm();
+
   const handleVote = React.useCallback(async (vote: "for" | "against") => {
     if (voting) return;
     setVoteError(null);
     try {
+      const prevTotal = (proposal?.votesFor ?? 0) + (proposal?.votesAgainst ?? 0);
       await voteOnProposal(proposalId, vote);
       setUserVote(vote);
+
+      // Trigger celebration animation
+      if (vote === "for") {
+        triggerSpark();
+      } else {
+        triggerDouse();
+      }
+
       await refreshProposal();
+
+      // Check if quorum was just reached
+      const newTotal = prevTotal + 1;
+      if (proposal && newTotal >= proposal.quorum && prevTotal < proposal.quorum) {
+        setTimeout(() => triggerQuorum(), 600);
+      }
     } catch (err) {
       setVoteError(
         err instanceof ApiError ? err.message : "Failed to cast vote",
       );
     }
-  }, [proposalId, voteOnProposal, voting, refreshProposal]);
+  }, [proposalId, voteOnProposal, voting, refreshProposal, proposal, triggerSpark, triggerDouse, triggerQuorum]);
 
   if (loading) return <GovernanceSkeleton />;
   if (error)
@@ -255,6 +275,16 @@ export default function ProposalDetailPage() {
         <ArrowLeft className="h-3.5 w-3.5" />
         All proposals
       </Link>
+
+      {/* Proposal lifecycle timeline */}
+      <div className="mt-4 rounded-lg border border-charcoal bg-charcoal/50 p-4">
+        <ProposalTimeline
+          status={proposal.status}
+          createdAt={proposal.createdAt}
+          discussionEndsAt={proposal.discussionEndsAt}
+          votingEndsAt={proposal.votingEndsAt}
+        />
+      </div>
 
       {/* Proposal header */}
       <div className="mt-4 rounded-lg border border-charcoal bg-charcoal/50 p-5">
@@ -488,37 +518,41 @@ export default function ProposalDetailPage() {
       <div className="mt-4 rounded-lg border border-charcoal bg-charcoal/50 p-5">
         <h2 className="text-sm font-medium text-ash">Votes</h2>
 
-        {/* Vote bar */}
-        <div className="mt-3">
-          <div className="flex h-3 overflow-hidden rounded-full bg-charcoal">
-            {totalVotes > 0 && (
-              <>
-                <div
-                  className="bg-green-500 transition-all"
-                  style={{ width: `${forPercent}%` }}
-                />
-                <div
-                  className="bg-red-500 transition-all"
-                  style={{ width: `${100 - forPercent}%` }}
-                />
-              </>
-            )}
-          </div>
-          <div className="mt-2 flex justify-between text-xs">
-            <span className="text-green-400">
-              {proposal.votesFor} for ({forPercent}%)
-            </span>
-            <span className="text-smoke">
-              {totalVotes} total · Quorum: {proposal.quorum}
-              {quorumReached ? (
-                <CheckCircle2 className="ml-1 inline h-3 w-3 text-green-400" />
-              ) : (
-                <XCircle className="ml-1 inline h-3 w-3 text-smoke" />
-              )}
-            </span>
-            <span className="text-red-400">
-              {proposal.votesAgainst} against ({totalVotes > 0 ? 100 - forPercent : 0}%)
-            </span>
+        {/* Flame gauge + vote summary */}
+        <div className="mt-4 flex flex-col sm:flex-row items-center gap-6">
+          <FlameGauge
+            sparkVotes={proposal.votesFor}
+            douseVotes={proposal.votesAgainst}
+            quorum={proposal.quorum}
+            totalMembers={proposal.quorum * 2}
+            size="lg"
+          />
+          <div className="flex-1 space-y-2 text-sm">
+            <div className="flex items-center justify-between">
+              <span className="flex items-center gap-1.5 text-flame-400 font-medium">
+                <ThumbsUp className="h-3.5 w-3.5" />
+                {proposal.votesFor} spark{proposal.votesFor !== 1 ? "s" : ""}
+              </span>
+              <span className="text-xs text-smoke">{forPercent}%</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="flex items-center gap-1.5 text-teal font-medium">
+                <ThumbsDown className="h-3.5 w-3.5" />
+                {proposal.votesAgainst} douse{proposal.votesAgainst !== 1 ? "s" : ""}
+              </span>
+              <span className="text-xs text-smoke">{totalVotes > 0 ? 100 - forPercent : 0}%</span>
+            </div>
+            <div className="border-t border-charcoal pt-2 flex items-center justify-between text-xs text-smoke">
+              <span>{totalVotes} total votes</span>
+              <span className="flex items-center gap-1">
+                Quorum: {proposal.quorum}
+                {quorumReached ? (
+                  <CheckCircle2 className="h-3 w-3 text-flame-400" />
+                ) : (
+                  <XCircle className="h-3 w-3 text-smoke" />
+                )}
+              </span>
+            </div>
           </div>
         </div>
 
@@ -529,7 +563,7 @@ export default function ProposalDetailPage() {
               variant="outline"
               size="sm"
               disabled={voting}
-              className="flex-1 gap-1.5 border-charcoal text-ash hover:border-green-500/50 hover:text-green-400"
+              className="flex-1 gap-1.5 border-charcoal text-ash hover:border-flame-500/50 hover:text-flame-400 transition-all"
               onClick={() => handleVote("for")}
             >
               {voting ? (
@@ -543,7 +577,7 @@ export default function ProposalDetailPage() {
               variant="outline"
               size="sm"
               disabled={voting}
-              className="flex-1 gap-1.5 border-charcoal text-ash hover:border-red-500/50 hover:text-red-400"
+              className="flex-1 gap-1.5 border-charcoal text-ash hover:border-teal/50 hover:text-teal transition-all"
               onClick={() => handleVote("against")}
             >
               {voting ? (
@@ -557,13 +591,16 @@ export default function ProposalDetailPage() {
         )}
 
         {canVote && userVote && (
-          <div className="mt-4 rounded-md border border-charcoal bg-charcoal/30 p-3 text-center">
+          <div className={cn(
+            "mt-4 rounded-md border p-3 text-center",
+            userVote === "for"
+              ? "border-flame-500/30 bg-flame-500/10"
+              : "border-teal/30 bg-teal/10",
+          )}>
             <p className="text-sm text-ash">
-              You voted{" "}
-              <span className={userVote === "for" ? "text-green-400 font-medium" : "text-red-400 font-medium"}>
+              <VoteButtonText voted type={userVote === "for" ? "spark" : "douse"}>
                 {userVote}
-              </span>{" "}
-              this proposal
+              </VoteButtonText>
             </p>
           </div>
         )}
@@ -592,6 +629,9 @@ export default function ProposalDetailPage() {
           Discussion comments coming soon. Proposal discussion will be available in a future update.
         </p>
       </div>
+
+      {/* Spark storm celebration overlay */}
+      <SparkStormOverlay />
     </div>
   );
 }

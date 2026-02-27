@@ -100,7 +100,7 @@ export function ReportDialog({
 
         {state === "success" ? (
           <div className="flex flex-col items-center gap-2 py-6 text-center">
-            <CheckCircle className="h-8 w-8 text-green-400" />
+            <CheckCircle className="h-8 w-8 text-flame-400" />
             <p className="text-sm font-medium text-foreground">Report submitted</p>
             <p className="text-xs text-smoke">Thank you for helping keep the community safe.</p>
           </div>

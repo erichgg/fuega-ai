@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { cn } from "@/lib/utils";
 
 /**
  * Displays campfire name in the correct format: f | name
@@ -15,7 +16,7 @@ export function CampfirePrefix({
   linked?: boolean;
 }) {
   const content = (
-    <span className={`inline-flex items-baseline font-semibold ${className ?? ""}`}>
+    <span className={cn("inline-flex items-baseline font-semibold", className)}>
       <span className="text-lava-hot">f</span>
       <span className="text-smoke mx-1">|</span>
       <span className="text-foreground">{name}</span>

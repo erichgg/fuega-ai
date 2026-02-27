@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { ArrowLeft, Check, AlertTriangle, Loader2, Vote } from "lucide-react";
+import { ArrowLeft, Check, AlertTriangle, Loader2, Vote, ShieldAlert } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -369,6 +369,11 @@ export default function CampfireSettingsPage() {
     user && campfire && campfire.created_by === user.id,
   );
 
+  // Page title
+  React.useEffect(() => {
+    document.title = `Settings - f/${campfireSlug} - fuega`;
+  }, [campfireSlug]);
+
   // Group settings by category
   const grouped = React.useMemo(() => {
     const groups = new Map<string, ResolvedSetting[]>();
@@ -428,6 +433,20 @@ export default function CampfireSettingsPage() {
           >
             Back to campfire
           </Link>
+        </div>
+      )}
+
+      {/* Permission check for non-admins */}
+      {!loading && !error && !isUserAdmin && (
+        <div className="rounded-lg border border-amber-500/20 bg-amber-500/5 p-6 text-center">
+          <ShieldAlert className="mx-auto h-8 w-8 text-amber-400 mb-2" />
+          <p className="text-sm font-medium text-amber-400">
+            You don&apos;t have permission to modify these settings
+          </p>
+          <p className="mt-1 text-xs text-smoke">
+            Only the campfire creator can change governance variables.
+            You can still view the current configuration below.
+          </p>
         </div>
       )}
 

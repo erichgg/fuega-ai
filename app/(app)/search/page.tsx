@@ -2,8 +2,8 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
-import { Search, Flame, User, FileText, Loader2 } from "lucide-react";
+import { useSearchParams, useRouter } from "next/navigation";
+import { Search, Flame, User, FileText, Loader2, TrendingUp, Sparkles } from "lucide-react";
 import { api, ApiError } from "@/lib/api/client";
 import { cn } from "@/lib/utils";
 import { timeAgo } from "@/lib/utils/time-ago";
@@ -57,7 +57,25 @@ export default function SearchPage() {
 
 function SearchPageInner() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const q = searchParams.get("q") ?? "";
+
+  // Page title
+  React.useEffect(() => {
+    document.title = q.trim() ? `Search: ${q} - fuega` : "Search - fuega";
+  }, [q]);
+
+  // Local input for search form (allows Enter to search + updates URL)
+  const [searchInput, setSearchInput] = React.useState(q);
+  React.useEffect(() => { setSearchInput(q); }, [q]);
+
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const trimmed = searchInput.trim();
+    if (trimmed) {
+      router.push(`/search?q=${encodeURIComponent(trimmed)}`);
+    }
+  };
 
   const [activeTab, setActiveTab] = React.useState<SearchTab>("all");
   const [results, setResults] = React.useState<SearchResultItem[]>([]);
@@ -162,10 +180,25 @@ function SearchPageInner() {
           </p>
         ) : (
           <p className="mt-1 text-sm text-ash">
-            Enter a query in the search bar above.
+            Find posts, campfires, and users across fuega.
           </p>
         )}
       </div>
+
+      {/* Inline search form (Enter to search, also updates URL for sharing) */}
+      <form onSubmit={handleSearchSubmit} className="mt-4">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-smoke" />
+          <input
+            type="text"
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            placeholder="Search posts, campfires, users..."
+            className="w-full rounded-lg border border-charcoal bg-coal pl-10 pr-4 py-2.5 text-sm text-foreground placeholder:text-smoke focus:border-flame-500/50 focus:outline-none focus:ring-1 focus:ring-flame-500/30"
+            autoFocus={!q.trim()}
+          />
+        </div>
+      </form>
 
       {/* Tabs */}
       {q.trim() && (
@@ -210,11 +243,36 @@ function SearchPageInner() {
             <p className="text-red-400">{error}</p>
           </div>
         ) : !q.trim() ? (
-          <div className="py-16 text-center">
+          <div className="py-12 text-center">
             <Search className="mx-auto h-12 w-12 text-smoke/60" />
             <p className="mt-4 text-ash">
               Type a search query to find posts, campfires, and users.
             </p>
+            <div className="mt-6 space-y-3">
+              <p className="text-xs text-smoke font-medium uppercase tracking-wider">Suggestions</p>
+              <div className="flex flex-wrap justify-center gap-2">
+                {["campfires", "governance", "badges", "trending", "new posts"].map((term) => (
+                  <Link
+                    key={term}
+                    href={`/search?q=${encodeURIComponent(term)}`}
+                    className="inline-flex items-center gap-1.5 rounded-full border border-charcoal px-3 py-1.5 text-xs text-smoke hover:text-flame-400 hover:border-flame-400/30 transition-colors"
+                  >
+                    <Sparkles className="h-3 w-3" />
+                    {term}
+                  </Link>
+                ))}
+              </div>
+              <div className="mt-4 flex justify-center gap-4 text-xs">
+                <Link href="/trending" className="flex items-center gap-1 text-smoke hover:text-flame-400 transition-colors">
+                  <TrendingUp className="h-3.5 w-3.5" />
+                  Browse trending
+                </Link>
+                <Link href="/campfires" className="flex items-center gap-1 text-smoke hover:text-flame-400 transition-colors">
+                  <Flame className="h-3.5 w-3.5" />
+                  Explore campfires
+                </Link>
+              </div>
+            </div>
           </div>
         ) : results.length === 0 ? (
           <div className="py-16 text-center">

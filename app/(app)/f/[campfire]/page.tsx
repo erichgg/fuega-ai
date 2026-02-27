@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { Users, Bot, Plus, Shield, Clock, Settings, AlertCircle, MessageSquare, FileText, Flame, TrendingUp, Vote } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -25,6 +25,8 @@ type ViewMode = "posts" | "chat";
 
 export default function CampfirePage() {
   const params = useParams();
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const { user } = useAuth();
   const campfireSlug = params.campfire as string;
 
@@ -57,8 +59,28 @@ export default function CampfirePage() {
     onLoadMore: loadMore,
   });
 
-  // View mode (posts vs chat)
-  const [viewMode, setViewMode] = React.useState<ViewMode>("posts");
+  // View mode persisted in URL param (?view=chat)
+  const initialView = searchParams.get("view") === "chat" ? "chat" : "posts";
+  const [viewMode, setViewMode] = React.useState<ViewMode>(initialView);
+
+  const handleViewModeChange = (mode: ViewMode) => {
+    setViewMode(mode);
+    const params = new URLSearchParams(window.location.search);
+    if (mode === "chat") {
+      params.set("view", "chat");
+    } else {
+      params.delete("view");
+    }
+    const qs = params.toString();
+    router.replace(`/f/${campfireSlug}${qs ? `?${qs}` : ""}`, { scroll: false });
+  };
+
+  // Page title
+  React.useEffect(() => {
+    if (campfire) {
+      document.title = `f/${campfire.name} - fuega`;
+    }
+  }, [campfire]);
 
   // Report dialog
   const [reportPostId, setReportPostId] = React.useState<string | null>(null);
@@ -258,7 +280,7 @@ export default function CampfirePage() {
         <button
           role="tab"
           aria-selected={viewMode === "posts"}
-          onClick={() => setViewMode("posts")}
+          onClick={() => handleViewModeChange("posts")}
           className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
             viewMode === "posts"
               ? "bg-flame-500/20 text-flame-400"
@@ -271,7 +293,7 @@ export default function CampfirePage() {
         <button
           role="tab"
           aria-selected={viewMode === "chat"}
-          onClick={() => setViewMode("chat")}
+          onClick={() => handleViewModeChange("chat")}
           className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
             viewMode === "chat"
               ? "bg-flame-500/20 text-flame-400"
@@ -345,9 +367,17 @@ export default function CampfirePage() {
                   </Link>
                 ))}
                 {hasMore && (
-                  <div ref={sentinelRef} className="flex justify-center py-4">
-                    <div className="h-6 w-6 animate-spin rounded-full border-2 border-lava-hot border-t-transparent" />
-                  </div>
+                  <>
+                    <div ref={sentinelRef} className="flex justify-center py-4">
+                      <div className="h-6 w-6 animate-spin rounded-full border-2 border-lava-hot border-t-transparent" />
+                    </div>
+                    <button
+                      onClick={loadMore}
+                      className="w-full py-2 text-center text-xs text-ash hover:text-flame-400 transition-colors"
+                    >
+                      Load more posts
+                    </button>
+                  </>
                 )}
               </>
             )}

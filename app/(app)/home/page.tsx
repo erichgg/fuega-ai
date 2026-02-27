@@ -20,6 +20,11 @@ type SortOption = "hot" | "new" | "top" | "rising";
 
 export default function HomeFeedPage() {
   const { user } = useAuth();
+
+  React.useEffect(() => {
+    document.title = "Home - fuega";
+  }, []);
+
   const [sort, setSort] = React.useState<SortOption>("hot");
   const [timeRange, setTimeRange] = React.useState<"all" | "today" | "week" | "month">("all");
   const [postType, setPostType] = React.useState<"all" | "text" | "link" | "image">("all");

@@ -6,13 +6,13 @@ export function FeedSkeleton() {
       {Array.from({ length: 5 }).map((_, i) => (
         <div
           key={i}
-          className="rounded-lg border border-charcoal bg-charcoal/50 p-3 space-y-2"
+          className="rounded-md border-l-2 border-l-transparent bg-coal p-3 space-y-2"
         >
           {/* Header: campfire chip + dot + avatar + username + dot + timestamp */}
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-2 text-xs">
             <Skeleton className="h-3 w-20 rounded-full" />
             <Skeleton className="h-1 w-1 rounded-full" />
-            <Skeleton className="h-4 w-4 rounded-full" />
+            <Skeleton className="h-6 w-6 rounded-full" />
             <Skeleton className="h-3 w-16" />
             <Skeleton className="h-1 w-1 rounded-full" />
             <Skeleton className="h-3 w-12" />
@@ -24,13 +24,13 @@ export function FeedSkeleton() {
             <Skeleton className="h-3 w-full" />
             <Skeleton className="h-3 w-5/6" />
           </div>
-          {/* Action bar: spark/douse + divider + comments + share + report */}
-          <div className="flex items-center gap-3 pt-1">
-            <Skeleton className="h-3 w-16" />
-            <Skeleton className="h-3 w-px" />
-            <Skeleton className="h-3 w-14" />
-            <Skeleton className="h-3 w-10" />
-            <Skeleton className="h-3 w-10" />
+          {/* Action bar: spark/douse | comments | share | report */}
+          <div className="flex items-center gap-1 pt-1">
+            <Skeleton className="h-8 w-20 rounded-md" />
+            <Skeleton className="h-4 w-px" />
+            <Skeleton className="h-8 w-14 rounded-md" />
+            <Skeleton className="h-8 w-14 rounded-md" />
+            <Skeleton className="h-8 w-8 rounded-md ml-auto" />
           </div>
         </div>
       ))}

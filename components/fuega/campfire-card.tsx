@@ -28,7 +28,7 @@ export function CampfireCard({
   return (
     <Card
       className={cn(
-        "border-charcoal bg-charcoal/50 transition-colors hover:border-charcoal",
+        "border-charcoal bg-charcoal/50 transition-all duration-200 hover:border-lava-hot/30 hover:-translate-y-0.5 hover:shadow-lg",
         className,
       )}
     >

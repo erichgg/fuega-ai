@@ -47,16 +47,8 @@
   --flame-800: #9A2C00;
   --flame-900: #7C2D12;
 
-  /* Legacy aliases */
-  --fire: #FF4500;
-  --fire-light: #FF5722;
-  --fire-dark: #CC4A10;
+  /* Douse/success color (teal) */
   --teal: #00D4AA;
-  --teal-light: #33E0BE;
-  --teal-dark: #00A888;
-  --navy: #1A1A1A;
-  --navy-light: #1A1A1A;
-  --navy-dark: #000000;
 
   /* shadcn/ui semantic tokens */
   --radius: 4px;
@@ -141,6 +133,7 @@
   --color-flame-700: var(--flame-700);
   --color-flame-800: var(--flame-800);
   --color-flame-900: var(--flame-900);
+  --color-flame-950: #1a0800;
 
   /* Ash scale — theme-aware via CSS vars (inverts in light mode) */
   --color-ash-50: var(--ash-50);
@@ -167,16 +160,8 @@
   --color-ember-800: #7A1F00;
   --color-ember-900: #661A00;
 
-  /* Legacy aliases */
-  --color-fire: var(--fire);
-  --color-fire-light: var(--fire-light);
-  --color-fire-dark: var(--fire-dark);
-  --color-navy: var(--navy);
-  --color-navy-light: var(--navy-light);
-  --color-navy-dark: var(--navy-dark);
+  /* Teal (douse/success) */
   --color-teal: var(--teal);
-  --color-teal-light: var(--teal-light);
-  --color-teal-dark: var(--teal-dark);
   --color-foreground-muted: var(--foreground-muted);
 
   /* shadcn/ui semantic colors */
@@ -627,4 +612,37 @@ hr.lava-rule,
 
 .notification-dot {
   animation: notification-pulse 2s ease-in-out infinite;
+}
+
+/* ===== Governance: Spark Storm particles ===== */
+@keyframes particle-rise {
+  from { transform: translateY(0) scale(1); opacity: 1; }
+  to { transform: translateY(-100vh) scale(0.3); opacity: 0; }
+}
+
+@keyframes particle-fall {
+  from { transform: translateY(0) scale(1); opacity: 1; }
+  to { transform: translateY(100vh) scale(0.3); opacity: 0; }
+}
+
+@keyframes flash-overlay {
+  0% { opacity: 0; }
+  20% { opacity: 0.15; }
+  100% { opacity: 0; }
+}
+
+@keyframes quorum-pulse {
+  0% { transform: scale(0.8); opacity: 0; }
+  50% { transform: scale(1.1); opacity: 1; }
+  100% { transform: scale(1); opacity: 0.9; }
+}
+
+/* ===== Governance: Proposal Timeline ===== */
+@keyframes timeline-breathe {
+  0%, 100% { box-shadow: 0 0 8px var(--flame-400); transform: scale(1); }
+  50% { box-shadow: 0 0 20px var(--flame-400); transform: scale(1.08); }
+}
+
+.timeline-breathe {
+  animation: timeline-breathe 2s ease-in-out infinite;
 }

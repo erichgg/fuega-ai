@@ -17,6 +17,11 @@ import { toPostCardData } from "@/lib/adapters/post-adapter";
 
 export default function TrendingPage() {
   const { user } = useAuth();
+
+  React.useEffect(() => {
+    document.title = "Trending - fuega";
+  }, []);
+
   const [sort, setSort] = React.useState<"hot" | "new" | "top" | "rising">("hot");
   const [timeRange, setTimeRange] = React.useState<"all" | "today" | "week" | "month">("all");
   const [postType, setPostType] = React.useState<"all" | "text" | "link" | "image">("all");

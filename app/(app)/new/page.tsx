@@ -17,6 +17,11 @@ import { toPostCardData } from "@/lib/adapters/post-adapter";
 
 export default function NewPostsPage() {
   const { user } = useAuth();
+
+  React.useEffect(() => {
+    document.title = "New Posts - fuega";
+  }, []);
+
   const [sort, setSort] = React.useState<"hot" | "new" | "top" | "rising">("new");
   const [timeRange, setTimeRange] = React.useState<"all" | "today" | "week" | "month">("all");
   const [postType, setPostType] = React.useState<"all" | "text" | "link" | "image">("all");

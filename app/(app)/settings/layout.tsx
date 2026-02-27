@@ -23,6 +23,13 @@ export default function SettingsLayout({
   const router = useRouter();
   const { user, loading } = useAuth();
 
+  // Set page title based on current settings sub-page
+  React.useEffect(() => {
+    const segment = pathname.split("/").pop() ?? "settings";
+    const label = segment.charAt(0).toUpperCase() + segment.slice(1);
+    document.title = `${label === "Settings" ? "Settings" : `${label} Settings`} - fuega`;
+  }, [pathname]);
+
   React.useEffect(() => {
     if (!loading && !user) {
       router.push("/login");

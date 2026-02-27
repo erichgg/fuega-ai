@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { cn } from "@/lib/utils";
 
 interface LinkPreviewProps {
   url: string;
@@ -45,7 +46,7 @@ export function LinkPreview({
           handleClick();
         }
       }}
-      className={`flex rounded-md border border-charcoal bg-charcoal/30 overflow-hidden hover:border-lava-hot/20 transition-colors cursor-pointer ${className ?? ""}`}
+      className={cn("flex rounded-md border border-charcoal bg-charcoal/30 overflow-hidden hover:border-lava-hot/20 transition-colors cursor-pointer", className)}
     >
       {/* Image / Favicon */}
       <div className="relative w-32 min-h-[80px] flex-shrink-0 bg-charcoal/50 flex items-center justify-center">
