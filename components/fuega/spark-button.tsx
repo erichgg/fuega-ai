@@ -48,7 +48,8 @@ export function SparkButton({
             userVote !== "sparked" && "text-ash hover:text-flame-400",
             disabled && "cursor-not-allowed opacity-50",
           )}
-          aria-label="Spark"
+          aria-label="Spark this post"
+          aria-pressed={userVote === "sparked"}
         >
           <Flame
             className={cn(
@@ -87,7 +88,8 @@ export function SparkButton({
             userVote !== "doused" && "text-ash hover:text-blue-400",
             disabled && "cursor-not-allowed opacity-50",
           )}
-          aria-label="Douse"
+          aria-label="Douse this post"
+          aria-pressed={userVote === "doused"}
         >
           <Droplets
             className={cn(
@@ -122,7 +124,8 @@ export function SparkButton({
           userVote !== "sparked" && "text-smoke hover:text-flame-400",
           disabled && "cursor-not-allowed opacity-50",
         )}
-        aria-label="Spark"
+        aria-label="Spark this post"
+        aria-pressed={userVote === "sparked"}
       >
         <Flame
           className={cn(
@@ -159,7 +162,8 @@ export function SparkButton({
           userVote !== "doused" && "text-smoke hover:text-blue-400",
           disabled && "cursor-not-allowed opacity-50",
         )}
-        aria-label="Douse"
+        aria-label="Douse this post"
+        aria-pressed={userVote === "doused"}
       >
         <Droplets
           className={cn(

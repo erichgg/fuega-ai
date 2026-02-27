@@ -168,9 +168,11 @@ export function FeedTemplate({
       )}
 
       {/* Feed content */}
-      <div className="mt-4 space-y-2">
+      <div className="mt-4 space-y-2" aria-live="polite" aria-busy={loading}>
         {loading ? (
-          <FeedSkeleton />
+          <div role="status" aria-label="Loading posts">
+            <FeedSkeleton />
+          </div>
         ) : error ? (
           <div className="py-16 text-center">
             <p className="text-red-400">{error}</p>
@@ -233,9 +235,9 @@ function FeedEmptyBlock({ config, user }: FeedEmptyBlockProps) {
   const hasCta = config.ctaLabel || config.ctaLabelLoggedOut;
 
   return (
-    <div className="py-16 text-center">
+    <div className="py-16 text-center" role="status">
       {Icon ? (
-        <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-coal border border-charcoal">
+        <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-coal border border-charcoal" aria-hidden="true">
           <Icon className="h-7 w-7 text-smoke" />
         </div>
       ) : config.emoji ? (

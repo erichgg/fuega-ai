@@ -85,16 +85,18 @@ export function BottomNav() {
             className={cn(
               "flex-1 flex flex-col items-center justify-center gap-0.5",
               "transition-colors relative",
-              "min-h-[44px]",
+              "min-h-[44px] min-w-[44px]",
               active ? "text-lava-hot" : "text-smoke",
             )}
             aria-current={active ? "page" : undefined}
+            aria-label={tab.label === "Alerts" && hasUnread ? `Alerts, ${unreadCount} unread` : tab.label}
           >
             {/* Accent ring for Create button */}
             {tab.accent ? (
               <span
+                aria-hidden="true"
                 className={cn(
-                  "flex items-center justify-center w-8 h-8 rounded-full",
+                  "flex items-center justify-center w-9 h-9 rounded-full",
                   "border-2",
                   active
                     ? "border-lava-hot bg-lava-hot/10"
@@ -104,11 +106,11 @@ export function BottomNav() {
                 <Icon className="h-5 w-5" />
               </span>
             ) : (
-              <span className="relative">
+              <span className="relative" aria-hidden="true">
                 <Icon className="h-5 w-5" />
                 {/* Notification dot */}
                 {tab.label === "Alerts" && hasUnread && (
-                  <span className="absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full bg-lava-hot" />
+                  <span className="absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full bg-lava-hot" aria-hidden="true" />
                 )}
               </span>
             )}

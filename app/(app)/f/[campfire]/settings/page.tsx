@@ -98,7 +98,20 @@ function SettingEditor({
     setSaved(false);
   };
 
+  // Validation for integer fields
+  const isIntegerOutOfRange = React.useMemo(() => {
+    if (setting.data_type !== "integer") return false;
+    const numVal = parseInt(localValue, 10);
+    if (isNaN(numVal)) return true;
+    const minNum = setting.min_value !== null ? parseInt(setting.min_value, 10) : null;
+    const maxNum = setting.max_value !== null ? parseInt(setting.max_value, 10) : null;
+    if (minNum !== null && !isNaN(minNum) && numVal < minNum) return true;
+    if (maxNum !== null && !isNaN(maxNum) && numVal > maxNum) return true;
+    return false;
+  }, [setting.data_type, setting.min_value, setting.max_value, localValue]);
+
   const handleSave = async () => {
+    if (isIntegerOutOfRange) return;
     try {
       await updateSetting(campfireId, setting.key, localValue);
       setSaved(true);
@@ -130,20 +143,41 @@ function SettingEditor({
           </button>
         );
 
-      case "integer":
+      case "integer": {
+        const numVal = parseInt(localValue, 10);
+        const minNum = setting.min_value !== null ? parseInt(setting.min_value, 10) : null;
+        const maxNum = setting.max_value !== null ? parseInt(setting.max_value, 10) : null;
+        const outOfRange =
+          !isNaN(numVal) &&
+          ((minNum !== null && !isNaN(minNum) && numVal < minNum) ||
+            (maxNum !== null && !isNaN(maxNum) && numVal > maxNum));
         return (
-          <input
-            type="number"
-            disabled={!isAdmin || requiresProposal}
-            value={localValue}
-            onChange={(e) => handleChange(e.target.value)}
-            min={setting.min_value ?? undefined}
-            max={setting.max_value ?? undefined}
-            className="w-24 rounded border border-charcoal bg-void px-2 py-1 text-sm font-mono text-foreground
-                       focus:border-lava-hot/50 focus:outline-none focus:ring-1 focus:ring-lava-hot/30
-                       disabled:opacity-50 disabled:cursor-not-allowed"
-          />
+          <div>
+            <input
+              type="number"
+              disabled={!isAdmin || requiresProposal}
+              value={localValue}
+              onChange={(e) => handleChange(e.target.value)}
+              min={minNum ?? undefined}
+              max={maxNum ?? undefined}
+              className={`w-24 rounded border bg-void px-2 py-1 text-sm font-mono text-foreground
+                         focus:outline-none focus:ring-1
+                         disabled:opacity-50 disabled:cursor-not-allowed ${
+                           outOfRange
+                             ? "border-red-500/50 focus:border-red-500/50 focus:ring-red-500/30"
+                             : "border-charcoal focus:border-lava-hot/50 focus:ring-lava-hot/30"
+                         }`}
+            />
+            {outOfRange && (
+              <p className="mt-0.5 text-[10px] text-red-400 flex items-center gap-0.5">
+                <AlertTriangle className="h-2.5 w-2.5" />
+                Must be between {setting.min_value ?? "..."} and{" "}
+                {setting.max_value ?? "..."}
+              </p>
+            )}
+          </div>
         );
+      }
 
       case "enum":
         return (
@@ -200,30 +234,40 @@ function SettingEditor({
 
       case "string":
         return (
-          <input
-            type="text"
-            disabled={!isAdmin || requiresProposal}
-            value={localValue}
-            onChange={(e) => handleChange(e.target.value)}
-            maxLength={200}
-            className="w-full max-w-xs rounded border border-charcoal bg-void px-2 py-1 text-sm font-mono text-foreground
-                       focus:border-lava-hot/50 focus:outline-none focus:ring-1 focus:ring-lava-hot/30
-                       disabled:opacity-50 disabled:cursor-not-allowed"
-          />
+          <div className="w-full max-w-xs">
+            <input
+              type="text"
+              disabled={!isAdmin || requiresProposal}
+              value={localValue}
+              onChange={(e) => handleChange(e.target.value)}
+              maxLength={200}
+              className="w-full rounded border border-charcoal bg-void px-2 py-1 text-sm font-mono text-foreground
+                         focus:border-lava-hot/50 focus:outline-none focus:ring-1 focus:ring-lava-hot/30
+                         disabled:opacity-50 disabled:cursor-not-allowed"
+            />
+            <p className="mt-0.5 text-right text-[10px] text-smoke/60">
+              {localValue.length}/200
+            </p>
+          </div>
         );
 
       case "text":
         return (
-          <textarea
-            disabled={!isAdmin || requiresProposal}
-            value={localValue}
-            onChange={(e) => handleChange(e.target.value)}
-            maxLength={2000}
-            rows={3}
-            className="w-full max-w-md rounded border border-charcoal bg-void px-2 py-1 text-sm font-mono text-foreground
-                       focus:border-lava-hot/50 focus:outline-none focus:ring-1 focus:ring-lava-hot/30
-                       disabled:opacity-50 disabled:cursor-not-allowed resize-y"
-          />
+          <div className="w-full max-w-md">
+            <textarea
+              disabled={!isAdmin || requiresProposal}
+              value={localValue}
+              onChange={(e) => handleChange(e.target.value)}
+              maxLength={2000}
+              rows={3}
+              className="w-full rounded border border-charcoal bg-void px-2 py-1 text-sm font-mono text-foreground
+                         focus:border-lava-hot/50 focus:outline-none focus:ring-1 focus:ring-lava-hot/30
+                         disabled:opacity-50 disabled:cursor-not-allowed resize-y"
+            />
+            <p className="mt-0.5 text-right text-[10px] text-smoke/60">
+              {localValue.length.toLocaleString()}/2,000
+            </p>
+          </div>
         );
 
       default:
@@ -309,7 +353,7 @@ function SettingEditor({
                 size="sm"
                 className="h-7 text-xs"
                 onClick={handleSave}
-                disabled={updating}
+                disabled={updating || isIntegerOutOfRange}
               >
                 {updating ? (
                   <Loader2 className="mr-1 h-3 w-3 animate-spin" />

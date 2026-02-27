@@ -941,6 +941,35 @@ function SubmitPageInner() {
           >
             Body <span className="font-normal text-smoke">(optional)</span>
           </label>
+          <div className="flex items-center justify-between mb-1.5">
+            <div className="flex items-center gap-1 rounded-md border border-charcoal bg-coal p-0.5">
+              <button
+                type="button"
+                onClick={() => setShowPreview(false)}
+                className={`rounded px-2.5 py-1 text-xs font-medium transition-colors ${
+                  !showPreview
+                    ? "bg-charcoal text-foreground shadow-sm"
+                    : "text-smoke hover:text-ash"
+                }`}
+              >
+                Write
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowPreview(true)}
+                className={`rounded px-2.5 py-1 text-xs font-medium transition-colors ${
+                  showPreview
+                    ? "bg-charcoal text-foreground shadow-sm"
+                    : "text-smoke hover:text-ash"
+                }`}
+              >
+                Preview
+              </button>
+            </div>
+            <p className="text-[10px] text-smoke">
+              Supports **markdown** formatting
+            </p>
+          </div>
           {showPreview ? (
             <div className="min-h-[160px] rounded-md border border-charcoal bg-coal p-3">
               {body.trim() ? (
@@ -960,19 +989,7 @@ function SubmitPageInner() {
               className="min-h-[160px] resize-y border-charcoal bg-coal placeholder:text-smoke focus-visible:ring-flame-500/50"
             />
           )}
-          <div className="mt-1 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={() => setShowPreview(!showPreview)}
-                className="text-xs font-medium text-smoke hover:text-ash transition-colors"
-              >
-                {showPreview ? "Write" : "Preview"}
-              </button>
-              <p className="text-[10px] text-smoke">
-                Supports **markdown** formatting
-              </p>
-            </div>
+          <div className="mt-1 flex items-center justify-end">
             <p className="text-xs text-smoke">
               {body.length.toLocaleString()} / 40,000 chars &middot;{" "}
               {wordCount} words

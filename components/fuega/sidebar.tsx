@@ -80,7 +80,7 @@ export function SidebarContent({
   return (
     <div className="flex flex-col h-full">
       {/* Scrollable nav */}
-      <nav className="flex-1 overflow-y-auto p-3">
+      <nav className="flex-1 overflow-y-auto p-3" aria-label="Sidebar navigation">
         {/* Main navigation */}
         <div className="space-y-0.5">
           {mainLinks.map((link) => (
@@ -249,6 +249,7 @@ function SidebarItem({
     <Link
       href={link.href}
       onClick={onClick}
+      aria-current={active ? "page" : undefined}
       className={cn(
         "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-mono transition-colors",
         active
@@ -256,7 +257,7 @@ function SidebarItem({
           : "text-ash hover:bg-charcoal/50 hover:text-foreground",
       )}
     >
-      <Icon className="h-4 w-4 shrink-0" />
+      <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
       {link.label}
     </Link>
   );
@@ -275,6 +276,7 @@ function CampfireLink({
     <Link
       href={`/f/${campfire.name}`}
       onClick={onClick}
+      aria-current={active ? "page" : undefined}
       className={cn(
         "flex items-center gap-2 rounded-md px-3 py-1.5 text-sm font-mono transition-colors",
         active
@@ -282,7 +284,7 @@ function CampfireLink({
           : "text-ash hover:bg-charcoal/50 hover:text-foreground",
       )}
     >
-      <Flame className="h-3.5 w-3.5 text-lava-hot/60 shrink-0" />
+      <Flame className="h-3.5 w-3.5 text-lava-hot/60 shrink-0" aria-hidden="true" />
       <span className="truncate">
         <CampfirePrefix name={campfire.name} className="text-sm" />
       </span>

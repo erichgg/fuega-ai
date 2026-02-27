@@ -95,6 +95,7 @@ export default function CreateCampfirePage() {
   const [name, setName] = React.useState("");
   const [nameManuallyEdited, setNameManuallyEdited] = React.useState(false);
   const [description, setDescription] = React.useState("");
+  const [themeColor, setThemeColor] = React.useState("#ff4500");
   const [success, setSuccess] = React.useState(false);
 
   // Page title
@@ -127,6 +128,7 @@ export default function CreateCampfirePage() {
         name,
         display_name: displayName.trim(),
         description: description.trim(),
+        ...(themeColor !== "#ff4500" ? { theme_color: themeColor } : {}),
       });
       setSuccess(true);
       setTimeout(() => {
@@ -197,6 +199,14 @@ export default function CreateCampfirePage() {
             maxLength={100}
             className="border-charcoal bg-coal placeholder:text-smoke focus-visible:ring-flame-500/50"
           />
+          <div className="mt-1 flex items-center justify-between">
+            {!displayName.trim() ? (
+              <p className="text-xs text-red-400/80">Display name is required</p>
+            ) : (
+              <span />
+            )}
+            <p className="text-xs text-smoke">{displayName.length}/100</p>
+          </div>
         </div>
 
         {/* Slug */}
@@ -235,16 +245,22 @@ export default function CreateCampfirePage() {
               )}
             </div>
           </div>
-          <div className="mt-1 flex items-center gap-2">
-            <p className="text-xs text-smoke">
-              3-21 characters, lowercase letters, numbers, and underscores only
-            </p>
-            {name.length >= 3 && slugAvailable === false && (
-              <p className="text-xs text-ember-400">Name is taken</p>
-            )}
-            {name.length >= 3 && slugAvailable === true && !slugChecking && (
-              <p className="text-xs text-green-400">Available</p>
-            )}
+          <div className="mt-1 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <p className="text-xs text-smoke">
+                3-21 characters, lowercase letters, numbers, and underscores only
+              </p>
+              {name.length > 0 && name.length < 3 && (
+                <p className="text-xs text-red-400/80">Too short</p>
+              )}
+              {name.length >= 3 && slugAvailable === false && (
+                <p className="text-xs text-ember-400">Name is taken</p>
+              )}
+              {name.length >= 3 && slugAvailable === true && !slugChecking && (
+                <p className="text-xs text-green-400">Available</p>
+              )}
+            </div>
+            <p className="text-xs text-smoke shrink-0">{name.length}/21</p>
           </div>
         </div>
 
@@ -265,8 +281,50 @@ export default function CreateCampfirePage() {
             maxLength={500}
             className="min-h-[100px] resize-y border-charcoal bg-coal placeholder:text-smoke focus-visible:ring-flame-500/50"
           />
+          <div className="mt-1 flex items-center justify-between">
+            {!description.trim() ? (
+              <p className="text-xs text-red-400/80">Description is required</p>
+            ) : (
+              <span />
+            )}
+            <p className="text-xs text-smoke">{description.length}/500</p>
+          </div>
+        </div>
+
+        {/* Theme color */}
+        <div>
+          <label
+            htmlFor="themeColor"
+            className="mb-1.5 block text-sm font-medium text-ash"
+          >
+            Theme Color <span className="font-normal text-smoke">(optional)</span>
+          </label>
+          <div className="flex items-center gap-3">
+            <div className="relative">
+              <input
+                id="themeColor"
+                type="color"
+                value={themeColor}
+                onChange={(e) => setThemeColor(e.target.value)}
+                className="h-9 w-14 cursor-pointer rounded border border-charcoal bg-coal p-0.5"
+              />
+            </div>
+            <Input
+              value={themeColor}
+              onChange={(e) => {
+                const val = e.target.value;
+                if (/^#[0-9a-fA-F]{0,6}$/.test(val)) setThemeColor(val);
+              }}
+              maxLength={7}
+              className="w-28 border-charcoal bg-coal font-mono text-sm placeholder:text-smoke focus-visible:ring-flame-500/50"
+            />
+            <div
+              className="h-9 flex-1 rounded border border-charcoal"
+              style={{ backgroundColor: themeColor }}
+            />
+          </div>
           <p className="mt-1 text-xs text-smoke">
-            {description.length}/500 characters
+            Accent color for your campfire. Shown on banners and highlights.
           </p>
         </div>
 

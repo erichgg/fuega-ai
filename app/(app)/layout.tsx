@@ -98,7 +98,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       {/* Desktop: persistent sidebar + main content */}
       <div className="flex-1 flex">
         {/* Persistent sidebar — visible on lg+ */}
-        <aside className="hidden lg:flex lg:w-60 xl:w-64 shrink-0 flex-col border-r border-lava-hot/10 bg-coal/50 sticky top-14 h-[calc(100vh-3.5rem)] overflow-hidden">
+        <aside aria-label="Sidebar" className="hidden lg:flex lg:w-60 xl:w-64 shrink-0 flex-col border-r border-lava-hot/10 bg-coal/50 sticky top-14 h-[calc(100vh-3.5rem)] overflow-hidden">
           <SidebarContent
             campfires={myCampfires.length > 0 ? myCampfires : undefined}
             popularCampfires={popularCampfires.length > 0 ? popularCampfires : undefined}

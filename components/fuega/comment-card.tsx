@@ -170,8 +170,8 @@ export function CommentCard({
             </UserHoverCard>
             <span>&middot;</span>
             <span className="flex items-center gap-1">
-              <Clock className="h-3 w-3" />
-              {timeAgo(comment.createdAt)}
+              <Clock className="h-3 w-3" aria-hidden="true" />
+              <time dateTime={comment.createdAt}>{timeAgo(comment.createdAt)}</time>
             </span>
             {comment.moderation && (
               <ModBadge
@@ -246,7 +246,7 @@ export function CommentCard({
                   className="flex items-center gap-1 transition-colors hover:text-foreground"
                   aria-label="Reply to comment"
                 >
-                  <MessageSquare className="h-3 w-3" />
+                  <MessageSquare className="h-3 w-3" aria-hidden="true" />
                   Reply
                 </button>
               )}
@@ -258,7 +258,7 @@ export function CommentCard({
                   className="flex items-center gap-1 transition-colors hover:text-foreground"
                   aria-label="Report comment"
                 >
-                  <Flag className="h-3 w-3" />
+                  <Flag className="h-3 w-3" aria-hidden="true" />
                   Report
                 </button>
               )}
@@ -270,7 +270,7 @@ export function CommentCard({
                   className="flex items-center gap-1 transition-colors hover:text-foreground"
                   aria-label="Edit comment"
                 >
-                  <Edit3 className="h-3 w-3" />
+                  <Edit3 className="h-3 w-3" aria-hidden="true" />
                   Edit
                 </button>
               )}
@@ -282,7 +282,7 @@ export function CommentCard({
                   className="flex items-center gap-1 transition-colors hover:text-red-400"
                   aria-label="Delete comment"
                 >
-                  <Trash2 className="h-3 w-3" />
+                  <Trash2 className="h-3 w-3" aria-hidden="true" />
                   Delete
                 </button>
               )}

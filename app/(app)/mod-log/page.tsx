@@ -10,10 +10,12 @@ import {
   Filter,
   Search,
   Clock,
+  Calendar,
   Loader2,
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
+import Link from "next/link";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -77,6 +79,8 @@ export default function ModLogPage() {
   );
   const [campfireFilter, setCampfireFilter] = React.useState("");
   const [searchQuery, setSearchQuery] = React.useState("");
+  const [dateFrom, setDateFrom] = React.useState("");
+  const [dateTo, setDateTo] = React.useState("");
 
   // Page title
   React.useEffect(() => {
@@ -132,7 +136,7 @@ export default function ModLogPage() {
     setOffset(0);
   }, [decisionFilter]);
 
-  // Client-side filtering for campfire name and search query
+  // Client-side filtering for campfire name, search query, and date range
   const filteredEntries = React.useMemo(() => {
     return entries.filter((entry) => {
       if (
@@ -150,9 +154,19 @@ export default function ModLogPage() {
       ) {
         return false;
       }
+      if (dateFrom) {
+        const entryDate = new Date(entry.created_at);
+        const fromDate = new Date(dateFrom);
+        if (entryDate < fromDate) return false;
+      }
+      if (dateTo) {
+        const entryDate = new Date(entry.created_at);
+        const toDate = new Date(dateTo + "T23:59:59");
+        if (entryDate > toDate) return false;
+      }
       return true;
     });
-  }, [entries, debouncedCampfire, searchQuery]);
+  }, [entries, debouncedCampfire, searchQuery, dateFrom, dateTo]);
 
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
   const currentPage = Math.floor(offset / PAGE_SIZE) + 1;
@@ -194,6 +208,37 @@ export default function ModLogPage() {
           />
         </div>
 
+        {/* Date range */}
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+          <div className="flex items-center gap-2">
+            <Calendar className="h-4 w-4 text-smoke shrink-0" />
+            <Input
+              type="date"
+              value={dateFrom}
+              onChange={(e) => setDateFrom(e.target.value)}
+              aria-label="Filter from date"
+              className="h-9 w-auto border-charcoal bg-coal text-sm text-ash focus-visible:ring-flame-500/50"
+            />
+            <span className="text-xs text-smoke">to</span>
+            <Input
+              type="date"
+              value={dateTo}
+              onChange={(e) => setDateTo(e.target.value)}
+              aria-label="Filter to date"
+              className="h-9 w-auto border-charcoal bg-coal text-sm text-ash focus-visible:ring-flame-500/50"
+            />
+          </div>
+          {(dateFrom || dateTo) && (
+            <button
+              type="button"
+              onClick={() => { setDateFrom(""); setDateTo(""); }}
+              className="text-xs text-smoke hover:text-ash transition-colors"
+            >
+              Clear dates
+            </button>
+          )}
+        </div>
+
         <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Filter by decision">
           <Filter className="h-4 w-4 text-smoke" />
           {(["all", "approved", "flagged", "removed", "warned"] as const).map((d) => (
@@ -213,8 +258,19 @@ export default function ModLogPage() {
         </div>
       </div>
 
+      {/* Entry count */}
+      {!loading && !error && (
+        <div className="mt-4 flex items-center justify-between">
+          <p className="text-xs text-smoke">
+            {filteredEntries.length === total
+              ? `${total.toLocaleString()} total entries`
+              : `${filteredEntries.length} of ${total.toLocaleString()} entries`}
+          </p>
+        </div>
+      )}
+
       {/* Entries */}
-      <div className="mt-6 space-y-2">
+      <div className="mt-3 space-y-2">
         {loading ? (
           <ModLogSkeleton />
         ) : error ? (
@@ -295,7 +351,7 @@ export default function ModLogPage() {
                 </summary>
 
                 <div className="border-t border-charcoal px-3 pb-3 pt-3">
-                  <div className="space-y-2">
+                  <div className="space-y-3">
                     <div>
                       <span className="text-[10px] font-semibold uppercase tracking-wider text-smoke">
                         AI Reasoning
@@ -304,7 +360,17 @@ export default function ModLogPage() {
                         {entry.reason}
                       </p>
                     </div>
-                    <div className="flex flex-wrap items-center gap-3 text-xs text-smoke">
+                    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 rounded border border-charcoal/50 bg-void/30 px-3 py-2 text-xs text-smoke">
+                      <span>
+                        Campfire:{" "}
+                        <Link
+                          href={`/f/${entry.campfire_name}`}
+                          className="text-flame-400 hover:underline"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          f/{entry.campfire_name}
+                        </Link>
+                      </span>
                       <span>
                         Level:{" "}
                         <span className="text-ash capitalize">
@@ -317,6 +383,12 @@ export default function ModLogPage() {
                           <span className="text-ash">{entry.ai_model}</span>
                         </span>
                       )}
+                      <span>
+                        Type:{" "}
+                        <span className="text-ash capitalize">
+                          {entry.content_type}
+                        </span>
+                      </span>
                       {entry.injection_detected && (
                         <span className="flex items-center gap-1 text-red-400">
                           <AlertTriangle className="h-3 w-3" />

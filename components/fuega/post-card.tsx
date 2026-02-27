@@ -125,8 +125,8 @@ export function PostCard({
         </Link>
         <span className="text-smoke">·</span>
         <span className="flex items-center gap-1 text-smoke">
-          <Clock className="h-3 w-3" />
-          {timeAgo(post.createdAt)}
+          <Clock className="h-3 w-3" aria-hidden="true" />
+          <time dateTime={post.createdAt}>{timeAgo(post.createdAt)}</time>
         </span>
         {post.post_type === "link" && (
           <span className="inline-flex items-center gap-1 rounded-full bg-flame-400/10 px-1.5 py-0.5 text-[10px] text-flame-400">
@@ -151,7 +151,13 @@ export function PostCard({
         "mt-1.5 font-medium leading-snug text-foreground group-hover:text-lava-hot cursor-pointer transition-colors",
         compact ? "text-sm" : "text-base",
       )}>
-        {post.title}
+        <Link
+          href={`/f/${post.campfire}/${post.id}`}
+          className="hover:underline focus:outline-none focus-visible:underline"
+          aria-label={post.title}
+        >
+          {post.title}
+        </Link>
       </h3>
 
       {/* Link preview */}
