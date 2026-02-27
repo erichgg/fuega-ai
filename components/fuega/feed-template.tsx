@@ -242,8 +242,8 @@ function FeedEmptyBlock({ config, user }: FeedEmptyBlockProps) {
           <Icon className="h-7 w-7 text-smoke" />
         </div>
       ) : config.emoji ? (
-        <div className="mx-auto mb-4" aria-hidden="true">
-          <EmptyFeedIllustration />
+        <div className="mx-auto mb-4 flex justify-center" aria-hidden="true">
+          <EmptyFeedIllustration className="h-24 w-24 sm:h-[120px] sm:w-[120px]" />
         </div>
       ) : null}
 
