@@ -27,6 +27,17 @@ import { toPostCardData } from "@/lib/adapters/post-adapter";
 import { api, ApiError } from "@/lib/api/client";
 import { timeAgo } from "@/lib/utils/time-ago";
 
+interface UserCommentApi {
+  id: string;
+  body: string;
+  createdAt: string;
+  editedAt: string | null;
+  sparks: number;
+  douses: number;
+  post: { id: string; title: string };
+  campfire: { id: string; name: string };
+}
+
 interface UserComment {
   id: string;
   body: string;
@@ -111,31 +122,67 @@ export default function UserProfilePage() {
   // Voting
   const { handleVote, getVote, getDelta } = useOptimisticVoting();
 
-  // Fetch user's comments
+  // Fetch user's comments with pagination
+  const COMMENTS_LIMIT = 20;
   const [comments, setComments] = React.useState<UserComment[]>([]);
   const [commentsLoading, setCommentsLoading] = React.useState(true);
+  const [commentsLoadingMore, setCommentsLoadingMore] = React.useState(false);
+  const [hasMoreComments, setHasMoreComments] = React.useState(false);
+
+  const mapComment = (c: UserCommentApi): UserComment => ({
+    id: c.id,
+    body: c.body,
+    created_at: c.createdAt,
+    post_id: c.post.id,
+    post_title: c.post.title,
+    campfire_name: c.campfire.name,
+    glow: (c.sparks ?? 0) - (c.douses ?? 0),
+  });
 
   React.useEffect(() => {
     let cancelled = false;
     setCommentsLoading(true);
 
     api
-      .get<{ comments: UserComment[] }>(`/api/users/${encodeURIComponent(username)}/comments`)
+      .get<{ comments: UserCommentApi[] }>(`/api/users/${encodeURIComponent(username)}/comments`, { limit: COMMENTS_LIMIT })
       .then((data) => {
         if (!cancelled) {
-          setComments(data.comments ?? []);
+          const mapped = (data.comments ?? []).map(mapComment);
+          setComments(mapped);
+          setHasMoreComments(mapped.length >= COMMENTS_LIMIT);
           setCommentsLoading(false);
         }
       })
       .catch(() => {
         if (!cancelled) {
           setComments([]);
+          setHasMoreComments(false);
           setCommentsLoading(false);
         }
       });
 
     return () => { cancelled = true; };
   }, [username]);
+
+  const loadMoreComments = React.useCallback(async () => {
+    if (commentsLoadingMore || !hasMoreComments || comments.length === 0) return;
+    setCommentsLoadingMore(true);
+    try {
+      const lastComment = comments[comments.length - 1] as UserComment | undefined;
+      if (!lastComment) return;
+      const data = await api.get<{ comments: UserCommentApi[] }>(
+        `/api/users/${encodeURIComponent(username)}/comments`,
+        { limit: COMMENTS_LIMIT, before: lastComment.created_at }
+      );
+      const mapped = (data.comments ?? []).map(mapComment);
+      setComments((prev) => [...prev, ...mapped]);
+      setHasMoreComments(mapped.length >= COMMENTS_LIMIT);
+    } catch {
+      // Silently handle pagination errors
+    } finally {
+      setCommentsLoadingMore(false);
+    }
+  }, [commentsLoadingMore, hasMoreComments, comments, username]);
 
   // Page title
   React.useEffect(() => {
@@ -154,6 +201,16 @@ export default function UserProfilePage() {
     }
     return card;
   });
+
+  const isOwnProfile = currentUser?.username === (profile?.username ?? "");
+  const isHidden = profile ? !profile.profileVisible && !isOwnProfile : false;
+  const filledSocials = React.useMemo(
+    () =>
+      Object.entries(profile?.socialLinks ?? {}).filter(
+        ([, val]) => val && val.trim() !== "",
+      ),
+    [profile?.socialLinks],
+  );
 
   const loading = profileLoading || postsLoading;
 
@@ -174,12 +231,6 @@ export default function UserProfilePage() {
       </div>
     );
   }
-
-  const isOwnProfile = currentUser?.username === profile.username;
-  const isHidden = !profile.profileVisible && !isOwnProfile;
-  const filledSocials = Object.entries(profile.socialLinks ?? {}).filter(
-    ([, val]) => val && val.trim() !== "",
-  );
 
   return (
     <div className="max-w-5xl">
@@ -377,30 +428,41 @@ export default function UserProfilePage() {
               </p>
             </div>
           ) : (
-            comments.map((comment) => (
-              <Link
-                key={comment.id}
-                href={`/f/${comment.campfire_name}/${comment.post_id}`}
-                className="block rounded-md border border-transparent p-3 hover:border-lava-hot/20 hover:bg-coal/80 transition-all"
-              >
-                <div className="flex items-center gap-2 text-[10px] text-smoke">
-                  <span className="font-mono">
-                    <span className="text-flame-400">f</span>
-                    <span className="text-smoke mx-0.5">|</span>
-                    <span>{comment.campfire_name}</span>
-                  </span>
-                  <span>&middot;</span>
-                  <span className="truncate">{comment.post_title}</span>
-                  <span>&middot;</span>
-                  <span>{timeAgo(comment.created_at)}</span>
-                </div>
-                <p className="mt-1 text-sm text-ash line-clamp-2">{comment.body}</p>
-                <div className="mt-1 flex items-center gap-1 text-[10px] text-smoke">
-                  <Flame className="h-3 w-3 text-flame-400" />
-                  <span>{comment.glow ?? 0} glow</span>
-                </div>
-              </Link>
-            ))
+            <>
+              {comments.map((comment) => (
+                <Link
+                  key={comment.id}
+                  href={`/f/${comment.campfire_name}/${comment.post_id}`}
+                  className="block rounded-md border border-transparent p-3 hover:border-lava-hot/20 hover:bg-coal/80 transition-all"
+                >
+                  <div className="flex items-center gap-2 text-[10px] text-smoke">
+                    <span className="font-mono">
+                      <span className="text-flame-400">f</span>
+                      <span className="text-smoke mx-0.5">|</span>
+                      <span>{comment.campfire_name}</span>
+                    </span>
+                    <span>&middot;</span>
+                    <span className="truncate">{comment.post_title}</span>
+                    <span>&middot;</span>
+                    <span>{timeAgo(comment.created_at)}</span>
+                  </div>
+                  <p className="mt-1 text-sm text-ash line-clamp-2">{comment.body}</p>
+                  <div className="mt-1 flex items-center gap-1 text-[10px] text-smoke">
+                    <Flame className="h-3 w-3 text-flame-400" />
+                    <span>{comment.glow ?? 0} glow</span>
+                  </div>
+                </Link>
+              ))}
+              {hasMoreComments && (
+                <button
+                  onClick={loadMoreComments}
+                  disabled={commentsLoadingMore}
+                  className="w-full py-3 text-center text-xs text-ash hover:text-flame-400 transition-colors disabled:opacity-50"
+                >
+                  {commentsLoadingMore ? "Loading..." : "Load more comments"}
+                </button>
+              )}
+            </>
           )}
         </TabsContent>
       </Tabs>

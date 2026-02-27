@@ -54,7 +54,21 @@ export async function POST(req: Request) {
     }
 
     const body = await req.json();
-    const validated = moderateRequestSchema.parse(body);
+    const parsed = moderateRequestSchema.safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json(
+        {
+          error: "Validation failed",
+          code: "VALIDATION_ERROR",
+          details: parsed.error.errors.map((e) => ({
+            field: e.path.join("."),
+            message: e.message,
+          })),
+        },
+        { status: 400 }
+      );
+    }
+    const validated = parsed.data;
 
     // Fetch campfire context (rules, prompt version)
     const campfire = await queryOne<{
@@ -122,20 +136,6 @@ export async function POST(req: Request) {
       log_ids: logIds,
     });
   } catch (error) {
-    if (error instanceof z.ZodError) {
-      return NextResponse.json(
-        {
-          error: "Validation failed",
-          code: "VALIDATION_ERROR",
-          details: error.errors.map((e) => ({
-            field: e.path.join("."),
-            message: e.message,
-          })),
-        },
-        { status: 400 }
-      );
-    }
-
     console.error("Moderation endpoint error:", error);
     return NextResponse.json(
       { error: "Internal server error", code: "INTERNAL_ERROR" },

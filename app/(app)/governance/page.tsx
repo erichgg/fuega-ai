@@ -53,6 +53,8 @@ interface Proposal {
   votesFor: number;
   votesAgainst: number;
   commentCount: number;
+  quorum: number;
+  totalMembers: number;
   author: string;
   createdAt: string;
   endsAt: string;
@@ -178,6 +180,13 @@ function GovernancePageInner() {
   const router = useRouter();
   const campfireFilter = searchParams.get("campfire");
 
+  // Page title
+  React.useEffect(() => {
+    document.title = campfireFilter
+      ? `Governance: f/${campfireFilter} - fuega`
+      : "Governance - fuega";
+  }, [campfireFilter]);
+
   // Active tab: proposals | settings | history
   const [activeTab, setActiveTab] = React.useState<"proposals" | "settings" | "history">("proposals");
   const [proposals, setProposals] = React.useState<Proposal[]>([]);
@@ -233,6 +242,7 @@ function GovernancePageInner() {
         interface ApiProposalWithJoins extends ApiProposal {
           creator_username?: string;
           campfire_name?: string;
+          member_count?: number;
         }
         const res = await api.get<{ proposals: ApiProposalWithJoins[] }>(
           "/api/proposals",
@@ -251,6 +261,8 @@ function GovernancePageInner() {
               votesFor: p.votes_for,
               votesAgainst: p.votes_against,
               commentCount: 0,
+              quorum: Math.ceil((p.member_count ?? 0) * 0.3),
+              totalMembers: p.member_count ?? 0,
               author: p.creator_username ?? "unknown",
               createdAt: p.created_at,
               endsAt: p.voting_ends_at ?? p.created_at,
@@ -743,8 +755,8 @@ function ProposalCard({ proposal }: { proposal: Proposal }) {
         <FlameGauge
           sparkVotes={proposal.votesFor}
           douseVotes={proposal.votesAgainst}
-          quorum={100}
-          totalMembers={200}
+          quorum={proposal.quorum}
+          totalMembers={proposal.totalMembers}
           size="sm"
           className="shrink-0 mt-1"
         />

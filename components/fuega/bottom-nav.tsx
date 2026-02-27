@@ -4,6 +4,7 @@ import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { Home, Flame, Plus, Bell, User } from "lucide-react";
 import { useAuth } from "@/lib/contexts/auth-context";
+import { useNotificationContext } from "@/lib/contexts/notification-context";
 import { cn } from "@/lib/utils";
 
 interface NavTab {
@@ -60,8 +61,8 @@ export function BottomNav() {
     },
   ];
 
-  // TODO: replace with real unread count from notifications context
-  const hasUnread = false;
+  const { unreadCount } = useNotificationContext();
+  const hasUnread = unreadCount > 0;
 
   return (
     <nav

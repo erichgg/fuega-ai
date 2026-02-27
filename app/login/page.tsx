@@ -38,6 +38,11 @@ function LoginInner() {
 
   const redirectTo = searchParams.get("redirect") || "/home";
 
+  // Page title
+  React.useEffect(() => {
+    document.title = "Log In - fuega";
+  }, []);
+
   React.useEffect(() => {
     if (user) router.replace("/home");
   }, [user, router]);

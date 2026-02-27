@@ -102,6 +102,9 @@ export default function CampfirePage() {
     }
   };
 
+  // Banner image error state (must be before any early returns)
+  const [bannerError, setBannerError] = React.useState(false);
+
   // Convert API posts to PostCard shape
   const postCards = posts.map((p) => {
     const card = toPostCardData(p);
@@ -132,21 +135,34 @@ export default function CampfirePage() {
     );
   }
 
+  // Gradient fallback for banner
+  const bannerGradient = `linear-gradient(135deg, ${campfire.theme_color || 'var(--lava-hot)'} 0%, var(--ember) 50%, #1a0a00 100%)`;
+  const showBannerImage = campfire.banner_url && !bannerError;
+
   return (
     <div style={campfire.theme_color ? { '--campfire-accent': campfire.theme_color } as React.CSSProperties : undefined}>
       {/* Campfire Hearth — Banner + Header */}
       <div className="rounded-lg border border-charcoal overflow-hidden">
-        {/* Banner — custom image or gradient */}
+        {/* Banner — custom image or gradient fallback */}
         <div
           className="h-24 sm:h-32 relative"
           style={{
-            backgroundImage: campfire.banner_url
+            backgroundImage: showBannerImage
               ? `url(${campfire.banner_url})`
-              : `linear-gradient(135deg, ${campfire.theme_color || 'var(--lava-hot)'} 0%, var(--ember) 50%, #1a0a00 100%)`,
+              : bannerGradient,
             backgroundSize: 'cover',
             backgroundPosition: 'center',
           }}
         >
+          {/* eslint-disable-next-line @next/next/no-img-element -- Hidden probe to detect load errors */}
+          {campfire.banner_url && !bannerError && (
+            <img
+              src={campfire.banner_url}
+              alt=""
+              className="hidden"
+              onError={() => setBannerError(true)}
+            />
+          )}
           {/* Noise texture overlay */}
           <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 256 256\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'noise\'%3E%3CfeTurbulence baseFrequency=\'0.65\' numOctaves=\'3\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23noise)\'/%3E%3C/svg%3E")' }} />
           <div className="absolute inset-0 bg-gradient-to-t from-coal/80 to-transparent" />
@@ -162,7 +178,9 @@ export default function CampfirePage() {
                 <h1 className="text-xl font-bold text-white drop-shadow-lg font-mono">
                   <span className="text-flame-400">f</span>
                   <span className="text-white/60 mx-0.5">|</span>
-                  <span>{campfire.name}</span>
+                  <span style={campfire.theme_color ? { color: campfire.theme_color } : undefined}>
+                    {campfire.name}
+                  </span>
                 </h1>
               </div>
             </div>
@@ -179,7 +197,9 @@ export default function CampfirePage() {
                 }
                 style={
                   !isMember && campfire.theme_color
-                    ? { backgroundColor: campfire.theme_color }
+                    ? { backgroundColor: campfire.theme_color, borderColor: campfire.theme_color }
+                    : isMember && campfire.theme_color
+                    ? { borderColor: `${campfire.theme_color}50` }
                     : undefined
                 }
               >
@@ -211,17 +231,14 @@ export default function CampfirePage() {
             </span>
             <span className="flex items-center gap-1">
               <TrendingUp className="h-3.5 w-3.5" />
-              <span className="text-foreground font-semibold">{postCards.length}</span>
+              <span className="text-foreground font-semibold">{(campfire.post_count ?? 0).toLocaleString()}</span>
               posts
             </span>
             <span className="flex items-center gap-1">
-              <Vote className="h-3.5 w-3.5" />
-              <span className="text-foreground font-semibold">0</span>
-              proposals
-            </span>
-            <span className="flex items-center gap-1">
               <Flame className="h-3.5 w-3.5" />
-              <span className="text-foreground font-semibold">0</span>
+              <span className="text-foreground font-semibold">
+                {postCards.reduce((sum, p) => sum + (p.sparkCount ?? 0), 0).toLocaleString()}
+              </span>
               glow
             </span>
             <span className="flex items-center gap-1">
@@ -286,6 +303,11 @@ export default function CampfirePage() {
               ? "bg-flame-500/20 text-flame-400"
               : "text-ash hover:text-foreground hover:bg-charcoal/50"
           }`}
+          style={
+            viewMode === "posts" && campfire.theme_color
+              ? { color: campfire.theme_color, backgroundColor: `${campfire.theme_color}20` }
+              : undefined
+          }
         >
           <FileText className="h-4 w-4" />
           Posts
@@ -299,6 +321,11 @@ export default function CampfirePage() {
               ? "bg-flame-500/20 text-flame-400"
               : "text-ash hover:text-foreground hover:bg-charcoal/50"
           }`}
+          style={
+            viewMode === "chat" && campfire.theme_color
+              ? { color: campfire.theme_color, backgroundColor: `${campfire.theme_color}20` }
+              : undefined
+          }
         >
           <MessageSquare className="h-4 w-4" />
           Chat

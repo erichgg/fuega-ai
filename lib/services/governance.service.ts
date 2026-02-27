@@ -28,6 +28,7 @@ export interface Proposal {
   implemented_at: string | null;
   creator_username?: string;
   campfire_name?: string;
+  member_count?: number;
 }
 
 export interface ProposalVote {
@@ -173,7 +174,8 @@ export async function getProposalById(
   return queryOne<Proposal>(
     `SELECT p.*,
             u.username AS creator_username,
-            c.name AS campfire_name
+            c.name AS campfire_name,
+            (SELECT COUNT(*)::int FROM campfire_members cm WHERE cm.campfire_id = p.campfire_id) AS member_count
      FROM proposals p
      JOIN users u ON u.id = p.created_by
      JOIN campfires c ON c.id = p.campfire_id
@@ -200,7 +202,8 @@ export async function listProposals(
   const sql = `
     SELECT p.*,
            u.username AS creator_username,
-           c.name AS campfire_name
+           c.name AS campfire_name,
+           (SELECT COUNT(*)::int FROM campfire_members cm WHERE cm.campfire_id = p.campfire_id) AS member_count
     FROM proposals p
     JOIN users u ON u.id = p.created_by
     JOIN campfires c ON c.id = p.campfire_id

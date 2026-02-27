@@ -57,6 +57,11 @@ function ResetPasswordInner() {
   const confirmTouched = confirmPassword.length > 0;
   const canSubmit = token && passwordLongEnough && passwordsMatch && confirmTouched && !loading;
 
+  // Page title
+  React.useEffect(() => {
+    document.title = "Reset Password - fuega";
+  }, []);
+
   // Auto-redirect to login 3 seconds after success
   React.useEffect(() => {
     if (!success) return;

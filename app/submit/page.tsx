@@ -493,7 +493,7 @@ function SubmitPageInner() {
 
   // Page title
   React.useEffect(() => {
-    document.title = "Create a Post - fuega";
+    document.title = "Submit Post - fuega";
   }, []);
 
   // Warn on unsaved changes before leaving

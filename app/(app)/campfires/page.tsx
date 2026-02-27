@@ -17,6 +17,11 @@ export default function CampfiresPage() {
   const [sort, setSort] = React.useState<"members" | "newest" | "name">("members");
   const [retryCount, setRetryCount] = React.useState(0);
 
+  // Page title
+  React.useEffect(() => {
+    document.title = "Explore Campfires - fuega";
+  }, []);
+
   React.useEffect(() => {
     let cancelled = false;
     setLoading(true);

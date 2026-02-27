@@ -19,6 +19,11 @@ export default function ForgotPasswordPage() {
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState("");
 
+  // Page title
+  React.useEffect(() => {
+    document.title = "Forgot Password - fuega";
+  }, []);
+
   React.useEffect(() => {
     if (user) router.replace("/home");
   }, [user, router]);

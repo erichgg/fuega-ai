@@ -148,6 +148,11 @@ export default function AccountSettingsPage() {
     }
   };
 
+  // Page title
+  React.useEffect(() => {
+    document.title = "Account Settings - fuega";
+  }, []);
+
   // Auto-dismiss success messages
   React.useEffect(() => {
     if (passwordMessage?.type !== "success") return;

@@ -67,6 +67,11 @@ export default function SignupPage() {
   const passwordsMatch = confirmPassword.length === 0 || password === confirmPassword;
   const confirmPasswordTouched = confirmPassword.length > 0;
 
+  // Page title
+  React.useEffect(() => {
+    document.title = "Sign Up - fuega";
+  }, []);
+
   React.useEffect(() => {
     if (user) router.replace("/home");
   }, [user, router]);

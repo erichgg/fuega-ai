@@ -43,6 +43,7 @@ interface ProposalDetail {
   votesAgainst: number;
   commentCount: number;
   quorum: number;
+  totalMembers: number;
   author: string;
   createdAt: string;
   discussionEndsAt: string;
@@ -77,6 +78,15 @@ export default function ProposalDetailPage() {
   const [voteError, setVoteError] = React.useState<string | null>(null);
   const { voteOnProposal, voting } = useProposalVote();
 
+  // Page title
+  React.useEffect(() => {
+    if (proposal) {
+      document.title = `${proposal.title} - fuega`;
+    } else {
+      document.title = "Proposal - fuega";
+    }
+  }, [proposal]);
+
   // Governance variable details for change_settings proposals
   const [variableDetail, setVariableDetail] = React.useState<GovernanceVariable | null>(null);
   const [currentSettingValue, setCurrentSettingValue] = React.useState<string | null>(null);
@@ -98,6 +108,7 @@ export default function ProposalDetailPage() {
     created_at: string;
     creator_username?: string;
     campfire_name?: string;
+    member_count?: number;
   }
 
   const mapProposal = React.useCallback((p: ApiProposalDetail): ProposalDetail => {
@@ -116,7 +127,8 @@ export default function ProposalDetailPage() {
       votesFor: p.votes_for,
       votesAgainst: p.votes_against,
       commentCount: 0,
-      quorum: 100,
+      quorum: Math.ceil((p.member_count ?? 0) * 0.3),
+      totalMembers: p.member_count ?? 0,
       author: p.creator_username ?? "unknown",
       createdAt: p.created_at,
       discussionEndsAt: p.discussion_ends_at,
@@ -524,7 +536,7 @@ export default function ProposalDetailPage() {
             sparkVotes={proposal.votesFor}
             douseVotes={proposal.votesAgainst}
             quorum={proposal.quorum}
-            totalMembers={proposal.quorum * 2}
+            totalMembers={proposal.totalMembers}
             size="lg"
           />
           <div className="flex-1 space-y-2 text-sm">

@@ -78,6 +78,11 @@ export default function ModLogPage() {
   const [campfireFilter, setCampfireFilter] = React.useState("");
   const [searchQuery, setSearchQuery] = React.useState("");
 
+  // Page title
+  React.useEffect(() => {
+    document.title = "Mod Log - fuega";
+  }, []);
+
   // Debounce campfire filter to avoid excessive API calls
   const [debouncedCampfire, setDebouncedCampfire] = React.useState("");
   React.useEffect(() => {

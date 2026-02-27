@@ -97,6 +97,11 @@ export default function CreateCampfirePage() {
   const [description, setDescription] = React.useState("");
   const [success, setSuccess] = React.useState(false);
 
+  // Page title
+  React.useEffect(() => {
+    document.title = "Create Campfire - fuega";
+  }, []);
+
   // Real-time slug uniqueness check
   const { checking: slugChecking, available: slugAvailable } = useSlugCheck(name);
 

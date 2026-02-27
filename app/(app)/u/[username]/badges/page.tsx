@@ -26,6 +26,11 @@ export default function UserBadgesPage() {
   );
   const [selectorOpen, setSelectorOpen] = React.useState(false);
 
+  // Page title
+  React.useEffect(() => {
+    document.title = `${username}'s Badges - fuega`;
+  }, [username]);
+
   React.useEffect(() => {
     let cancelled = false;
 

@@ -18,7 +18,7 @@ export default function PrivacySettingsPage() {
 
   // Set page title
   React.useEffect(() => {
-    document.title = "Privacy Settings | fuega.ai";
+    document.title = "Privacy Settings - fuega";
   }, []);
 
   React.useEffect(() => {

@@ -123,6 +123,13 @@ export default function PostDetailPage() {
     });
   };
 
+  // Page title
+  React.useEffect(() => {
+    if (rawPost) {
+      document.title = `${rawPost.title} - fuega`;
+    }
+  }, [rawPost]);
+
   // Load user's existing vote state on page load
   React.useEffect(() => {
     if (!user || !postId) return;

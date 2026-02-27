@@ -44,6 +44,11 @@ export default function ProfileSettingsPage() {
   const [savedForm, setSavedForm] = React.useState<ProfileForm | null>(null);
   const isDirty = savedForm !== null && JSON.stringify(form) !== JSON.stringify(savedForm);
 
+  // Page title
+  React.useEffect(() => {
+    document.title = "Profile Settings - fuega";
+  }, []);
+
   React.useEffect(() => {
     let cancelled = false;
     async function load() {

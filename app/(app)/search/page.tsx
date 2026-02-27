@@ -280,19 +280,27 @@ function SearchPageInner() {
             <p className="mt-4 text-ash">
               No results for &ldquo;{q}&rdquo;
             </p>
-            <p className="mt-1 text-xs text-smoke">
-              Try different keywords or check your spelling.
-            </p>
-            <div className="mt-4 flex flex-wrap justify-center gap-2">
-              {["campfires", "governance", "badges"].map((term) => (
+            <div className="mt-3 space-y-1 text-xs text-smoke">
+              <p>Try different keywords or check your spelling.</p>
+              <p>Search works across post titles, campfire names, and usernames.</p>
+            </div>
+            <div className="mt-5 flex flex-wrap justify-center gap-2">
+              {["campfires", "governance", "badges", "trending"].map((term) => (
                 <Link
                   key={term}
-                  href={`/search?q=${term}`}
-                  className="rounded-full border border-charcoal px-3 py-1 text-xs text-smoke hover:text-flame-400 hover:border-flame-400/30 transition-colors"
+                  href={`/search?q=${encodeURIComponent(term)}`}
+                  className="inline-flex items-center gap-1.5 rounded-full border border-charcoal px-3 py-1.5 text-xs text-smoke hover:text-flame-400 hover:border-flame-400/30 transition-colors"
                 >
+                  <Sparkles className="h-3 w-3" />
                   Try &ldquo;{term}&rdquo;
                 </Link>
               ))}
+            </div>
+            <div className="mt-4 flex justify-center gap-4 text-xs">
+              <Link href="/campfires" className="flex items-center gap-1 text-smoke hover:text-flame-400 transition-colors">
+                <Flame className="h-3.5 w-3.5" />
+                Browse campfires
+              </Link>
             </div>
           </div>
         ) : (
