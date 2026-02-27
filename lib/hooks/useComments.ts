@@ -64,6 +64,7 @@ interface UseCreateCommentReturn {
   createComment: (input: CreateCommentInput) => Promise<{ comment: Comment; moderation: ModerationResult }>;
   creating: boolean;
   error: string | null;
+  clearError: () => void;
 }
 
 export function useCreateComment(): UseCreateCommentReturn {
@@ -88,5 +89,71 @@ export function useCreateComment(): UseCreateCommentReturn {
     }
   }, []);
 
-  return { createComment, creating, error };
+  return { createComment, creating, error, clearError: () => setError(null) };
+}
+
+// ---------------------------------------------------------------------------
+// Edit comment
+// ---------------------------------------------------------------------------
+
+interface UseEditCommentReturn {
+  editComment: (commentId: string, body: string) => Promise<{ comment: Comment }>;
+  editing: boolean;
+  error: string | null;
+}
+
+export function useEditComment(): UseEditCommentReturn {
+  const [editing, setEditing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const editComment = useCallback(async (commentId: string, body: string) => {
+    setEditing(true);
+    setError(null);
+    try {
+      const data = await api.patch<{ comment: Comment }>(
+        `/api/comments/${commentId}`,
+        { body },
+      );
+      return data;
+    } catch (err) {
+      const msg = err instanceof ApiError ? err.message : "Failed to edit comment";
+      setError(msg);
+      throw err;
+    } finally {
+      setEditing(false);
+    }
+  }, []);
+
+  return { editComment, editing, error };
+}
+
+// ---------------------------------------------------------------------------
+// Delete comment
+// ---------------------------------------------------------------------------
+
+interface UseDeleteCommentReturn {
+  deleteComment: (commentId: string) => Promise<void>;
+  deleting: boolean;
+  error: string | null;
+}
+
+export function useDeleteComment(): UseDeleteCommentReturn {
+  const [deleting, setDeleting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const deleteComment = useCallback(async (commentId: string) => {
+    setDeleting(true);
+    setError(null);
+    try {
+      await api.delete(`/api/comments/${commentId}`);
+    } catch (err) {
+      const msg = err instanceof ApiError ? err.message : "Failed to delete comment";
+      setError(msg);
+      throw err;
+    } finally {
+      setDeleting(false);
+    }
+  }, []);
+
+  return { deleteComment, deleting, error };
 }

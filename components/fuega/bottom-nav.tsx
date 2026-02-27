@@ -36,7 +36,7 @@ export function BottomNav() {
       label: "Campfires",
       icon: Flame,
       href: "/campfires",
-      match: (p) => p === "/campfires",
+      match: (p) => p === "/campfires" || p.startsWith("/campfires/") || p.startsWith("/f/"),
     },
     {
       label: "Create",

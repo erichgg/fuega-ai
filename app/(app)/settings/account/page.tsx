@@ -5,8 +5,77 @@ import { useRouter } from "next/navigation";
 import { Lock, Trash2, Loader2, AlertTriangle } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { useAuth } from "@/lib/contexts/auth-context";
 import { api } from "@/lib/api/client";
+
+// ---------------------------------------------------------------------------
+// Password strength meter
+// ---------------------------------------------------------------------------
+
+function getPasswordStrength(password: string): {
+  score: 0 | 1 | 2 | 3 | 4;
+  label: string;
+  color: string;
+} {
+  if (!password) return { score: 0, label: "", color: "" };
+
+  let score = 0;
+  if (password.length >= 8) score++;
+  if (password.length >= 12) score++;
+  if (/[A-Z]/.test(password) && /[a-z]/.test(password)) score++;
+  if (/[0-9]/.test(password) && /[^A-Za-z0-9]/.test(password)) score++;
+
+  const levels: Array<{ label: string; color: string }> = [
+    { label: "Weak", color: "bg-ember-500" },
+    { label: "Fair", color: "bg-amber-500" },
+    { label: "Good", color: "bg-yellow-500" },
+    { label: "Strong", color: "bg-green-500" },
+  ];
+
+  const idx = Math.min(score, 4) - 1;
+  if (idx < 0) return { score: 0 as const, label: "Too short", color: "bg-ember-500" };
+  const level = levels[idx];
+  return {
+    score: (idx + 1) as 1 | 2 | 3 | 4,
+    label: level?.label ?? "Unknown",
+    color: level?.color ?? "bg-charcoal",
+  };
+}
+
+function PasswordStrengthMeter({ password }: { password: string }) {
+  const { score, label, color } = getPasswordStrength(password);
+
+  if (!password) return null;
+
+  return (
+    <div className="mt-1.5 space-y-1">
+      <div className="flex gap-1">
+        {[1, 2, 3, 4].map((level) => (
+          <div
+            key={level}
+            className={`h-1 flex-1 rounded-full transition-colors ${
+              level <= score ? color : "bg-charcoal"
+            }`}
+          />
+        ))}
+      </div>
+      <p className="text-[10px] text-smoke">{label}</p>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Account Settings Page
+// ---------------------------------------------------------------------------
 
 export default function AccountSettingsPage() {
   const router = useRouter();
@@ -23,8 +92,10 @@ export default function AccountSettingsPage() {
   } | null>(null);
 
   // Delete account
+  const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false);
   const [deleteConfirm, setDeleteConfirm] = React.useState("");
   const [deleting, setDeleting] = React.useState(false);
+  const [deleteError, setDeleteError] = React.useState<string | null>(null);
 
   const handlePasswordChange = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -63,16 +134,26 @@ export default function AccountSettingsPage() {
     if (deleteConfirm !== user?.username) return;
 
     setDeleting(true);
+    setDeleteError(null);
     try {
       await api.delete("/api/settings/account");
       await logout();
       router.push("/");
-    } catch {
-      // Ignore
+    } catch (err: unknown) {
+      const message =
+        err instanceof Error ? err.message : "Failed to delete account. Please try again.";
+      setDeleteError(message);
     } finally {
       setDeleting(false);
     }
   };
+
+  // Auto-dismiss success messages
+  React.useEffect(() => {
+    if (passwordMessage?.type !== "success") return;
+    const timer = setTimeout(() => setPasswordMessage(null), 3000);
+    return () => clearTimeout(timer);
+  }, [passwordMessage]);
 
   if (!authLoading && !user) {
     return (
@@ -119,6 +200,7 @@ export default function AccountSettingsPage() {
             className="mt-1 bg-charcoal/50 border-charcoal text-foreground"
             autoComplete="new-password"
           />
+          <PasswordStrengthMeter password={newPassword} />
           <p className="text-[10px] text-smoke mt-1">Minimum 8 characters</p>
         </div>
 
@@ -149,10 +231,11 @@ export default function AccountSettingsPage() {
         )}
 
         <div className="flex justify-end">
-          <button
+          <Button
             type="submit"
+            variant="spark"
             disabled={passwordSaving || !currentPassword || !newPassword || !confirmPassword}
-            className="flex items-center gap-2 px-4 py-2 text-sm font-medium bg-flame-500 text-void hover:bg-flame-400 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="gap-2"
           >
             {passwordSaving ? (
               <Loader2 className="h-4 w-4 animate-spin" />
@@ -160,7 +243,7 @@ export default function AccountSettingsPage() {
               <Lock className="h-4 w-4" />
             )}
             Change Password
-          </button>
+          </Button>
         </div>
       </form>
 
@@ -179,36 +262,81 @@ export default function AccountSettingsPage() {
           attributed back to you.
         </p>
 
-        <div>
-          <Label htmlFor="deleteConfirm" className="text-xs text-ash">
-            Type your username to confirm:{" "}
-            <span className="text-ember-400 font-medium">{user?.username}</span>
-          </Label>
-          <Input
-            id="deleteConfirm"
-            value={deleteConfirm}
-            onChange={(e) => setDeleteConfirm(e.target.value)}
-            placeholder={user?.username}
-            className="mt-1 bg-charcoal/50 border-charcoal text-foreground placeholder:text-smoke"
-          />
-        </div>
-
         <div className="flex justify-end">
-          <button
+          <Button
             type="button"
-            onClick={handleDeleteAccount}
-            disabled={deleting || deleteConfirm !== user?.username}
-            className="flex items-center gap-2 px-4 py-2 text-sm font-medium bg-ember-500 text-void hover:bg-ember-400 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            variant="destructive"
+            onClick={() => {
+              setDeleteDialogOpen(true);
+              setDeleteConfirm("");
+              setDeleteError(null);
+            }}
+            className="gap-2"
           >
-            {deleting ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <Trash2 className="h-4 w-4" />
-            )}
+            <Trash2 className="h-4 w-4" />
             Delete Account
-          </button>
+          </Button>
         </div>
       </div>
+
+      {/* Delete confirmation dialog */}
+      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <DialogContent className="bg-coal border-ember-500/30">
+          <DialogHeader>
+            <DialogTitle className="text-ember-400 flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5" />
+              Delete your account?
+            </DialogTitle>
+            <DialogDescription className="text-ash">
+              This action is permanent and cannot be undone. Your posts and
+              comments will be anonymized.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div>
+            <Label htmlFor="deleteConfirmDialog" className="text-xs text-ash">
+              Type your username to confirm:{" "}
+              <span className="text-ember-400 font-medium">{user?.username}</span>
+            </Label>
+            <Input
+              id="deleteConfirmDialog"
+              value={deleteConfirm}
+              onChange={(e) => setDeleteConfirm(e.target.value)}
+              placeholder={user?.username}
+              className="mt-1 bg-charcoal/50 border-charcoal text-foreground placeholder:text-smoke"
+              autoComplete="off"
+            />
+          </div>
+
+          {deleteError && (
+            <div className="p-3 text-xs border border-ember-500/30 bg-ember-500/10 text-ember-400">
+              {deleteError}
+            </div>
+          )}
+
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button
+              variant="outline"
+              onClick={() => setDeleteDialogOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleDeleteAccount}
+              disabled={deleting || deleteConfirm !== user?.username}
+              className="gap-2"
+            >
+              {deleting ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Trash2 className="h-4 w-4" />
+              )}
+              Permanently Delete
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -70,17 +70,21 @@ export function CommandPalette() {
   const { user } = useAuth();
   const router = useRouter();
 
-  // Ctrl+K / Cmd+K toggle
+  // Ctrl+K / Cmd+K toggle + Escape to close
   React.useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
       if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
         e.preventDefault();
         setOpen((prev) => !prev);
       }
+      if (e.key === "Escape" && open) {
+        e.preventDefault();
+        setOpen(false);
+      }
     }
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [setOpen]);
+  }, [setOpen, open]);
 
   const runCommand = React.useCallback(
     (command: () => void) => {
@@ -96,6 +100,9 @@ export function CommandPalette() {
     <div
       className="fixed inset-0 z-50 bg-void/80 backdrop-blur-sm"
       onClick={() => setOpen(false)}
+      role="dialog"
+      aria-modal="true"
+      aria-label="Command palette"
     >
       <div
         className="w-full max-w-lg mx-auto mt-[20vh]"
@@ -159,7 +166,7 @@ export function CommandPalette() {
                   <Command.Item
                     value="Create Campfire"
                     onSelect={() =>
-                      runCommand(() => router.push("/campfires/create"))
+                      runCommand(() => router.push("/create-campfire"))
                     }
                     className="px-3 py-2 text-sm font-mono text-ash cursor-pointer flex items-center gap-3 rounded-md data-[selected=true]:bg-charcoal data-[selected=true]:text-flame-400"
                   >

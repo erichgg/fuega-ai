@@ -2,8 +2,10 @@
 
 import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { MessageSquare, Share2, Check, Flag, Clock, Link2, ImageIcon } from "lucide-react";
 import { SparkButton } from "@/components/fuega/spark-button";
+import { CampfirePrefix } from "@/components/fuega/campfire-prefix";
 import { UserAvatar } from "@/components/fuega/user-avatar";
 import { ModBadge } from "@/components/fuega/mod-badge";
 import { MarkdownContent } from "@/components/fuega/markdown-content";
@@ -11,6 +13,7 @@ import { VideoEmbed, isVideoUrl } from "@/components/fuega/video-embed";
 import { cn } from "@/lib/utils";
 import { timeAgo } from "@/lib/utils/time-ago";
 import { toast } from "sonner";
+import { useAuth } from "@/lib/contexts/auth-context";
 
 interface PostCardProps {
   post: {
@@ -57,6 +60,7 @@ export function PostCard({
   compact = false,
   className,
 }: PostCardProps) {
+  const { user } = useAuth();
   const [expanded, setExpanded] = useState(false);
   const [copied, setCopied] = useState(false);
   const [voteAnim, setVoteAnim] = useState<"spark" | "douse" | null>(null);
@@ -78,6 +82,15 @@ export function PostCard({
     const timer = setTimeout(() => setVoteAnim(null), 300);
     return () => clearTimeout(timer);
   }, [userVote]);
+
+  // Guard votes behind authentication
+  const handleGuardedVote = (vote: "spark" | "douse") => {
+    if (!user) {
+      toast.error("Log in to vote");
+      return;
+    }
+    onVote(vote);
+  };
 
   const showBody = !compact && post.body;
   const bodyIsLong = (post.body?.length ?? 0) > 200;
@@ -102,16 +115,22 @@ export function PostCard({
     >
       {/* Campfire chip */}
       <div className="flex items-center gap-2 text-xs font-mono text-ash">
-        <span className="font-medium text-flame-400 hover:underline cursor-pointer">
-          <span className="text-lava-hot">f</span>
-          <span className="text-smoke mx-0.5">|</span>
-          <span>{post.campfire}</span>
-        </span>
+        <Link
+          href={`/f/${post.campfire}`}
+          onClick={(e) => e.stopPropagation()}
+          className="font-medium text-flame-400 hover:underline"
+        >
+          <CampfirePrefix name={post.campfire} className="text-xs" />
+        </Link>
         <span className="text-smoke">·</span>
-        <UserAvatar username={post.author} size="sm" />
-        <span className="hover:underline cursor-pointer">
-          {post.author}
-        </span>
+        <Link
+          href={`/u/${post.author}`}
+          onClick={(e) => e.stopPropagation()}
+          className="flex items-center gap-2 hover:underline"
+        >
+          <UserAvatar username={post.author} size="sm" />
+          <span>{post.author}</span>
+        </Link>
         <span className="text-smoke">·</span>
         <span className="flex items-center gap-1 text-smoke">
           <Clock className="h-3 w-3" />
@@ -217,6 +236,7 @@ export function PostCard({
       <div className="mt-2 flex items-center gap-1 text-xs">
         {/* Spark/Douse with micro-animation wrapper */}
         <div
+          onClick={(e) => { e.stopPropagation(); e.preventDefault(); }}
           className={cn(
             voteAnim === "spark" && "animate-spark-pop",
             voteAnim === "douse" && "animate-douse-pop",
@@ -225,7 +245,7 @@ export function PostCard({
           <SparkButton
             sparkCount={post.sparkCount}
             userVote={userVote}
-            onVote={onVote}
+            onVote={handleGuardedVote}
             variant="horizontal"
           />
         </div>
@@ -253,11 +273,31 @@ export function PostCard({
             e.stopPropagation();
             e.preventDefault();
             const url = `${window.location.origin}/f/${post.campfire}/${post.id}`;
-            navigator.clipboard.writeText(url).then(() => {
+            const onCopySuccess = () => {
               setCopied(true);
               toast.success("Link copied!");
               setTimeout(() => setCopied(false), 2000);
-            });
+            };
+            const fallbackCopy = (text: string) => {
+              try {
+                const textarea = document.createElement("textarea");
+                textarea.value = text;
+                textarea.style.position = "fixed";
+                textarea.style.opacity = "0";
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand("copy");
+                document.body.removeChild(textarea);
+                onCopySuccess();
+              } catch {
+                toast.error("Could not copy link");
+              }
+            };
+            if (navigator.clipboard?.writeText) {
+              navigator.clipboard.writeText(url).then(onCopySuccess).catch(() => fallbackCopy(url));
+            } else {
+              fallbackCopy(url);
+            }
             onShare?.();
           }}
           className="flex items-center gap-1.5 rounded-md px-3 py-2 min-h-[44px] min-w-[44px] text-ash transition-colors hover:bg-charcoal/50 hover:text-foreground"

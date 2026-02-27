@@ -57,7 +57,7 @@ export function NotificationDropdown({ open, onClose }: NotificationDropdownProp
   return (
     <div
       ref={dropdownRef}
-      className="absolute right-0 top-full mt-1 w-80 sm:w-96 bg-coal border border-lava-hot/20 shadow-[0_0_20px_var(--void-shadow)] z-50"
+      className="absolute right-0 top-full mt-1 w-80 sm:w-96 max-w-[calc(100vw-2rem)] bg-coal border border-lava-hot/20 shadow-[0_0_20px_var(--void-shadow)] z-50"
       role="dialog"
       aria-label="Notifications"
     >
@@ -75,7 +75,7 @@ export function NotificationDropdown({ open, onClose }: NotificationDropdownProp
         {unreadCount > 0 && (
           <button
             onClick={() => markAllAsRead()}
-            className="flex items-center gap-1 text-xs text-ash hover:text-lava-hot transition-colors"
+            className="flex items-center gap-1 text-xs text-ash hover:text-lava-hot transition-colors min-h-[44px] min-w-[44px] justify-center"
             aria-label="Mark all as read"
           >
             <CheckCheck className="h-3.5 w-3.5" />

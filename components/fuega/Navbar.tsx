@@ -45,6 +45,9 @@ import { cn } from "@/lib/utils";
 
 const navLinks = [
   { href: "/home", label: "Home" },
+  { href: "/campfires", label: "Campfires" },
+  { href: "/governance", label: "Governance" },
+  { href: "/mod-log", label: "Mod Log" },
   { href: "/about", label: "About" },
 ] as const;
 
@@ -61,7 +64,7 @@ const mobileNavLinks = [
 // Keyboard shortcuts hook
 // ---------------------------------------------------------------------------
 
-function useKeyboardShortcuts() {
+function useKeyboardShortcuts(router: ReturnType<typeof useRouter>, pathname: string | null) {
   const [shortcutsOpen, setShortcutsOpen] = React.useState(false);
   const pendingKey = React.useRef<string | null>(null);
 
@@ -89,9 +92,9 @@ function useKeyboardShortcuts() {
 
       // "c" -> create post
       if (e.key === "c" && !e.metaKey && !e.ctrlKey) {
-        const match = window.location.pathname.match(/^\/f\/([^/]+)/);
+        const match = pathname?.match(/^\/f\/([^/]+)/);
         const cf = match ? match[1] : null;
-        window.location.href = cf ? `/submit?campfire=${cf}` : "/submit";
+        router.push(cf ? `/submit?campfire=${cf}` : "/submit");
         return;
       }
 
@@ -113,16 +116,16 @@ function useKeyboardShortcuts() {
       if (pendingKey.current === "g") {
         pendingKey.current = null;
         if (e.key === "h") {
-          window.location.href = "/home";
+          router.push("/home");
         } else if (e.key === "g") {
-          window.location.href = "/governance";
+          router.push("/governance");
         }
       }
     }
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, []);
+  }, [router, pathname]);
 
   return { shortcutsOpen, setShortcutsOpen };
 }
@@ -249,7 +252,7 @@ export function Navbar({ onOpenSidebar }: NavbarProps = {}) {
   // Derive current campfire from URL for context-aware create button
   const campfireMatch = pathname?.match(/^\/f\/([^/]+)/);
   const currentCampfire = campfireMatch ? campfireMatch[1] : null;
-  const { shortcutsOpen, setShortcutsOpen } = useKeyboardShortcuts();
+  const { shortcutsOpen, setShortcutsOpen } = useKeyboardShortcuts(router, pathname);
 
   // Scroll detection at 50px threshold
   React.useEffect(() => {
@@ -311,23 +314,27 @@ export function Navbar({ onOpenSidebar }: NavbarProps = {}) {
           </div>
 
           {/* Desktop search */}
-          <div className="hidden md:flex relative flex-1 max-w-md mx-6">
+          <form
+            role="search"
+            className="hidden md:flex relative flex-1 max-w-md mx-6"
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (searchValue.trim()) {
+                router.push(`/search?q=${encodeURIComponent(searchValue.trim())}`);
+              }
+            }}
+          >
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-smoke" />
             <input
               type="text"
               data-search-input
               value={searchValue}
               onChange={(e) => setSearchValue(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && searchValue.trim()) {
-                  router.push(`/search?q=${encodeURIComponent(searchValue.trim())}`);
-                }
-              }}
               className="w-full bg-coal border border-lava-hot/20 pl-10 pr-4 py-1.5 text-sm text-foreground placeholder:text-smoke focus:border-lava-hot focus:ring-0 focus:outline-none transition-colors"
               placeholder="Search…  /"
               aria-label="Search campfires, posts, and users"
             />
-          </div>
+          </form>
 
           {/* Desktop nav links */}
           <div className="hidden md:flex items-center gap-1">
@@ -438,10 +445,10 @@ export function Navbar({ onOpenSidebar }: NavbarProps = {}) {
             {/* Mobile nav sheet trigger */}
             <button
               onClick={() => setMobileOpen(true)}
-              className="md:hidden p-2 text-ash hover:text-lava-hot transition-colors"
+              className="md:hidden p-2 min-w-[44px] min-h-[44px] flex items-center justify-center text-ash hover:text-lava-hot transition-colors"
               aria-label="Open mobile menu"
             >
-              <Menu className="h-4 w-4" />
+              <Menu className="h-5 w-5" />
             </button>
           </div>
         </div>

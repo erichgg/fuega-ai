@@ -20,6 +20,14 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { SparkButton } from "@/components/fuega/spark-button";
 import { CommentCard } from "@/components/fuega/comment-card";
 import { UserHoverCard } from "@/components/fuega/user-hover-card";
@@ -31,12 +39,14 @@ import { MarkdownContent } from "@/components/fuega/markdown-content";
 import { VideoEmbed, isVideoUrl } from "@/components/fuega/video-embed";
 import { useAuth } from "@/lib/contexts/auth-context";
 import { usePost } from "@/lib/hooks/usePosts";
-import { useComments, useCreateComment } from "@/lib/hooks/useComments";
+import { useComments, useCreateComment, useEditComment, useDeleteComment } from "@/lib/hooks/useComments";
 import { useVoting } from "@/lib/hooks/useVoting";
 import { api, ApiError } from "@/lib/api/client";
 import { toast } from "sonner";
 import { toPostCardData, flattenCommentsForDisplay } from "@/lib/adapters/post-adapter";
 import { timeAgo } from "@/lib/utils/time-ago";
+
+const MAX_COMMENT_LENGTH = 10000;
 
 export default function PostDetailPage() {
   const params = useParams();
@@ -58,7 +68,9 @@ export default function PostDetailPage() {
     error: commentsError,
     refresh: refreshComments,
   } = useComments(postId);
-  const { createComment, creating, error: commentError } = useCreateComment();
+  const { createComment, creating, error: commentError, clearError: clearCommentError } = useCreateComment();
+  const { editComment } = useEditComment();
+  const { deleteComment: deleteCommentApi } = useDeleteComment();
   const { vote } = useVoting();
 
   // Local state
@@ -78,14 +90,23 @@ export default function PostDetailPage() {
   const [editSaving, setEditSaving] = React.useState(false);
   const [editError, setEditError] = React.useState<string | null>(null);
 
-  // Delete state
+  // Delete state — now uses Dialog instead of window.confirm
+  const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false);
   const [deleting, setDeleting] = React.useState(false);
+
+  // Comment delete confirmation
+  const [deleteCommentId, setDeleteCommentId] = React.useState<string | null>(null);
+  const [deletingComment, setDeletingComment] = React.useState(false);
 
   // Share copied state
   const [shareCopied, setShareCopied] = React.useState(false);
 
-  // Report dialog state
+  // Report dialog state — supports posts and comments
   const [reportOpen, setReportOpen] = React.useState(false);
+  const [reportCommentId, setReportCommentId] = React.useState<string | undefined>(undefined);
+
+  // Reply state
+  const [replyingTo, setReplyingTo] = React.useState<string | null>(null);
 
   // Thread collapse state
   const [collapsed, setCollapsed] = React.useState<Set<string>>(new Set());
@@ -101,6 +122,37 @@ export default function PostDetailPage() {
       return next;
     });
   };
+
+  // Load user's existing vote state on page load
+  React.useEffect(() => {
+    if (!user || !postId) return;
+    let cancelled = false;
+
+    api.get<{ vote_value: number | null; comment_votes?: Record<string, number> }>(
+      `/api/posts/${postId}/vote`,
+      { include_comments: "true" },
+    ).then((data) => {
+      if (cancelled) return;
+      if (data.vote_value === 1) {
+        setPostVote("sparked");
+      } else if (data.vote_value === -1) {
+        setPostVote("doused");
+      } else {
+        setPostVote(null);
+      }
+      if (data.comment_votes) {
+        const mapped: Record<string, "sparked" | "doused" | null> = {};
+        for (const [cid, val] of Object.entries(data.comment_votes)) {
+          mapped[cid] = val === 1 ? "sparked" : val === -1 ? "doused" : null;
+        }
+        setCommentVotes(mapped);
+      }
+    }).catch(() => {
+      // Silently fail — user may not be authenticated or endpoint may 401
+    });
+
+    return () => { cancelled = true; };
+  }, [user, postId]);
 
   // Convert to UI shapes
   const post = rawPost ? toPostCardData(rawPost) : null;
@@ -139,12 +191,8 @@ export default function PostDetailPage() {
     }
   };
 
-  // --- Delete handler ---
+  // --- Delete handler (with Dialog) ---
   const handleDelete = async () => {
-    const confirmed = window.confirm(
-      "Are you sure you want to delete this post? This action cannot be undone."
-    );
-    if (!confirmed) return;
     setDeleting(true);
     try {
       await api.delete(`/api/posts/${postId}`);
@@ -153,7 +201,55 @@ export default function PostDetailPage() {
     } catch (err) {
       toast.error(err instanceof ApiError ? err.message : "Failed to delete post");
       setDeleting(false);
+      setDeleteDialogOpen(false);
     }
+  };
+
+  // --- Comment delete handler ---
+  const handleDeleteComment = async () => {
+    if (!deleteCommentId) return;
+    setDeletingComment(true);
+    try {
+      await deleteCommentApi(deleteCommentId);
+      toast.success("Comment deleted");
+      setDeleteCommentId(null);
+      refreshComments();
+      refreshPost();
+    } catch (err) {
+      toast.error(err instanceof ApiError ? err.message : "Failed to delete comment");
+    } finally {
+      setDeletingComment(false);
+    }
+  };
+
+  // --- Comment edit handler ---
+  const handleEditComment = async (commentId: string, body: string) => {
+    await editComment(commentId, body);
+    toast.success("Comment updated");
+    refreshComments();
+  };
+
+  // --- Reply handler ---
+  const handleSubmitReply = async (parentId: string, body: string) => {
+    await createComment({
+      post_id: postId,
+      body,
+      parent_id: parentId,
+    });
+    setReplyingTo(null);
+    refreshComments();
+    refreshPost();
+  };
+
+  // --- Report handlers ---
+  const handleReportPost = () => {
+    setReportCommentId(undefined);
+    setReportOpen(true);
+  };
+
+  const handleReportComment = (commentId: string) => {
+    setReportCommentId(commentId);
+    setReportOpen(true);
   };
 
   const handlePostVote = async (voteType: "spark" | "douse") => {
@@ -225,7 +321,7 @@ export default function PostDetailPage() {
           href={`/f/${campfireSlug}`}
           className="mt-2 inline-block text-xs text-flame-400 hover:underline"
         >
-          ← Back to campfire
+          &larr; Back to campfire
         </Link>
       </div>
     );
@@ -259,12 +355,12 @@ export default function PostDetailPage() {
             <span className="text-smoke mx-1">|</span>
             <span>{post.campfire}</span>
           </Link>
-          <span>·</span>
+          <span>&middot;</span>
           <UserAvatar username={post.author} size="sm" />
           <Link href={`/u/${post.author}`} className="hover:underline">
             {post.author}
           </Link>
-          <span>·</span>
+          <span>&middot;</span>
           <span className="flex items-center gap-1">
             <Clock className="h-3 w-3" />
             {timeAgo(post.createdAt)}
@@ -372,7 +468,7 @@ export default function PostDetailPage() {
                 className="mt-3 inline-flex items-center gap-1.5 text-sm text-flame-400 hover:underline font-mono"
                 onClick={(e) => e.stopPropagation()}
               >
-                ↗ {(() => { try { return new URL(rawPost.url).hostname; } catch { return rawPost.url; } })()}
+                {"↗ "}{(() => { try { return new URL(rawPost.url).hostname; } catch { return rawPost.url; } })()}
               </a>
             )}
           </>
@@ -405,7 +501,7 @@ export default function PostDetailPage() {
             {shareCopied ? "Copied!" : "Share"}
           </button>
           <button
-            onClick={() => setReportOpen(true)}
+            onClick={handleReportPost}
             className="flex items-center gap-1.5 transition-colors hover:text-foreground"
             aria-label="Report post"
           >
@@ -423,7 +519,7 @@ export default function PostDetailPage() {
                 Edit
               </button>
               <button
-                onClick={handleDelete}
+                onClick={() => setDeleteDialogOpen(true)}
                 disabled={deleting}
                 className="flex items-center gap-1.5 transition-colors hover:text-red-400 disabled:opacity-50"
                 aria-label="Delete post"
@@ -453,27 +549,37 @@ export default function PostDetailPage() {
                 placeholder="Join the discussion..."
                 aria-label="Write a comment"
                 value={commentText}
-                onChange={(e) => setCommentText(e.target.value)}
+                onChange={(e) => {
+                  setCommentText(e.target.value);
+                  // Clear error when user starts typing
+                  if (commentError) clearCommentError();
+                }}
                 rows={3}
+                maxLength={MAX_COMMENT_LENGTH}
                 className="min-h-[80px] resize-y border-charcoal bg-coal placeholder:text-smoke focus-visible:ring-flame-500/50"
               />
-              {commentError && (
-                <div className="mt-2 flex items-center gap-2 text-sm text-red-400">
-                  <AlertCircle className="h-4 w-4" />
-                  {commentError}
+              <div className="mt-2 flex items-center justify-between">
+                <span className="text-xs text-smoke">
+                  {commentText.length.toLocaleString()}/{MAX_COMMENT_LENGTH.toLocaleString()}
+                </span>
+                <div className="flex items-center gap-2">
+                  {commentError && (
+                    <div className="flex items-center gap-1.5 text-xs text-red-400">
+                      <AlertCircle className="h-3.5 w-3.5" />
+                      {commentError}
+                    </div>
+                  )}
+                  <Button
+                    type="submit"
+                    variant="spark"
+                    size="sm"
+                    disabled={!commentText.trim() || creating}
+                    className="gap-1.5"
+                  >
+                    <Send className="h-3.5 w-3.5" />
+                    {creating ? "Posting..." : "Comment"}
+                  </Button>
                 </div>
-              )}
-              <div className="mt-2 flex justify-end">
-                <Button
-                  type="submit"
-                  variant="spark"
-                  size="sm"
-                  disabled={!commentText.trim() || creating}
-                  className="gap-1.5"
-                >
-                  <Send className="h-3.5 w-3.5" />
-                  {creating ? "Posting..." : "Comment"}
-                </Button>
               </div>
             </div>
           </div>
@@ -531,7 +637,7 @@ export default function PostDetailPage() {
                       <button
                         onClick={() => toggleCollapse(comment.id)}
                         className="flex w-full items-center gap-1.5 py-2 text-left text-xs font-mono text-smoke transition-colors hover:text-ash"
-                        style={{ paddingLeft: `${Math.min(comment.depth, 6) * 1.5}rem` }}
+                        style={{ paddingLeft: `${Math.min(comment.depth, 3) * 1.5}rem` }}
                       >
                         <span className="text-smoke hover:text-flame-400">[+]</span>
                         <span className="font-medium text-ash">{comment.author}</span>
@@ -545,6 +651,14 @@ export default function PostDetailPage() {
                         comment={comment}
                         userVote={commentVotes[comment.id] ?? null}
                         onVote={(v) => handleCommentVote(comment.id, v)}
+                        currentUser={user?.username ?? null}
+                        onReply={(id) => setReplyingTo(replyingTo === id ? null : id)}
+                        isReplying={replyingTo === comment.id}
+                        onSubmitReply={handleSubmitReply}
+                        onCancelReply={() => setReplyingTo(null)}
+                        onReport={handleReportComment}
+                        onEdit={handleEditComment}
+                        onDelete={(id) => setDeleteCommentId(id)}
                         collapseToggle={
                           comment.totalDescendants > 0 ? (
                             <button
@@ -567,12 +681,108 @@ export default function PostDetailPage() {
         </div>
       </div>
 
-      {/* Report dialog */}
+      {/* Report dialog — supports both posts and comments */}
       <ReportDialog
         open={reportOpen}
         onOpenChange={setReportOpen}
-        postId={postId}
+        postId={reportCommentId ? undefined : postId}
+        commentId={reportCommentId}
       />
+
+      {/* Delete post confirmation dialog */}
+      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <DialogContent className="border-charcoal bg-coal sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-foreground">
+              <Trash2 className="h-4 w-4 text-red-400" />
+              Delete Post
+            </DialogTitle>
+            <DialogDescription className="text-smoke">
+              Are you sure you want to delete this post? This action cannot be undone.
+              All comments on this post will also be removed.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => setDeleteDialogOpen(false)}
+              disabled={deleting}
+              className="text-smoke hover:text-foreground"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              variant="destructive"
+              size="sm"
+              onClick={handleDelete}
+              disabled={deleting}
+              className="gap-1.5"
+            >
+              {deleting ? (
+                <>
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  Deleting...
+                </>
+              ) : (
+                <>
+                  <Trash2 className="h-3.5 w-3.5" />
+                  Delete Post
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete comment confirmation dialog */}
+      <Dialog open={deleteCommentId !== null} onOpenChange={(open) => { if (!open) setDeleteCommentId(null); }}>
+        <DialogContent className="border-charcoal bg-coal sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-foreground">
+              <Trash2 className="h-4 w-4 text-red-400" />
+              Delete Comment
+            </DialogTitle>
+            <DialogDescription className="text-smoke">
+              Are you sure you want to delete this comment? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => setDeleteCommentId(null)}
+              disabled={deletingComment}
+              className="text-smoke hover:text-foreground"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              variant="destructive"
+              size="sm"
+              onClick={handleDeleteComment}
+              disabled={deletingComment}
+              className="gap-1.5"
+            >
+              {deletingComment ? (
+                <>
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  Deleting...
+                </>
+              ) : (
+                <>
+                  <Trash2 className="h-3.5 w-3.5" />
+                  Delete Comment
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

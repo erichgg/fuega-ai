@@ -1,4 +1,4 @@
-import { query, queryOne } from "@/lib/db";
+import { query, queryOne, queryAll } from "@/lib/db";
 import { ServiceError } from "@/lib/services/posts.service";
 import { createNotification } from "@/lib/services/notifications.service";
 
@@ -331,4 +331,27 @@ export async function getUserVote(
      WHERE user_id = $1 AND votable_type = $2 AND votable_id = $3`,
     [userId, votableType, votableId]
   );
+}
+
+// ─── Bulk: Get all user votes for a post's comments ─────────
+
+export async function getUserVotesForPostComments(
+  userId: string,
+  postId: string
+): Promise<Record<string, number>> {
+  const rows = await queryAll<{ votable_id: string; vote_value: number }>(
+    `SELECT v.votable_id, v.vote_value
+     FROM votes v
+     JOIN comments c ON c.id = v.votable_id
+     WHERE v.user_id = $1
+       AND v.votable_type = 'comment'
+       AND c.post_id = $2
+       AND c.deleted_at IS NULL`,
+    [userId, postId]
+  );
+  const result: Record<string, number> = {};
+  for (const row of rows) {
+    result[row.votable_id] = row.vote_value;
+  }
+  return result;
 }

@@ -2,18 +2,26 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { Mail, Loader2, CheckCircle, AlertCircle } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Mail, Loader2, CheckCircle, AlertCircle, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { FlameLogo } from "@/components/fuega/flame-logo";
+import { useAuth } from "@/lib/contexts/auth-context";
 import { api, ApiError } from "@/lib/api/client";
 
 export default function ForgotPasswordPage() {
+  const router = useRouter();
+  const { user } = useAuth();
   const [email, setEmail] = React.useState("");
   const [submitted, setSubmitted] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState("");
+
+  React.useEffect(() => {
+    if (user) router.replace("/home");
+  }, [user, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -60,11 +68,19 @@ export default function ForgotPasswordPage() {
                 href="/login"
                 className="text-xs text-flame-400 hover:text-flame-400/80 transition-colors block"
               >
-                Back to login →
+                Back to login
               </Link>
             </div>
           ) : (
             <>
+              <Link
+                href="/login"
+                className="inline-flex items-center gap-1 text-xs text-smoke hover:text-ash transition-colors mb-4"
+              >
+                <ArrowLeft className="h-3 w-3" />
+                Back to login
+              </Link>
+
               <h1 className="text-xl font-bold text-foreground glow-text-subtle mb-1">
                 <span className="text-lava-hot font-bold">$ </span>
                 forgot password
@@ -94,6 +110,7 @@ export default function ForgotPasswordPage() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
+                    aria-required="true"
                     autoComplete="email"
                     autoFocus
                     className="border-charcoal bg-coal placeholder:text-smoke focus-visible:ring-flame-500/50"

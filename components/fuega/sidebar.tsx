@@ -20,6 +20,7 @@ import {
   SheetContent,
   SheetTitle,
 } from "@/components/ui/sheet";
+import { CampfirePrefix } from "@/components/fuega/campfire-prefix";
 import { cn } from "@/lib/utils";
 
 // ---------------------------------------------------------------------------
@@ -55,6 +56,7 @@ const mainLinks: SidebarLink[] = [
 ];
 
 const discoverLinks: SidebarLink[] = [
+  { icon: Vote, label: "Governance", href: "/governance" },
   { icon: Bot, label: "Mod Log", href: "/mod-log" },
 ];
 
@@ -115,6 +117,7 @@ export function SidebarContent({
             <button
               onClick={() => setMyExpanded(!myExpanded)}
               aria-expanded={myExpanded}
+              aria-controls="sidebar-my-campfires"
               aria-label="My Campfires"
               className="flex w-full items-center justify-between px-3 py-1"
             >
@@ -128,7 +131,7 @@ export function SidebarContent({
               )}
             </button>
             {myExpanded && (
-              <div className="mt-1 space-y-0.5">
+              <div id="sidebar-my-campfires" className="mt-1 space-y-0.5">
                 {campfires.map((c) => (
                   <CampfireLink
                     key={c.name}
@@ -149,6 +152,7 @@ export function SidebarContent({
             <button
               onClick={() => setPopularExpanded(!popularExpanded)}
               aria-expanded={popularExpanded}
+              aria-controls="sidebar-popular-campfires"
               aria-label="Popular Campfires"
               className="flex w-full items-center justify-between px-3 py-1"
             >
@@ -162,7 +166,7 @@ export function SidebarContent({
               )}
             </button>
             {popularExpanded && (
-              <div className="mt-1 space-y-0.5">
+              <div id="sidebar-popular-campfires" className="mt-1 space-y-0.5">
                 {popularCampfires.map((c) => (
                   <CampfireLink
                     key={c.name}
@@ -280,9 +284,7 @@ function CampfireLink({
     >
       <Flame className="h-3.5 w-3.5 text-lava-hot/60 shrink-0" />
       <span className="truncate">
-        <span className="text-lava-hot">f</span>
-        <span className="text-smoke mx-0.5">|</span>
-        <span>{campfire.name}</span>
+        <CampfirePrefix name={campfire.name} className="text-sm" />
       </span>
       <span className="ml-auto text-[10px] text-smoke shrink-0">
         {campfire.memberCount >= 1000

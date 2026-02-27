@@ -5,6 +5,7 @@ import { Save, Loader2, ExternalLink } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/contexts/auth-context";
 import { api } from "@/lib/api/client";
 
@@ -39,24 +40,27 @@ export default function ProfileSettingsPage() {
   const [saving, setSaving] = React.useState(false);
   const [message, setMessage] = React.useState<{ type: "success" | "error"; text: string } | null>(null);
 
+  // Track saved state for dirty detection
+  const [savedForm, setSavedForm] = React.useState<ProfileForm | null>(null);
+  const isDirty = savedForm !== null && JSON.stringify(form) !== JSON.stringify(savedForm);
+
   React.useEffect(() => {
     let cancelled = false;
     async function load() {
       try {
-        const res = await fetch("/api/settings/profile", { credentials: "include" });
-        if (res.ok) {
-          const data = await res.json();
-          const p = data.profile;
-          if (!cancelled) {
-            setForm({
-              displayName: p.displayName ?? "",
-              bio: p.bio ?? "",
-              location: p.location ?? "",
-              website: p.website ?? "",
-              socialLinks: p.socialLinks ?? {},
-              brandText: p.brandText ?? "",
-            });
-          }
+        const data = await api.get<{ profile: Record<string, unknown> }>("/api/settings/profile");
+        const p = data.profile;
+        if (!cancelled) {
+          const loaded: ProfileForm = {
+            displayName: (p.displayName as string) ?? "",
+            bio: (p.bio as string) ?? "",
+            location: (p.location as string) ?? "",
+            website: (p.website as string) ?? "",
+            socialLinks: (p.socialLinks as Record<string, string>) ?? {},
+            brandText: (p.brandText as string) ?? "",
+          };
+          setForm(loaded);
+          setSavedForm(loaded);
         }
       } catch {
         if (!cancelled) {
@@ -84,6 +88,7 @@ export default function ProfileSettingsPage() {
         socialLinks: form.socialLinks,
         brandText: form.brandText || null,
       });
+      setSavedForm({ ...form });
       setMessage({ type: "success", text: "Profile updated" });
     } catch (err: unknown) {
       const message =
@@ -93,6 +98,13 @@ export default function ProfileSettingsPage() {
       setSaving(false);
     }
   };
+
+  // Auto-dismiss success messages after 3 seconds
+  React.useEffect(() => {
+    if (message?.type !== "success") return;
+    const timer = setTimeout(() => setMessage(null), 3000);
+    return () => clearTimeout(timer);
+  }, [message]);
 
   const updateSocialLink = (key: string, value: string) => {
     setForm((prev) => ({
@@ -291,11 +303,15 @@ export default function ProfileSettingsPage() {
         </div>
       )}
 
-      <div className="flex justify-end">
-        <button
+      <div className="flex items-center justify-end gap-3">
+        {isDirty && (
+          <span className="text-xs text-amber-400">Unsaved changes</span>
+        )}
+        <Button
           type="submit"
-          disabled={saving}
-          className="flex items-center gap-2 px-4 py-2 text-sm font-medium bg-flame-500 text-void hover:bg-flame-400 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          variant="spark"
+          disabled={saving || !isDirty}
+          className="gap-2"
         >
           {saving ? (
             <Loader2 className="h-4 w-4 animate-spin" />
@@ -303,7 +319,7 @@ export default function ProfileSettingsPage() {
             <Save className="h-4 w-4" />
           )}
           Save Profile
-        </button>
+        </Button>
       </div>
     </form>
   );

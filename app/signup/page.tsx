@@ -3,7 +3,15 @@
 import * as React from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Flame, AlertCircle, Loader2, CheckCircle2, Zap } from "lucide-react";
+import {
+  Flame,
+  AlertCircle,
+  Loader2,
+  CheckCircle2,
+  Zap,
+  Eye,
+  EyeOff,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -45,6 +53,9 @@ export default function SignupPage() {
   const { signup, user } = useAuth();
   const [username, setUsername] = React.useState("");
   const [password, setPassword] = React.useState("");
+  const [confirmPassword, setConfirmPassword] = React.useState("");
+  const [showPassword, setShowPassword] = React.useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = React.useState(false);
   const [email, setEmail] = React.useState("");
   const [termsAccepted, setTermsAccepted] = React.useState(false);
   const [error, setError] = React.useState("");
@@ -53,6 +64,8 @@ export default function SignupPage() {
   const usernameError = username.length > 0 ? validateUsername(username) : null;
   const passwordStrength = password.length > 0 ? getPasswordStrength(password) : null;
   const passwordValid = password.length >= 8;
+  const passwordsMatch = confirmPassword.length === 0 || password === confirmPassword;
+  const confirmPasswordTouched = confirmPassword.length > 0;
 
   React.useEffect(() => {
     if (user) router.replace("/home");
@@ -62,6 +75,8 @@ export default function SignupPage() {
     username.length >= 3 &&
     !usernameError &&
     passwordValid &&
+    confirmPasswordTouched &&
+    password === confirmPassword &&
     termsAccepted &&
     !loading;
 
@@ -128,6 +143,7 @@ export default function SignupPage() {
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               required
+              aria-required="true"
               autoComplete="username"
               autoFocus
               maxLength={20}
@@ -159,17 +175,33 @@ export default function SignupPage() {
             <Label htmlFor="password" className="text-ash">
               Password
             </Label>
-            <Input
-              id="password"
-              type="password"
-              placeholder="8+ characters"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              autoComplete="new-password"
-              className="border-charcoal bg-coal placeholder:text-smoke focus-visible:ring-flame-500/50"
-              aria-describedby="password-strength"
-            />
+            <div className="relative">
+              <Input
+                id="password"
+                type={showPassword ? "text" : "password"}
+                placeholder="8+ characters"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                aria-required="true"
+                autoComplete="new-password"
+                className="border-charcoal bg-coal placeholder:text-smoke focus-visible:ring-flame-500/50 pr-10"
+                aria-describedby="password-strength"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-smoke hover:text-ash transition-colors"
+                aria-label={showPassword ? "Hide password" : "Show password"}
+                tabIndex={-1}
+              >
+                {showPassword ? (
+                  <EyeOff className="h-4 w-4" />
+                ) : (
+                  <Eye className="h-4 w-4" />
+                )}
+              </button>
+            </div>
             {passwordStrength && (
               <div id="password-strength" className="space-y-1.5">
                 <div className="flex gap-1">
@@ -201,6 +233,56 @@ export default function SignupPage() {
             )}
           </div>
 
+          {/* Confirm Password */}
+          <div className="space-y-2">
+            <Label htmlFor="confirmPassword" className="text-ash">
+              Confirm password
+            </Label>
+            <div className="relative">
+              <Input
+                id="confirmPassword"
+                type={showConfirmPassword ? "text" : "password"}
+                placeholder="Re-enter your password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                required
+                aria-required="true"
+                autoComplete="new-password"
+                className={cn(
+                  "border-charcoal bg-coal placeholder:text-smoke focus-visible:ring-flame-500/50 pr-10",
+                  confirmPasswordTouched && !passwordsMatch && "border-red-500/50 focus-visible:ring-red-500/50",
+                  confirmPasswordTouched && passwordsMatch && password.length > 0 && "border-green-500/50 focus-visible:ring-green-500/50",
+                )}
+                aria-describedby="confirm-password-help"
+                aria-invalid={confirmPasswordTouched && !passwordsMatch}
+              />
+              <button
+                type="button"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-smoke hover:text-ash transition-colors"
+                aria-label={showConfirmPassword ? "Hide password" : "Show password"}
+                tabIndex={-1}
+              >
+                {showConfirmPassword ? (
+                  <EyeOff className="h-4 w-4" />
+                ) : (
+                  <Eye className="h-4 w-4" />
+                )}
+              </button>
+            </div>
+            {confirmPasswordTouched && !passwordsMatch && (
+              <p id="confirm-password-help" className="text-xs text-red-400">
+                Passwords do not match
+              </p>
+            )}
+            {confirmPasswordTouched && passwordsMatch && password.length > 0 && (
+              <p id="confirm-password-help" className="flex items-center gap-1 text-xs text-green-400">
+                <CheckCircle2 className="h-3 w-3" />
+                Passwords match
+              </p>
+            )}
+          </div>
+
           {/* Email (optional) */}
           <div className="space-y-2">
             <Label htmlFor="email" className="text-ash">
@@ -219,26 +301,62 @@ export default function SignupPage() {
           </div>
 
           {/* Terms */}
-          <div className="flex items-start gap-3">
-            <input
-              id="terms"
-              type="checkbox"
-              checked={termsAccepted}
-              onChange={(e) => setTermsAccepted(e.target.checked)}
-              className="mt-1 h-4 w-4 rounded border-charcoal bg-coal text-flame-500 focus:ring-flame-500/50"
-              required
-            />
-            <Label htmlFor="terms" className="text-xs text-ash leading-relaxed">
+          <label
+            htmlFor="terms"
+            className="flex items-start gap-3 cursor-pointer group"
+          >
+            <div className="relative mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center">
+              <input
+                id="terms"
+                type="checkbox"
+                checked={termsAccepted}
+                onChange={(e) => setTermsAccepted(e.target.checked)}
+                required
+                aria-required="true"
+                className="peer sr-only"
+              />
+              <div
+                className={cn(
+                  "h-4 w-4 rounded border transition-colors",
+                  termsAccepted
+                    ? "border-flame-500 bg-flame-500"
+                    : "border-charcoal bg-coal group-hover:border-smoke",
+                )}
+              >
+                {termsAccepted && (
+                  <svg
+                    className="h-4 w-4 text-white"
+                    viewBox="0 0 16 16"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M3.5 8.5L6.5 11.5L12.5 5.5" />
+                  </svg>
+                )}
+              </div>
+            </div>
+            <span className="text-xs text-ash leading-relaxed">
               I agree to the{" "}
-              <Link href="/terms" className="text-flame-400 hover:underline">
+              <Link
+                href="/terms"
+                className="text-flame-400 hover:underline"
+                onClick={(e) => e.stopPropagation()}
+              >
                 Terms of Service
               </Link>{" "}
               and{" "}
-              <Link href="/privacy" className="text-flame-400 hover:underline">
+              <Link
+                href="/privacy"
+                className="text-flame-400 hover:underline"
+                onClick={(e) => e.stopPropagation()}
+              >
                 Privacy Policy
               </Link>
-            </Label>
-          </div>
+            </span>
+          </label>
 
           <Button
             type="submit"

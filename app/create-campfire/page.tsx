@@ -3,12 +3,13 @@
 import * as React from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Flame, AlertCircle, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, Flame, AlertCircle, CheckCircle2, Loader2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "@/lib/contexts/auth-context";
 import { useCreateCampfire } from "@/lib/hooks/useCampfires";
+import { api } from "@/lib/api/client";
 
 function slugify(input: string): string {
   return input
@@ -18,6 +19,72 @@ function slugify(input: string): string {
     .replace(/^_|_$/g, "")
     .slice(0, 21);
 }
+
+// ---------------------------------------------------------------------------
+// Debounced slug uniqueness check hook
+// ---------------------------------------------------------------------------
+
+function useSlugCheck(slug: string) {
+  const [checking, setChecking] = React.useState(false);
+  const [available, setAvailable] = React.useState<boolean | null>(null);
+  const abortRef = React.useRef<AbortController | null>(null);
+
+  React.useEffect(() => {
+    // Reset if slug too short
+    if (!slug || slug.length < 3) {
+      setAvailable(null);
+      setChecking(false);
+      return;
+    }
+
+    // Invalid pattern
+    if (!/^[a-z0-9_]+$/.test(slug)) {
+      setAvailable(null);
+      setChecking(false);
+      return;
+    }
+
+    setChecking(true);
+
+    const timer = setTimeout(async () => {
+      // Cancel previous request
+      abortRef.current?.abort();
+      const controller = new AbortController();
+      abortRef.current = controller;
+
+      try {
+        const data = await api.get<{ available: boolean }>(
+          "/api/campfires/check-name",
+          { name: slug },
+          controller.signal
+        );
+        if (!controller.signal.aborted) {
+          setAvailable(data.available);
+        }
+      } catch {
+        // Ignore aborted or failed requests
+        if (!controller.signal.aborted) {
+          setAvailable(null);
+        }
+      } finally {
+        if (!controller.signal.aborted) {
+          setChecking(false);
+        }
+      }
+    }, 400);
+
+    return () => {
+      clearTimeout(timer);
+      abortRef.current?.abort();
+    };
+  }, [slug]);
+
+  return { checking, available };
+}
+
+// ---------------------------------------------------------------------------
+// Create Campfire Page
+// ---------------------------------------------------------------------------
 
 export default function CreateCampfirePage() {
   const router = useRouter();
@@ -29,6 +96,9 @@ export default function CreateCampfirePage() {
   const [nameManuallyEdited, setNameManuallyEdited] = React.useState(false);
   const [description, setDescription] = React.useState("");
   const [success, setSuccess] = React.useState(false);
+
+  // Real-time slug uniqueness check
+  const { checking: slugChecking, available: slugAvailable } = useSlugCheck(name);
 
   // Auto-generate slug from display name unless manually edited
   React.useEffect(() => {
@@ -137,18 +207,40 @@ export default function CreateCampfirePage() {
               <span className="text-lava-hot">f</span>
               <span className="text-smoke mx-0.5">|</span>
             </span>
-            <Input
-              id="name"
-              value={name}
-              onChange={(e) => handleNameChange(e.target.value)}
-              placeholder="science_discovery"
-              maxLength={21}
-              className="border-charcoal bg-coal placeholder:text-smoke focus-visible:ring-flame-500/50 font-mono text-sm"
-            />
+            <div className="relative flex-1">
+              <Input
+                id="name"
+                value={name}
+                onChange={(e) => handleNameChange(e.target.value)}
+                placeholder="science_discovery"
+                maxLength={21}
+                className="border-charcoal bg-coal placeholder:text-smoke focus-visible:ring-flame-500/50 font-mono text-sm pr-8"
+              />
+              {/* Slug status indicator */}
+              {name.length >= 3 && (
+                <span className="absolute right-2.5 top-1/2 -translate-y-1/2">
+                  {slugChecking ? (
+                    <Loader2 className="h-4 w-4 text-smoke animate-spin" />
+                  ) : slugAvailable === true ? (
+                    <CheckCircle2 className="h-4 w-4 text-green-400" />
+                  ) : slugAvailable === false ? (
+                    <X className="h-4 w-4 text-ember-400" />
+                  ) : null}
+                </span>
+              )}
+            </div>
           </div>
-          <p className="mt-1 text-xs text-smoke">
-            3-21 characters, lowercase letters, numbers, and underscores only
-          </p>
+          <div className="mt-1 flex items-center gap-2">
+            <p className="text-xs text-smoke">
+              3-21 characters, lowercase letters, numbers, and underscores only
+            </p>
+            {name.length >= 3 && slugAvailable === false && (
+              <p className="text-xs text-ember-400">Name is taken</p>
+            )}
+            {name.length >= 3 && slugAvailable === true && !slugChecking && (
+              <p className="text-xs text-green-400">Available</p>
+            )}
+          </div>
         </div>
 
         {/* Description */}
@@ -180,7 +272,14 @@ export default function CreateCampfirePage() {
           </div>
         )}
 
-        <div className="flex justify-end">
+        <div className="flex justify-end gap-3">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => router.back()}
+          >
+            Cancel
+          </Button>
           <Button
             type="submit"
             variant="spark"
@@ -190,7 +289,9 @@ export default function CreateCampfirePage() {
               !displayName.trim() ||
               !description.trim() ||
               creating ||
-              success
+              success ||
+              slugAvailable === false ||
+              slugChecking
             }
             className="gap-1.5"
           >
