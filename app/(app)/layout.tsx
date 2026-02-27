@@ -5,6 +5,7 @@ import { Navbar } from "@/components/fuega/Navbar";
 import { Sidebar, SidebarContent } from "@/components/fuega/sidebar";
 import { Footer } from "@/components/fuega/Footer";
 import { ErrorBoundary } from "@/components/fuega/error-boundary";
+import { ConnectionStatus } from "@/components/fuega/connection-status";
 import {
   CommandPalette,
   CommandPaletteProvider,
@@ -73,10 +74,11 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     <CommandPaletteProvider>
     <div className="min-h-screen bg-void flex flex-col">
       <Navbar onOpenSidebar={() => setSidebarOpen(true)} />
+      <ConnectionStatus />
       <CommandPalette />
       <Toaster
         theme="dark"
-        position="bottom-right"
+        position="top-right"
         toastOptions={{
           className: "bg-coal border-charcoal text-foreground font-mono text-sm",
         }}

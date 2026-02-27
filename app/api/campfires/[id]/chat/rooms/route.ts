@@ -11,7 +11,7 @@ import { getMembership } from "@/lib/services/campfires.service";
 import { ServiceError } from "@/lib/services/posts.service";
 
 const createRoomSchema = z.object({
-  name: z.string().min(2).max(64),
+  name: z.string().min(1).max(64),
   description: z.string().max(500).optional(),
 });
 

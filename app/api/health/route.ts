@@ -28,28 +28,39 @@ async function checkDatabase(): Promise<HealthCheck> {
 }
 
 async function checkAnthropicApi(): Promise<HealthCheck> {
-  if (!process.env.ANTHROPIC_API_KEY) {
-    return { name: "anthropic_api", status: "unhealthy", details: { reason: "api_key_missing" } };
-  }
-  // Lightweight check — just verify the key format is plausible
-  const keyValid = process.env.ANTHROPIC_API_KEY.startsWith("sk-ant-");
+  const keyConfigured = !!process.env.ANTHROPIC_API_KEY;
   return {
     name: "anthropic_api",
-    status: keyValid ? "healthy" : "degraded",
-    details: { key_configured: true, key_format_valid: keyValid },
+    status: keyConfigured ? "healthy" : "unhealthy",
   };
 }
 
 function checkEnvironment(): HealthCheck {
   const required = ["DATABASE_URL", "JWT_SECRET", "IP_SALT"];
-  const missing = required.filter((k) => !process.env[k]);
+  const missingCount = required.filter((k) => !process.env[k]).length;
   return {
     name: "environment",
-    status: missing.length === 0 ? "healthy" : "unhealthy",
-    details: { missing_vars: missing.length > 0 ? missing : undefined },
+    status: missingCount === 0 ? "healthy" : "unhealthy",
   };
 }
 
+/**
+ * Verify the MONITORING_SECRET header for detailed health checks.
+ */
+function isMonitoringAuthorized(req: Request): boolean {
+  const secret = process.env.MONITORING_SECRET;
+  if (!secret) return false;
+  const header = req.headers.get("x-monitoring-secret") ?? req.headers.get("authorization")?.replace("Bearer ", "");
+  return header === secret;
+}
+
+/**
+ * GET /api/health
+ *
+ * Public: returns { status: "ok" }
+ * With valid MONITORING_SECRET header: returns detailed checks including
+ * pool stats, env var status, and API key status.
+ */
 export async function GET(req: Request) {
   const ipHash = hashIp(getClientIp(req));
   const rateLimit = await checkReadRateLimit(ipHash);
@@ -60,6 +71,12 @@ export async function GET(req: Request) {
     );
   }
 
+  // Public health check — no internals exposed
+  if (!isMonitoringAuthorized(req)) {
+    return Response.json({ status: "ok" });
+  }
+
+  // Detailed health check — requires MONITORING_SECRET
   const checks: HealthCheck[] = [];
 
   const [db, ai] = await Promise.all([checkDatabase(), checkAnthropicApi()]);

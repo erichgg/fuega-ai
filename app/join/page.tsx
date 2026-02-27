@@ -13,7 +13,13 @@ function JoinContent() {
   const { user } = useAuth();
   const ref = searchParams.get("ref");
 
-  // Set referral cookie on mount
+  // Set page title
+  React.useEffect(() => {
+    document.title = "Join fuega.ai";
+  }, []);
+
+  // Set referral cookie on mount (even if logged in, so the referral
+  // can be credited server-side on next eligible action)
   React.useEffect(() => {
     if (ref && ref.length > 0) {
       // Set cookie: 30 days. The actual referral is validated server-side
@@ -36,9 +42,19 @@ function JoinContent() {
               </p>
             </div>
             <p className="text-xs text-ash mb-6">
-              You&apos;re already part of the{" "}
-              <span className="text-flame-400 font-semibold">fuega</span>{" "}
-              community.
+              {ref ? (
+                <>
+                  Thanks for using the referral link! You&apos;re already part of the{" "}
+                  <span className="text-flame-400 font-semibold">fuega</span>{" "}
+                  community. Share your own referral link to invite others.
+                </>
+              ) : (
+                <>
+                  You&apos;re already part of the{" "}
+                  <span className="text-flame-400 font-semibold">fuega</span>{" "}
+                  community.
+                </>
+              )}
             </p>
             <Link
               href="/home"

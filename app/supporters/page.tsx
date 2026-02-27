@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Heart, Shield, Zap, Star } from "lucide-react";
+import { ArrowLeft, Heart, Shield, Zap, Star } from "lucide-react";
 import { PublicNav } from "@/components/fuega/public-nav";
 
 export const metadata: Metadata = {
@@ -57,8 +57,15 @@ export default function SupportersPage() {
   return (
     <div className="min-h-screen bg-void">
       <PublicNav />
-      <div className="mx-auto max-w-4xl px-4 py-16">
-        <div className="text-center">
+      <div className="mx-auto max-w-3xl px-4 py-10">
+        <Link
+          href="/"
+          className="inline-flex items-center gap-1.5 font-mono text-xs text-smoke transition-colors hover:text-ash"
+        >
+          <ArrowLeft className="h-3 w-3" />
+          cd /
+        </Link>
+        <div className="mt-6 text-center">
           <h1 className="text-3xl font-bold text-foreground sm:text-4xl">
             Support{" "}
             <span className="text-flame-400 font-semibold">fuega</span>.ai
@@ -110,7 +117,7 @@ export default function SupportersPage() {
           </p>
         </div>
 
-        <div className="mt-8 text-center">
+        <div className="mt-8 border-t border-charcoal pt-6 text-center">
           <Link
             href="/"
             className="text-sm text-smoke hover:text-flame-400 transition-colors"

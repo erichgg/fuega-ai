@@ -34,7 +34,15 @@ export async function GET(req: Request, context: RouteContext) {
   const limit = Math.min(parseInt(url.searchParams.get("limit") ?? "50", 10), 100);
 
   if (stream) {
-    // SSE stream
+    // SSE stream — require authentication
+    const user = await authenticate(req);
+    if (!user) {
+      return NextResponse.json(
+        { error: "Authentication required", code: "UNAUTHORIZED" },
+        { status: 401 }
+      );
+    }
+
     const encoder = new TextEncoder();
     const readable = new ReadableStream({
       start(controller) {

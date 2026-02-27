@@ -16,6 +16,11 @@ export default function PrivacySettingsPage() {
     text: string;
   } | null>(null);
 
+  // Set page title
+  React.useEffect(() => {
+    document.title = "Privacy Settings | fuega.ai";
+  }, []);
+
   React.useEffect(() => {
     if (!user) return;
     let cancelled = false;
@@ -170,6 +175,7 @@ export default function PrivacySettingsPage() {
 
       {message && (
         <div
+          role="alert"
           className={`p-3 text-xs border ${
             message.type === "success"
               ? "border-green-500/30 bg-green-500/10 text-green-400"

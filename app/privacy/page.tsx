@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 import { PublicNav } from "@/components/fuega/public-nav";
 
 export const metadata: Metadata = {
@@ -15,8 +16,15 @@ export default function PrivacyPage() {
   return (
     <div className="min-h-screen bg-void">
       <PublicNav />
-      <div className="mx-auto max-w-3xl px-4 py-16">
-        <h1 className="text-3xl font-bold text-foreground sm:text-4xl">
+      <div className="mx-auto max-w-3xl px-4 py-10">
+        <Link
+          href="/"
+          className="inline-flex items-center gap-1.5 font-mono text-xs text-smoke transition-colors hover:text-ash"
+        >
+          <ArrowLeft className="h-3 w-3" />
+          cd /
+        </Link>
+        <h1 className="mt-6 text-3xl font-bold text-foreground sm:text-4xl">
           Privacy Policy
         </h1>
         <p className="mt-2 text-sm text-smoke">

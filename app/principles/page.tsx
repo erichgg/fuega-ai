@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Shield, Scale, Eye, Users, Lock, BookOpen } from "lucide-react";
+import { ArrowLeft, Shield, Scale, Eye, Users, Lock, BookOpen } from "lucide-react";
 import { PublicNav } from "@/components/fuega/public-nav";
 
 export const metadata: Metadata = {
@@ -57,8 +57,15 @@ export default function PrinciplesPage() {
   return (
     <div className="min-h-screen bg-void">
       <PublicNav />
-      <div className="mx-auto max-w-3xl px-4 py-16">
-        <div className="text-center">
+      <div className="mx-auto max-w-3xl px-4 py-10">
+        <Link
+          href="/"
+          className="inline-flex items-center gap-1.5 font-mono text-xs text-smoke transition-colors hover:text-ash"
+        >
+          <ArrowLeft className="h-3 w-3" />
+          cd /
+        </Link>
+        <div className="mt-6 text-center">
           <h1 className="text-3xl font-bold text-foreground sm:text-4xl">
             The <span className="text-flame-400 font-semibold">fuega</span> Principles
           </h1>
