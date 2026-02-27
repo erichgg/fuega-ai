@@ -28,8 +28,8 @@ export function useProposals(opts: UseProposalsOptions): UseProposalsReturn {
   const [proposals, setProposals] = useState<Proposal[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [offset, setOffset] = useState(0);
   const [hasMore, setHasMore] = useState(true);
+  const offsetRef = useRef(0);
   const abortRef = useRef<AbortController | null>(null);
 
   const fetchProposals = useCallback(
@@ -38,7 +38,7 @@ export function useProposals(opts: UseProposalsOptions): UseProposalsReturn {
       const controller = new AbortController();
       abortRef.current = controller;
 
-      const currentOffset = reset ? 0 : offset;
+      const currentOffset = reset ? 0 : offsetRef.current;
       setLoading(true);
       setError(null);
 
@@ -56,7 +56,7 @@ export function useProposals(opts: UseProposalsOptions): UseProposalsReturn {
         }
 
         setHasMore(data.count >= limit);
-        setOffset(currentOffset + data.count);
+        offsetRef.current = currentOffset + data.count;
       } catch (err) {
         if (err instanceof DOMException && err.name === "AbortError") return;
         setError(err instanceof ApiError ? err.message : "Failed to load proposals");
@@ -64,11 +64,11 @@ export function useProposals(opts: UseProposalsOptions): UseProposalsReturn {
         setLoading(false);
       }
     },
-    [campfireId, status, limit, offset],
+    [campfireId, status, limit],
   );
 
   useEffect(() => {
-    setOffset(0);
+    offsetRef.current = 0;
     setHasMore(true);
     fetchProposals(true);
     return () => abortRef.current?.abort();
@@ -81,7 +81,7 @@ export function useProposals(opts: UseProposalsOptions): UseProposalsReturn {
   }, [hasMore, loading, fetchProposals]);
 
   const refresh = useCallback(async () => {
-    setOffset(0);
+    offsetRef.current = 0;
     setHasMore(true);
     await fetchProposals(true);
   }, [fetchProposals]);

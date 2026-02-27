@@ -3,7 +3,8 @@ import { authenticate } from "@/lib/auth/jwt";
 import { createCommentSchema } from "@/lib/validation/comments";
 import { createComment, getCommentsForPost } from "@/lib/services/comments.service";
 import { ServiceError } from "@/lib/services/posts.service";
-import { checkCommentRateLimit } from "@/lib/auth/rate-limit";
+import { checkCommentRateLimit, checkReadRateLimit } from "@/lib/auth/rate-limit";
+import { hashIp, getClientIp } from "@/lib/auth/ip-hash";
 
 export const dynamic = "force-dynamic";
 
@@ -17,6 +18,17 @@ interface RouteContext {
  */
 export async function GET(req: Request, context: RouteContext) {
   try {
+    // Rate limit: 60 per minute per IP
+    const ip = getClientIp(req);
+    const ipHash = hashIp(ip);
+    const rateLimit = await checkReadRateLimit(ipHash);
+    if (!rateLimit.allowed) {
+      return NextResponse.json(
+        { error: "Too many requests", code: "RATE_LIMITED" },
+        { status: 429, headers: { "Retry-After": String(rateLimit.retryAfterSeconds) } }
+      );
+    }
+
     const { id: postId } = await context.params;
     const url = new URL(req.url);
     const sort = url.searchParams.get("sort") as "top" | "new" | "controversial" | null;

@@ -10,7 +10,7 @@ import { UserAvatar } from "@/components/fuega/user-avatar";
 import { ModBadge } from "@/components/fuega/mod-badge";
 import { MarkdownContent } from "@/components/fuega/markdown-content";
 import { VideoEmbed, isVideoUrl } from "@/components/fuega/video-embed";
-import { cn } from "@/lib/utils";
+import { cn, extractDomain } from "@/lib/utils";
 import { timeAgo } from "@/lib/utils/time-ago";
 import { toast } from "sonner";
 import { useAuth } from "@/lib/contexts/auth-context";
@@ -40,14 +40,6 @@ interface PostCardProps {
   onReport?: () => void;
   compact?: boolean;
   className?: string;
-}
-
-function extractDomain(url: string): string | null {
-  try {
-    return new URL(url).hostname;
-  } catch {
-    return null;
-  }
 }
 
 export function PostCard({

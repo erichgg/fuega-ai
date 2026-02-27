@@ -26,8 +26,8 @@ export function useCampfires(opts: UseCampfiresOptions = {}): UseCampfiresReturn
   const [campfires, setCampfires] = useState<Campfire[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [offset, setOffset] = useState(0);
   const [hasMore, setHasMore] = useState(true);
+  const offsetRef = useRef(0);
   const abortRef = useRef<AbortController | null>(null);
 
   const fetchCampfires = useCallback(
@@ -36,7 +36,7 @@ export function useCampfires(opts: UseCampfiresOptions = {}): UseCampfiresReturn
       const controller = new AbortController();
       abortRef.current = controller;
 
-      const currentOffset = reset ? 0 : offset;
+      const currentOffset = reset ? 0 : offsetRef.current;
       setLoading(true);
       setError(null);
 
@@ -54,7 +54,7 @@ export function useCampfires(opts: UseCampfiresOptions = {}): UseCampfiresReturn
         }
 
         setHasMore(data.count >= limit);
-        setOffset(currentOffset + data.count);
+        offsetRef.current = currentOffset + data.count;
       } catch (err) {
         if (err instanceof DOMException && err.name === "AbortError") return;
         setError(err instanceof ApiError ? err.message : "Failed to load campfires");
@@ -62,11 +62,11 @@ export function useCampfires(opts: UseCampfiresOptions = {}): UseCampfiresReturn
         setLoading(false);
       }
     },
-    [sort, limit, offset],
+    [sort, limit],
   );
 
   useEffect(() => {
-    setOffset(0);
+    offsetRef.current = 0;
     setHasMore(true);
     fetchCampfires(true);
     return () => abortRef.current?.abort();
@@ -79,7 +79,7 @@ export function useCampfires(opts: UseCampfiresOptions = {}): UseCampfiresReturn
   }, [hasMore, loading, fetchCampfires]);
 
   const refresh = useCallback(async () => {
-    setOffset(0);
+    offsetRef.current = 0;
     setHasMore(true);
     await fetchCampfires(true);
   }, [fetchCampfires]);
@@ -121,16 +121,8 @@ export function useCampfire(campfireId: string | undefined): UseCampfireReturn {
   }, [campfireId]);
 
   useEffect(() => {
-    let cancelled = false;
-    if (!campfireId) return;
-    setLoading(true);
-    setError(null);
-    api.get<{ campfire: Campfire; is_member?: boolean }>(`/api/campfires/${campfireId}`)
-      .then((data) => { if (!cancelled) { setCampfire(data.campfire); setIsMember(!!data.is_member); } })
-      .catch((err) => { if (!cancelled) setError(err instanceof ApiError ? err.message : "Failed to load campfire"); })
-      .finally(() => { if (!cancelled) setLoading(false); });
-    return () => { cancelled = true; };
-  }, [campfireId]);
+    refresh();
+  }, [refresh]);
 
   return { campfire, isMember, loading, error, refresh };
 }

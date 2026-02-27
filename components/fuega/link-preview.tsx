@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { cn } from "@/lib/utils";
+import { cn, extractDomain } from "@/lib/utils";
 
 interface LinkPreviewProps {
   url: string;
@@ -12,14 +12,6 @@ interface LinkPreviewProps {
   className?: string;
 }
 
-function getDomain(url: string): string {
-  try {
-    return new URL(url).hostname;
-  } catch {
-    return url;
-  }
-}
-
 export function LinkPreview({
   url,
   title,
@@ -28,7 +20,7 @@ export function LinkPreview({
   siteName,
   className,
 }: LinkPreviewProps) {
-  const domain = getDomain(url);
+  const domain = extractDomain(url);
   const faviconUrl = `https://www.google.com/s2/favicons?domain=${domain}&sz=32`;
 
   const handleClick = () => {

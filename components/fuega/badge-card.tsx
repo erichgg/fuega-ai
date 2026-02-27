@@ -176,20 +176,23 @@ export function BadgeCard({
   progress = null,
   className,
 }: BadgeCardProps) {
-  const rarity = badge.rarity as BadgeRarity;
+  const rarity = (RARITY_CONFIG[badge.rarity as BadgeRarity] ? badge.rarity : "common") as BadgeRarity;
   const config = RARITY_CONFIG[rarity];
   const isEarned = earned !== null;
 
   const founderNumber =
-    isEarned && earned.metadata && "founder_number" in earned.metadata
+    isEarned && earned.metadata != null && typeof earned.metadata === "object" && "founder_number" in earned.metadata
       ? (earned.metadata.founder_number as number)
       : null;
 
+  const Wrapper = onClick ? "button" : "div";
+  const wrapperProps = onClick
+    ? { type: "button" as const, onClick }
+    : {};
+
   const card = (
-    <button
-      type="button"
-      onClick={onClick}
-      disabled={!onClick}
+    <Wrapper
+      {...wrapperProps}
       className={cn(
         "terminal-card flex flex-col items-center gap-2 p-3 transition-all text-left w-full",
         onClick && "cursor-pointer hover:border-lava-hot/40",
@@ -234,7 +237,7 @@ export function BadgeCard({
           </p>
         </div>
       )}
-    </button>
+    </Wrapper>
   );
 
   // Wrap with tooltip if earned
@@ -282,7 +285,7 @@ interface InlineBadgeProps {
 }
 
 export function InlineBadge({ badge, founderNumber, className }: InlineBadgeProps) {
-  const rarity = badge.rarity as BadgeRarity;
+  const rarity = (RARITY_CONFIG[badge.rarity as BadgeRarity] ? badge.rarity : "common") as BadgeRarity;
   const config = RARITY_CONFIG[rarity];
 
   return (

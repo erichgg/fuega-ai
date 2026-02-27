@@ -1,3 +1,7 @@
+"use client";
+
+import { useState } from "react";
+
 /**
  * Cosmetics hooks — CUT FROM V1.
  * Cosmetics require anonymous payment support which isn't available yet.
@@ -44,13 +48,17 @@ interface UseSetActiveCosmeticReturn {
 
 /**
  * Stub — no-op. Cosmetics are cut from V1.
+ * Returns gracefully instead of throwing to avoid crashing callers.
  */
 export function useSetActiveCosmetic(): UseSetActiveCosmeticReturn {
+  const [error, setError] = useState<string | null>(null);
+
   return {
     setActive: async () => {
-      throw new Error("Cosmetics are not available in V1");
+      setError("Cosmetics are not available yet");
+      // No-op: cosmetics are cut from V1
     },
     loading: false,
-    error: null,
+    error,
   };
 }

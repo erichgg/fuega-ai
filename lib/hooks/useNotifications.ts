@@ -41,6 +41,7 @@ export function useNotifications(opts: UseNotificationsOptions = {}): UseNotific
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const fetchRef = useRef<() => Promise<void>>(null!);
 
   const fetchNotifications = useCallback(async () => {
     setError(null);
@@ -64,18 +65,21 @@ export function useNotifications(opts: UseNotificationsOptions = {}): UseNotific
     }
   }, [page, limit, type]);
 
+  // Keep ref in sync so the interval always calls the latest version
+  fetchRef.current = fetchNotifications;
+
   // Initial fetch + polling
   useEffect(() => {
-    fetchNotifications();
+    fetchRef.current();
 
     if (pollInterval > 0) {
-      intervalRef.current = setInterval(fetchNotifications, pollInterval);
+      intervalRef.current = setInterval(() => fetchRef.current(), pollInterval);
     }
 
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
     };
-  }, [fetchNotifications, pollInterval]);
+  }, [pollInterval]);
 
   const markAsRead = useCallback(async (id: string) => {
     try {

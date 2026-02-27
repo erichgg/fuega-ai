@@ -144,10 +144,10 @@ export function CommentCard({
       id={`comment-${comment.id}`}
     >
       {comment.depth > 0 && (
-        <div className="absolute -left-3 top-0 bottom-0 w-[2px] bg-charcoal" />
+        <div className="absolute left-0 top-0 bottom-0 w-[2px] bg-charcoal" />
       )}
 
-      <div className="flex gap-2 py-2">
+      <div className="flex gap-2 py-2 ml-3">
         {collapseToggle && (
           <div className="flex items-start pt-1">
             {collapseToggle}

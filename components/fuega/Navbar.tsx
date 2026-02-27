@@ -159,15 +159,16 @@ function ShortcutsHelp({
 
     function trapFocus(e: KeyboardEvent) {
       if (e.key !== "Tab") return;
+      if (!first || !last) return;
       if (e.shiftKey) {
         if (document.activeElement === first) {
           e.preventDefault();
-          last?.focus();
+          last.focus();
         }
       } else {
         if (document.activeElement === last) {
           e.preventDefault();
-          first?.focus();
+          first.focus();
         }
       }
     }

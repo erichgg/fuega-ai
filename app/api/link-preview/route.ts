@@ -9,6 +9,49 @@ const querySchema = z.object({
   url: z.string().url(),
 });
 
+/**
+ * Block SSRF attempts by rejecting private/internal URLs.
+ * Checks protocol, localhost variants, and private IP ranges.
+ */
+function isPrivateUrl(url: string): boolean {
+  const parsed = new URL(url);
+  const hostname = parsed.hostname;
+
+  // Only allow http(s) protocols
+  if (!["http:", "https:"].includes(parsed.protocol)) return true;
+
+  // Block localhost variants
+  if (hostname === "localhost" || hostname === "127.0.0.1" || hostname === "::1") return true;
+
+  // Block IPv6 loopback/private
+  if (hostname.startsWith("[")) {
+    const inner = hostname.slice(1, -1).toLowerCase();
+    if (inner === "::1" || inner.startsWith("fc") || inner.startsWith("fd") || inner.startsWith("fe80")) return true;
+  }
+
+  // Block private IPv4 ranges
+  const parts = hostname.split(".");
+  if (parts.length === 4 && parts.every((p) => /^\d+$/.test(p))) {
+    const first = parseInt(parts[0] ?? "0", 10);
+    const second = parseInt(parts[1] ?? "0", 10);
+
+    // 10.0.0.0/8
+    if (first === 10) return true;
+    // 172.16.0.0/12
+    if (first === 172 && second >= 16 && second <= 31) return true;
+    // 192.168.0.0/16
+    if (first === 192 && second === 168) return true;
+    // 169.254.0.0/16 (link-local)
+    if (first === 169 && second === 254) return true;
+    // 127.0.0.0/8 (full loopback range)
+    if (first === 127) return true;
+    // 0.0.0.0
+    if (first === 0) return true;
+  }
+
+  return false;
+}
+
 function extractMetaContent(html: string, property: string): string | null {
   // Handle both property="og:X" content="Y" and content="Y" property="og:X" orders
   const patterns = [
@@ -79,6 +122,14 @@ export async function GET(req: Request) {
     }
 
     const targetUrl = parsed.data.url;
+
+    // SSRF protection: block private/internal URLs
+    if (isPrivateUrl(targetUrl)) {
+      return NextResponse.json(
+        { error: "URL not allowed", code: "BLOCKED_URL" },
+        { status: 400 }
+      );
+    }
 
     const emptyResult = {
       title: null,

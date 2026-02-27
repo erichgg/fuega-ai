@@ -1,14 +1,17 @@
 "use client";
 
+import Link from "next/link";
 import { Users, Flame } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { CampfirePrefix } from "@/components/fuega/campfire-prefix";
 import { cn } from "@/lib/utils";
 
 interface CampfireCardProps {
   campfire: {
     id: string;
     name: string;
+    slug?: string;
     description: string;
     memberCount: number;
     activeCount?: number;
@@ -36,9 +39,12 @@ export function CampfireCard({
         <div className="flex items-start justify-between">
           <div>
             <CardTitle className="text-base">
-              <span className="text-flame-400 cursor-pointer hover:underline">
-                <span className="text-lava-hot">f</span><span className="text-smoke mx-1">|</span><span>{campfire.name}</span>
-              </span>
+              <Link
+                href={`/f/${campfire.slug ?? campfire.name}`}
+                className="text-flame-400 hover:underline"
+              >
+                <CampfirePrefix name={campfire.name} className="text-base" />
+              </Link>
             </CardTitle>
           </div>
           {campfire.isJoined ? (

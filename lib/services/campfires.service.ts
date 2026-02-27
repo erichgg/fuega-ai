@@ -203,7 +203,7 @@ export async function updateCampfire(
   // Verify user is admin of this campfire
   const membership = await queryOne<CampfireMembership>(
     `SELECT * FROM campfire_members
-     WHERE user_id = $1 AND campfire_id = $2`,
+     WHERE user_id = $1 AND campfire_id = $2 AND left_at IS NULL`,
     [userId, campfireId]
   );
   if (!membership || membership.role !== "admin") {
@@ -269,9 +269,9 @@ export async function joinCampfire(
     throw new ServiceError("Campfire is banned", "CAMPFIRE_BANNED", 403);
   }
 
-  // Check if already a member
+  // Check if already an active member
   const existing = await queryOne<CampfireMembership>(
-    `SELECT * FROM campfire_members WHERE user_id = $1 AND campfire_id = $2`,
+    `SELECT * FROM campfire_members WHERE user_id = $1 AND campfire_id = $2 AND left_at IS NULL`,
     [userId, campfireId]
   );
   if (existing) {
@@ -317,7 +317,7 @@ export async function leaveCampfire(
 
   // Check membership
   const membership = await queryOne<CampfireMembership>(
-    `SELECT * FROM campfire_members WHERE user_id = $1 AND campfire_id = $2`,
+    `SELECT * FROM campfire_members WHERE user_id = $1 AND campfire_id = $2 AND left_at IS NULL`,
     [userId, campfireId]
   );
   if (!membership) {
@@ -332,7 +332,7 @@ export async function leaveCampfire(
   if (membership.role === "admin") {
     const adminCount = await queryOne<{ count: string }>(
       `SELECT COUNT(*) as count FROM campfire_members
-       WHERE campfire_id = $1 AND role = 'admin'`,
+       WHERE campfire_id = $1 AND role = 'admin' AND left_at IS NULL`,
       [campfireId]
     );
     if (adminCount && parseInt(adminCount.count, 10) <= 1) {
@@ -344,9 +344,9 @@ export async function leaveCampfire(
     }
   }
 
-  // Remove membership
+  // Soft-delete membership
   await query(
-    `DELETE FROM campfire_members WHERE user_id = $1 AND campfire_id = $2`,
+    `UPDATE campfire_members SET left_at = NOW() WHERE user_id = $1 AND campfire_id = $2`,
     [userId, campfireId]
   );
 
@@ -363,7 +363,7 @@ export async function getUserCampfires(userId: string): Promise<Campfire[]> {
   const rows = await queryAll<Campfire>(
     `SELECT c.* FROM campfires c
      INNER JOIN campfire_members cm ON cm.campfire_id = c.id
-     WHERE cm.user_id = $1 AND c.deleted_at IS NULL AND c.is_banned = FALSE
+     WHERE cm.user_id = $1 AND cm.left_at IS NULL AND c.deleted_at IS NULL AND c.is_banned = FALSE
      ORDER BY c.name ASC`,
     [userId]
   );
@@ -377,7 +377,7 @@ export async function getMembership(
   campfireId: string
 ): Promise<CampfireMembership | null> {
   return queryOne<CampfireMembership>(
-    `SELECT * FROM campfire_members WHERE user_id = $1 AND campfire_id = $2`,
+    `SELECT * FROM campfire_members WHERE user_id = $1 AND campfire_id = $2 AND left_at IS NULL`,
     [userId, campfireId]
   );
 }

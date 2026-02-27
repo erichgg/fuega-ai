@@ -113,15 +113,15 @@ async function castVote(
   // Check for existing vote
   const existing = await queryOne<Vote>(
     `SELECT * FROM votes
-     WHERE user_id = $1 AND votable_type = $2 AND votable_id = $3`,
+     WHERE user_id = $1 AND votable_type = $2 AND votable_id = $3 AND deleted_at IS NULL`,
     [userId, votableType, votableId]
   );
 
   if (existing) {
     if (existing.vote_value === value) {
-      // Same vote — remove it (toggle off)
+      // Same vote — remove it (toggle off) via soft delete
       await query(
-        `DELETE FROM votes WHERE id = $1`,
+        `UPDATE votes SET deleted_at = NOW() WHERE id = $1`,
         [existing.id]
       );
 
@@ -328,7 +328,7 @@ export async function getUserVote(
 ): Promise<Vote | null> {
   return queryOne<Vote>(
     `SELECT * FROM votes
-     WHERE user_id = $1 AND votable_type = $2 AND votable_id = $3`,
+     WHERE user_id = $1 AND votable_type = $2 AND votable_id = $3 AND deleted_at IS NULL`,
     [userId, votableType, votableId]
   );
 }
@@ -346,7 +346,8 @@ export async function getUserVotesForPostComments(
      WHERE v.user_id = $1
        AND v.votable_type = 'comment'
        AND c.post_id = $2
-       AND c.deleted_at IS NULL`,
+       AND c.deleted_at IS NULL
+       AND v.deleted_at IS NULL`,
     [userId, postId]
   );
   const result: Record<string, number> = {};

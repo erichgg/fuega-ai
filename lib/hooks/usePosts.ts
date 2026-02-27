@@ -26,8 +26,8 @@ export function usePosts(opts: UsePostsOptions = {}): UsePostsReturn {
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [offset, setOffset] = useState(0);
   const [hasMore, setHasMore] = useState(true);
+  const offsetRef = useRef(0);
   const abortRef = useRef<AbortController | null>(null);
 
   const fetchPosts = useCallback(
@@ -36,7 +36,7 @@ export function usePosts(opts: UsePostsOptions = {}): UsePostsReturn {
       const controller = new AbortController();
       abortRef.current = controller;
 
-      const currentOffset = reset ? 0 : offset;
+      const currentOffset = reset ? 0 : offsetRef.current;
       setLoading(true);
       setError(null);
 
@@ -62,7 +62,7 @@ export function usePosts(opts: UsePostsOptions = {}): UsePostsReturn {
         }
 
         setHasMore(data.count >= limit);
-        setOffset(currentOffset + data.count);
+        offsetRef.current = currentOffset + data.count;
       } catch (err) {
         if (err instanceof DOMException && err.name === "AbortError") return;
         setError(err instanceof ApiError ? err.message : "Failed to load posts");
@@ -70,11 +70,11 @@ export function usePosts(opts: UsePostsOptions = {}): UsePostsReturn {
         setLoading(false);
       }
     },
-    [campfire, author, sort, limit, offset, timeRange, postType],
+    [campfire, author, sort, limit, timeRange, postType],
   );
 
   useEffect(() => {
-    setOffset(0);
+    offsetRef.current = 0;
     setHasMore(true);
     fetchPosts(true);
     return () => abortRef.current?.abort();
@@ -87,7 +87,7 @@ export function usePosts(opts: UsePostsOptions = {}): UsePostsReturn {
   }, [hasMore, loading, fetchPosts]);
 
   const refresh = useCallback(async () => {
-    setOffset(0);
+    offsetRef.current = 0;
     setHasMore(true);
     await fetchPosts(true);
   }, [fetchPosts]);
@@ -126,16 +126,8 @@ export function usePost(postId: string | undefined): UsePostReturn {
   }, [postId]);
 
   useEffect(() => {
-    let cancelled = false;
-    if (!postId) return;
-    setLoading(true);
-    setError(null);
-    api.get<{ post: Post }>(`/api/posts/${postId}`)
-      .then((data) => { if (!cancelled) setPost(data.post); })
-      .catch((err) => { if (!cancelled) setError(err instanceof ApiError ? err.message : "Failed to load post"); })
-      .finally(() => { if (!cancelled) setLoading(false); });
-    return () => { cancelled = true; };
-  }, [postId]);
+    refresh();
+  }, [refresh]);
 
   return { post, loading, error, refresh };
 }

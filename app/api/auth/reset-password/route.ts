@@ -3,6 +3,8 @@ import { z } from "zod";
 import { hashPassword } from "@/lib/auth/password";
 import { queryOne } from "@/lib/db";
 import { resetTokenStore } from "@/lib/auth/reset-tokens";
+import { checkResetPasswordRateLimit } from "@/lib/auth/rate-limit";
+import { hashIp, getClientIp } from "@/lib/auth/ip-hash";
 
 export const dynamic = "force-dynamic";
 
@@ -19,6 +21,17 @@ const resetPasswordSchema = z.object({
  */
 export async function POST(req: Request) {
   try {
+    // Rate limit: 5 attempts per 15 minutes per IP
+    const ip = getClientIp(req);
+    const ipHash = hashIp(ip);
+    const rateLimit = await checkResetPasswordRateLimit(ipHash);
+    if (!rateLimit.allowed) {
+      return NextResponse.json(
+        { error: "Too many attempts. Try again later.", code: "RATE_LIMITED" },
+        { status: 429, headers: { "Retry-After": String(rateLimit.retryAfterSeconds) } }
+      );
+    }
+
     // Parse and validate input
     const body = await req.json();
     const parsed = resetPasswordSchema.safeParse(body);

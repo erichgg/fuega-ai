@@ -16,6 +16,16 @@ export function NotificationDropdown({ open, onClose }: NotificationDropdownProp
     useNotificationContext();
   const dropdownRef = React.useRef<HTMLDivElement>(null);
 
+  // Focus the dropdown when it opens
+  React.useEffect(() => {
+    if (!open) return;
+    // Use requestAnimationFrame so the DOM has rendered before focusing
+    const raf = requestAnimationFrame(() => {
+      dropdownRef.current?.focus();
+    });
+    return () => cancelAnimationFrame(raf);
+  }, [open]);
+
   // Close on click outside
   React.useEffect(() => {
     if (!open) return;
@@ -29,13 +39,9 @@ export function NotificationDropdown({ open, onClose }: NotificationDropdownProp
       }
     }
 
-    // Delay to avoid closing on the bell click itself
-    const timer = setTimeout(() => {
-      document.addEventListener("mousedown", handleClickOutside);
-    }, 0);
+    document.addEventListener("mousedown", handleClickOutside);
 
     return () => {
-      clearTimeout(timer);
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [open, onClose]);
@@ -57,7 +63,8 @@ export function NotificationDropdown({ open, onClose }: NotificationDropdownProp
   return (
     <div
       ref={dropdownRef}
-      className="absolute right-0 top-full mt-1 w-80 sm:w-96 max-w-[calc(100vw-2rem)] bg-coal border border-lava-hot/20 shadow-[0_0_20px_var(--void-shadow)] z-50"
+      tabIndex={-1}
+      className="absolute right-0 top-full mt-1 w-80 sm:w-96 max-w-[calc(100vw-2rem)] bg-coal border border-lava-hot/20 shadow-[0_0_20px_var(--void-shadow)] z-50 outline-none"
       role="dialog"
       aria-label="Notifications"
     >

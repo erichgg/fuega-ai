@@ -48,7 +48,7 @@ export async function DELETE(req: Request, context: RouteContext) {
       );
     }
 
-    await deleteRoom(roomId, campfireId);
+    await deleteRoom(roomId, user.userId);
 
     return NextResponse.json({ message: "Room deleted" });
   } catch (error) {

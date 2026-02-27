@@ -94,6 +94,12 @@ const uploadLimiter = new RateLimiterMemory({
   keyPrefix: "upload",
 });
 
+const resetPasswordLimiter = new RateLimiterMemory({
+  points: 5,
+  duration: 15 * 60, // 15 minutes
+  keyPrefix: "reset_password",
+});
+
 const cspReportLimiter = new RateLimiterMemory({
   points: 30,
   duration: 60, // 1 minute
@@ -347,6 +353,25 @@ export async function checkUploadRateLimit(
 }
 
 /**
+ * Check reset-password rate limit for an IP hash.
+ * IP-based since the user is unauthenticated. Max 5 per 15 minutes.
+ */
+export async function checkResetPasswordRateLimit(
+  ipHash: string
+): Promise<RateLimitResult> {
+  try {
+    await resetPasswordLimiter.consume(ipHash);
+    return { allowed: true, retryAfterSeconds: 0 };
+  } catch (err: unknown) {
+    const rlErr = err as { msBeforeNext?: number };
+    return {
+      allowed: false,
+      retryAfterSeconds: Math.ceil((rlErr.msBeforeNext ?? 900000) / 1000),
+    };
+  }
+}
+
+/**
  * Check CSP report rate limit for an IP hash.
  * IP-based since CSP reports are unauthenticated.
  */
@@ -382,6 +407,7 @@ export async function resetRateLimiters(): Promise<void> {
   await forgotPasswordLimiter.delete("*");
   await reportLimiter.delete("*");
   await uploadLimiter.delete("*");
+  await resetPasswordLimiter.delete("*");
   await cspReportLimiter.delete("*");
 }
 
@@ -397,6 +423,7 @@ export {
   readLimiter,
   searchLimiter,
   forgotPasswordLimiter,
+  resetPasswordLimiter,
   uploadLimiter,
   reportLimiter,
   cspReportLimiter,

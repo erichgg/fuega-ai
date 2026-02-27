@@ -139,7 +139,7 @@ async function getUserMetrics(userId: string): Promise<UserMetrics> {
       [userId]
     ),
 
-    // Consecutive active days (current streak)
+    // Consecutive active days (CURRENT streak from today backward)
     queryOne<{ streak: string }>(
       `WITH daily_activity AS (
          SELECT DISTINCT DATE(created_at AT TIME ZONE 'UTC') AS active_date
@@ -151,11 +151,16 @@ async function getUserMetrics(userId: string): Promise<UserMetrics> {
        ),
        streak AS (
          SELECT active_date,
-                active_date - (ROW_NUMBER() OVER (ORDER BY active_date))::int AS grp
+                active_date - (ROW_NUMBER() OVER (ORDER BY active_date DESC))::int AS grp
          FROM daily_activity
+         WHERE active_date >= CURRENT_DATE - INTERVAL '366 days'
        )
        SELECT COALESCE(MAX(cnt), 0) AS streak
-       FROM (SELECT COUNT(*) AS cnt FROM streak GROUP BY grp) counts`,
+       FROM (
+         SELECT COUNT(*) AS cnt FROM streak
+         GROUP BY grp
+         HAVING MAX(active_date) >= CURRENT_DATE - INTERVAL '1 day'
+       ) counts`,
       [userId]
     ),
 
@@ -178,7 +183,7 @@ async function getUserMetrics(userId: string): Promise<UserMetrics> {
     queryOne<{ count: string }>(
       `SELECT COUNT(*) AS count
        FROM proposals
-       WHERE proposed_by = $1`,
+       WHERE created_by = $1`,
       [userId]
     ),
 
@@ -186,7 +191,7 @@ async function getUserMetrics(userId: string): Promise<UserMetrics> {
     queryOne<{ count: string }>(
       `SELECT COUNT(*) AS count
        FROM proposals
-       WHERE proposed_by = $1 AND status = 'active'`,
+       WHERE created_by = $1 AND status = 'passed'`,
       [userId]
     ),
 

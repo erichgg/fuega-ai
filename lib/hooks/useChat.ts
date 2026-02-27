@@ -129,33 +129,60 @@ export function useChat({ campfireId, roomId, enabled = true }: UseChatOptions):
     return () => { cancelled = true; };
   }, [campfireId, roomId, enabled, basePath]);
 
-  // SSE stream for real-time updates
+  // SSE stream for real-time updates with exponential backoff reconnection
   useEffect(() => {
     if (!enabled || !campfireId) return;
 
-    const url = `${basePath}?stream=true`;
-    const es = new EventSource(url);
-    eventSourceRef.current = es;
+    let retryCount = 0;
+    let retryTimeout: ReturnType<typeof setTimeout> | null = null;
+    let disposed = false;
+    const MAX_RETRIES = 10;
+    const MAX_BACKOFF_MS = 30_000;
 
-    es.onopen = () => setConnected(true);
+    function connect() {
+      if (disposed) return;
 
-    es.onmessage = (event) => {
-      try {
-        const msg = JSON.parse(event.data) as ChatMessage;
-        setMessages((prev) => {
-          if (prev.some((m) => m.id === msg.id)) return prev;
-          return [...prev, msg];
-        });
-      } catch { /* ignore parse errors */ }
-    };
+      const url = `${basePath}?stream=true`;
+      const es = new EventSource(url);
+      eventSourceRef.current = es;
 
-    es.onerror = () => {
-      setConnected(false);
-    };
+      es.onopen = () => {
+        retryCount = 0; // Reset backoff on successful connection
+        setConnected(true);
+      };
+
+      es.onmessage = (event) => {
+        try {
+          const msg = JSON.parse(event.data) as ChatMessage;
+          setMessages((prev) => {
+            if (prev.some((m) => m.id === msg.id)) return prev;
+            return [...prev, msg];
+          });
+        } catch { /* ignore parse errors */ }
+      };
+
+      es.onerror = () => {
+        setConnected(false);
+        es.close();
+        eventSourceRef.current = null;
+
+        if (disposed || retryCount >= MAX_RETRIES) return;
+
+        const backoffMs = Math.min(1000 * Math.pow(2, retryCount), MAX_BACKOFF_MS);
+        retryCount++;
+        retryTimeout = setTimeout(connect, backoffMs);
+      };
+    }
+
+    connect();
 
     return () => {
-      es.close();
-      eventSourceRef.current = null;
+      disposed = true;
+      if (retryTimeout) clearTimeout(retryTimeout);
+      if (eventSourceRef.current) {
+        eventSourceRef.current.close();
+        eventSourceRef.current = null;
+      }
       setConnected(false);
     };
   }, [campfireId, roomId, enabled, basePath]);
