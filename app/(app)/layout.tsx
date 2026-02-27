@@ -20,8 +20,11 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const [popularCampfires, setPopularCampfires] = React.useState<
     { name: string; memberCount: number }[]
   >([]);
+  const [myCampfires, setMyCampfires] = React.useState<
+    { name: string; memberCount: number }[]
+  >([]);
 
-  // Fetch real campfires for sidebar
+  // Fetch popular campfires for sidebar
   React.useEffect(() => {
     let cancelled = false;
     async function load() {
@@ -43,6 +46,29 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     return () => { cancelled = true; };
   }, []);
 
+  // Fetch user's joined campfires for sidebar
+  React.useEffect(() => {
+    if (!user) {
+      setMyCampfires([]);
+      return;
+    }
+    let cancelled = false;
+    async function load() {
+      try {
+        const data = await api.get<{ campfires: Campfire[] }>("/api/me/campfires");
+        if (!cancelled) {
+          setMyCampfires(
+            data.campfires.map((c) => ({ name: c.name, memberCount: c.member_count ?? 0 })),
+          );
+        }
+      } catch {
+        // Falls back to empty
+      }
+    }
+    load();
+    return () => { cancelled = true; };
+  }, [user]);
+
   return (
     <CommandPaletteProvider>
     <div className="min-h-screen bg-void flex flex-col">
@@ -58,6 +84,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
       {/* Sidebar drawer (mobile + menu button) */}
       <Sidebar
+        campfires={myCampfires.length > 0 ? myCampfires : undefined}
         popularCampfires={popularCampfires.length > 0 ? popularCampfires : undefined}
         open={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
@@ -71,6 +98,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         {/* Persistent sidebar — visible on lg+ */}
         <aside className="hidden lg:flex lg:w-60 xl:w-64 shrink-0 flex-col border-r border-lava-hot/10 bg-coal/50 sticky top-14 h-[calc(100vh-3.5rem)] overflow-hidden">
           <SidebarContent
+            campfires={myCampfires.length > 0 ? myCampfires : undefined}
             popularCampfires={popularCampfires.length > 0 ? popularCampfires : undefined}
           />
         </aside>

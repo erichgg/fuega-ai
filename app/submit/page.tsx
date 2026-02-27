@@ -12,6 +12,10 @@ import {
   FileText,
   Link2,
   ImageIcon,
+  Film,
+  Upload,
+  X,
+  Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,7 +26,7 @@ import { useCreatePost } from "@/lib/hooks/usePosts";
 import { MarkdownContent } from "@/components/fuega/markdown-content";
 import { CampfirePicker } from "@/components/fuega/campfire-picker";
 
-type PostType = "text" | "link" | "image";
+type PostType = "text" | "link" | "image" | "video";
 
 const DRAFT_KEY = "fuega_draft_post";
 
@@ -34,6 +38,329 @@ interface Draft {
   imageUrl: string;
   campfireId: string;
 }
+
+interface UploadedFile {
+  url: string;
+  type: "image" | "video";
+  filename: string;
+  size: number;
+}
+
+// ─── File Upload Zone ─────────────────────────────────────────
+
+interface FileUploadZoneProps {
+  accept: string;
+  maxSizeLabel: string;
+  maxSizeBytes: number;
+  mediaType: "image" | "video";
+  onUploadComplete: (file: UploadedFile) => void;
+  uploadedFile: UploadedFile | null;
+  onRemove: () => void;
+  previewUrl: string;
+}
+
+function FileUploadZone({
+  accept,
+  maxSizeLabel,
+  maxSizeBytes,
+  mediaType,
+  onUploadComplete,
+  uploadedFile,
+  onRemove,
+  previewUrl,
+}: FileUploadZoneProps) {
+  const [dragging, setDragging] = React.useState(false);
+  const [uploading, setUploading] = React.useState(false);
+  const [progress, setProgress] = React.useState(0);
+  const [uploadError, setUploadError] = React.useState<string | null>(null);
+  const inputRef = React.useRef<HTMLInputElement>(null);
+
+  const handleFiles = React.useCallback(
+    async (files: FileList | null) => {
+      if (!files || files.length === 0) return;
+      const file = files[0];
+      if (!file) return;
+
+      setUploadError(null);
+
+      // Client-side validation
+      const allowedTypes =
+        mediaType === "image"
+          ? ["image/jpeg", "image/png", "image/gif", "image/webp"]
+          : ["video/mp4", "video/webm"];
+
+      if (!allowedTypes.includes(file.type)) {
+        setUploadError(
+          mediaType === "image"
+            ? "Only JPEG, PNG, GIF, and WebP images are allowed"
+            : "Only MP4 and WebM videos are allowed",
+        );
+        return;
+      }
+
+      if (file.size > maxSizeBytes) {
+        setUploadError(`File too large. Maximum size is ${maxSizeLabel}`);
+        return;
+      }
+
+      setUploading(true);
+      setProgress(0);
+
+      // Simulate progress (real progress would require XMLHttpRequest)
+      const progressInterval = setInterval(() => {
+        setProgress((prev) => {
+          if (prev >= 90) return prev;
+          return prev + Math.random() * 15;
+        });
+      }, 200);
+
+      try {
+        const formData = new FormData();
+        formData.append("file", file);
+
+        const res = await fetch("/api/upload", {
+          method: "POST",
+          body: formData,
+        });
+
+        clearInterval(progressInterval);
+
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({ error: "Upload failed" }));
+          throw new Error(data.error || "Upload failed");
+        }
+
+        setProgress(100);
+        const data: UploadedFile = await res.json();
+        onUploadComplete(data);
+      } catch (err) {
+        clearInterval(progressInterval);
+        setUploadError(
+          err instanceof Error ? err.message : "Upload failed. Please try again.",
+        );
+      } finally {
+        setUploading(false);
+        setProgress(0);
+        // Reset file input
+        if (inputRef.current) {
+          inputRef.current.value = "";
+        }
+      }
+    },
+    [maxSizeBytes, maxSizeLabel, mediaType, onUploadComplete],
+  );
+
+  const handleDragOver = React.useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (!uploading) setDragging(true);
+    },
+    [uploading],
+  );
+
+  const handleDragLeave = React.useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragging(false);
+  }, []);
+
+  const handleDrop = React.useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      setDragging(false);
+      if (!uploading) {
+        handleFiles(e.dataTransfer.files);
+      }
+    },
+    [uploading, handleFiles],
+  );
+
+  // If there's an uploaded file or a pasted URL preview, show the preview
+  if (uploadedFile || previewUrl) {
+    const displayUrl = uploadedFile?.url || previewUrl;
+    const displayName = uploadedFile?.filename || "Linked media";
+    const displaySize = uploadedFile
+      ? formatFileSize(uploadedFile.size)
+      : null;
+    const displayType = uploadedFile?.type || mediaType;
+
+    return (
+      <div className="relative overflow-hidden rounded-lg border border-charcoal bg-coal">
+        {/* Preview */}
+        <div className="relative flex items-center justify-center bg-void/50">
+          {displayType === "image" ? (
+            <div className="relative max-h-64 w-full overflow-hidden">
+              <Image
+                src={displayUrl}
+                alt="Upload preview"
+                width={600}
+                height={400}
+                unoptimized
+                className="h-auto max-h-64 w-full object-contain"
+              />
+            </div>
+          ) : (
+            <video
+              src={displayUrl}
+              controls
+              className="max-h-64 w-full"
+              preload="metadata"
+            >
+              <track kind="captions" />
+            </video>
+          )}
+        </div>
+        {/* File info bar */}
+        <div className="flex items-center justify-between border-t border-charcoal px-3 py-2">
+          <div className="flex items-center gap-2 truncate">
+            {displayType === "image" ? (
+              <ImageIcon className="h-4 w-4 shrink-0 text-flame-400" />
+            ) : (
+              <Film className="h-4 w-4 shrink-0 text-flame-400" />
+            )}
+            <span className="truncate text-sm text-ash">{displayName}</span>
+            {displaySize && (
+              <span className="shrink-0 text-xs text-smoke">
+                ({displaySize})
+              </span>
+            )}
+          </div>
+          <button
+            type="button"
+            onClick={onRemove}
+            className="ml-2 rounded p-1 text-smoke transition-colors hover:bg-charcoal hover:text-red-400"
+            title="Remove file"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-1">
+      <div
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+        onClick={() => !uploading && inputRef.current?.click()}
+        className={`relative flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed px-6 py-10 transition-all ${
+          dragging
+            ? "border-flame-400 bg-flame-400/5"
+            : "border-charcoal bg-coal hover:border-smoke hover:bg-coal/80"
+        } ${uploading ? "pointer-events-none opacity-70" : ""}`}
+      >
+        <input
+          ref={inputRef}
+          type="file"
+          accept={accept}
+          className="hidden"
+          onChange={(e) => handleFiles(e.target.files)}
+          disabled={uploading}
+        />
+
+        {uploading ? (
+          <Loader2 className="mb-3 h-8 w-8 animate-spin text-flame-400" />
+        ) : (
+          <Upload
+            className={`mb-3 h-8 w-8 ${dragging ? "text-flame-400" : "text-smoke"}`}
+          />
+        )}
+
+        <p className="text-sm font-medium text-ash">
+          {uploading
+            ? "Uploading..."
+            : dragging
+              ? "Drop to upload"
+              : "Drag & drop or click to upload"}
+        </p>
+        <p className="mt-1 text-xs text-smoke">
+          {mediaType === "image"
+            ? "JPEG, PNG, GIF, WebP"
+            : "MP4, WebM"}{" "}
+          &middot; Max {maxSizeLabel}
+        </p>
+
+        {/* Progress bar */}
+        {uploading && (
+          <div className="absolute inset-x-0 bottom-0 h-1 overflow-hidden rounded-b-lg bg-charcoal">
+            <div
+              className="h-full bg-gradient-to-r from-flame-500 to-flame-400 transition-all duration-300"
+              style={{ width: `${Math.min(progress, 100)}%` }}
+            />
+          </div>
+        )}
+      </div>
+
+      {uploadError && (
+        <div className="flex items-center gap-1.5 text-sm text-red-400">
+          <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+          {uploadError}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function formatFileSize(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+// ─── Helpers ──────────────────────────────────────────────────
+
+function isEmbeddableVideoUrl(url: string): boolean {
+  try {
+    const parsed = new URL(url);
+    return (
+      parsed.hostname.includes("youtube.com") ||
+      parsed.hostname.includes("youtu.be") ||
+      parsed.hostname.includes("vimeo.com")
+    );
+  } catch {
+    return false;
+  }
+}
+
+function getYouTubeEmbedUrl(url: string): string | null {
+  try {
+    const parsed = new URL(url);
+    let videoId: string | null = null;
+    if (
+      parsed.hostname.includes("youtube.com") &&
+      parsed.pathname === "/watch"
+    ) {
+      videoId = parsed.searchParams.get("v");
+    } else if (parsed.hostname.includes("youtu.be")) {
+      videoId = parsed.pathname.slice(1);
+    } else if (
+      parsed.hostname.includes("youtube.com") &&
+      parsed.pathname.startsWith("/embed/")
+    ) {
+      videoId = parsed.pathname.split("/embed/")[1] ?? null;
+    }
+    return videoId ? `https://www.youtube-nocookie.com/embed/${videoId}` : null;
+  } catch {
+    return null;
+  }
+}
+
+function getVimeoEmbedUrl(url: string): string | null {
+  try {
+    const parsed = new URL(url);
+    if (!parsed.hostname.includes("vimeo.com")) return null;
+    const match = parsed.pathname.match(/\/(\d+)/);
+    return match ? `https://player.vimeo.com/video/${match[1]}` : null;
+  } catch {
+    return null;
+  }
+}
+
+// ─── Main Page ────────────────────────────────────────────────
 
 export default function SubmitPage() {
   return (
@@ -77,6 +404,12 @@ function SubmitPageInner() {
     decision: string;
     reasoning: string;
   } | null>(null);
+
+  // Upload state
+  const [uploadedImageFile, setUploadedImageFile] =
+    React.useState<UploadedFile | null>(null);
+  const [uploadedVideoFile, setUploadedVideoFile] =
+    React.useState<UploadedFile | null>(null);
 
   // Draft state
   const [draftAvailable, setDraftAvailable] = React.useState(false);
@@ -154,6 +487,12 @@ function SubmitPageInner() {
 
   const wordCount = body.trim().split(/\s+/).filter(Boolean).length;
 
+  // Resolve effective image URL (upload takes precedence over pasted URL)
+  const effectiveImageUrl = uploadedImageFile?.url || imageUrl;
+
+  // Resolve effective video URL (upload takes precedence over pasted URL)
+  const effectiveVideoUrl = uploadedVideoFile?.url || url;
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedCampfireId || !title.trim() || creating) return;
@@ -165,8 +504,11 @@ function SubmitPageInner() {
         body: body.trim(),
         post_type: postType,
         ...(postType === "link" && url.trim() ? { url: url.trim() } : {}),
-        ...(postType === "image" && imageUrl.trim()
-          ? { image_url: imageUrl.trim() }
+        ...(postType === "image" && effectiveImageUrl
+          ? { image_url: effectiveImageUrl }
+          : {}),
+        ...(postType === "video" && effectiveVideoUrl
+          ? { url: effectiveVideoUrl }
           : {}),
       });
 
@@ -211,8 +553,22 @@ function SubmitPageInner() {
   const tabs: { type: PostType; label: string; icon: React.ReactNode }[] = [
     { type: "text", label: "Text", icon: <FileText className="h-4 w-4" /> },
     { type: "link", label: "Link", icon: <Link2 className="h-4 w-4" /> },
-    { type: "image", label: "Image", icon: <ImageIcon className="h-4 w-4" /> },
+    {
+      type: "image",
+      label: "Image",
+      icon: <ImageIcon className="h-4 w-4" />,
+    },
+    { type: "video", label: "Video", icon: <Film className="h-4 w-4" /> },
   ];
+
+  // Video preview logic
+  const videoPreviewEmbed =
+    postType === "video" && url.trim() && !uploadedVideoFile
+      ? getYouTubeEmbedUrl(url.trim()) || getVimeoEmbedUrl(url.trim())
+      : null;
+
+  const showVideoNativePreview =
+    postType === "video" && !videoPreviewEmbed && effectiveVideoUrl && !isEmbeddableVideoUrl(effectiveVideoUrl);
 
   return (
     <div className="mx-auto max-w-2xl">
@@ -276,7 +632,7 @@ function SubmitPageInner() {
             )}
             <span className="text-sm font-medium text-foreground">
               {moderationResult.decision === "approve"
-                ? "Post approved — redirecting..."
+                ? "Post approved -- redirecting..."
                 : moderationResult.decision === "remove"
                   ? "Post removed by moderation"
                   : "Post flagged for review"}
@@ -288,22 +644,22 @@ function SubmitPageInner() {
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+      <form onSubmit={handleSubmit} className="mt-6 space-y-5">
         {/* Post type tabs */}
-        <div className="flex gap-1 border-b border-charcoal mb-4">
+        <div className="flex rounded-lg border border-charcoal bg-coal p-1">
           {tabs.map((tab) => (
             <button
               key={tab.type}
               type="button"
               onClick={() => setPostType(tab.type)}
-              className={`flex items-center gap-1.5 px-4 py-2 text-sm font-mono transition-colors cursor-pointer ${
+              className={`flex flex-1 items-center justify-center gap-1.5 rounded-md px-3 py-2 text-sm font-medium transition-all ${
                 postType === tab.type
-                  ? "bg-charcoal text-flame-400 border-b-2 border-lava-hot"
+                  ? "bg-charcoal text-flame-400 shadow-sm"
                   : "text-smoke hover:text-ash"
               }`}
             >
               {tab.icon}
-              {tab.label}
+              <span className="hidden sm:inline">{tab.label}</span>
             </button>
           ))}
         </div>
@@ -366,34 +722,141 @@ function SubmitPageInner() {
           </div>
         )}
 
-        {/* Image URL field (image posts) */}
+        {/* Image upload + URL (image posts) */}
         {postType === "image" && (
-          <div>
-            <label
-              htmlFor="imageUrl"
-              className="mb-1.5 block text-sm font-medium text-ash"
-            >
-              Image URL
+          <div className="space-y-3">
+            <label className="block text-sm font-medium text-ash">
+              Image
             </label>
-            <Input
-              id="imageUrl"
-              type="url"
-              value={imageUrl}
-              onChange={(e) => setImageUrl(e.target.value)}
-              placeholder="https://example.com/image.jpg"
-              className="border-charcoal bg-coal placeholder:text-smoke focus-visible:ring-flame-500/50"
+            <FileUploadZone
+              accept="image/jpeg,image/png,image/gif,image/webp"
+              maxSizeLabel="10MB"
+              maxSizeBytes={10 * 1024 * 1024}
+              mediaType="image"
+              onUploadComplete={(file) => {
+                setUploadedImageFile(file);
+                setImageUrl(file.url);
+              }}
+              uploadedFile={uploadedImageFile}
+              onRemove={() => {
+                setUploadedImageFile(null);
+                setImageUrl("");
+              }}
+              previewUrl={!uploadedImageFile && imageUrl.trim() ? imageUrl.trim() : ""}
             />
-            {imageUrl.trim() && (
-              <div className="mt-2 overflow-hidden rounded-md border border-charcoal bg-coal">
-                <div className="relative max-h-48 overflow-hidden">
-                  <Image
-                    src={imageUrl.trim()}
-                    alt="Image preview"
-                    width={600}
-                    height={400}
-                    unoptimized
-                    className="h-auto max-h-48 w-full object-contain"
+            {!uploadedImageFile && (
+              <div>
+                <p className="mb-1.5 text-xs font-medium text-smoke">
+                  Or paste an image URL
+                </p>
+                <Input
+                  id="imageUrl"
+                  type="url"
+                  value={imageUrl}
+                  onChange={(e) => setImageUrl(e.target.value)}
+                  placeholder="https://example.com/image.jpg"
+                  className="border-charcoal bg-coal placeholder:text-smoke focus-visible:ring-flame-500/50"
+                />
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Video upload + URL (video posts) */}
+        {postType === "video" && (
+          <div className="space-y-3">
+            <label className="block text-sm font-medium text-ash">
+              Video
+            </label>
+            <FileUploadZone
+              accept="video/mp4,video/webm"
+              maxSizeLabel="50MB"
+              maxSizeBytes={50 * 1024 * 1024}
+              mediaType="video"
+              onUploadComplete={(file) => {
+                setUploadedVideoFile(file);
+                setUrl(file.url);
+              }}
+              uploadedFile={uploadedVideoFile}
+              onRemove={() => {
+                setUploadedVideoFile(null);
+                setUrl("");
+              }}
+              previewUrl=""
+            />
+            {!uploadedVideoFile && (
+              <div>
+                <p className="mb-1.5 text-xs font-medium text-smoke">
+                  Or paste a video URL (YouTube, Vimeo, direct link)
+                </p>
+                <Input
+                  id="videoUrl"
+                  type="url"
+                  value={url}
+                  onChange={(e) => setUrl(e.target.value)}
+                  placeholder="https://youtube.com/watch?v=... or https://example.com/video.mp4"
+                  className="border-charcoal bg-coal placeholder:text-smoke focus-visible:ring-flame-500/50"
+                />
+              </div>
+            )}
+
+            {/* Embed preview for YouTube/Vimeo */}
+            {videoPreviewEmbed && (
+              <div className="overflow-hidden rounded-lg border border-charcoal">
+                <div className="relative aspect-video w-full">
+                  <iframe
+                    src={videoPreviewEmbed}
+                    title="Video preview"
+                    className="absolute inset-0 h-full w-full"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
                   />
+                </div>
+                <div className="flex items-center justify-between border-t border-charcoal px-3 py-2">
+                  <div className="flex items-center gap-2 truncate">
+                    <Film className="h-4 w-4 shrink-0 text-flame-400" />
+                    <span className="truncate text-sm text-ash">
+                      {url.trim()}
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setUrl("")}
+                    className="ml-2 rounded p-1 text-smoke transition-colors hover:bg-charcoal hover:text-red-400"
+                    title="Remove video"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Native video preview for direct URLs */}
+            {showVideoNativePreview && (
+              <div className="overflow-hidden rounded-lg border border-charcoal">
+                <video
+                  src={effectiveVideoUrl}
+                  controls
+                  className="max-h-64 w-full"
+                  preload="metadata"
+                >
+                  <track kind="captions" />
+                </video>
+                <div className="flex items-center justify-between border-t border-charcoal px-3 py-2">
+                  <div className="flex items-center gap-2 truncate">
+                    <Film className="h-4 w-4 shrink-0 text-flame-400" />
+                    <span className="truncate text-sm text-ash">
+                      {url.trim()}
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setUrl("")}
+                    className="ml-2 rounded p-1 text-smoke transition-colors hover:bg-charcoal hover:text-red-400"
+                    title="Remove video"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
                 </div>
               </div>
             )}
@@ -406,10 +869,7 @@ function SubmitPageInner() {
             htmlFor="body"
             className="mb-1.5 block text-sm font-medium text-ash"
           >
-            Body{" "}
-            <span className="font-normal text-smoke">
-              {postType === "text" ? "(optional)" : "(optional)"}
-            </span>
+            Body <span className="font-normal text-smoke">(optional)</span>
           </label>
           {showPreview ? (
             <div className="min-h-[160px] rounded-md border border-charcoal bg-coal p-3">
@@ -462,15 +922,40 @@ function SubmitPageInner() {
         )}
 
         {/* Submit */}
-        <div className="flex justify-end">
+        <div className="flex items-center justify-between border-t border-charcoal pt-4">
+          <p className="text-xs text-smoke">
+            {postType === "image" && !effectiveImageUrl
+              ? "Upload or paste an image to continue"
+              : postType === "video" && !effectiveVideoUrl
+                ? "Upload or paste a video URL to continue"
+                : postType === "link" && !url.trim()
+                  ? "Add a URL to continue"
+                  : "\u00A0"}
+          </p>
           <Button
             type="submit"
             variant="spark"
-            disabled={!selectedCampfireId || !title.trim() || creating}
+            disabled={
+              !selectedCampfireId ||
+              !title.trim() ||
+              creating ||
+              (postType === "link" && !url.trim()) ||
+              (postType === "image" && !effectiveImageUrl) ||
+              (postType === "video" && !effectiveVideoUrl)
+            }
             className="gap-1.5"
           >
-            <Send className="h-4 w-4" />
-            {creating ? "Submitting..." : "Create Post"}
+            {creating ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Submitting...
+              </>
+            ) : (
+              <>
+                <Send className="h-4 w-4" />
+                Create Post
+              </>
+            )}
           </Button>
         </div>
       </form>

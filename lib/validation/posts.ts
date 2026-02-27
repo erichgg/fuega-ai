@@ -12,8 +12,8 @@ export const createPostSchema = z
       .max(40000, "Body must be at most 40,000 characters")
       .optional()
       .nullable(),
-    post_type: z.enum(["text", "link", "image"], {
-      errorMap: () => ({ message: "Post type must be text, link, or image" }),
+    post_type: z.enum(["text", "link", "image", "video"], {
+      errorMap: () => ({ message: "Post type must be text, link, image, or video" }),
     }),
     url: z
       .string()
@@ -30,11 +30,12 @@ export const createPostSchema = z
       if (data.post_type === "text") return true;
       if (data.post_type === "link") return !!data.url;
       if (data.post_type === "image") return !!data.image_url;
+      if (data.post_type === "video") return !!data.url;
       return false;
     },
     {
       message:
-        "Link posts require a URL, image posts require an image_url",
+        "Link posts require a URL, image posts require an image_url, video posts require a URL",
       path: ["url"],
     }
   );

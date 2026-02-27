@@ -6,6 +6,10 @@
 # Stashed builder output (preserved locally, not in repo)
 _stashed/
 
+# User uploads (local dev only, production uses CDN/object storage)
+public/uploads/*
+!public/uploads/.gitkeep
+
 # Dependencies
 node_modules/
 

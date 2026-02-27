@@ -88,6 +88,12 @@ const reportLimiter = new RateLimiterMemory({
   keyPrefix: "report",
 });
 
+const uploadLimiter = new RateLimiterMemory({
+  points: 20,
+  duration: 60 * 60, // 1 hour
+  keyPrefix: "upload",
+});
+
 const cspReportLimiter = new RateLimiterMemory({
   points: 30,
   duration: 60, // 1 minute
@@ -322,6 +328,25 @@ export async function checkReportRateLimit(
 }
 
 /**
+ * Check upload rate limit for a user ID.
+ * Max 20 uploads per hour per user.
+ */
+export async function checkUploadRateLimit(
+  userId: string
+): Promise<RateLimitResult> {
+  try {
+    await uploadLimiter.consume(userId);
+    return { allowed: true, retryAfterSeconds: 0 };
+  } catch (err: unknown) {
+    const rlErr = err as { msBeforeNext?: number };
+    return {
+      allowed: false,
+      retryAfterSeconds: Math.ceil((rlErr.msBeforeNext ?? 3600000) / 1000),
+    };
+  }
+}
+
+/**
  * Check CSP report rate limit for an IP hash.
  * IP-based since CSP reports are unauthenticated.
  */
@@ -356,6 +381,7 @@ export async function resetRateLimiters(): Promise<void> {
   await searchLimiter.delete("*");
   await forgotPasswordLimiter.delete("*");
   await reportLimiter.delete("*");
+  await uploadLimiter.delete("*");
   await cspReportLimiter.delete("*");
 }
 
@@ -371,6 +397,7 @@ export {
   readLimiter,
   searchLimiter,
   forgotPasswordLimiter,
+  uploadLimiter,
   reportLimiter,
   cspReportLimiter,
 };

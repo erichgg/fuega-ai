@@ -9,7 +9,7 @@ interface UsePostsOptions {
   author?: string;
   limit?: number;
   timeRange?: "all" | "today" | "week" | "month";
-  postType?: "all" | "text" | "link" | "image";
+  postType?: "all" | "text" | "link" | "image" | "video";
 }
 
 interface UsePostsReturn {
@@ -148,8 +148,9 @@ interface CreatePostInput {
   campfire_id: string;
   title: string;
   body: string;
-  post_type: "text" | "link" | "image";
+  post_type: "text" | "link" | "image" | "video";
   url?: string;
+  image_url?: string;
 }
 
 interface UseCreatePostReturn {

@@ -357,6 +357,19 @@ export async function leaveCampfire(
   );
 }
 
+// ─── User Campfires ─────────────────────────────────────────
+
+export async function getUserCampfires(userId: string): Promise<Campfire[]> {
+  const rows = await queryAll<Campfire>(
+    `SELECT c.* FROM campfires c
+     INNER JOIN campfire_members cm ON cm.campfire_id = c.id
+     WHERE cm.user_id = $1 AND c.deleted_at IS NULL AND c.is_banned = FALSE
+     ORDER BY c.name ASC`,
+    [userId]
+  );
+  return rows;
+}
+
 // ─── Helpers ─────────────────────────────────────────────────
 
 export async function getMembership(
