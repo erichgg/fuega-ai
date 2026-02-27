@@ -36,6 +36,7 @@ export const listCampfiresSchema = z.object({
   sort: z.enum(["members", "activity", "created_at"]).default("members"),
   limit: z.coerce.number().int().min(1).max(100).default(25),
   offset: z.coerce.number().int().min(0).default(0),
+  search: z.string().max(200).optional(),
 });
 
 export type CreateCampfireInput = z.infer<typeof createCampfireSchema>;

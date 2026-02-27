@@ -34,6 +34,7 @@ export async function GET(req: Request) {
       sort: url.searchParams.get("sort") ?? "members",
       limit: url.searchParams.get("limit") ?? "25",
       offset: url.searchParams.get("offset") ?? "0",
+      search: url.searchParams.get("search") ?? undefined,
     });
 
     if (!parsed.success) {
@@ -43,10 +44,11 @@ export async function GET(req: Request) {
       );
     }
 
-    const campfires = await listCampfires(parsed.data);
+    const { campfires, total } = await listCampfires(parsed.data);
 
     return NextResponse.json({
       campfires,
+      total,
       count: campfires.length,
       sort: parsed.data.sort,
       limit: parsed.data.limit,

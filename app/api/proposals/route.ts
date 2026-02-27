@@ -53,10 +53,11 @@ export async function GET(req: Request) {
       );
     }
 
-    const proposals = await listProposals(parsed.data);
+    const { proposals, total } = await listProposals(parsed.data);
 
     return NextResponse.json({
       proposals,
+      total,
       count: proposals.length,
       limit: parsed.data.limit,
       offset: parsed.data.offset,

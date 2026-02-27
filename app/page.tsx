@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import { FlameLogo } from "@/components/fuega/flame-logo";
 import { CampfirePrefix } from "@/components/fuega/campfire-prefix";
-import { EmberParticles } from "@/components/fuega/ember-particles";
+import { FireParticles } from "@/components/fuega/fire-particles";
 import { ThemeToggle } from "@/components/fuega/theme-toggle";
 import { AuthRedirect } from "@/components/fuega/auth-redirect";
 
@@ -140,7 +140,7 @@ export default function LandingPage() {
         <div className="absolute inset-0 -z-10">
           <div className="absolute left-1/2 top-0 h-[400px] w-full max-w-[900px] -translate-x-1/2 rounded-full bg-flame-500/5 blur-3xl" />
           <div className="absolute left-1/3 top-10 h-[250px] w-full max-w-[600px] -translate-x-1/2 rounded-full bg-ember-500/5 blur-3xl" />
-          <EmberParticles count={15} />
+          <FireParticles count={60} />
         </div>
 
         <div className="mx-auto flex w-full max-w-7xl flex-1 flex-col justify-center">

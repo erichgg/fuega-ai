@@ -11,7 +11,6 @@ import {
   Search,
   Clock,
   Calendar,
-  Loader2,
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
@@ -68,6 +67,17 @@ const decisionConfig: Record<
 
 const PAGE_SIZE = 50;
 
+/** Default to 7 days ago in YYYY-MM-DD format */
+function sevenDaysAgo(): string {
+  const d = new Date();
+  d.setDate(d.getDate() - 7);
+  return d.toISOString().slice(0, 10);
+}
+
+function today(): string {
+  return new Date().toISOString().slice(0, 10);
+}
+
 export default function ModLogPage() {
   const [entries, setEntries] = React.useState<ModLogEntry[]>([]);
   const [total, setTotal] = React.useState(0);
@@ -77,23 +87,39 @@ export default function ModLogPage() {
   const [decisionFilter, setDecisionFilter] = React.useState<Decision | "all">(
     "all",
   );
+  // Server-side filter inputs
   const [campfireFilter, setCampfireFilter] = React.useState("");
   const [searchQuery, setSearchQuery] = React.useState("");
-  const [dateFrom, setDateFrom] = React.useState("");
+  const [dateFrom, setDateFrom] = React.useState(sevenDaysAgo());
   const [dateTo, setDateTo] = React.useState("");
+
+  // Debounced values for server queries
+  const [debouncedCampfire, setDebouncedCampfire] = React.useState("");
+  const [debouncedSearch, setDebouncedSearch] = React.useState("");
 
   // Page title
   React.useEffect(() => {
     document.title = "Mod Log - fuega";
   }, []);
 
-  // Debounce campfire filter to avoid excessive API calls
-  const [debouncedCampfire, setDebouncedCampfire] = React.useState("");
+  // Debounce campfire filter
   React.useEffect(() => {
     const timer = setTimeout(() => setDebouncedCampfire(campfireFilter), 300);
     return () => clearTimeout(timer);
   }, [campfireFilter]);
 
+  // Debounce search filter
+  React.useEffect(() => {
+    const timer = setTimeout(() => setDebouncedSearch(searchQuery), 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  // Reset offset when any filter changes
+  React.useEffect(() => {
+    setOffset(0);
+  }, [decisionFilter, debouncedCampfire, debouncedSearch, dateFrom, dateTo]);
+
+  // Fetch entries -- ALL filtering is server-side
   React.useEffect(() => {
     let cancelled = false;
     setLoading(true);
@@ -106,8 +132,18 @@ export default function ModLogPage() {
     if (decisionFilter !== "all") {
       params.action = decisionFilter;
     }
-    // Note: campfire_id filter requires a UUID, not a name.
-    // Client-side filtering on campfire name is applied below.
+    if (debouncedCampfire.trim()) {
+      params.campfire_name = debouncedCampfire.trim();
+    }
+    if (debouncedSearch.trim()) {
+      params.search = debouncedSearch.trim();
+    }
+    if (dateFrom) {
+      params.date_from = dateFrom;
+    }
+    if (dateTo) {
+      params.date_to = dateTo;
+    }
 
     api
       .get<{ entries: ModLogEntry[]; total: number }>("/api/mod-log", params)
@@ -129,44 +165,7 @@ export default function ModLogPage() {
       });
 
     return () => { cancelled = true; };
-  }, [offset, decisionFilter]);
-
-  // Reset offset when filter changes
-  React.useEffect(() => {
-    setOffset(0);
-  }, [decisionFilter]);
-
-  // Client-side filtering for campfire name, search query, and date range
-  const filteredEntries = React.useMemo(() => {
-    return entries.filter((entry) => {
-      if (
-        debouncedCampfire &&
-        !entry.campfire_name
-          .toLowerCase()
-          .includes(debouncedCampfire.toLowerCase())
-      ) {
-        return false;
-      }
-      if (
-        searchQuery &&
-        !entry.reason.toLowerCase().includes(searchQuery.toLowerCase()) &&
-        !entry.content_type.toLowerCase().includes(searchQuery.toLowerCase())
-      ) {
-        return false;
-      }
-      if (dateFrom) {
-        const entryDate = new Date(entry.created_at);
-        const fromDate = new Date(dateFrom);
-        if (entryDate < fromDate) return false;
-      }
-      if (dateTo) {
-        const entryDate = new Date(entry.created_at);
-        const toDate = new Date(dateTo + "T23:59:59");
-        if (entryDate > toDate) return false;
-      }
-      return true;
-    });
-  }, [entries, debouncedCampfire, searchQuery, dateFrom, dateTo]);
+  }, [offset, decisionFilter, debouncedCampfire, debouncedSearch, dateFrom, dateTo]);
 
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
   const currentPage = Math.floor(offset / PAGE_SIZE) + 1;
@@ -228,15 +227,26 @@ export default function ModLogPage() {
               className="h-9 w-auto border-charcoal bg-coal text-sm text-ash focus-visible:ring-flame-500/50"
             />
           </div>
-          {(dateFrom || dateTo) && (
-            <button
-              type="button"
-              onClick={() => { setDateFrom(""); setDateTo(""); }}
-              className="text-xs text-smoke hover:text-ash transition-colors"
-            >
-              Clear dates
-            </button>
-          )}
+          <div className="flex items-center gap-2">
+            {(dateFrom || dateTo) && (
+              <button
+                type="button"
+                onClick={() => { setDateFrom(""); setDateTo(""); }}
+                className="text-xs text-smoke hover:text-ash transition-colors"
+              >
+                Clear dates
+              </button>
+            )}
+            {dateFrom !== sevenDaysAgo() && (
+              <button
+                type="button"
+                onClick={() => { setDateFrom(sevenDaysAgo()); setDateTo(""); }}
+                className="text-xs text-flame-400 hover:text-flame-300 transition-colors"
+              >
+                Last 7 days
+              </button>
+            )}
+          </div>
         </div>
 
         <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Filter by decision">
@@ -262,9 +272,8 @@ export default function ModLogPage() {
       {!loading && !error && (
         <div className="mt-4 flex items-center justify-between">
           <p className="text-xs text-smoke">
-            {filteredEntries.length === total
-              ? `${total.toLocaleString()} total entries`
-              : `${filteredEntries.length} of ${total.toLocaleString()} entries`}
+            Showing {total > 0 ? offset + 1 : 0}&ndash;{Math.min(offset + PAGE_SIZE, total)} of{" "}
+            {total.toLocaleString()} entries
           </p>
         </div>
       )}
@@ -286,20 +295,22 @@ export default function ModLogPage() {
               Retry
             </Button>
           </div>
-        ) : filteredEntries.length === 0 ? (
+        ) : entries.length === 0 ? (
           <div className="py-16 text-center">
             <Shield className="mx-auto h-12 w-12 text-smoke/40" />
             <h3 className="mt-4 text-lg font-medium text-ash">
-              {total === 0 ? "No moderation entries yet" : "No matching entries"}
+              {total === 0 && !debouncedCampfire && !debouncedSearch && !dateFrom && !dateTo && decisionFilter === "all"
+                ? "No moderation entries yet"
+                : "No matching entries"}
             </h3>
             <p className="mt-2 text-sm text-smoke max-w-md mx-auto">
-              {total === 0
+              {total === 0 && !debouncedCampfire && !debouncedSearch && !dateFrom && !dateTo && decisionFilter === "all"
                 ? "Moderation decisions will appear here as content is reviewed by the AI."
-                : "Try adjusting your filters to see more results."}
+                : "Try adjusting your filters or expanding the date range to see more results."}
             </p>
           </div>
         ) : (
-          filteredEntries.map((entry) => {
+          entries.map((entry) => {
             const config = decisionConfig[entry.decision] ?? decisionConfig.flagged;
             const Icon = config.icon;
 
@@ -408,8 +419,8 @@ export default function ModLogPage() {
       {total > PAGE_SIZE && (
         <div className="mt-6 flex items-center justify-between text-xs text-smoke">
           <span>
-            Showing {offset + 1}–{Math.min(offset + PAGE_SIZE, total)} of{" "}
-            {total}
+            Showing {offset + 1}&ndash;{Math.min(offset + PAGE_SIZE, total)} of{" "}
+            {total.toLocaleString()}
           </span>
           <div className="flex items-center gap-2">
             <Button

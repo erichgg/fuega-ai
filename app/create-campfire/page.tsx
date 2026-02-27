@@ -4,6 +4,7 @@ import * as React from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Flame, AlertCircle, CheckCircle2, Loader2, X } from "lucide-react";
+import { CampfireIllustration } from "@/components/fuega/illustrations";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -163,13 +164,18 @@ export default function CreateCampfirePage() {
         Back to feed
       </Link>
 
-      <h1 className="mt-4 text-xl font-bold text-foreground">
-        Create a Campfire
-      </h1>
-      <p className="mt-1 text-sm text-ash">
-        Start a new campfire with transparent AI moderation. You&apos;ll be the
-        first admin.
-      </p>
+      <div className="mt-4 flex items-center gap-4">
+        <CampfireIllustration className="hidden sm:block shrink-0 h-[100px] w-[100px]" />
+        <div>
+          <h1 className="text-xl font-bold text-foreground">
+            Create a Campfire
+          </h1>
+          <p className="mt-1 text-sm text-ash">
+            Start a new campfire with transparent AI moderation. You&apos;ll be the
+            first admin.
+          </p>
+        </div>
+      </div>
 
       {success && (
         <div className="mt-4 rounded-lg border border-green-500/30 bg-green-500/10 p-4">

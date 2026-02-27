@@ -14,6 +14,7 @@ import {
   Flame,
   ChevronDown,
   ChevronRight,
+  ChevronLeft,
   Settings,
   History,
   ArrowRight,
@@ -21,6 +22,7 @@ import {
   FileText,
   PenLine,
   LayoutDashboard,
+  Search,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -74,6 +76,8 @@ interface SettingsHistoryEntry {
 // Constants
 // ---------------------------------------------------------------------------
 
+const PROPOSALS_PAGE_SIZE = 10;
+
 const statusConfig: Record<
   ProposalStatus,
   { label: string; color: string; icon: typeof Clock }
@@ -123,7 +127,15 @@ const typeConfig: Record<string, { label: string; color: string; icon: typeof Se
   },
 };
 
-const STATUS_FILTERS = ["all", "discussion", "voting", "passed", "rejected", "executed"] as const;
+// Status tabs: "active" maps to discussion+voting server-side
+type StatusTabKey = "active" | "passed" | "rejected" | "all";
+
+const STATUS_TABS: { key: StatusTabKey; label: string }[] = [
+  { key: "active", label: "Active" },
+  { key: "passed", label: "Passed" },
+  { key: "rejected", label: "Failed" },
+  { key: "all", label: "All" },
+];
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -150,6 +162,12 @@ function relativeTime(dateStr: string): string {
   const days = Math.floor(hours / 24);
   if (days < 30) return `${days}d ago`;
   return new Date(dateStr).toLocaleDateString();
+}
+
+function mapApiStatus(status: string): ProposalStatus {
+  if (status === "failed") return "rejected";
+  if (status === "implemented") return "executed";
+  return status as ProposalStatus;
 }
 
 // ---------------------------------------------------------------------------
@@ -189,12 +207,25 @@ function GovernancePageInner() {
 
   // Active tab: proposals | settings | history
   const [activeTab, setActiveTab] = React.useState<"proposals" | "settings" | "history">("proposals");
+
+  // Proposal state
   const [proposals, setProposals] = React.useState<Proposal[]>([]);
+  const [proposalTotal, setProposalTotal] = React.useState(0);
+  const [proposalOffset, setProposalOffset] = React.useState(0);
+  const [statusTab, setStatusTab] = React.useState<StatusTabKey>("active");
+
+  // Summary stats (counts per status)
+  const [statusCounts, setStatusCounts] = React.useState<Record<string, number>>({});
+  const [countsLoaded, setCountsLoaded] = React.useState(false);
+
+  // Search within proposals
+  const [proposalSearch, setProposalSearch] = React.useState("");
+
+  // Campfire picker state
   const [campfires, setCampfires] = React.useState<{ id: string; name: string; member_count?: number }[]>([]);
   const [campfireId, setCampfireId] = React.useState<string | null>(null);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
-  const [statusFilter, setStatusFilter] = React.useState<ProposalStatus | "all">("all");
 
   // Settings & history
   const { settings, loading: settingsLoading } = useCampfireSettings(campfireId);
@@ -210,7 +241,6 @@ function GovernancePageInner() {
         const res = await api.get<{ campfires: Campfire[] }>("/api/campfires", { limit: 100 });
         if (!cancelled) {
           setCampfires(res.campfires.map((c) => ({ id: c.id, name: c.name, member_count: c.member_count })));
-          // Resolve campfireId if a name filter is set
           if (campfireFilter) {
             const match = res.campfires.find((c) => c.name === campfireFilter);
             if (match) setCampfireId(match.id);
@@ -224,50 +254,103 @@ function GovernancePageInner() {
     return () => { cancelled = true; };
   }, [campfireFilter]);
 
-  // ---- Fetch proposals ----
+  // ---- Fetch status counts (once when campfire changes) ----
   React.useEffect(() => {
+    if (!campfireId) {
+      setStatusCounts({});
+      setCountsLoaded(false);
+      return;
+    }
     let cancelled = false;
 
-    async function fetchProposals() {
-      if (!campfireFilter || !campfireId) {
-        setProposals([]);
-        setLoading(false);
-        return;
-      }
-
-      setLoading(true);
-      setError(null);
-
+    async function fetchCounts() {
       try {
-        interface ApiProposalWithJoins extends ApiProposal {
-          creator_username?: string;
-          campfire_name?: string;
-          member_count?: number;
-        }
-        const res = await api.get<{ proposals: ApiProposalWithJoins[] }>(
-          "/api/proposals",
-          { campfire_id: campfireId },
+        const statuses = ["discussion", "voting", "passed", "failed", "implemented"];
+        const results = await Promise.all(
+          statuses.map((s) =>
+            api.get<{ total: number }>("/api/proposals", {
+              campfire_id: campfireId ?? undefined,
+              status: s,
+              limit: 1,
+              offset: 0,
+            })
+          )
         );
         if (!cancelled) {
-          setProposals(
-            res.proposals.map((p): Proposal => ({
-              id: p.id,
-              title: p.title,
-              description: p.description,
-              campfire: campfireFilter,
-              proposalType: (p.proposed_changes?.type as Proposal["proposalType"]) ?? "change_settings",
-              proposedChanges: p.proposed_changes ?? {},
-              status: (p.status === "failed" ? "rejected" : p.status === "implemented" ? "executed" : p.status) as ProposalStatus,
-              votesFor: p.votes_for,
-              votesAgainst: p.votes_against,
-              commentCount: 0,
-              quorum: Math.ceil((p.member_count ?? 0) * 0.3),
-              totalMembers: p.member_count ?? 0,
-              author: p.creator_username ?? "unknown",
-              createdAt: p.created_at,
-              endsAt: p.voting_ends_at ?? p.created_at,
-            })),
+          const counts: Record<string, number> = {};
+          statuses.forEach((s, i) => {
+            counts[s] = results[i]?.total ?? 0;
+          });
+          counts["active"] = (counts["discussion"] ?? 0) + (counts["voting"] ?? 0);
+          counts["rejected"] = counts["failed"] ?? 0;
+          counts["all"] = statuses.reduce((sum, s) => sum + (counts[s] ?? 0), 0);
+          setStatusCounts(counts);
+          setCountsLoaded(true);
+        }
+      } catch {
+        // Counts are supplementary
+      }
+    }
+    fetchCounts();
+    return () => { cancelled = true; };
+  }, [campfireId]);
+
+  // ---- Fetch proposals (server-side filtered by status tab) ----
+  React.useEffect(() => {
+    if (!campfireFilter || !campfireId) {
+      setProposals([]);
+      setProposalTotal(0);
+      setLoading(false);
+      return;
+    }
+
+    let cancelled = false;
+    setLoading(true);
+    setError(null);
+
+    interface ApiProposalWithJoins extends ApiProposal {
+      creator_username?: string;
+      campfire_name?: string;
+      member_count?: number;
+    }
+
+    async function fetchProposals() {
+      try {
+        // For "active" tab, fetch both discussion and voting proposals
+        if (statusTab === "active") {
+          const [discRes, voteRes] = await Promise.all([
+            api.get<{ proposals: ApiProposalWithJoins[]; total: number }>(
+              "/api/proposals",
+              { campfire_id: campfireId ?? undefined, status: "discussion", limit: PROPOSALS_PAGE_SIZE, offset: proposalOffset },
+            ),
+            api.get<{ proposals: ApiProposalWithJoins[]; total: number }>(
+              "/api/proposals",
+              { campfire_id: campfireId ?? undefined, status: "voting", limit: PROPOSALS_PAGE_SIZE, offset: 0 },
+            ),
+          ]);
+          if (!cancelled) {
+            const allProposals = [...voteRes.proposals, ...discRes.proposals];
+            const total = discRes.total + voteRes.total;
+            setProposals(allProposals.slice(0, PROPOSALS_PAGE_SIZE).map((p) => mapProposal(p, campfireFilter!)));
+            setProposalTotal(total);
+          }
+        } else {
+          const apiStatus = statusTab === "rejected" ? "failed" : statusTab === "all" ? undefined : statusTab;
+          const params: Record<string, string | number> = {
+            campfire_id: campfireId!,
+            limit: PROPOSALS_PAGE_SIZE,
+            offset: proposalOffset,
+          };
+          if (apiStatus) params.status = apiStatus;
+
+          const res = await api.get<{ proposals: ApiProposalWithJoins[]; total: number }>(
+            "/api/proposals",
+            params,
           );
+          if (!cancelled) {
+            setProposals(res.proposals.map((p) => mapProposal(p, campfireFilter!)));
+            setProposalTotal(res.total);
+          }
         }
       } catch (err) {
         if (!cancelled) {
@@ -280,9 +363,9 @@ function GovernancePageInner() {
 
     fetchProposals();
     return () => { cancelled = true; };
-  }, [campfireFilter, campfireId]);
+  }, [campfireFilter, campfireId, statusTab, proposalOffset]);
 
-  // ---- Fetch settings history ----
+  // ---- Fetch settings history (lazy -- only when tab selected) ----
   React.useEffect(() => {
     if (!campfireId || activeTab !== "history") return;
     let cancelled = false;
@@ -306,10 +389,19 @@ function GovernancePageInner() {
     return () => { cancelled = true; };
   }, [campfireId, activeTab]);
 
-  const filteredProposals =
-    statusFilter === "all"
-      ? proposals
-      : proposals.filter((p) => p.status === statusFilter);
+  // Client-side search filter within already-paginated results
+  const filteredProposals = proposalSearch.trim()
+    ? proposals.filter(
+        (p) =>
+          p.title.toLowerCase().includes(proposalSearch.toLowerCase()) ||
+          p.description.toLowerCase().includes(proposalSearch.toLowerCase())
+      )
+    : proposals;
+
+  const handleStatusTabChange = (tab: StatusTabKey) => {
+    setStatusTab(tab);
+    setProposalOffset(0);
+  };
 
   // Group settings by category
   const settingsByCategory = React.useMemo(() => {
@@ -321,6 +413,9 @@ function GovernancePageInner() {
     }
     return groups;
   }, [settings]);
+
+  const proposalTotalPages = Math.max(1, Math.ceil(proposalTotal / PROPOSALS_PAGE_SIZE));
+  const proposalCurrentPage = Math.floor(proposalOffset / PROPOSALS_PAGE_SIZE) + 1;
 
   // ---- No campfire selected: show picker ----
   if (!campfireFilter) {
@@ -411,12 +506,25 @@ function GovernancePageInner() {
         )}
       </div>
 
+      {/* Summary stats */}
+      {countsLoaded && (
+        <div className="mt-4 flex flex-wrap items-center gap-3 text-xs text-smoke font-mono">
+          <span className="text-flame-400 font-medium">{statusCounts["active"] ?? 0} active</span>
+          <span className="text-charcoal">&middot;</span>
+          <span>{statusCounts["passed"] ?? 0} passed</span>
+          <span className="text-charcoal">&middot;</span>
+          <span>{statusCounts["rejected"] ?? 0} failed</span>
+          <span className="text-charcoal">&middot;</span>
+          <span>{statusCounts["all"] ?? 0} total</span>
+        </div>
+      )}
+
       {/* Tab navigation */}
       <div className="mt-5 flex items-center gap-1 border-b border-charcoal" role="tablist">
         {([
-          { key: "proposals" as const, label: "Proposals", icon: Vote, count: proposals.length },
-          { key: "settings" as const, label: "Current Settings", icon: Settings, count: settings.length },
-          { key: "history" as const, label: "Change History", icon: History, count: undefined },
+          { key: "proposals" as const, label: "Proposals", icon: Vote },
+          { key: "settings" as const, label: "Current Settings", icon: Settings },
+          { key: "history" as const, label: "Change History", icon: History },
         ]).map((tab) => (
           <button
             key={tab.key}
@@ -432,16 +540,6 @@ function GovernancePageInner() {
           >
             <tab.icon className="h-3.5 w-3.5" />
             {tab.label}
-            {tab.count !== undefined && tab.count > 0 && (
-              <span className={cn(
-                "ml-1 rounded-full px-1.5 py-0.5 text-[10px] font-mono",
-                activeTab === tab.key
-                  ? "bg-flame-500/20 text-flame-400"
-                  : "bg-charcoal text-smoke",
-              )}>
-                {tab.count}
-              </span>
-            )}
           </button>
         ))}
       </div>
@@ -481,28 +579,41 @@ function GovernancePageInner() {
             </div>
           )}
 
-          {/* Status filter pills */}
-          <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Filter by status">
-            <Filter className="h-4 w-4 text-smoke" />
-            {STATUS_FILTERS.map((status) => (
-              <button
-                key={status}
-                onClick={() => setStatusFilter(status)}
-                className={cn(
-                  "rounded-full px-3 py-1 text-xs font-medium transition-colors",
-                  statusFilter === status
-                    ? "bg-flame-500/20 text-flame-400 border border-flame-500/30"
-                    : "text-smoke hover:text-ash border border-transparent",
-                )}
-              >
-                {status === "all" ? "All" : statusConfig[status].label}
-                {status !== "all" && (
-                  <span className="ml-1 text-[10px] opacity-60">
-                    {proposals.filter((p) => p.status === status).length}
-                  </span>
-                )}
-              </button>
-            ))}
+          {/* Status tabs + search */}
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+            <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Filter by status">
+              <Filter className="h-4 w-4 text-smoke" />
+              {STATUS_TABS.map((tab) => (
+                <button
+                  key={tab.key}
+                  onClick={() => handleStatusTabChange(tab.key)}
+                  className={cn(
+                    "rounded-full px-3 py-1 text-xs font-medium transition-colors",
+                    statusTab === tab.key
+                      ? "bg-flame-500/20 text-flame-400 border border-flame-500/30"
+                      : "text-smoke hover:text-ash border border-transparent",
+                  )}
+                >
+                  {tab.label}
+                  {countsLoaded && (
+                    <span className="ml-1 text-[10px] opacity-60">
+                      {statusCounts[tab.key] ?? 0}
+                    </span>
+                  )}
+                </button>
+              ))}
+            </div>
+            <div className="relative sm:ml-auto">
+              <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-smoke" />
+              <input
+                type="text"
+                placeholder="Search proposals..."
+                value={proposalSearch}
+                onChange={(e) => setProposalSearch(e.target.value)}
+                aria-label="Search proposals"
+                className="w-full sm:w-48 rounded-md border border-charcoal bg-coal py-1.5 pl-8 pr-3 text-xs text-foreground placeholder:text-smoke focus:border-flame-500/50 focus:outline-none focus:ring-1 focus:ring-flame-500/30"
+              />
+            </div>
           </div>
 
           {/* Proposals list */}
@@ -518,11 +629,13 @@ function GovernancePageInner() {
               <div className="py-16 text-center">
                 <Vote className="mx-auto h-12 w-12 text-smoke/60" />
                 <p className="mt-4 text-ash">
-                  {statusFilter !== "all"
-                    ? `No ${statusConfig[statusFilter].label.toLowerCase()} proposals`
+                  {proposalSearch.trim()
+                    ? `No proposals matching "${proposalSearch}"`
+                    : statusTab !== "all"
+                    ? `No ${STATUS_TABS.find((t) => t.key === statusTab)?.label.toLowerCase()} proposals`
                     : "No proposals yet"}
                 </p>
-                {user && (
+                {user && !proposalSearch.trim() && (
                   <Link href={`/governance/create?campfire=${campfireFilter}`}>
                     <Button variant="spark" size="sm" className="mt-4 gap-1.5">
                       <Plus className="h-4 w-4" />
@@ -532,11 +645,48 @@ function GovernancePageInner() {
                 )}
               </div>
             ) : (
-              filteredProposals.map((proposal) => (
-                <ProposalCard key={proposal.id} proposal={proposal} />
-              ))
+              <>
+                <p className="text-xs text-smoke font-mono">
+                  Showing {proposalOffset + 1}&ndash;{Math.min(proposalOffset + PROPOSALS_PAGE_SIZE, proposalTotal)} of{" "}
+                  {proposalTotal} proposal{proposalTotal !== 1 ? "s" : ""}
+                </p>
+                {filteredProposals.map((proposal) => (
+                  <ProposalCard key={proposal.id} proposal={proposal} />
+                ))}
+              </>
             )}
           </div>
+
+          {/* Pagination */}
+          {proposalTotal > PROPOSALS_PAGE_SIZE && (
+            <div className="mt-6 flex items-center justify-between text-xs text-smoke">
+              <span>
+                Page {proposalCurrentPage} of {proposalTotalPages}
+              </span>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={proposalOffset === 0}
+                  className="h-7 border-charcoal text-ash"
+                  onClick={() => setProposalOffset(Math.max(0, proposalOffset - PROPOSALS_PAGE_SIZE))}
+                >
+                  <ChevronLeft className="h-3.5 w-3.5" />
+                  Prev
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={proposalOffset + PROPOSALS_PAGE_SIZE >= proposalTotal}
+                  className="h-7 border-charcoal text-ash"
+                  onClick={() => setProposalOffset(proposalOffset + PROPOSALS_PAGE_SIZE)}
+                >
+                  Next
+                  <ChevronRight className="h-3.5 w-3.5" />
+                </Button>
+              </div>
+            </div>
+          )}
         </div>
       )}
 
@@ -642,7 +792,34 @@ function GovernancePageInner() {
 }
 
 // ---------------------------------------------------------------------------
-// Settings Grid (used in both collapsible and full tab)
+// Map API proposal to UI shape
+// ---------------------------------------------------------------------------
+
+function mapProposal(
+  p: ApiProposal & { creator_username?: string; campfire_name?: string; member_count?: number },
+  campfireName: string,
+): Proposal {
+  return {
+    id: p.id,
+    title: p.title,
+    description: p.description,
+    campfire: campfireName,
+    proposalType: (p.proposed_changes?.type as Proposal["proposalType"]) ?? "change_settings",
+    proposedChanges: p.proposed_changes ?? {},
+    status: mapApiStatus(p.status),
+    votesFor: p.votes_for,
+    votesAgainst: p.votes_against,
+    commentCount: 0,
+    quorum: Math.ceil((p.member_count ?? 0) * 0.3),
+    totalMembers: p.member_count ?? 0,
+    author: p.creator_username ?? "unknown",
+    createdAt: p.created_at,
+    endsAt: p.voting_ends_at ?? p.created_at,
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Settings Grid
 // ---------------------------------------------------------------------------
 
 function SettingsGrid({
@@ -730,14 +907,11 @@ function formatSettingValue(s: ResolvedSetting): string {
 function ProposalCard({ proposal }: { proposal: Proposal }) {
   const config = statusConfig[proposal.status];
   const StatusIcon = config.icon;
-  const totalVotes = proposal.votesFor + proposal.votesAgainst;
-  const forPercent = totalVotes > 0 ? Math.round((proposal.votesFor / totalVotes) * 100) : 0;
 
   const tc = typeConfig[proposal.proposalType] ?? typeConfig["change_settings"];
   if (!tc) return null;
   const TypeIcon = tc.icon;
 
-  // Extract diff info for settings change proposals
   const settingsDiff = proposal.proposalType === "change_settings" && proposal.proposedChanges
     ? {
         key: (proposal.proposedChanges.variable_key as string) ?? null,
@@ -751,7 +925,6 @@ function ProposalCard({ proposal }: { proposal: Proposal }) {
       className="block rounded-lg border border-charcoal bg-charcoal/50 p-4 transition-colors hover:border-flame-500/30 hover:bg-charcoal/70"
     >
       <div className="flex items-start gap-3">
-        {/* Compact flame gauge */}
         <FlameGauge
           sparkVotes={proposal.votesFor}
           douseVotes={proposal.votesAgainst}
@@ -762,7 +935,6 @@ function ProposalCard({ proposal }: { proposal: Proposal }) {
         />
 
         <div className="min-w-0 flex-1">
-          {/* Meta row: type badge, campfire, author */}
           <div className="flex items-center gap-2 text-xs text-smoke flex-wrap">
             <Badge
               variant="outline"
@@ -779,12 +951,10 @@ function ProposalCard({ proposal }: { proposal: Proposal }) {
             <span className="text-smoke">by {proposal.author}</span>
           </div>
 
-          {/* Title */}
           <h3 className="mt-1.5 text-sm font-medium text-foreground">
             {proposal.title}
           </h3>
 
-          {/* Settings change diff preview */}
           {settingsDiff?.key && (
             <div className="mt-1.5 flex items-center gap-1.5 rounded bg-coal/60 border border-charcoal/50 px-2 py-1 w-fit">
               <span className="font-mono text-[11px] text-smoke">{settingsDiff.key}</span>
@@ -793,13 +963,11 @@ function ProposalCard({ proposal }: { proposal: Proposal }) {
             </div>
           )}
 
-          {/* Description excerpt */}
           <p className="mt-1.5 text-xs text-ash line-clamp-2">
             {proposal.description}
           </p>
         </div>
 
-        {/* Status badge */}
         <Badge
           variant="outline"
           className={cn("shrink-0 gap-1 text-[10px]", config.color)}
@@ -809,7 +977,6 @@ function ProposalCard({ proposal }: { proposal: Proposal }) {
         </Badge>
       </div>
 
-      {/* Footer meta */}
       <div className="mt-2 flex items-center gap-4 text-[10px] text-smoke">
         <span className="flex items-center gap-1">
           <MessageSquare className="h-3 w-3" />

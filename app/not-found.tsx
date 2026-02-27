@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Flame, ArrowLeft, Search } from "lucide-react";
 import { FlameLogo } from "@/components/fuega/flame-logo";
+import { NotFoundIllustration } from "@/components/fuega/illustrations";
 
 export const metadata = {
   title: "Page Not Found - fuega",
@@ -14,8 +15,8 @@ export default function NotFound() {
         <div className="absolute left-1/2 top-1/3 -translate-x-1/2 -translate-y-1/2 w-full max-w-[600px] h-[300px] rounded-full bg-flame-500/5 blur-[100px]" />
       </div>
 
-      <FlameLogo size="lg" />
-      <div className="relative mt-8 text-center">
+      <NotFoundIllustration />
+      <div className="relative mt-4 text-center">
         <h1 className="text-7xl font-bold font-mono">
           <span className="text-flame-400">4</span>
           <span className="text-ash">0</span>

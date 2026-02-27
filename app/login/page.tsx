@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { FlameLogo } from "@/components/fuega/flame-logo";
 import { useAuth } from "@/lib/contexts/auth-context";
-import { EmberParticles } from "@/components/fuega/ember-particles";
+import { FireParticles } from "@/components/fuega/fire-particles";
 import { ThemeToggle } from "@/components/fuega/theme-toggle";
 
 export default function LoginPage() {
@@ -67,7 +67,7 @@ function LoginInner() {
       <div className="absolute top-4 right-4 z-10">
         <ThemeToggle />
       </div>
-      <EmberParticles count={8} />
+      <FireParticles count={40} />
       <div className="w-full max-w-sm">
         <div className="text-center">
           <Link href="/">

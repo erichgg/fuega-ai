@@ -12,6 +12,8 @@ import {
 } from "@/components/fuega/command-palette";
 import { Toaster } from "sonner";
 import { BottomNav } from "@/components/fuega/bottom-nav";
+import { ConsoleEasterEgg } from "@/components/fuega/console-easter-egg";
+import { KonamiCode } from "@/components/fuega/konami-code";
 import { useAuth } from "@/lib/contexts/auth-context";
 import { api, type Campfire } from "@/lib/api/client";
 
@@ -119,6 +121,10 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
       {/* Mobile bottom navigation */}
       <BottomNav />
+
+      {/* Easter eggs */}
+      <ConsoleEasterEgg />
+      <KonamiCode />
     </div>
     </CommandPaletteProvider>
   );

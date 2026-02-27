@@ -6,9 +6,13 @@ export const dynamic = "force-dynamic";
 
 const modLogQuerySchema = z.object({
   campfire_id: z.string().uuid("Invalid campfire ID").optional(),
+  campfire_name: z.string().max(200).optional(),
   action: z
     .enum(["approved", "removed", "flagged", "warned"])
     .optional(),
+  search: z.string().max(200).optional(),
+  date_from: z.string().optional(),
+  date_to: z.string().optional(),
   limit: z.coerce.number().int().min(1).max(100).default(50),
   offset: z.coerce.number().int().min(0).default(0),
 });
@@ -43,7 +47,11 @@ export async function GET(req: Request) {
 
     const parsed = modLogQuerySchema.safeParse({
       campfire_id: url.searchParams.get("campfire_id") ?? undefined,
+      campfire_name: url.searchParams.get("campfire_name") ?? undefined,
       action: url.searchParams.get("action") ?? undefined,
+      search: url.searchParams.get("search") ?? undefined,
+      date_from: url.searchParams.get("date_from") ?? undefined,
+      date_to: url.searchParams.get("date_to") ?? undefined,
       limit: url.searchParams.get("limit") ?? "50",
       offset: url.searchParams.get("offset") ?? "0",
     });
@@ -58,7 +66,7 @@ export async function GET(req: Request) {
       );
     }
 
-    const { campfire_id, action, limit, offset } = parsed.data;
+    const { campfire_id, campfire_name, action, search, date_from, date_to, limit, offset } = parsed.data;
 
     // Build query with optional filters
     const conditions: string[] = [];
@@ -70,9 +78,30 @@ export async function GET(req: Request) {
       params.push(campfire_id);
     }
 
+    if (campfire_name) {
+      conditions.push(`c.name ILIKE $${paramIdx++}`);
+      params.push(`%${campfire_name}%`);
+    }
+
     if (action) {
       conditions.push(`m.decision = $${paramIdx++}`);
       params.push(action);
+    }
+
+    if (search) {
+      conditions.push(`(m.reason ILIKE $${paramIdx} OR m.content_type ILIKE $${paramIdx})`);
+      params.push(`%${search}%`);
+      paramIdx++;
+    }
+
+    if (date_from) {
+      conditions.push(`m.created_at >= $${paramIdx++}`);
+      params.push(date_from);
+    }
+
+    if (date_to) {
+      conditions.push(`m.created_at <= ($${paramIdx++}::date + interval '1 day')`);
+      params.push(date_to);
     }
 
     const whereClause =

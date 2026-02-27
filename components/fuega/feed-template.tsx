@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PostCard } from "@/components/fuega/post-card";
+import { EmptyFeedIllustration } from "@/components/fuega/illustrations";
 import { ReportDialog } from "@/components/fuega/report-dialog";
 import { FeedToolbar } from "@/components/fuega/feed-sort";
 import { FeedSkeleton } from "@/components/fuega/page-skeleton";
@@ -241,8 +242,8 @@ function FeedEmptyBlock({ config, user }: FeedEmptyBlockProps) {
           <Icon className="h-7 w-7 text-smoke" />
         </div>
       ) : config.emoji ? (
-        <div className="mx-auto mb-6 text-5xl" aria-hidden="true">
-          {config.emoji}
+        <div className="mx-auto mb-4" aria-hidden="true">
+          <EmptyFeedIllustration />
         </div>
       ) : null}
 

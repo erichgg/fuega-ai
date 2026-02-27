@@ -147,9 +147,14 @@ export async function getCampfireByName(
   );
 }
 
+interface ListCampfiresResult {
+  campfires: Campfire[];
+  total: number;
+}
+
 export async function listCampfires(
   input: ListCampfiresInput
-): Promise<Campfire[]> {
+): Promise<ListCampfiresResult> {
   const conditions: string[] = [
     "c.deleted_at IS NULL",
     "c.is_banned = FALSE",
@@ -157,7 +162,22 @@ export async function listCampfires(
   const params: unknown[] = [];
   let paramIdx = 1;
 
+  if (input.search) {
+    conditions.push(
+      `(c.name ILIKE $${paramIdx} OR c.display_name ILIKE $${paramIdx} OR c.description ILIKE $${paramIdx})`
+    );
+    params.push(`%${input.search}%`);
+    paramIdx++;
+  }
+
   const whereClause = conditions.join(" AND ");
+
+  // Get total count
+  const countRow = await queryOne<{ count: string }>(
+    `SELECT COUNT(*) as count FROM campfires c WHERE ${whereClause}`,
+    params,
+  );
+  const total = parseInt(countRow?.count ?? "0", 10);
 
   let orderBy: string;
   switch (input.sort) {
@@ -184,7 +204,8 @@ export async function listCampfires(
   `;
   params.push(input.limit, input.offset);
 
-  return queryAll<Campfire>(sql, params);
+  const campfires = await queryAll<Campfire>(sql, params);
+  return { campfires, total };
 }
 
 // ─── Update ──────────────────────────────────────────────────

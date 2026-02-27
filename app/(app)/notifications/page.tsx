@@ -3,6 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { Bell, BellOff } from "lucide-react";
+import { EmptyNotificationsIllustration } from "@/components/fuega/illustrations";
 import { useFeatureFlag } from "@/lib/hooks/useFeatureFlags";
 import { useAuth } from "@/lib/contexts/auth-context";
 import { NotificationInbox } from "@/components/fuega/notification-inbox";
@@ -43,9 +44,7 @@ export default function NotificationsPage() {
   if (!enabled) {
     return (
       <div className="py-16 flex flex-col items-center justify-center text-center gap-4">
-        <div className="flex h-14 w-14 items-center justify-center rounded-full border border-charcoal bg-charcoal/30">
-          <BellOff className="h-6 w-6 text-smoke" />
-        </div>
+        <EmptyNotificationsIllustration />
         <div>
           <h2 className="text-lg font-bold text-foreground font-mono">
             <span className="text-lava-hot">$ </span>

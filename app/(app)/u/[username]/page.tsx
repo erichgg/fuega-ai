@@ -76,10 +76,16 @@ const SOCIAL_ICONS: Record<string, string> = {
   linkedin: "LI",
 };
 
+const COMMENTS_LIMIT = 10;
+const POSTS_LIMIT = 10;
+
 export default function UserProfilePage() {
   const params = useParams();
   const { user: currentUser } = useAuth();
   const username = params.username as string;
+
+  // Active tab state -- used for lazy loading
+  const [activeTab, setActiveTab] = React.useState("posts");
 
   // Fetch profile
   const [profile, setProfile] = React.useState<UserProfile | null>(null);
@@ -111,23 +117,27 @@ export default function UserProfilePage() {
     };
   }, [username]);
 
-  // Fetch user's posts
+  // Fetch user's posts -- only when posts tab is active (default tab, so loads immediately)
   const {
     posts: rawPosts,
     loading: postsLoading,
     hasMore,
     loadMore,
-  } = usePosts({ author: username, sort: "new" });
+  } = usePosts({
+    author: activeTab === "posts" ? username : undefined,
+    sort: "new",
+    limit: POSTS_LIMIT,
+  });
 
   // Voting
   const { handleVote, getVote, getDelta } = useOptimisticVoting();
 
-  // Fetch user's comments with pagination
-  const COMMENTS_LIMIT = 20;
+  // Fetch user's comments -- LAZY: only when comments tab is first selected
   const [comments, setComments] = React.useState<UserComment[]>([]);
-  const [commentsLoading, setCommentsLoading] = React.useState(true);
+  const [commentsLoading, setCommentsLoading] = React.useState(false);
   const [commentsLoadingMore, setCommentsLoadingMore] = React.useState(false);
   const [hasMoreComments, setHasMoreComments] = React.useState(false);
+  const [commentsInitialized, setCommentsInitialized] = React.useState(false);
 
   const mapComment = (c: UserCommentApi): UserComment => ({
     id: c.id,
@@ -139,7 +149,10 @@ export default function UserProfilePage() {
     glow: (c.sparks ?? 0) - (c.douses ?? 0),
   });
 
+  // Lazy-load comments on tab switch
   React.useEffect(() => {
+    if (activeTab !== "comments" || commentsInitialized) return;
+
     let cancelled = false;
     setCommentsLoading(true);
 
@@ -151,6 +164,7 @@ export default function UserProfilePage() {
           setComments(mapped);
           setHasMoreComments(mapped.length >= COMMENTS_LIMIT);
           setCommentsLoading(false);
+          setCommentsInitialized(true);
         }
       })
       .catch(() => {
@@ -158,11 +172,12 @@ export default function UserProfilePage() {
           setComments([]);
           setHasMoreComments(false);
           setCommentsLoading(false);
+          setCommentsInitialized(true);
         }
       });
 
     return () => { cancelled = true; };
-  }, [username]);
+  }, [activeTab, commentsInitialized, username]);
 
   const loadMoreComments = React.useCallback(async () => {
     if (commentsLoadingMore || !hasMoreComments || comments.length === 0) return;
@@ -212,9 +227,7 @@ export default function UserProfilePage() {
     [profile?.socialLinks],
   );
 
-  const loading = profileLoading || postsLoading;
-
-  if (loading) return <ProfileSkeleton />;
+  if (profileLoading) return <ProfileSkeleton />;
 
   if (profileError || !profile) {
     return (
@@ -350,22 +363,22 @@ export default function UserProfilePage() {
         </div>
       </div>
 
-      {/* Tabs */}
-      <Tabs defaultValue="posts" className="mt-4">
+      {/* Tabs -- lazy loading via onValueChange */}
+      <Tabs defaultValue="posts" className="mt-4" onValueChange={setActiveTab}>
         <TabsList className="w-full justify-start border-b border-charcoal bg-transparent p-0">
           <TabsTrigger
             value="posts"
             className="gap-1.5 rounded-none border-b-2 border-transparent px-4 pb-2 pt-2 text-ash data-[state=active]:border-flame-400 data-[state=active]:text-flame-400 data-[state=active]:bg-transparent"
           >
             <FileText className="h-3.5 w-3.5" />
-            Posts ({postCards.length})
+            Posts
           </TabsTrigger>
           <TabsTrigger
             value="comments"
             className="gap-1.5 rounded-none border-b-2 border-transparent px-4 pb-2 pt-2 text-ash data-[state=active]:border-flame-400 data-[state=active]:text-flame-400 data-[state=active]:bg-transparent"
           >
             <MessageSquare className="h-3.5 w-3.5" />
-            Comments ({comments.length})
+            Comments
           </TabsTrigger>
           <Link
             href={`/u/${profile.username}/badges`}
@@ -376,7 +389,13 @@ export default function UserProfilePage() {
         </TabsList>
 
         <TabsContent value="posts" className="mt-4 space-y-2">
-          {postCards.length === 0 ? (
+          {postsLoading && postCards.length === 0 ? (
+            <div className="space-y-2">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <div key={i} className="animate-pulse h-24 rounded-md bg-charcoal/30" />
+              ))}
+            </div>
+          ) : postCards.length === 0 ? (
             <div className="py-12 text-center">
               <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-coal border border-charcoal">
                 <FileText className="h-6 w-6 text-smoke" />
@@ -417,7 +436,7 @@ export default function UserProfilePage() {
                 <div key={i} className="animate-pulse h-16 rounded-md bg-charcoal/30" />
               ))}
             </div>
-          ) : comments.length === 0 ? (
+          ) : comments.length === 0 && commentsInitialized ? (
             <div className="py-12 text-center">
               <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-coal border border-charcoal">
                 <MessageSquare className="h-6 w-6 text-smoke" />

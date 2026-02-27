@@ -184,9 +184,14 @@ export async function getProposalById(
   );
 }
 
+interface ListProposalsResult {
+  proposals: Proposal[];
+  total: number;
+}
+
 export async function listProposals(
   input: ListProposalsInput
-): Promise<Proposal[]> {
+): Promise<ListProposalsResult> {
   const conditions: string[] = ["p.campfire_id = $1"];
   const params: unknown[] = [input.campfire_id];
   let paramIdx = 2;
@@ -198,6 +203,13 @@ export async function listProposals(
   }
 
   const whereClause = conditions.join(" AND ");
+
+  // Get total count
+  const countRow = await queryOne<{ count: string }>(
+    `SELECT COUNT(*) as count FROM proposals p WHERE ${whereClause}`,
+    params,
+  );
+  const total = parseInt(countRow?.count ?? "0", 10);
 
   const sql = `
     SELECT p.*,
@@ -213,7 +225,8 @@ export async function listProposals(
   `;
   params.push(input.limit, input.offset);
 
-  return queryAll<Proposal>(sql, params);
+  const proposals = await queryAll<Proposal>(sql, params);
+  return { proposals, total };
 }
 
 // ─── Vote on Proposal ────────────────────────────────────────

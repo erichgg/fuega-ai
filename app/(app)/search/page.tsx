@@ -8,7 +8,7 @@ import { api, ApiError } from "@/lib/api/client";
 import { cn } from "@/lib/utils";
 import { timeAgo } from "@/lib/utils/time-ago";
 
-// ─── Types ───────────────────────────────────────────────────
+// --- Types ---
 
 interface SearchResultItem {
   type: "post" | "campfire" | "user";
@@ -39,7 +39,9 @@ const tabs: { key: SearchTab; label: string }[] = [
   { key: "users", label: "Users" },
 ];
 
-// ─── Page ────────────────────────────────────────────────────
+const PAGE_SIZE = 20;
+
+// --- Page ---
 
 export default function SearchPage() {
   return (
@@ -65,7 +67,6 @@ function SearchPageInner() {
     document.title = q.trim() ? `Search: ${q} - fuega` : "Search - fuega";
   }, [q]);
 
-  // Local input for search form (allows Enter to search + updates URL)
   const [searchInput, setSearchInput] = React.useState(q);
   React.useEffect(() => { setSearchInput(q); }, [q]);
 
@@ -81,9 +82,10 @@ function SearchPageInner() {
   const [results, setResults] = React.useState<SearchResultItem[]>([]);
   const [total, setTotal] = React.useState(0);
   const [loading, setLoading] = React.useState(false);
+  const [loadingMore, setLoadingMore] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
 
-  // Per-tab counts (fetched once on initial query)
+  // Per-tab counts
   const [counts, setCounts] = React.useState<Record<SearchTab, number>>({
     all: 0,
     posts: 0,
@@ -122,7 +124,7 @@ function SearchPageInner() {
           setCountsLoaded(true);
         }
       } catch {
-        // Counts are supplementary; silently ignore errors
+        // Counts are supplementary
       }
     }
 
@@ -130,7 +132,7 @@ function SearchPageInner() {
     return () => { cancelled = true; };
   }, [q]);
 
-  // Fetch results when query or tab changes
+  // Fetch initial results when query or tab changes
   React.useEffect(() => {
     if (!q.trim()) {
       setResults([]);
@@ -142,13 +144,16 @@ function SearchPageInner() {
     let cancelled = false;
     setLoading(true);
     setError(null);
+    setResults([]);
+    setTotal(0);
 
     async function fetchResults() {
       try {
         const data = await api.get<SearchApiResponse>("/api/search", {
           q,
           type: activeTab,
-          limit: 25,
+          limit: PAGE_SIZE,
+          offset: 0,
         });
         if (!cancelled) {
           setResults(data.results);
@@ -169,6 +174,27 @@ function SearchPageInner() {
     return () => { cancelled = true; };
   }, [q, activeTab]);
 
+  // Load more handler
+  const loadMore = React.useCallback(async () => {
+    if (loadingMore || results.length >= total) return;
+    setLoadingMore(true);
+    try {
+      const data = await api.get<SearchApiResponse>("/api/search", {
+        q,
+        type: activeTab,
+        limit: PAGE_SIZE,
+        offset: results.length,
+      });
+      setResults((prev) => [...prev, ...data.results]);
+    } catch {
+      // Silently fail on load more
+    } finally {
+      setLoadingMore(false);
+    }
+  }, [loadingMore, results.length, total, q, activeTab]);
+
+  const hasMore = results.length < total;
+
   return (
     <div>
       {/* Header */}
@@ -176,7 +202,7 @@ function SearchPageInner() {
         <h1 className="text-2xl font-bold text-foreground">Search</h1>
         {q.trim() ? (
           <p className="mt-1 text-sm text-ash">
-            {countsLoaded ? `${counts.all} results` : "Searching"} for &ldquo;{q}&rdquo;
+            {countsLoaded ? `${counts.all.toLocaleString()} results` : "Searching"} for &ldquo;{q}&rdquo;
           </p>
         ) : (
           <p className="mt-1 text-sm text-ash">
@@ -185,7 +211,7 @@ function SearchPageInner() {
         )}
       </div>
 
-      {/* Inline search form (Enter to search, also updates URL for sharing) */}
+      {/* Search form */}
       <form onSubmit={handleSearchSubmit} className="mt-4">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-smoke" />
@@ -219,7 +245,7 @@ function SearchPageInner() {
               {tab.label}
               {countsLoaded && (
                 <span className="ml-1 text-[10px] opacity-70">
-                  ({counts[tab.key]})
+                  ({counts[tab.key].toLocaleString()})
                 </span>
               )}
             </button>
@@ -304,16 +330,42 @@ function SearchPageInner() {
             </div>
           </div>
         ) : (
-          results.map((result) => (
-            <SearchResultRow key={`${result.type}-${result.id}`} result={result} />
-          ))
+          <>
+            {/* Results count */}
+            <p className="text-xs text-smoke font-mono mb-2">
+              Showing {results.length.toLocaleString()} of {total.toLocaleString()} results
+            </p>
+            {results.map((result) => (
+              <SearchResultRow key={`${result.type}-${result.id}`} result={result} />
+            ))}
+
+            {/* Load more button */}
+            {hasMore && (
+              <div className="pt-4 text-center">
+                <button
+                  onClick={loadMore}
+                  disabled={loadingMore}
+                  className="inline-flex items-center gap-2 rounded-md border border-charcoal px-5 py-2 text-sm text-ash hover:text-flame-400 hover:border-flame-400/30 transition-colors disabled:opacity-50"
+                >
+                  {loadingMore ? (
+                    <>
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      Loading...
+                    </>
+                  ) : (
+                    `Load more (${(total - results.length).toLocaleString()} remaining)`
+                  )}
+                </button>
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>
   );
 }
 
-// ─── Result Row ──────────────────────────────────────────────
+// --- Result Row ---
 
 function SearchResultRow({ result }: { result: SearchResultItem }) {
   switch (result.type) {
@@ -330,7 +382,6 @@ function SearchResultRow({ result }: { result: SearchResultItem }) {
 
 function PostResult({ result }: { result: SearchResultItem }) {
   const campfire = result.meta?.campfire ?? "unknown";
-  // We don't have postId-based routes with campfire prefix, use generic post link
   return (
     <Link
       href={`/f/${campfire}/${result.id}`}
